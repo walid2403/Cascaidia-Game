@@ -5,7 +5,7 @@ import edu.udo.cs.sopra.util.sopraPackageRegistry
 import org.gradle.kotlin.dsl.application
 
 plugins {
-    kotlin("jvm") version "1.9.25"
+    kotlin("jvm") version "2.3.0"
     application
     id("edu.udo.cs.sopra") version "1.0.3"
 }
@@ -14,7 +14,7 @@ group = "edu.udo.cs.sopra"
 version = "1.0"
 
 /* Change this to the version of the BGW you want to use */
-val bgwVersion = "0.10"
+val bgwVersion = "0.11"
 
 kotlin {
     jvmToolchain(11)
