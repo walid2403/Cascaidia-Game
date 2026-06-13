@@ -17,75 +17,75 @@ interface Refreshable {
      *
      * @param lastTurn Indicates wether the game is in the final turn or not ([Boolean])
      */
-    fun refreshAfterChangeTurn(lastTurn: Boolean)
+    fun refreshAfterChangeTurn(lastTurn: Boolean) {}
 
     /**
      * Perform refreshes necessary after the game has been started
      */
-    fun refreshAfterStartGame()
+    fun refreshAfterStartGame() {}
 
     /**
      * Perform refreshes necessary after a column has been selected
      *
      * @param index The index of the selected Column ([Int])
      */
-    fun refreshAfterSelectColumn(index: Int)
+    fun refreshAfterSelectColumn(index: Int) {}
 
     /**
      * Perform refreshes necessary after the wildlife tokens have been changed
      *
      * @param indices A [List] with the positions of the now changed wildlife tokens
      */
-    fun refreshAfterChangeWildlife(indices: List<Int>)
+    fun refreshAfterChangeWildlife(indices: List<Int>) {}
 
     /**
      * Perform refreshes necessary after the wildlife tokens have been exterminated
      */
-    fun refreshAfterExterminate()
+    fun refreshAfterExterminate() {}
 
     /**
      * Perform refreshes necessary after a game has been loaded
      */
-    fun refreshAfterLoadGame()
+    fun refreshAfterLoadGame() {}
 
     /**
      * Perform refreshes necessary after undo has been used
      */
-    fun refreshAfterUndo()
+    fun refreshAfterUndo() {}
 
     /**
      * Perform refreshes necessary after redo has been used
      */
-    fun refreshAfterRedo()
+    fun refreshAfterRedo() {}
 
     /**
      * Perform refreshes necessary after a free selection has been executed
      */
-    fun refreshAfterFreeSelection()
+    fun refreshAfterFreeSelection() {}
 
     /**
      * Perform refreshes necessary after a tile has been rotated
      *
      * @param right Has the tile been rotated in the right direction? ([Boolean])
      */
-    fun refreshAfterRotate(right: Boolean)
+    fun refreshAfterRotate(right: Boolean) {}
 
     /**
      * Perform refreshes necessary after a tile has been placed
      *
      * @param index A [Triple] containing the coordinates of the placement as [Int]
      */
-    fun refreshAfterPlaceTile(index: Triple<Int, Int, Int>)
+    fun refreshAfterPlaceTile(index: Triple<Int, Int, Int>) {}
 
     /**
      * Perform refreshes necessary after a wildlife token has been placed
      *
      * @param index A [Triple] containing the coordinates of the placement as [Int]
      */
-    fun refreshAfterPlaceWildlife(index: Triple<Int, Int, Int>)
+    fun refreshAfterPlaceWildlife(index: Triple<Int, Int, Int>) {}
 
     /**
      * Perform refreshes necessary after the game has ended
      */
-    fun refreshAfterEndGame()
+    fun refreshAfterEndGame() {}
 }
