@@ -16,6 +16,16 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
 
     }
 
+    /**
+     * this functions resolves the overpopulation of the wildlife tokens
+     *
+     * If all four wildlife tokens are identical, they are automatically
+     * removed and replaced. If only three identical wildlife tokens are present,
+     * the current player may choose whether to remove and replace them.
+     *
+     * Removed wildlife tokens are temporarily set aside and returned to the
+     * wildlife bag after the replacement process has been completed.
+     */
     fun exterminate() {
 
     }
