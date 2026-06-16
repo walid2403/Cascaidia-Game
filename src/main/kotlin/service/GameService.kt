@@ -34,6 +34,9 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
      * A function to load a previously saved game. The saved game is identified by the name Parameter.
      *
      * @param name The name of the previously saved game
+     *
+     * @throws IllegalArgumentException If the name is empty or if there isn't a saved game with the entered name
+     * @throws IllegalStateException If there is currently a game running
      */
     fun loadGame(name: String) {
 
@@ -47,6 +50,10 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
      * players name as a [String] and the players Type as a [PlayerType]
      * @param scoringCards The scoring cards to be used in the game, as a [List] of [Boolean] objects
      * @see [entity.CascadiaGame.scoringCards]
+     *
+     * @throws IllegalArgumentException If the list-size is not 2 - 4, if there are duplicate names or if there are
+     * not exactly five scoringCards
+     * @throws IllegalStateException If there is currently a game running
      */
     fun startNewGame(playerList: List<Pair<String, PlayerType>>, scoringCards: List<Boolean>) {
 
