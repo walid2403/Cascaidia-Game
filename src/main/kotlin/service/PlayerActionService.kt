@@ -6,10 +6,46 @@ package service
 
 class PlayerActionService(private val rootService: RootService): AbstractRefreshingService() {
 
+    /**
+     * Allows the active player to swap any number (1..4) of wildlife tokens in the market
+     * by spending a nature token.
+     *
+     * According to the specified activity diagram, the process proceeds as follows:
+     * 1. The `exterminate` method is called by the GameService.
+     * 2. Checks whether the player possesses a nature token.
+     * 3. A nature token is deducted from the player's supply.
+     * 4. The selected wildlife tokens (based on the given indices) are removed from the display
+     * and stored in the "removedTokens list".
+     * 5. The market is immediately refilled with new tokens from the "wildlifeTokens stack".
+     * 6. The previously removed tokens are placed back into the "wildlifeTokens stack".
+     *
+     * @param indices A list of the positions (0 to 3) of the wildlife tokens in the market
+     * that the player wishes to swap.
+     * @throws IllegalStateException If the player attempts to perform this action without
+     * possessing a nature token.
+     * @throws IllegalArgumentException If the provided indices are invalid.
+     */
     fun changeWildlife(indices: List<Int>) {
 
     }
-
+    /**
+     * Processes the selection of a combination of a habitat tile and a wildlife token
+     * from the market.
+     *
+     * According to the "TakeCombination" activity diagram, this method is used exclusively
+     * when the player selects a tile and an animal from different columns. In this case,
+     * it is checked whether the player possesses a nature token. If this is the case,
+     * a token is deducted from their supply.
+     *
+     * After successful verification, the selection is confirmed and stored for the current
+     * turn (in the `selectedChoice` variable).
+     *
+     * @param tileIndex The index (0 to 3) of the selected habitat tile in the market.
+     * @param wildlifeIndex The index (0 to 3) of the selected wildlife token in the market.
+     * @throws IllegalStateException If a free selection is made but the player no longer possesses
+     * a nature token.
+     * @throws IllegalArgumentException If the provided indices are invalid.
+     */
     fun freeSelection(tileIndex: Int, wildlifeIndex: Int) {
 
     }
