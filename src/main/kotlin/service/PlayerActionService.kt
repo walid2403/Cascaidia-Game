@@ -47,11 +47,30 @@ class PlayerActionService(private val rootService: RootService): AbstractRefresh
     fun rotateTile(right: Boolean) {
 
     }
-
+    /**
+     * Interrupts the current game and saves the game state under the specified name.
+     *
+     * The complete move history is saved along with the game.
+     * When the game is loaded at a later time (even after restarting the application),
+     * the undo and redo functions will work exactly as they did before the interruption.
+     *
+     * The save and load feature is disabled for network games.
+     *
+     * @param name The file name or identifier under which the game should be saved.
+     */
     fun saveGame(name: String) {
 
     }
-
+    /**
+     * Selects a given combination of a habitat tile and a wildlife token from the offered selection.
+     *
+     * This method executes the standard turn where the player does not spend a nature token
+     * to decouple the selection. Based on the provided index, the system automatically selects
+     * the habitat tile and the corresponding wildlife token from the exact same column of the current selection.
+     *
+     * @param index The index of the selected column
+     * (corresponds to the position of the selected tile and token combination)
+     */
     fun selectColumn(index: Int) {
 
     }
