@@ -14,7 +14,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
 
     /**
      * the function changes the current Player by rotating the [entity.CascadiaGame.playerQueue]
-     * and setting the [entity.GameState] to [entity.GameState.START_OF_TURN]
+     * and setting the [entity.CascadiaGame.gameState] to [entity.GameState.START_OF_TURN]
      *
      * it also checks if the [entity.CascadiaGame.tileStack] is empty
      * if the condition is true, [calculateScores] is executed

@@ -75,6 +75,19 @@ class PlayerActionService(private val rootService: RootService): AbstractRefresh
 
     }
 
+    /**
+     * this function reverts the last action
+     * it allows the current player to go back to their previous action
+     * or to the end of the previous players turn
+     *
+     * if the previous player is not a [entity.PlayerType.HUMAN],
+     * the game is reverted until it reaches the end of the most recent human players turn
+     *
+     * stores current [entity.CascadiaGame] in [entity.CascadiaGame.undoneMoves]
+     * takes the previous Game from [entity.CascadiaGame.prevMoves]
+     * @throws IllegalArgumentException if prevMoves is empty
+     * (this would occur in the first Action of the first turn by a human)
+     */
     fun undo() {
 
     }
