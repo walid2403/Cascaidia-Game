@@ -12,6 +12,17 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
 
     }
 
+    /**
+     * the function changes the current Player by rotating the [entity.CascadiaGame.playerQueue]
+     * and setting the [entity.GameState] to [entity.GameState.START_OF_TURN]
+     *
+     * it also checks if the [entity.CascadiaGame.tileStack] is empty
+     * if the condition is true, [calculateScores] is executed
+     *
+     *@throws IllegalStateException if Game is not in [entity.GameState.END_OF_TURN]
+     *@throws IllegalArgumentException if the playerqueue is empty
+     *
+     */
     fun changeTurn() {
 
     }
