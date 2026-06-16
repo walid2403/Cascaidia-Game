@@ -36,7 +36,7 @@ class CascadiaGame {
     var scoringCards: List<Boolean> = emptyList()
 
     val choices: MutableList<Pair<Tile, WildlifeToken>> = emptyList()
-    val selectedChoice: Pair<Tile, WildlifeToken> = Pair(Tile(-1, mutableListOf(Habitates.MOUNTAINS), listOf(
+    var selectedChoice: Pair<Tile, WildlifeToken> = Pair(Tile(-1, mutableListOf(Habitates.MOUNTAINS), listOf(
         WildlifeToken.ELK)), WildlifeToken.BEAR)
 
     var gameState: GameState = GameState.START_OF_TURN
