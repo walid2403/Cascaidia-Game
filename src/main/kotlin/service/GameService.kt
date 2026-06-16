@@ -22,6 +22,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
      *@throws IllegalStateException if Game is not in [entity.GameState.END_OF_TURN]
      *@throws IllegalArgumentException if the playerqueue is empty
      *
+     *
      */
     fun changeTurn() {
 
