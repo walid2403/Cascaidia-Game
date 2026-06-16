@@ -20,7 +20,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
      * if the condition is true, [calculateScores] is executed
      *
      *@throws IllegalStateException if Game is not in [entity.GameState.END_OF_TURN]
-     *@throws IllegalArgumentException if the playerqueue is empty
+     *@throws IllegalArgumentException if the [entity.CascadiaGame.playerQueue] is empty
      *
      *
      */

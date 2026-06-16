@@ -86,7 +86,7 @@ class PlayerActionService(private val rootService: RootService): AbstractRefresh
      *
      * stores current [entity.CascadiaGame] in [entity.CascadiaGame.undoneMoves]
      * takes the previous Game from [entity.CascadiaGame.prevMoves]
-     * @throws IllegalArgumentException if prevMoves is empty
+     * @throws IllegalArgumentException if [entity.CascadiaGame.prevMoves] is empty
      * (this would occur in the first Action of the first turn by a human)
      */
     fun undo() {
