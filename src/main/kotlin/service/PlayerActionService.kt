@@ -40,6 +40,14 @@ class PlayerActionService(private val rootService: RootService): AbstractRefresh
 
     }
 
+    /**
+     * this function allows the player to redo an action that has been undone
+     *
+     * if the following [entity.Player] is not a [entity.PlayerType.HUMAN],
+     * the game is jumped back to the next turn of a human player
+     *
+     * @throws IllegalArgumentException if there are no undone moves
+     */
     fun redo() {
 
     }

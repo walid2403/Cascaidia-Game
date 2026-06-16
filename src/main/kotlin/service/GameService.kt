@@ -7,7 +7,18 @@ import entity.PlayerType
  */
 
 class GameService(private val rootService: RootService): AbstractRefreshingService() {
-
+    /**
+     * the function calculates the score for every player. The score consist of points in the following categories:
+     * - For each wildlife scoring card
+     * - For each habitat corridor
+     * - For each habitat corridor majority
+     * - Nature tokens
+     *
+     * the resulting score is parsed directly to the GUI
+     *
+     * @throws IllegalStateException if there is no current game or
+     *                               if not every player has 20 habitat tiles
+     */
     private fun calculateScores() {
 
     }
