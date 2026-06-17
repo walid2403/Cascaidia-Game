@@ -8,8 +8,10 @@ import java.util.Collections.emptyList
 /**
  * Diese Entity-Klasse stellt ein Spiel des Spieles Cascadia dar.
  *
- * @property prevMoves Hält die vergangen Spielstände als [CascadiaGame] Objekte auf einem [Stack]
- * @property undoneMoves Hält die rückgängig gemachten Spielstände als [CascadiaGame] Objekte auf einem [Stack]
+ * @param scoringCards Enthält die gewählten Scoring Cards als [List] von [Boolean]. Hierbei bedeutet true Scoring
+ * Card A und false Scoring Card B. Die Reihenfolge ist Bear, Elk, Salmon, Hawk, Fox
+ * @param isLocal Ein [Boolean] welcher angibt, ob das Spiel lokal läuft oder in einem Network
+ *
  * @property tileStack Hält die Tiles die aktuell nicht ausliegen als [Tile] Objekte auf einem [Stack]
  * @property natureTokens Hält die Anzahl an nicht ausgegebenen Nature Tokens als [Int] fest
  * @property scoringCards Enthält die gewählten Scoring Cards als [List] von [Boolean]. Hierbei bedeutet true Scoring
@@ -23,17 +25,14 @@ import java.util.Collections.emptyList
  * @property removedTokens Enthält die aktuell beiseite gelegten [WildlifeToken] in einer [MutableList]
  * @property wildlifeTokens Enthält die [WildlifeToken] welche sich momentan auf dem Nachziehstapel befinden in einem
  * [Stack]
+ * @property isLocal Ein [Boolean] welcher angibt, ob das Spiel lokal läuft oder in einem Network
  */
 
-class CascadiaGame {
-    val prevMoves: Stack<CascadiaGame> = Stack()
-    val undoneMoves: Stack<CascadiaGame> = Stack()
+class CascadiaGame(val scoringCards: List<Boolean>, val isLocal: Boolean) {
 
     val tileStack: Stack<Tile> = Stack()
 
     var natureTokens: Int = 0
-
-    var scoringCards: List<Boolean> = emptyList()
 
     val choices: MutableList<Pair<Tile, WildlifeToken>> = emptyList()
     var selectedChoice: Pair<Tile, WildlifeToken> = Pair(Tile(-1, mutableListOf(Habitates.MOUNTAINS), listOf(

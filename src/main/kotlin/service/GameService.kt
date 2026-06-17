@@ -70,7 +70,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
      * @throws IllegalStateException if there is no current game or
      *                               if not every player has 20 habitat tiles
      */
-    private fun calculateScores() {
+    fun calculateScores() {
 
     }
 
@@ -83,8 +83,6 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
      *
      *@throws IllegalStateException if Game is not in [GameState.END_OF_TURN]
      *@throws IllegalArgumentException if the [CascadiaGame.playerQueue] is empty
-     *
-     *
      */
     fun changeTurn() {
 
