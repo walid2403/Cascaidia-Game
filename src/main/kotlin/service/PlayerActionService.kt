@@ -49,7 +49,19 @@ class PlayerActionService(private val rootService: RootService): AbstractRefresh
     fun freeSelection(tileIndex: Int, wildlifeIndex: Int) {
 
     }
-
+    /**
+     * Allows the player to insert the previously selected [entity.Tile] (stored in
+     * `selectedChoice`) into their own [entity.Player.board] at the position specified by
+     * [index]. [index] must contain exactly one element, the target coordinate (x, y, z) on
+     * the player's board. The target must be adjacent to at least one tile already on the
+     * board (or to the starter tile) and must not already be occupied.
+     *
+     * @param index represents the position of the tile on the player's board represented
+     *  by the three coordinates (x, y, z).
+     * @throws IllegalStateException if the [entity.GameState] is not `MADE_CHOICE`.
+     * @throws IllegalArgumentException if [index] does not contain exactly one element, the
+     * target coordinate is already occupied, or it is not adjacent to any existing tile.
+     */
     fun placeTile(index: Triple<Int, Int, Int>) {
 
     }
@@ -87,7 +99,15 @@ class PlayerActionService(private val rootService: RootService): AbstractRefresh
     fun redo() {
 
     }
-
+    /**
+     * Allows the player to rotate, by 60°, the [entity.Tile] most recently placed via
+     * [placeTile], i.e. the tile in [entity.Player.board] at the last used target
+     * coordinate. This changes which edges of the tile face which neighboring tiles; the
+     * tile's habitat list itself is not changed, only its assignment to the six edges shifts.
+     * Rotation is only possible before the turn is completed
+     * @param right the direction of rotation: `true` clockwise, `false` counterclockwise.
+     * @throws IllegalStateException if the [entity.GameState] is not `MADE_CHOICE`.
+     */
     fun rotateTile(right: Boolean) {
 
     }
