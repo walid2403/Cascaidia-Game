@@ -71,10 +71,33 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
     }
 
+    /**
+     * Allows the player to rotate their selected [Tile] by 60°
+     * This changes which edges of the tile face which neighboring tiles; the order of the
+     * tile's habitat list is changed to reflect this
+     *
+     * @param right the direction of rotation: `true` clockwise, `false` counterclockwise.
+     *
+     * @throws IllegalStateException if the [GameState] is not `MADE_CHOICE`.
+     */
     fun rotateTile(right: Boolean) {
 
     }
 
+    /**
+     * Allows the player to insert the previously selected [Tile] (stored in
+     * `selectedChoice`) into their own [Player.board] at the position specified by
+     * [index]. [index] must contain exactly one element, the target coordinate (x, y, z) on
+     * the player's board. The target must be adjacent to at least one tile already on the
+     * board (or to the starter tile) and must not already be occupied.
+     *
+     * @param index represents the position of the tile on the player's board represented
+     *  by the three coordinates (x, y, z).
+     *
+     * @throws IllegalStateException if the [GameState] is not `MADE_CHOICE`.
+     * @throws IllegalArgumentException if the target coordinate is already occupied or if
+     * it is not adjacent to any existing tile.
+     */
     fun placeTile(index: Triple<Int, Int, Int>) {
 
     }
@@ -119,9 +142,6 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
     /**
      * this function allows the player to redo an action that has been undone
-     *
-     * if the following [Player] is not a [PlayerType.HUMAN],
-     * the game is jumped back to the next turn of a human player
      *
      * @throws IllegalStateException if there are no undone moves
      */
