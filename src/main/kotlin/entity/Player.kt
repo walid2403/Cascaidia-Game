@@ -9,7 +9,7 @@ package entity
  * @property name Der Name des Spielers als [String]
  * @property type Die Art des Spielers als [PlayerType] Objekt
  * @property natureTokens Die Anzahl an Nature Tokens die der Spieler besitzt als [Int]
- * @property board Das Spiel-Board des Spielers, als [Map] eines [Triple] Objekts mit [Int] Objekten,
+ * @property board Das Spiel-Board des Spielers, als [MutableMap] eines [Triple] Objekts mit [Int] Objekten,
  * und einem [Tile] Objekt
  */
 
