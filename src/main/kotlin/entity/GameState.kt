@@ -8,7 +8,7 @@ enum class GameState {
     START_OF_TURN,
     HAS_EXTERMINATED,
     MADE_CHOICE,
-    PLAYER_TILE,
+    PLAYED_TILE,
     END_OF_TURN,
     ;
 }
