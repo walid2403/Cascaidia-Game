@@ -3,7 +3,6 @@ package entity
 import tools.aqua.bgw.util.Stack
 import java.util.Queue
 import java.util.ArrayDeque
-import java.util.Collections.emptyList
 
 /**
  * Diese Entity-Klasse stellt ein Spiel des Spieles Cascadia dar.
@@ -18,8 +17,8 @@ import java.util.Collections.emptyList
  * Card A und false Scoring Card B. Die Reihenfolge ist Bear, Elk, Salmon, Hawk, Fox
  * @property choices Enthält die aktuell ausliegenden Kombinationen von [Tile] und [WildlifeToken] in einer
  * [MutableList] von [Pair] Objekten
- * @property selectedChoice Enthält ein [Pair] Objekt welches das gewählte [Tile] sowie das gewählte [WildlifeToken]
- * enthält
+ * @property selectedChoice Enthält ein [Pair] Objekt welches die Indices des gewählten [Tile] sowie des gewählten
+ * [WildlifeToken] enthält
  * @property gameState Enthält den GameState des aktuellen Zuges als [GameState] Objekt
  * @property playerQueue Enthält die Spieler als [Player] Objekte in einer [Queue]
  * @property removedTokens Enthält die aktuell beiseite gelegten [WildlifeToken] in einer [MutableList]
@@ -34,14 +33,13 @@ class CascadiaGame(val scoringCards: List<Boolean>, val isLocal: Boolean) {
 
     var natureTokens: Int = 0
 
-    val choices: MutableList<Pair<Tile, WildlifeToken>> = emptyList()
-    var selectedChoice: Pair<Tile, WildlifeToken> = Pair(Tile(-1, mutableListOf(Habitates.MOUNTAINS), listOf(
-        WildlifeToken.ELK)), WildlifeToken.BEAR)
+    val choices: MutableList<Pair<Tile, WildlifeToken>> = mutableListOf()
+    var selectedChoice: Pair<Int, Int> = Pair(-1, -1)
 
     var gameState: GameState = GameState.START_OF_TURN
 
     val playerQueue: Queue<Player> = ArrayDeque()
 
-    val removedTokens: MutableList<WildlifeToken> = emptyList()
+    val removedTokens: MutableList<WildlifeToken> = mutableListOf()
     val wildlifeTokens: Stack<WildlifeToken> = Stack()
 }

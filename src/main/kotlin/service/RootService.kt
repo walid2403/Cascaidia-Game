@@ -1,12 +1,13 @@
 package service
 
-import entity.CascadiaGame
+import entity.*
 
 
 /**
  * The root service class is responsible for managing services and the entity layer reference.
  * This class acts as a central hub for every other service within the application and holds the [currentGame] state for
  * these services to access.
+ * It also holds the [history] of all moves.
  *
  */
 class RootService {
@@ -15,6 +16,7 @@ class RootService {
     val playerActionService = PlayerActionService(this)
 
     var currentGame : CascadiaGame ?= null
+    val history = CascadiaGames()
 
     /**
      * Adds the provided [newRefreshable] to all services connected

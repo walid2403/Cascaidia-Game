@@ -9,12 +9,12 @@ package entity
  * @property name Der Name des Spielers als [String]
  * @property type Die Art des Spielers als [PlayerType] Objekt
  * @property natureTokens Die Anzahl an Nature Tokens die der Spieler besitzt als [Int]
- * @property board Das Spiel-Board des Spielers, als [Map] eines [Triple] Objekts mit [Int] Objekten,
+ * @property board Das Spiel-Board des Spielers, als [MutableMap] eines [Triple] Objekts mit [Int] Objekten,
  * und einem [Tile] Objekt
  */
 
 class Player(val name: String, val type: PlayerType) {
     var natureTokens: Int = 0
 
-    val board: Map<Triple<Int, Int, Int>, Tile> = emptyMap()
+    val board: MutableMap<Triple<Int, Int, Int>, Tile> = mutableMapOf()
 }
