@@ -8,7 +8,6 @@ import kotlin.test.*
  */
 class TestChangeTurn {
     lateinit var rootService: RootService
-    lateinit var refreshable: Refreshable
     var refreshWasCalled = false
     var lastRound = false
 
@@ -67,7 +66,7 @@ class TestChangeTurn {
                 lastRound = lastTurn
             }
         }
-        this.refreshable = refreshable
+        rootService.addRefreshable(refreshable)
     }
 
     /**
@@ -160,11 +159,21 @@ class TestChangeTurn {
         repeat(5) {
             currentGame.tileStack.pop()
         }
+        var calledCalculateScores = false
+        val testRefresh = object : Refreshable {
+            override fun refreshAfterEndGame() {
+                calledCalculateScores = true
+            }
+        }
+        rootService.addRefreshable(testRefresh)
 
         rootService.gameService.changeTurn()
 
         assertFalse(refreshWasCalled,
             "Refresh wurde aufgerufen")
+        assertTrue(calledCalculateScores,
+            "CalculateScores wurde nicht aufgerufen")
+        calledCalculateScores = false
         assertEquals(3, currentGame.playerQueue.size,
             "Spieler verloren gegangen")
 
@@ -177,6 +186,9 @@ class TestChangeTurn {
 
         assertFalse(refreshWasCalled,
             "Refresh wurde aufgerufen")
+        assertTrue(calledCalculateScores,
+            "CalculateScores wurde nicht aufgerufen")
+        calledCalculateScores = false
         assertEquals(3, currentGame.playerQueue.size,
             "Spieler verloren gegangen")
 
@@ -186,6 +198,8 @@ class TestChangeTurn {
 
         assertFalse(refreshWasCalled,
             "Refresh wurde aufgerufen")
+        assertTrue(calledCalculateScores,
+            "CalculateScores wurde nicht aufgerufen")
         assertEquals(3, currentGame.playerQueue.size,
             "Spieler verloren gegangen")
     }
