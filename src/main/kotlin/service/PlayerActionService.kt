@@ -115,7 +115,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * @param index represents the position of the tile on the player's board represented
      *  by the three coordinates (x, y, z).
      *
-     * @throws IllegalStateException if the game is not in gameState [GameState.PLAYER_TILE]
+     * @throws IllegalStateException if the game is not in gameState [GameState.PLAYED_TILE]
      * @throws IllegalArgumentException if the placement is not valid, meaning the position is either not empty or
      * not adjacent to another position
      */
@@ -154,9 +154,9 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * it allows the current player to go back to their previous action
      * or to the end of the previous players turn
      *
-     * stores current [CascadiaGame] in [CascadiaGame.undoneMoves]
-     * takes the previous Game from [entity.CascadiaGame.prevMoves]
-     * @throws IllegalStateException if [CascadiaGame.prevMoves] is empty
+     * stores current [CascadiaGame] in [CascadiaGames.undoneMoves]
+     * takes the previous Game from [entity.CascadiaGames.prevMoves]
+     * @throws IllegalStateException if [CascadiaGames.prevMoves] is empty
      * (this would occur in the first Action of the first turn by a human)
      */
     fun undo() {
