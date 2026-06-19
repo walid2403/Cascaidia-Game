@@ -42,13 +42,15 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
     private var changeAnimalsArray = booleanArrayOf(false,false,false,false)
     private var player = 0
 
+    private var allButtonsAllowed = true
+
 
     //Hintergrundbild
     private val logo = Label(posX = 0,posY = 0,width = 1920,height = 1080,visual = ImageVisual("CascadiaHintergrund.png"))
 
     //Graue Box um Auswahl
     private val grayBox = Label(width = 950, height = 260, posX = 485, posY = 0).apply {
-        visual= ColorVisual(170,170,170, 127).apply { style.borderRadius = BorderRadius(20) }
+        visual= ColorVisual(170,170,170, 170).apply { style.borderRadius = BorderRadius(20) }
     }
 
     //Buttons in grauer Box
@@ -220,36 +222,28 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         coordinateSystem = HexagonGrid.CoordinateSystem.AXIAL,
         orientation = HexOrientation.POINTY_TOP
     ).apply {
-        visual = ColorVisual(170,170, 170, 127).apply {
-            style.borderRadius = BorderRadius(10)
-        }
+        //visual = ColorVisual(170,170, 170, 127).apply { style.borderRadius = BorderRadius(10) }
     }
     private val playerTwoArea = HexagonGrid<HexagonView>(
         width = 30, height = 30, posX = 1550, posY = 729,
         coordinateSystem = HexagonGrid.CoordinateSystem.AXIAL,
         orientation = HexOrientation.POINTY_TOP
     ).apply {
-        visual = ColorVisual(170,170, 170, 127).apply {
-            style.borderRadius = BorderRadius(10)
-        }
+        //visual = ColorVisual(170,170, 170, 127).apply { style.borderRadius = BorderRadius(10) }
     }
     private val playerThreeArea = HexagonGrid<HexagonView>(
         width = 30, height = 30, posX = 1000, posY = 854,
         coordinateSystem = HexagonGrid.CoordinateSystem.AXIAL,
         orientation = HexOrientation.POINTY_TOP
     ).apply {
-        visual = ColorVisual(170,170, 170, 127).apply {
-            style.borderRadius = BorderRadius(10)
-        }
+        //visual = ColorVisual(170,170, 170, 127).apply { style.borderRadius = BorderRadius(10) }
     }
     private val playerFourArea = HexagonGrid<HexagonView>(
         width = 30, height = 30, posX = 590, posY = 529,
         coordinateSystem = HexagonGrid.CoordinateSystem.AXIAL,
         orientation = HexOrientation.POINTY_TOP
     ).apply {
-        visual = ColorVisual(170,170, 170, 127).apply {
-            style.borderRadius = BorderRadius(10)
-        }
+        //visual = ColorVisual(170,170, 170, 127).apply { style.borderRadius = BorderRadius(10) }
     }
 
     //Buttons unten rechts
@@ -257,9 +251,14 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(10) }
         onMouseClicked = {
+            if(player == 0) {
+                startFirstTurn()
+            }
+
             if(player == 4) player = 1
             else player++
-            zoomOnPlayer()
+            showPlayer(player, false)
+            initializeCamerasOnSide()
         }
     }
 
@@ -283,13 +282,109 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
     }
 
     //Panel an der Seite mit einzelnen Views
-    private val viewPanel = Label(width = 285, height = 915, posX = 35, posY = 35).apply {
-        visual= ColorVisual(170,170,170, 127).apply { style.borderRadius = BorderRadius(40) }
+    private val viewPanel = Label(width = 285, height = 912, posX = 35, posY = 35).apply {
+        visual= ColorVisual(170,170,170, 170).apply { style.borderRadius = BorderRadius(40) }
     }
 
-    //Block für die Zoom Animation
+    //Kameras
     private val world = Pane<ComponentView>(width = 1920, height = 1080)
     private val cameraPane = CameraPane(posX = 0, posY = 0, width = 1920, height = 1080, target = world)
+    private val cameraPaneOneSide = CameraPane(posX = 55, posY = 65, width = 245, height = 130, target = world)
+    private val cameraPaneTwoSide = CameraPane(posX = 55, posY = 295, width = 245, height = 130, target = world)
+    private val cameraPaneThreeSide = CameraPane(posX = 55, posY = 525, width = 245, height = 130, target = world)
+    private val cameraPaneFourSide = CameraPane(posX = 55, posY = 755, width = 245, height = 130, target = world)
+
+    //Labels über den Kameras an der Seite für die Hover Funktion
+    private val LableAboveCamOne = Label(posX = 55, posY = 65, width = 245, height = 130).apply {
+        isDisabled = true
+        onMouseEntered = {
+            showPlayer(1, true)
+            playerName.text = "Luca"
+        }
+        onMouseExited = {
+            showPlayer(player, true)
+            playerName.text = "Aktuell"
+        }
+    }
+    private val LableAboveCamTwo = Label(posX = 55, posY = 295, width = 245, height = 130).apply {
+        isDisabled = true
+        onMouseEntered = {
+            showPlayer(2, true)
+            playerName.text = "Theresa"
+        }
+        onMouseExited = {
+            showPlayer(player, true)
+            playerName.text = "Aktuell"
+        }
+    }
+    private val LableAboveCamThree = Label(posX = 55, posY = 525, width = 245, height = 130).apply {
+        isDisabled = true
+        onMouseEntered = {
+            showPlayer(3, true)
+            playerName.text = "Philipp"
+        }
+        onMouseExited = {
+            showPlayer(player, true)
+            playerName.text = "Aktuell"
+        }
+    }
+    private val LableAboveCamFour = Label(posX = 55, posY = 755, width = 245, height = 130).apply {
+        isDisabled = true
+        onMouseEntered = {
+            showPlayer(4, true)
+            playerName.text = "Nicolas"
+        }
+        onMouseExited = {
+            showPlayer(player, true)
+            playerName.text = "Aktuell"
+        }
+    }
+
+    //Schwarze Leisten zwischen kleinen Kameras an der Seite
+    private val barOne = Label(width = 245, height = 4, posX = 55, posY = 261).apply { visual= ColorVisual(0,0,0) }
+    private val barTwo = Label(width = 245, height = 4, posX = 55, posY = 491).apply { visual= ColorVisual(0,0,0) }
+    private val barThree = Label(width = 245, height = 4, posX = 55, posY = 721).apply { visual= ColorVisual(0,0,0) }
+
+    //Namen an der Seite unter den kleinen Kameras
+    private val nameOneSide = Label(width = 155, height = 30, posX = 55, posY = 213).apply { font = Font(size = 25) }
+    private val nameTwoSide = Label(width = 155, height = 30, posX = 55, posY = 443).apply { font = Font(size = 25) }
+    private val nameThreeSide = Label(width = 155, height = 30, posX = 55, posY = 673).apply { font = Font(size = 25) }
+    private val nameFourSide = Label(width = 155, height = 30, posX = 55, posY = 903).apply { font = Font(size = 25) }
+
+    //NatureToken Symbole unter den kleinen Kameras
+    private val natureTokenOneSide = Label(width = 30, height = 30, posX = 220, posY = 213).apply {
+        visual= ImageVisual("pinecone.png")
+    }
+    private val natureTokenTwoSide = Label(width = 30, height = 30, posX = 220, posY = 443).apply {
+        visual= ImageVisual("pinecone.png")
+    }
+    private val natureTokenThreeSide = Label(width = 30, height = 30, posX = 220, posY = 673).apply {
+        visual= ImageVisual("pinecone.png")
+    }
+    private val natureTokenFourSide = Label(width = 30, height = 30, posX = 220, posY = 903).apply {
+        visual= ImageVisual("pinecone.png")
+    }
+
+    //Anzahl NatureTokens unter den kleinen Kameras
+    private val natureTokenCountOneSide = Label(width = 50, height = 30, posX = 250, posY = 213).apply {
+        font = Font(size = 25)
+    }
+    private val natureTokenCountTwoSide = Label(width = 50, height = 30, posX = 250, posY = 443).apply {
+        font = Font(size = 25)
+    }
+    private val natureTokenCountThreeSide = Label(width = 50, height = 30, posX = 250, posY = 673).apply {
+        font = Font(size = 25)
+    }
+    private val natureTokenCountFourSide = Label(width = 50, height = 30, posX = 250, posY = 903).apply {
+        font = Font(size = 25)
+    }
+
+    //Name des Spielers unten mittig
+    private val playerName = Label(width = 310, height = 60, posX = 845, posY = 985).apply {
+        visual= ColorVisual(170,170,170, 170).apply { style.borderRadius = BorderRadius(30) }
+        font = Font(size = 50)
+        isVisible = false
+    }
 
 
 
@@ -301,10 +396,18 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
     //Testweise
     private val hex = HexagonView(size = 14, visual = ImageVisual("tile2.png"))
     private val greyHex = HexagonView(size = 20, visual = ColorVisual(170,170,170).apply { transparency = 1.0 })
-    private val label1 = Label(width = 300, height = 158, posX = 990, posY = 325).apply { visual= ColorVisual(170,170,170, 127) }
-    private val label2 = Label(width = 300, height = 158, posX = 1400, posY = 650).apply { visual= ColorVisual(170,170,170, 127) }
-    private val label3 = Label(width = 300, height = 158, posX = 850, posY = 775).apply { visual= ColorVisual(170,170,170, 127) }
-    private val label4 = Label(width = 300, height = 158, posX = 440, posY = 450).apply { visual= ColorVisual(170,170,170, 127) }
+    private val label1 = Label(width = 300, height = 158, posX = 990, posY = 325).apply {
+        //visual= ColorVisual(170,170,170, 127)
+    }
+    private val label2 = Label(width = 300, height = 158, posX = 1400, posY = 650).apply {
+        //visual= ColorVisual(170,170,170, 127)
+    }
+    private val label3 = Label(width = 300, height = 158, posX = 850, posY = 775).apply {
+        //visual= ColorVisual(170,170,170, 127)
+    }
+    private val label4 = Label(width = 300, height = 158, posX = 440, posY = 450).apply {
+        //visual= ColorVisual(170,170,170, 127)
+    }
 
 
 
@@ -320,13 +423,32 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
             animalChoice1, animalChoice2, animalChoice3, animalChoice4,
             rotateOneCW, rotateOneCCW, rotateTwoCW, rotateTwoCCW,
             rotateThreeCW, rotateThreeCCW, rotateFourCW, rotateFourCCW,
-            endTurn, undo, redo, viewPanel
+            endTurn, undo, redo, viewPanel,
+            barOne, barTwo, barThree, nameOneSide, nameTwoSide, nameThreeSide, nameFourSide,
+            natureTokenOneSide, natureTokenTwoSide, natureTokenThreeSide, natureTokenFourSide,
+            natureTokenCountOneSide, natureTokenCountTwoSide, natureTokenCountThreeSide, natureTokenCountFourSide,
+            cameraPaneOneSide, cameraPaneTwoSide, cameraPaneThreeSide, cameraPaneFourSide,
+            LableAboveCamOne, LableAboveCamTwo, LableAboveCamThree, LableAboveCamFour, playerName
         )
 
         initializeTest()
         adjustAreas()
     }
 
+
+    private fun startFirstTurn() {
+        listOf(LableAboveCamOne, LableAboveCamTwo, LableAboveCamThree, LableAboveCamFour).forEach {
+            it.isDisabled = false
+        }
+        LableAboveCamOne.isDisabled = false
+    }
+
+    private fun initializeCamerasOnSide() {
+        cameraPaneOneSide.pan(x = 1140.0, y = 404.0, zoom = 0.8, smooth = true)
+        cameraPaneTwoSide.pan(x = 1550.0, y = 729.0, zoom = 0.8, smooth = true)
+        cameraPaneThreeSide.pan(x = 1000.0, y = 854.0, zoom = 0.8, smooth = true)
+        cameraPaneFourSide.pan(x = 590.0, y = 529.0, zoom = 0.8, smooth = true)
+    }
 
     /**
      * Zentriert alle HexagonGrids in ihren jeweiligen Bereichen
@@ -363,7 +485,7 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
      * Zoomt mit dem CameraPane aus dem letzten Spieler heraus und auf den aktuellen
      * Wenn noch kein Spieler dran war zoomt sie nur auf den ersten
      */
-    private fun zoomOnPlayer() {
+    private fun showPlayer(player: Int, fromMiniMap: Boolean) {
         //X und Y für den Zoom auswählen
         var x = 0.0
         var y = 0.0
@@ -386,17 +508,26 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
             }
         }
 
-        //Aus dem alten Spieler rauszoomen, eine Sekunde delay und in den aktuellen Spieler reinzoomen
-        if(player != 0) {
-            cameraPane.pan(x = 0, y = 0, zoom = 1.0, smooth = true)
-            playAnimation(
-                DelayAnimation(duration = 1000).apply {
-                    onFinished = { cameraPane.pan(x = x, y = y, zoom = 4.32, smooth = true) }
-                }
-            )
-        }
-        //Wenn noch keiner dran war in den ersten Spieler rein zoomen
-        else {
+        if(!fromMiniMap) {
+            //Aus dem alten Spieler rauszoomen, eine Sekunde delay und in den aktuellen Spieler reinzoomen
+            if (this.player != 0) {
+                playerName.isVisible = false
+                cameraPane.pan(x = 0, y = 0, zoom = 1.0, smooth = true)
+                playAnimation(
+                    DelayAnimation(duration = 1000).apply {
+                        onFinished = {
+                            cameraPane.pan(x = x, y = y, zoom = 4.32, smooth = true)
+                            playerName.isVisible = true
+                        }
+                    }
+                )
+            }
+            //Wenn noch keiner dran war in den ersten Spieler rein zoomen
+            else {
+                cameraPane.pan(x = x, y = y, zoom = 4.32, smooth = true)
+                playerName.isVisible = true
+            }
+        } else {
             cameraPane.pan(x = x, y = y, zoom = 4.32, smooth = true)
         }
     }
@@ -608,6 +739,20 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         playerFourArea[1,-1]=hex
         playerFourArea[-1,1]=hex
         playerFourArea[0,1]=hex
+
+        nameOneSide.text = "Luca"
+        nameTwoSide.text = "Theresa"
+        nameThreeSide.text = "Philipp"
+        nameFourSide.text = "Nicolas"
+
+        natureTokenCountOneSide.text = "3"
+        natureTokenCountTwoSide.text = "2"
+        natureTokenCountThreeSide.text = "0"
+        natureTokenCountFourSide.text = "4"
+
+        playerName.text = "Aktuell"
+
+        initializeCamerasOnSide()
     }
 
 
