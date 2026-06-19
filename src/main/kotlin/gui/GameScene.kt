@@ -33,7 +33,7 @@ import tools.aqua.bgw.visual.ImageVisual
  *  @property changeAnimalsArray ein Objekt des Typs [booleanArrayOf], speichert für jedes Tier, ob es getauscht wird
  *  @property player ein Objekt des Typs [Int], speichert den aktullen Spieler Index (0 = Rundenanfang)
  */
-class GameScene() : BoardGameScene(1920, 1080), Refreshable {
+class GameScene(private val rootService: RootService) : BoardGameScene(1920, 1080), Refreshable {
 
     private var selectAnimal = 0
     private var selectTile = 0
