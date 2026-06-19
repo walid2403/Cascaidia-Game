@@ -50,11 +50,14 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
      *
      * recursively calls itself if there are 4 tokens of the same type at the end of the function
      *
+     * @param playerTrigger indicates whether the extermination is initiated by the player (true)
+     * or automatically by the game (false)
+     *
      * @throws IllegalStateException If the gameState is not [GameState.START_OF_TURN] or [GameState.HAS_EXTERMINATED]
      * or if there are not at least 3 tokens of the same type or
      * if there are 3 and the current gameState is not [GameState.START_OF_TURN]
      */
-    fun exterminate() {
+    fun exterminate( playerTrigger: Boolean) {
 
     }
 
