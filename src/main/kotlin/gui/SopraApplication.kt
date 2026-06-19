@@ -17,7 +17,7 @@ class SopraApplication : BoardGameApplication("SoPra Game") {
     /**
      * The main game scene displayed in the application.
      */
-    private val helloScene = HelloScene()
+    private val helloScene = GameScene()
 
     /**
      * Initializes the application by displaying the [HelloScene].
