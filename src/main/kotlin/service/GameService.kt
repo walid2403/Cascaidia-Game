@@ -81,6 +81,12 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
             val nodes = createGraph(player.board)
             playerScore.addAll(createCorridorScores(nodes))
 
+            if (currentGame.scoringCards[0]) playerScore.add(bearScoringA(nodes))
+            else playerScore.add(bearScoringB(nodes))
+
+            if (currentGame.scoringCards[1]) playerScore.add(elkScoringA(nodes))
+            else playerScore.add(elkScoringB(nodes))
+
             scores.add(Pair(player.name, playerScore))
         }
     }
@@ -91,9 +97,6 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         for (entry in board){
             seen.add(entry.value)
             val node = Node(entry.value)
-            for (habitat in Habitates.entries) {
-                node.sizes[habitat] = 0
-            }
             val first = entry.key.first
             val second = entry.key.second
             val third = entry.key.third
@@ -115,9 +118,10 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         return nodes
     }
 
-    /**
-     * Stellt sicher, dass am Ende alle Marked flags false sind und ändert daher nichts an den Knoten
+    /*
+     * Alle Methoden stellen sicher, dass am Ende alle Marked flags false sind und ändern daher nichts an den Knoten
      */
+
     private fun createCorridorScores(nodes : List<Node>) : List<Int> {
         val scores = mutableListOf<Int>()
         for (habitat in Habitates.entries) {
@@ -151,14 +155,151 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         return scores
     }
 
-    //evtl beim erstellen schon zusammenhänge checken
+    private fun bearScoringA(nodes : List<Node>) : Int {
+        var count = 0
+        for (node in nodes) {
+            if (node.marked) continue
+            node.marked = true
+            if (node.tile.occupant == WildlifeToken.BEAR) {
+                node.neighbours.filterNotNull().forEach { it.marked = true }
+                val neighbours = node.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.BEAR }
+                if (neighbours.size != 1) continue
+                neighbours.single().neighbours.filterNotNull().forEach { it.marked = true }
+                if (neighbours.single().neighbours.filterNotNull().filter
+                    { it.tile.occupant == WildlifeToken.BEAR }.size != 1)
+                    continue
+                count++
+            }
+        }
+        nodes.forEach { node -> node.marked = false }
+        return when(count) {
+            0 -> 0
+            1 -> 4
+            2 -> 11
+            3 -> 19
+            else -> 27
+        }
+    }
 
-    //immer 3 Abstand bei Verbindung
-    //jeder Knoten setzt alle 5 auf Max von Nachbarn, nur die mit passender Verbindung betrachten für einzelne Gebiete
-    //erhöhe alle Werte, die in Habitates vorkommen um 1
-    //füge alle Nachbarn mit nur 0 in sizes zur Queue hinzu
+    private fun bearScoringB(nodes : List<Node>) : Int {
+        var count = 0
+        for (node in nodes) {
+            if (node.marked) continue
+            node.marked = true
+            if (node.tile.occupant == WildlifeToken.BEAR) {
+                node.neighbours.filterNotNull().forEach { it.marked = true }
+                val neighbours = node.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.BEAR }
+                if (neighbours.isEmpty() or (neighbours.size > 2)) continue
+                if (neighbours.size == 1) {
+                    neighbours.single().neighbours.filterNotNull().forEach { it.marked = true }
+                    if (neighbours.single().neighbours.filterNotNull().filter
+                        {it.tile.occupant == WildlifeToken.BEAR }.size != 2) continue
+                } else {
+                    val firstNeighbour = neighbours.first()
+                    val secondNeighbour = neighbours.last()
+                    val firstNeighbourNeighbours = firstNeighbour.neighbours.filterNotNull()
+                    val secondNeighbourNeighbours = secondNeighbour.neighbours.filterNotNull()
+                    firstNeighbourNeighbours.forEach { it.marked = true }
+                    secondNeighbourNeighbours.forEach { it.marked = true }
+                    if ((firstNeighbourNeighbours.filter { it.tile.occupant == WildlifeToken.BEAR }.size != 1 ) or
+                        (firstNeighbourNeighbours.filter { it.tile.occupant == WildlifeToken.BEAR }.size == 2 &&
+                                !firstNeighbourNeighbours.contains(secondNeighbour))) continue
+                    if ((secondNeighbourNeighbours.filter { it.tile.occupant == WildlifeToken.BEAR }.size != 1 ) or
+                        (secondNeighbourNeighbours.filter { it.tile.occupant == WildlifeToken.BEAR }.size == 2 &&
+                                !secondNeighbourNeighbours.contains(firstNeighbour))) continue
+                }
+                count++
+            }
+        }
+        nodes.forEach { node -> node.marked = false }
+        return 10 * count
+    }
+
+    private fun elkScoringA(nodes : List<Node>) : Int {
+        var sum = 0
+        for (node in nodes) {
+            if (node.marked) continue
+            node.marked = true
+            if (node.tile.occupant != WildlifeToken.ELK) continue
+            var cur = node
+            var count = 0
+            while ((cur.neighbours[1] != null) && (cur.neighbours[1]!!.tile.occupant == WildlifeToken.ELK)) {
+                cur = cur.neighbours[1]!!
+                cur.marked = true
+                count++
+            }
+            cur = node
+            while ((cur.neighbours[4] != null) && (cur.neighbours[4]!!.tile.occupant == WildlifeToken.ELK)) {
+                cur = cur.neighbours[4]!!
+                cur.marked = true
+                count++
+            }
+            sum += when (count) {
+                0 -> 0
+                1 -> 2
+                2 -> 5
+                3 -> 9
+                else -> 13
+            }
+        }
+        nodes.forEach { node -> node.marked = false }
+        return sum
+    }
+
+    private fun elkScoringB(nodes : List<Node>) : Int {
+        var sum = 0
+        loop@ for (node in nodes) {
+            if (node.marked) continue
+            node.marked = true
+            if (node.tile.occupant != WildlifeToken.ELK) continue
+            node.neighbours.filterNotNull().forEach { it.marked = true }
+            val neighbours = node.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.ELK }
+            if (neighbours.isEmpty()) {
+                sum += 2
+            }
+            if (neighbours.size == 1) {
+                if (neighbours.single().neighbours.filterNotNull().
+                    filter {it.tile.occupant == WildlifeToken.ELK }.size != 1) continue
+                sum += 5
+            }
+            if (neighbours.size == 2) {
+                val neighbourNeighbourCount = neighbours.map { directNeighbour ->
+                    directNeighbour.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.ELK  }.size }
+                neighbourNeighbourCount.forEach { if (it !in 2..3) continue@loop }
+                if (neighbourNeighbourCount.contains(3)) {
+                    node.neighbours.filterNotNull().forEach { it.marked = false }
+                } else {
+                    val firstNeighbour = neighbours.first()
+                    val secondNeighbour = neighbours.last()
+                    if (firstNeighbour.neighbours.contains(secondNeighbour)) {
+                        sum += 9
+                    }
+                }
+            }
+            if (neighbours.size == 3) {
+                neighbours.forEach { directNeighbour ->
+                    directNeighbour.neighbours.filterNotNull().forEach { it.marked = true } }
+                val count = neighbours.fold(0) { acc,directNeighbourNeighbour ->
+                    acc + directNeighbourNeighbour.neighbours.filterNotNull().
+                    filter { it.tile.occupant == WildlifeToken.ELK }.size }
+                if (count != 7) continue
+                val bigNeighbour = neighbours.single { directNeighbourNeighbour ->
+                    directNeighbourNeighbour.neighbours.filterNotNull()
+                        .filter { it.tile.occupant == WildlifeToken.ELK }.size == 3
+                }
+                val bigNeighbourNeighbours =
+                    bigNeighbour.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.ELK }
+                if ((!bigNeighbourNeighbours.contains(node)) or
+                    (neighbours.fold(0) {acc, it -> acc + if(bigNeighbourNeighbours.contains(it)) 1 else 0} != 2)
+                    ) continue
+                sum += 19
+            }
+        }
+        nodes.forEach { node -> node.marked = false }
+        return sum
+    }
+
     private class Node(val tile: Tile) {
-        val sizes : MutableMap<Habitates,Int> = mutableMapOf()
         val neighbours = Array<Node?>(6) { null }
         var marked = false
     }
