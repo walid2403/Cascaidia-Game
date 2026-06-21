@@ -1,6 +1,7 @@
 package entity
 
 import tools.aqua.bgw.util.Stack
+import java.io.Serializable
 import java.util.Queue
 import java.util.ArrayDeque
 
@@ -27,7 +28,7 @@ import java.util.ArrayDeque
  * @property isLocal Ein [Boolean] welcher angibt, ob das Spiel lokal läuft oder in einem Network
  */
 
-class CascadiaGame(val scoringCards: List<Boolean>, val isLocal: Boolean) {
+class CascadiaGame(val scoringCards: List<Boolean>, val isLocal: Boolean) : Serializable {
 
     val tileStack: Stack<Tile> = Stack()
 

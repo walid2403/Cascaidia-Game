@@ -18,6 +18,11 @@ class RootService {
     var currentGame : CascadiaGame ?= null
     val history = CascadiaGames()
 
+    companion object {
+        const val SAVE_DIRECTORY = "SavedGames"
+        const val SAVE_EXTENSION = ".cascadia"
+    }
+
     /**
      * Adds the provided [newRefreshable] to all services connected
      * to this root service
@@ -27,3 +32,4 @@ class RootService {
         playerActionService.addRefreshable(newRefreshable)
     }
 }
+

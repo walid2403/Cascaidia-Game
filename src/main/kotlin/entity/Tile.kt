@@ -1,5 +1,7 @@
 package entity
 
+import java.io.Serializable
+
 /**
  * Diese Entity-Klasse stellt ein Tile des Cascadia Spiels dar
  *
@@ -20,7 +22,7 @@ package entity
  * keinen Bewohner hat, ist der Parameter nullable
  */
 
-class Tile(val id: Int, val habs: MutableList<Habitates>, val possibles: List<WildlifeToken>) {
+class Tile(val id: Int, val habs: MutableList<Habitates>, val possibles: List<WildlifeToken>) : Serializable{
     var rotation: Int = 0
     var occupant: WildlifeToken? = null
 }

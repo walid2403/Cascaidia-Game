@@ -1,5 +1,7 @@
 package entity
 
+import java.io.Serializable
+
 /**
  * Diese Entity-Klasse stellt einen Spieler des Spiels Cascadia dar.
  *
@@ -13,7 +15,7 @@ package entity
  * und einem [Tile] Objekt
  */
 
-class Player(val name: String, val type: PlayerType) {
+class Player(val name: String, val type: PlayerType) : Serializable {
     var natureTokens: Int = 0
 
     val board: MutableMap<Triple<Int, Int, Int>, Tile> = mutableMapOf()

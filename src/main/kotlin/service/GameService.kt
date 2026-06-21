@@ -1,6 +1,8 @@
 package service
 
 import entity.*
+import entity.SaveState
+import java.io.*
 
 /**
  * The game service class of the Cascadia Game. It includes all functions which work mostly on the system-logic side
@@ -26,6 +28,33 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
     }
 
     /**
+     * Helper function to reconstruct a fully playable [CascadiaGame] from a [GameSnapshot].
+     * * Reconstructs the non-serializable BGW stacks from safe Kotlin lists and restores all other state variables.
+     * * @param snapshot The saved state of a single game.
+     * @return A live [CascadiaGame] object ready to be played.
+     */
+    private fun restoreSnapshot(snapshot: GameSnapshot): CascadiaGame {
+
+        val game = CascadiaGame(snapshot.scoringCards, snapshot.isLocal)
+
+        game.natureTokens = snapshot.natureTokens
+        game.gameState = snapshot.gameState
+        game.selectedChoice = snapshot.selectedChoice
+
+        game.choices.clear()
+        game.choices.addAll(snapshot.choicesList)
+
+        game.removedTokens.clear()
+        game.removedTokens.addAll(snapshot.removedTokensList)
+
+        snapshot.tileStackList.reversed().forEach { game.tileStack.push(it) }
+        snapshot.wildlifeTokensList.reversed().forEach { game.wildlifeTokens.push(it) }
+        snapshot.playerList.forEach { game.playerQueue.add(it) }
+
+        return game
+    }
+
+    /**
      * A function to load a previously saved game. The saved game is identified by the name Parameter.
      *
      * @param name The name of the previously saved game
@@ -35,6 +64,37 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
      */
     fun loadGame(name: String) {
 
+        if (rootService.currentGame != null) {
+            throw IllegalStateException("A game is already running.")
+        }
+        if (name.isBlank()) {
+            throw IllegalArgumentException("The save name cannot be empty.")
+        }
+
+        val file = File(RootService.SAVE_DIRECTORY, "$name${RootService.SAVE_EXTENSION}")
+
+        if (!file.exists()) {
+            throw IllegalArgumentException("Save game '$name' does not exist.")
+        }
+
+        val loadedState = ObjectInputStream(FileInputStream(file)).use { stream ->
+            stream.readObject() as SaveState
+        }
+
+        rootService.currentGame = restoreSnapshot(loadedState.currentGame)
+
+        rootService.history.prevMoves.clear()
+
+        loadedState.prevMovesList.reversed().forEach { snapshot ->
+            rootService.history.prevMoves.push(restoreSnapshot(snapshot))
+        }
+
+        rootService.history.undoneMoves.clear()
+        loadedState.undoneMovesList.reversed().forEach { snapshot ->
+            rootService.history.undoneMoves.push(restoreSnapshot(snapshot))
+        }
+
+        onAllRefreshables { refreshAfterLoadGame() }
     }
 
     /**

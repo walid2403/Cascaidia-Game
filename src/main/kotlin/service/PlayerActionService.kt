@@ -1,12 +1,18 @@
 package service
 
 import entity.*
+import java.io.File
+import entity.SaveState
+import java.io.FileOutputStream
+import java.io.ObjectOutputStream
+
 
 /**
  * The player action service class of the Cascadia game. It includes all functions which rely heavily on player inputs.
  */
 
 class PlayerActionService(private val rootService: RootService) : AbstractRefreshingService() {
+
 
     /**
      * Allows the active player to swap any number (0..4) of wildlife tokens in the market
@@ -123,6 +129,31 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
     }
 
+/**
+ * Helper function to convert a live [CascadiaGame] into a serializable [GameSnapshot].
+ *
+ * Extracts data from non-serializable structures like the BGW stacks or Java queues
+ * and safely stores them as standard Kotlin lists. This is necessary to avoid
+ * NotSerializableExceptions during the save process.
+ *
+ * @param game The active [CascadiaGame] to be converted.
+ * @return A pure data container ([GameSnapshot]) representing the given game.
+ */
+    private fun createSnapshot(game: CascadiaGame): GameSnapshot {
+        return GameSnapshot(
+            tileStackList = game.tileStack.peekAll(),
+            natureTokens = game.natureTokens,
+            choicesList = game.choices.toList(),
+            selectedChoice = game.selectedChoice,
+            gameState = game.gameState,
+            playerList = game.playerQueue.toList(),
+            removedTokensList = game.removedTokens.toList(),
+            wildlifeTokensList = game.wildlifeTokens.peekAll(),
+            scoringCards = game.scoringCards,
+            isLocal = game.isLocal
+        )
+    }
+
     /**
      * Interrupts the current game and saves it under the specified name.
      *
@@ -134,10 +165,31 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      *
      * @param name The file name or identifier under which the game should be saved.
      *
-     * @throws IllegalArgumentException if there is no .cascadia file with the given name in the SavedGames Folder
+     * @throws IllegalArgumentException if the name is empty, or if the game is not in a state where it can be saved.
      */
     fun saveGame(name: String) {
+        val game = rootService.currentGame ?: throw IllegalStateException("No game is currently running.")
+        if (name.isEmpty()) throw IllegalArgumentException("The name cannot be empty.")
+        if (!game.isLocal || game.playerQueue.any { it.type == PlayerType.NETWORK }) {
+            throw IllegalArgumentException("The save feature is not available for network games.")
+        }
 
+        val folder = File("SavedGames")
+        if (!folder.exists()) folder.mkdirs()
+
+        val file = File(folder, "$name${RootService.SAVE_EXTENSION}")
+
+        ObjectOutputStream(FileOutputStream(file)).use { stream ->
+
+            val state = SaveState(
+                currentGame = createSnapshot(game),
+
+                prevMovesList = rootService.history.prevMoves.peekAll().map{ createSnapshot(it) },
+                undoneMovesList = rootService.history.undoneMoves.peekAll().map { createSnapshot(it) }
+            )
+
+            stream.writeObject(state)
+        }
     }
 
     /**
