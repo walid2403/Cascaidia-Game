@@ -1,6 +1,7 @@
 package service
 
 import entity.*
+import kotlin.math.max
 
 /**
  * The game service class of the Cascadia Game. It includes all functions which work mostly on the system-logic side
@@ -71,7 +72,95 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
      *                               if not every player has 20 habitat tiles
      */
     fun calculateScores() {
+        val scores = mutableListOf<Pair<String,List<Int>>>()
+        val currentGame = rootService.currentGame
+        checkNotNull(currentGame) { "Es existiert kein Spiel" }
 
+        for (player in currentGame.playerQueue) {
+            val playerScore = mutableListOf<Int>()
+            val nodes = createGraph(player.board)
+            playerScore.addAll(createCorridorScores(nodes))
+
+            scores.add(Pair(player.name, playerScore))
+        }
+    }
+
+    private fun createGraph(board: Map<Triple<Int,Int,Int>,Tile>) : List<Node>{
+        val nodes = mutableListOf<Node>()
+        val seen = mutableListOf<Tile>()
+        for (entry in board){
+            seen.add(entry.value)
+            val node = Node(entry.value)
+            for (habitat in Habitates.entries) {
+                node.sizes[habitat] = 0
+            }
+            val first = entry.key.first
+            val second = entry.key.second
+            val third = entry.key.third
+            for (i in listOf(-1,1)) {
+                val xChange = board[Triple(first+i,second,third)]
+                val yChange = board[Triple(first,second+i,third)]
+                val zChange = board[Triple(first,second,third+i)]
+                if (xChange in seen) {
+                    node.neighbours[(1.5 - (i*1.5)).toInt()] = nodes.first { it.tile == xChange }
+                }
+                if (yChange in seen) {
+                    node.neighbours[(2.5 - (i*1.5)).toInt()] = nodes.first { it.tile == yChange }
+                }
+                if (zChange in seen) {
+                    node.neighbours[(3.5 - (i*1.5)).toInt()] = nodes.first { it.tile == zChange }
+                }
+            }
+        }
+        return nodes
+    }
+
+    /**
+     * Stellt sicher, dass am Ende alle Marked flags false sind und ändert daher nichts an den Knoten
+     */
+    private fun createCorridorScores(nodes : List<Node>) : List<Int> {
+        val scores = mutableListOf<Int>()
+        for (habitat in Habitates.entries) {
+            var maxSize = 0
+
+            for (node in nodes) {
+                if (node.marked || !node.tile.habs.contains(habitat)) continue
+                val open = ArrayDeque<Node>()
+                open.add(node)
+                node.marked = true
+                var size = 0
+                while (open.isNotEmpty()) {
+                    val cur = open.removeFirst()
+                    size++
+                    for (index in cur.tile.habs.indices) {
+                        if (cur.tile.habs[index] != habitat) continue
+                        val neighbour = cur.neighbours[index]?: continue
+                        if (neighbour.tile.habs[(index+3)%6] == habitat) {
+                            if (!neighbour.marked) {
+                                open.add(neighbour)
+                                neighbour.marked = true
+                            }
+                        }
+                    }
+                }
+                maxSize = max(size, maxSize)
+            }
+            scores.add(maxSize)
+            nodes.forEach { node -> node.marked = false }
+        }
+        return scores
+    }
+
+    //evtl beim erstellen schon zusammenhänge checken
+
+    //immer 3 Abstand bei Verbindung
+    //jeder Knoten setzt alle 5 auf Max von Nachbarn, nur die mit passender Verbindung betrachten für einzelne Gebiete
+    //erhöhe alle Werte, die in Habitates vorkommen um 1
+    //füge alle Nachbarn mit nur 0 in sizes zur Queue hinzu
+    private class Node(val tile: Tile) {
+        val sizes : MutableMap<Habitates,Int> = mutableMapOf()
+        val neighbours = Array<Node?>(6) { null }
+        var marked = false
     }
 
     /**
