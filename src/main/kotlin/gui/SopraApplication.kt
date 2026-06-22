@@ -2,6 +2,7 @@ package gui
 
 import tools.aqua.bgw.core.BoardGameApplication
 import service.RootService
+import tools.aqua.bgw.core.MenuScene
 
 /**
  * Represents the main application for the SoPra board game.
@@ -19,11 +20,23 @@ class SopraApplication : BoardGameApplication("SoPra Game") {
      */
     private val helloScene = GameScene(rootService)
 
+    private val lobbyScene = LobbyScene(this@SopraApplication,rootService)
+
+    private val joinScene = JoinOnlineScene(this@SopraApplication,rootService)
+
+
+    private val mainMenuScene = MainMenuScene(this@SopraApplication,rootService).apply {
+        hostButton.onMouseClicked = {
+            this@SopraApplication.showMenuScene(lobbyScene)
+        }
+    }
+
     /**
      * Initializes the application by displaying the [HelloScene].
      */
     init {
         this.showGameScene(helloScene)
+        this.showMenuScene(mainMenuScene)
     }
 
 }
