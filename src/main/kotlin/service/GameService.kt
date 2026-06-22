@@ -50,12 +50,75 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
      *
      * recursively calls itself if there are 4 tokens of the same type at the end of the function
      *
+     * @param playerTrigger indicates whether the extermination is initiated by the player (true)
+     * or automatically by the game (false)
+     *
      * @throws IllegalStateException If the gameState is not [GameState.START_OF_TURN] or [GameState.HAS_EXTERMINATED]
      * or if there are not at least 3 tokens of the same type or
      * if there are 3 and the current gameState is not [GameState.START_OF_TURN]
      */
-    fun exterminate() {
+    fun exterminate( playerTrigger: Boolean) {
+        val game = rootService.currentGame ?: error("No current game")
+        check(
+            game.gameState == GameState.START_OF_TURN ||
+                    game.gameState == GameState.HAS_EXTERMINATED
+        ) { "Extermination is not allowed in the current game state" }
+        if (playerTrigger && game.gameState != GameState.START_OF_TURN) {
+            throw IllegalStateException("Player can only exterminate at the START_OF_TURN.")
+        }
+        //counting the wildlife tokens
+        val wildlifeTokens = game.choices.map { it.second }
+        var duplicatedToken: WildlifeToken? = null
+        var highestCount = 0
+        for (token in WildlifeToken.entries) {
+            val count = wildlifeTokens.count { it == token }
+            if (count > highestCount) {
+                highestCount = count
+                duplicatedToken = token
+            }
+        }
+        check(highestCount >= 3) {
+            "There are not at least three identical wildlife tokens"
+        }
+        if (playerTrigger) {
+            if (highestCount != 3) {
+                throw IllegalStateException("Player extermination requires exactly three identical wildlife tokens")
+            }
+        } else {
+            if (highestCount < 4) return
+        }
+        val affectedIndices = mutableListOf<Int>()
+        for (i in game.choices.indices) {
+            if (game.choices[i].second == duplicatedToken) {
+                affectedIndices.add(i)
+            }
+        }
+        if (game.wildlifeTokens.size < affectedIndices.size) {
+            calculateScores()
+            return
+        }
+        //executing extermination
+        for (j in affectedIndices) {
+            game.removedTokens.add(game.choices[j].second)
+            val tile = game.choices[j].first
+            val newToken = game.wildlifeTokens.pop()
+            game.choices[j] = Pair(tile, newToken)
+        }
+        if (playerTrigger) {
+            game.gameState = GameState.HAS_EXTERMINATED
+        }
+        val remainingTokens = game.choices.map { it.second }
+        if (remainingTokens.distinct().size == 1) {
+            exterminate(false)
+            return
+        }else {
+            //refreshing only at the final resolved state
+            onAllRefreshables {
+                refreshAfterExterminate()
+            }
 
+
+        }
     }
 
     /**
