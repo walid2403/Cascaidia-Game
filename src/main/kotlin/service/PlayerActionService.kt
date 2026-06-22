@@ -161,21 +161,6 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * @throws IllegalStateException if the [GameState] is not `MADE_CHOICE`.
      */
     fun rotateTile(right: Boolean) {
-        val currentGame = checkNotNull(rootService.currentGame){"Es Wurde kein Spiel im RootService gefunden!"}
-        check(currentGame.gameState == GameState.MADE_CHOICE) {" Spieler darf kein Tile umdrehen"}
-
-        //die ausgewählte Tile
-        val selectedTileIndex = currentGame.selectedChoice.first
-        val selectedTile = currentGame.choices[selectedTileIndex].first
-
-        //den Tile umdrehen
-        if(right){
-            //Uhrzeigersinn (+1)
-            selectedTile.rotation= (selectedTile.rotation+1)%6
-        }else{
-            //Uhrzeigersinn (-1), ich addiere +5 damit ich nicht im Negativen zu landen.
-            selectedTile.rotation = (selectedTile.rotation+1)%6
-        }
 
     }
 
@@ -194,58 +179,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * it is not adjacent to any existing tile.
      */
     fun placeTile(index: Triple<Int, Int, Int>) {
-        val currentGame = checkNotNull(rootService.currentGame){"Es Wurde kein Spiel im RootService gefunden!"}
-        val currentPlayer = currentGame.playerQueue.peek()
 
-        //wirft automatisch ein IllegalStateException
-        check(currentGame.gameState == GameState.MADE_CHOICE) {
-            "Spieler darf kein Tile ablegen"
-        }
-
-        //Feld besetzt? wirft automatisch ein IllegalStateException
-        require(index !in currentPlayer.board){
-            "Feld ist bereits besetzt!"
-        }
-
-        //Das neue Plättchen darf nicht frei in der Luft schweben
-       val hexDirections = listOf(
-           Triple(1,-1,0),
-           Triple(1,0,-1),
-           Triple(0,1,-1),
-           Triple(-1,1,0),
-           Triple(-1,0,1),
-           Triple(0,-1,1),
-       )
-
-        //die 6 echten koordinaten rund um den Zielfeld (index)
-        //eine neue liste erstellen, die die addierte Koordinaten enthält
-        val neighborCoordinates = hexDirections.map { direction->
-            Triple(
-                index.first+direction.first,
-                index.second+direction.second,
-                index.third+direction.third
-            )
-        }
-
-        //Prüfe, ob das Board des Spielers an MINDESTENS EINER dieser 6 Koordinaten schon ein Plättchen hat.
-        //falls eine richtig, bricht ab und gibt True zurück
-        val hasNeighbor = neighborCoordinates.any{neighborCord ->
-            currentPlayer.board.containsKey(neighborCord)
-        }
-
-        require(hasNeighbor) {
-            "Ungültiger Zug: Das Plättchen muss an mindestens ein bestehendes Plättchen angrenzen!"
-        }
-
-        val selectedTileIndex = currentGame.selectedChoice.first
-        val selectedTile = currentGame.choices[selectedTileIndex].first
-
-        //das Tile im passende Stelle hinzufügen
-        currentPlayer.board[index] = selectedTile
-
-        currentGame.gameState = GameState.PLAYED_TILE
-
-        onAllRefreshables { refreshAfterPlaceTile(index) }
     }
 
     /**
