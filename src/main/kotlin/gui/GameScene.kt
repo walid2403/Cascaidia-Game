@@ -386,6 +386,66 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         isVisible = false
     }
 
+    //Tiere für Scoring Cards
+    private val bear = Label(width = 60, height = 60, posX = 1825, posY = 175).apply {
+        visual= ImageVisual("bear.png")
+        onMouseEntered = { bearScoringCard.isVisible = true }
+        onMouseExited = { bearScoringCard.isVisible = false }
+    }
+    private val elk = Label(width = 60, height = 60, posX = 1825, posY = 275).apply {
+        visual= ImageVisual("elk.png")
+        onMouseEntered = { elkScoringCard.isVisible = true }
+        onMouseExited = { elkScoringCard.isVisible = false }
+    }
+    private val fox = Label(width = 60, height = 60, posX = 1825, posY = 375).apply {
+        visual= ImageVisual("fox.png")
+        onMouseEntered = { foxScoringCard.isVisible = true }
+        onMouseExited = { foxScoringCard.isVisible = false }
+    }
+    private val salmon = Label(width = 60, height = 60, posX = 1825, posY = 475).apply {
+        visual= ImageVisual("salmon.png")
+        onMouseEntered = { salmonScoringCard.isVisible = true }
+        onMouseExited = { salmonScoringCard.isVisible = false }
+    }
+    private val hawk = Label(width = 60, height = 60, posX = 1825, posY = 575).apply {
+        visual= ImageVisual("hawk.png")
+        onMouseEntered = { hawkScoringCard.isVisible = true }
+        onMouseExited = { hawkScoringCard.isVisible = false }
+    }
+
+    //Graue Box um Tiere
+    private val grayBoxScoringAnimals = Label(width = 90, height = 490, posX = 1810, posY = 160).apply {
+        visual= ColorVisual(170,170,170, 170).apply { style.borderRadius = BorderRadius(20) }
+    }
+
+    //Scoring Karten
+    private val bearScoringCard = Label(width = 229, height = 435, posX = 1556, posY = 160).apply {
+        visual= ImageVisual("Scoring_Bear_A.png")
+        this.isVisible = false
+    }
+    private val elkScoringCard = Label(width = 229, height = 440, posX = 1556, posY = 160).apply {
+        visual= ImageVisual("Scoring_Elk_A.png")
+        this.isVisible = false
+    }
+    private val foxScoringCard = Label(width = 229, height = 497, posX = 1556, posY = 160).apply {
+        visual= ImageVisual("Scoring_Fox_A.png")
+        this.isVisible = false
+    }
+    private val salmonScoringCard = Label(width = 229, height = 497, posX = 1556, posY = 160).apply {
+        visual= ImageVisual("Scoring_Salmon_A.png")
+        this.isVisible = false
+    }
+    private val hawkScoringCard = Label(width = 229, height = 497, posX = 1556, posY = 160).apply {
+        visual= ImageVisual("Scoring_Hawk_A.png")
+        this.isVisible = false
+    }
+
+    //Pause Button
+    private val pause = Button(width = 60, height = 60, posX = 1825, posY = 35, text = "||",
+        font = Font(size = 16, color = Color(255, 255, 255))).apply {
+        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
+    }
+
 
 
 
@@ -423,12 +483,14 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
             animalChoice1, animalChoice2, animalChoice3, animalChoice4,
             rotateOneCW, rotateOneCCW, rotateTwoCW, rotateTwoCCW,
             rotateThreeCW, rotateThreeCCW, rotateFourCW, rotateFourCCW,
-            endTurn, undo, redo, viewPanel,
+            endTurn, undo, redo, viewPanel, pause,
+            grayBoxScoringAnimals, bear, elk, salmon, hawk, fox,
             barOne, barTwo, barThree, nameOneSide, nameTwoSide, nameThreeSide, nameFourSide,
             natureTokenOneSide, natureTokenTwoSide, natureTokenThreeSide, natureTokenFourSide,
             natureTokenCountOneSide, natureTokenCountTwoSide, natureTokenCountThreeSide, natureTokenCountFourSide,
             cameraPaneOneSide, cameraPaneTwoSide, cameraPaneThreeSide, cameraPaneFourSide,
-            LableAboveCamOne, LableAboveCamTwo, LableAboveCamThree, LableAboveCamFour, playerName
+            LableAboveCamOne, LableAboveCamTwo, LableAboveCamThree, LableAboveCamFour, playerName,
+            bearScoringCard, elkScoringCard, salmonScoringCard, hawkScoringCard, foxScoringCard
         )
 
         initializeTest()
