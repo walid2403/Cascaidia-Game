@@ -87,6 +87,9 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
             if (currentGame.scoringCards[1]) playerScore.add(elkScoringA(nodes))
             else playerScore.add(elkScoringB(nodes))
 
+            if (currentGame.scoringCards[2]) playerScore.add(salmonScoringA(nodes))
+            else playerScore.add(salmonScoringB(nodes))
+
             scores.add(Pair(player.name, playerScore))
         }
     }
@@ -296,6 +299,118 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
             }
         }
         nodes.forEach { node -> node.marked = false }
+        return sum
+    }
+
+    //TODO Problem behandeln, wenn Kreis in Lachskette ist
+    private fun salmonScoringA(nodes : List<Node>) : Int {
+        var sum = 0
+        for (node in nodes) {
+            if (node.marked) continue
+            node.marked = true
+            if (node.tile.occupant != WildlifeToken.SALMON) continue
+            val neighbours = node.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.SALMON }
+            if (neighbours.isEmpty()) {
+                sum += 2
+            }
+            if (neighbours.size == 1) {
+                var curNeighbour = neighbours.single()
+                var last = node
+                var run : Boolean
+                var count = 0
+                while (true) {
+                    curNeighbour.marked = true
+                    count++
+                    val curNeighbours =
+                        curNeighbour.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.SALMON }.
+                        filter { it != last}
+                    if (curNeighbours.size != 1) {
+                        run = curNeighbours.isEmpty()
+                        break
+                    }
+                    last = curNeighbour
+                    curNeighbour = curNeighbours.single()
+                }
+                if (run) count++
+                sum += when(count) {
+                    1 -> 2
+                    2 -> 5
+                    3 -> 8
+                    4 -> 12
+                    5 -> 16
+                    6 -> 20
+                    else -> 25
+                }
+            }
+            if (neighbours.size == 2) {
+                val firstNeighbourNeighbours =
+                    neighbours.first().neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.SALMON }
+                val secondNeighbourNeighbours =
+                    neighbours.last().neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.SALMON }
+                if ((firstNeighbourNeighbours.size != 2) or (!firstNeighbourNeighbours.contains(neighbours.last())))
+                    continue
+                if ((secondNeighbourNeighbours.size != 2) or (!secondNeighbourNeighbours.contains(neighbours.first())))
+                    continue
+                neighbours.forEach { it.marked = true }
+                sum += 8
+            }
+
+        }
+        return sum
+    }
+    //nur diplicate code, mit angepasstem score
+    //TODO beide zusammenlegen und die score Stellen mit Boolean ändern. In calcScore Aufruf Boolean mitgeben für ist a true
+    private fun salmonScoringB(nodes : List<Node>) : Int {
+        var sum = 0
+        for (node in nodes) {
+            if (node.marked) continue
+            node.marked = true
+            if (node.tile.occupant != WildlifeToken.SALMON) continue
+            val neighbours = node.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.SALMON }
+            if (neighbours.isEmpty()) {
+                sum += 2
+            }
+            if (neighbours.size == 1) {
+                var curNeighbour = neighbours.single()
+                var last = node
+                var run : Boolean
+                var count = 0
+                while (true) {
+                    curNeighbour.marked = true
+                    count++
+                    val curNeighbours =
+                        curNeighbour.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.SALMON }.
+                        filter { it != last}
+                    if (curNeighbours.size != 1) {
+                        run = curNeighbours.isEmpty()
+                        break
+                    }
+                    last = curNeighbour
+                    curNeighbour = curNeighbours.single()
+                }
+                if (run) count++
+                sum += when(count) {
+                    1 -> 2
+                    2 -> 4
+                    3 -> 9
+                    4 -> 11
+                    else -> 17
+                }
+            }
+            if (neighbours.size == 2) {
+                val firstNeighbourNeighbours =
+                    neighbours.first().neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.SALMON }
+                val secondNeighbourNeighbours =
+                    neighbours.last().neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.SALMON }
+                if ((firstNeighbourNeighbours.size != 2) or (!firstNeighbourNeighbours.contains(neighbours.last())))
+                    continue
+                if ((secondNeighbourNeighbours.size != 2) or (!secondNeighbourNeighbours.contains(neighbours.first())))
+                    continue
+                neighbours.forEach { it.marked = true }
+                sum += 9
+            }
+
+        }
         return sum
     }
 
