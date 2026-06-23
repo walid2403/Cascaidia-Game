@@ -65,8 +65,6 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
             size = 28,
             color = Color(0xFFFFFF),
             family = "Arial",
-            fontWeight = Font.FontWeight.NORMAL,
-            fontStyle = Font.FontStyle.NORMAL
         ),
         alignment = Alignment.CENTER,
         isWrapText = false,
