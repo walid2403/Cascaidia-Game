@@ -248,4 +248,4 @@ class ExterminateTest {
         assertEquals(0, currentGame.removedTokens.size,
             "No token should be removed after an invalid extermination")
     }
-}x
+}
