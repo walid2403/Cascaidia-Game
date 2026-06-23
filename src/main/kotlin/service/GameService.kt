@@ -138,16 +138,36 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
     }
 
     /**
-     * the function changes the current Player by rotating the [CascadiaGame.playerQueue]
-     * and setting the [CascadiaGame.gameState] to [GameState.START_OF_TURN]
-     *
-     * it also checks if the [CascadiaGame.tileStack] is empty
-     * if the condition is true, [calculateScores] is executed
+     * This function changes the currentPlayer by rotating the [CascadiaGame.playerQueue]. It also changes all other
+     * relevant variables, like the [CascadiaGame.gameState]. If all players have played their 20 rounds this function
+     * ends the game by calling [calculateScores] and sending the game-end Refresh with the scores to the GUI
      *
      *@throws IllegalStateException if Game is not in [GameState.END_OF_TURN]
      *@throws IllegalArgumentException if the [CascadiaGame.playerQueue] is empty
      */
     fun changeTurn() {
+        val game = rootService.currentGame
+        checkNotNull(game) {"No current game"}
 
+        val checkCondition = game.gameState == GameState.PLAYED_TILE || game.gameState == GameState.END_OF_TURN
+        check(checkCondition) {"Current Turn can not be ended"}
+
+        val currentPlayer = game.playerQueue.poll()
+        game.playerQueue.add(currentPlayer)
+
+        game.gameState = GameState.START_OF_TURN
+
+        val nextPlayer = game.playerQueue.peek()
+
+        if (nextPlayer.board.size == 23) {
+            onAllRefreshables {refreshAfterEndGame(calculateScores())}
+            return
+        }
+
+        if (nextPlayer.type == PlayerType.HUMAN && game.isLocal) {
+            rootService.history.prevMoves.push(game)
+        }
+
+        onAllRefreshables { refreshAfterChangeTurn(nextPlayer.board.size == 22) }
     }
 }
