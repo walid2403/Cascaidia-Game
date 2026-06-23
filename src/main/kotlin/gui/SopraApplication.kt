@@ -31,12 +31,22 @@ class SopraApplication : BoardGameApplication("SoPra Game") {
         }
     }
 
+    private val scoreScene = ScoreScene().apply {
+        exitButton.onMouseClicked = {
+            exit()
+        }
+
+        newGameButton.onMouseClicked = {
+            this@SopraApplication.showMenuScene(mainMenuScene)
+        }
+    }
+
     /**
      * Initializes the application by displaying the [HelloScene].
      */
     init {
         this.showGameScene(helloScene)
-        this.showMenuScene(mainMenuScene)
+        this.showMenuScene(scoreScene)
     }
 
 }

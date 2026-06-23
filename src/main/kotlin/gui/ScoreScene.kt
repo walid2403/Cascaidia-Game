@@ -1,0 +1,836 @@
+package gui
+
+import service.Refreshable
+import tools.aqua.bgw.components.StaticComponentView
+import tools.aqua.bgw.components.layoutviews.Pane
+import tools.aqua.bgw.components.uicomponents.Button
+import tools.aqua.bgw.components.uicomponents.Label
+import tools.aqua.bgw.core.MenuScene
+import tools.aqua.bgw.style.BorderRadius
+import tools.aqua.bgw.util.Font
+import tools.aqua.bgw.visual.ColorVisual
+import tools.aqua.bgw.visual.ImageVisual
+import tools.aqua.bgw.components.layoutviews.GridPane
+
+class ScoreScene : MenuScene(1920, 1080), Refreshable {
+
+    private val sceneWidth = 1920
+    private val sceneHeight = 1080
+    private val paneWidth = 800
+    private val paneHeight = 670
+    private val tabHeight = 125
+    private val tabWidth = 100
+    private val borderThickness = 4
+    private val paneX = (sceneWidth-paneWidth)/2
+    private val paneY = (sceneHeight-paneHeight)/2
+
+    //temporary lists to test the score scene visuals
+    private val scoreList: MutableList<Int> = ArrayList()
+    private val scoreList2: MutableList<Int> = ArrayList()
+    private val scoreList3: MutableList<Int> = ArrayList()
+    private val scoreList4: MutableList<Int> = ArrayList()
+    private val testList1: MutableList<Pair<String, List<Int>>> = ArrayList()
+    var scoresUpdated = false
+
+    //
+    // All panes and tabs + their borders
+    //
+
+    private val backgroundImage = Label(
+        posX = 0,
+        posY = 0,
+        width = sceneWidth,
+        height = sceneHeight,
+        visual = ImageVisual("ScoreSceneBackground.png")
+    )
+
+    private val mainScorePane = Pane<StaticComponentView<*>>(
+        posX = paneX,
+        posY = paneY,
+        width = paneWidth,
+        height = paneHeight,
+        visual = ColorVisual(64, 98, 70).apply{
+            style.borderRadius = BorderRadius(35)
+        }
+    )
+
+    private val wildlifeScorePane = Pane<StaticComponentView<*>>(
+        posX = paneX,
+        posY = paneY,
+        width = paneWidth,
+        height = paneHeight,
+        visual = ColorVisual(236, 142, 14).apply{
+            style.borderRadius = BorderRadius(35)
+        }
+    ).apply {
+        isVisible = false
+    }
+
+    private val habitatScorePane = Pane<StaticComponentView<*>>(
+        posX = paneX,
+        posY = paneY,
+        width = paneWidth,
+        height = paneHeight,
+        visual = ColorVisual(173, 208, 75).apply{
+            style.borderRadius = BorderRadius(35)
+        }
+    ).apply {
+        isVisible = false
+    }
+
+    private val paneBorder = Label(
+        posX = paneX - borderThickness,
+        posY = paneY - borderThickness,
+        width = paneWidth + borderThickness*2,
+        height = paneHeight + borderThickness*2,
+        visual = ColorVisual(255, 255, 255).apply{
+            style.borderRadius = BorderRadius(35)
+        }
+    )
+
+    private val mainScoreTab = Label(
+        posX = paneX + paneWidth - 30,
+        posY = paneY,
+        width = tabWidth,
+        height = tabHeight,
+        visual = ColorVisual(64, 98, 70).apply {
+            style.borderRadius = BorderRadius(15.0)
+        }
+    ). apply {
+        onMouseClicked = {
+            wildlifeScorePane.isVisible = false
+            wildlifeScoreTabOverlay.isVisible = false
+            habitatScorePane.isVisible = false
+            habitatScoreTabOverlay.isVisible = false
+            mainScorePane.isVisible = true
+            mainScoreTabOverlay.isVisible = true
+
+            //temporary, used to test the score scene visuals, can be deleted later!
+            if(!scoresUpdated) {
+                scoresUpdated = true
+                fillScoreLists()
+                testList1.add(Pair("a", scoreList))
+                testList1.add(Pair("b", scoreList2))
+                //testList1.add(Pair("c", scoreList3))
+                //testList1.add(Pair("d", scoreList4))
+                refreshAfterEndGame(testList1)
+            }
+        }
+    }
+
+    private fun fillScoreLists() {
+        scoreList.add(1)
+        scoreList.add(3)
+        scoreList.add(7)
+        scoreList.add(15)
+        scoreList.add(0)
+
+        scoreList.add(2)
+        scoreList.add(3)
+        scoreList.add(6)
+        scoreList.add(1)
+        scoreList.add(3)
+
+        scoreList.add(6)
+        scoreList.add(2)
+        scoreList.add(0)
+        scoreList.add(0)
+        scoreList.add(1)
+        scoreList.add(2)
+
+        scoreList2.add(2)
+        scoreList2.add(2)
+        scoreList2.add(2)
+        scoreList2.add(2)
+        scoreList2.add(2)
+
+        scoreList2.add(2)
+        scoreList2.add(2)
+        scoreList2.add(2)
+        scoreList2.add(2)
+        scoreList2.add(2)
+
+        scoreList2.add(2)
+        scoreList2.add(2)
+        scoreList2.add(2)
+        scoreList2.add(2)
+        scoreList2.add(2)
+        scoreList2.add(2)
+
+        scoreList3.add(1)
+        scoreList3.add(1)
+        scoreList3.add(1)
+        scoreList3.add(1)
+        scoreList3.add(1)
+
+        scoreList3.add(1)
+        scoreList3.add(1)
+        scoreList3.add(1)
+        scoreList3.add(1)
+        scoreList3.add(1)
+
+        scoreList3.add(1)
+        scoreList3.add(1)
+        scoreList3.add(1)
+        scoreList3.add(1)
+        scoreList3.add(1)
+        scoreList3.add(2)
+
+        scoreList4.add(3)
+        scoreList4.add(4)
+        scoreList4.add(3)
+        scoreList4.add(4)
+        scoreList4.add(3)
+        scoreList4.add(4)
+        scoreList4.add(3)
+        scoreList4.add(4)
+        scoreList4.add(3)
+        scoreList4.add(4)
+        scoreList4.add(3)
+        scoreList4.add(4)
+        scoreList4.add(3)
+        scoreList4.add(4)
+        scoreList4.add(3)
+        scoreList4.add(3)
+    }
+
+    private val mainScoreTabOverlay = Label (
+        posX = paneX + paneWidth - 30,
+        posY = paneY,
+        width = borderThickness + 30,
+        height = tabHeight,
+        visual = ColorVisual(64, 98, 70)
+    )
+
+    private val mainTabBorder = Label(
+        posX = mainScoreTab.posX - borderThickness,
+        posY = mainScoreTab.posY - borderThickness,
+        width = tabWidth + borderThickness*2,
+        height = tabHeight + borderThickness*2,
+        visual = ColorVisual(255, 255, 255).apply{
+            style.borderRadius = BorderRadius(15)
+        }
+    )
+
+    private val wildlifeScoreTab = Label(
+        posX = paneX + paneWidth - 30,
+        posY = paneY + tabHeight + borderThickness*2,
+        width = tabWidth,
+        height = tabHeight,
+        visual = ColorVisual(236, 142, 14).apply {
+            style.borderRadius = BorderRadius(15.0)
+        }
+    ). apply {
+        onMouseClicked = {
+            wildlifeScorePane.isVisible = true
+            wildlifeScoreTabOverlay.isVisible = true
+            habitatScorePane.isVisible = false
+            habitatScoreTabOverlay.isVisible = false
+            mainScorePane.isVisible = false
+            mainScoreTabOverlay.isVisible = false
+        }
+    }
+
+    private val wildlifeScoreTabOverlay = Label (
+        posX = wildlifeScorePane.posX + paneWidth,
+        posY = paneY + tabHeight + borderThickness*2,
+        width = borderThickness,
+        height = tabHeight,
+        visual = ColorVisual(236, 142, 14)
+    ).apply {
+        isVisible = false
+    }
+
+    private val wildlifeTabBorder = Label(
+        posX = wildlifeScoreTab.posX - borderThickness,
+        posY = wildlifeScoreTab.posY - borderThickness,
+        width = tabWidth + borderThickness*2,
+        height = tabHeight + borderThickness*2,
+        visual = ColorVisual(255, 255, 255).apply{
+            style.borderRadius = BorderRadius(15)
+        }
+    )
+
+    private val habitatScoreTab = Label(
+        posX = paneX + paneWidth - 30,
+        posY = paneY + tabHeight * 2 + borderThickness * 4,
+        width = tabWidth,
+        height = tabHeight,
+        visual = ColorVisual(173, 208, 75).apply {
+            style.borderRadius = BorderRadius(15.0)
+        }
+    ). apply {
+        onMouseClicked = {
+            wildlifeScorePane.isVisible = false
+            wildlifeScoreTabOverlay.isVisible = false
+            habitatScorePane.isVisible = true
+            habitatScoreTabOverlay.isVisible = true
+            mainScorePane.isVisible = false
+            mainScoreTabOverlay.isVisible = false
+        }
+    }
+
+    private val habitatScoreTabOverlay = Label (
+        posX = paneX + paneWidth,
+        posY = paneY + tabHeight * 2 + borderThickness * 4,
+        width = borderThickness,
+        height = tabHeight,
+        visual = ColorVisual(173, 208, 75)
+    ).apply {
+        isVisible = false
+    }
+
+    private val habitatTabBorder = Label(
+        posX = habitatScoreTab.posX - borderThickness,
+        posY = habitatScoreTab.posY - borderThickness,
+        width = tabWidth + borderThickness*2,
+        height = tabHeight + borderThickness*2,
+        visual = ColorVisual(255, 255, 255).apply{
+            style.borderRadius = BorderRadius(15)
+        }
+    )
+
+    //
+    // Components for the mainScorePane
+    //
+
+    private val firstPlaceName = Label(
+        posX = 80,
+        posY = 150,
+        width = 540,
+        height = 68,
+        font = Font(size = 30),
+        visual = ColorVisual(181, 181, 181).apply {
+            style.borderRadius = BorderRadius(34)
+        }
+    )
+
+    private val secondPlaceName = Label(
+        posX = 80,
+        posY = 240,
+        width = 540,
+        height = 68,
+        font = Font(size = 30),
+        visual = ColorVisual(181, 181, 181).apply {
+            style.borderRadius = BorderRadius(34)
+        }
+    )
+
+    private val thirdPlaceName = Label(
+        posX = 80,
+        posY = 330,
+        width = 540,
+        height = 68,
+        font = Font(size = 30),
+        visual = ColorVisual(181, 181, 181).apply {
+            style.borderRadius = BorderRadius(34)
+        }
+    )
+
+    private val fourthPlaceName = Label(
+        posX = 80,
+        posY = 420,
+        width = 540,
+        height = 68,
+        font = Font(size = 30),
+        visual = ColorVisual(181, 181, 181).apply {
+            style.borderRadius = BorderRadius(34)
+        }
+    )
+
+    private val firstPlaceScoreTotal = Label(
+        posX = 660,
+        posY = 150,
+        width = 68,
+        height = 68,
+        font = Font(size = 30),
+        visual = ColorVisual(181, 181, 181).apply {
+            style.borderRadius = BorderRadius(34)
+        }
+    )
+
+    private val secondPlaceScoreTotal = Label(
+        posX = 660,
+        posY = 240,
+        width = 68,
+        height = 68,
+        font = Font(size = 30),
+        visual = ColorVisual(181, 181, 181).apply {
+            style.borderRadius = BorderRadius(34)
+        }
+    )
+
+    private val thirdPlaceScoreTotal = Label(
+        posX = 660,
+        posY = 330,
+        width = 68,
+        height = 68,
+        font = Font(size = 30),
+        visual = ColorVisual(181, 181, 181).apply {
+            style.borderRadius = BorderRadius(34)
+        }
+    )
+
+    private val fourthPlaceScoreTotal = Label(
+        posX = 660,
+        posY = 420,
+        width = 68,
+        height = 68,
+        font = Font(size = 30),
+        visual = ColorVisual(181, 181, 181).apply {
+            style.borderRadius = BorderRadius(34)
+        }
+    )
+
+    val exitButton = Button(
+        width = 280,
+        height = 70,
+        posX = 80,
+        posY = 570,
+        text = "Exit",
+        font = Font(size = 30),
+        visual = ColorVisual(181, 181, 181).apply {
+            style.borderRadius = BorderRadius(10.0)
+        }
+    )
+
+    val newGameButton = Button(
+        width = 280,
+        height = 70,
+        posX = paneWidth-280-80,
+        posY = 570,
+        text = "New Game",
+        font = Font(size = 30),
+        visual = ColorVisual(181, 181, 181).apply {
+            style.borderRadius = BorderRadius(10.0)
+        }
+    )
+
+    //
+    // Components for the wildlife and habitatScorePane
+    //
+
+    private val spacing = 10
+    private val entryWidth = 85
+    private val entryHeight = 60
+
+    private val wildlifeTableTopHalf = GridPane<Label>(
+        posX = paneWidth/2 - (5*entryWidth + 4*spacing)/2,
+        posY = paneHeight/2 - (7*entryHeight + 6*spacing)/2,
+        rows = 5,
+        columns = 5,
+        spacing = spacing,
+        layoutFromCenter = false
+    )
+
+    private val wildlifeTableBottomHalf = GridPane<Label>(
+        posX = paneWidth/2 - (5*entryWidth + 4*spacing)/2,
+        posY = wildlifeTableTopHalf.posY + 5*entryHeight + 5*spacing,
+        rows = 2,
+        columns = 5,
+        spacing = spacing,
+        layoutFromCenter = false
+    )
+
+    private val habitatTableTopHalf = GridPane<Label>(
+        posX = paneWidth/2 - (5*entryWidth + 4*spacing)/2,
+        posY = paneHeight/2 - (8*entryHeight + 7*spacing)/2,
+        rows = 5,
+        columns = 5,
+        spacing = spacing,
+        layoutFromCenter = false
+    )
+
+    private val habitatTableBottomHalf = GridPane<Label>(
+        posX = paneWidth/2 - (5*entryWidth + 4*spacing)/2,
+        posY = habitatTableTopHalf.posY + 5*entryHeight + 5*spacing,
+        rows = 3,
+        columns = 5,
+        spacing = spacing,
+        layoutFromCenter = false
+    )
+
+    init {
+        addComponents(
+            backgroundImage,
+            mainTabBorder,
+            wildlifeTabBorder,
+            habitatTabBorder,
+            wildlifeScoreTab,
+            habitatScoreTab,
+            mainScoreTab,
+            paneBorder,
+            mainScorePane,
+            wildlifeScorePane,
+            habitatScorePane,
+            mainScoreTabOverlay,
+            wildlifeScoreTabOverlay,
+            habitatScoreTabOverlay
+        )
+        mainScorePane.addAll(
+            firstPlaceName,
+            secondPlaceName,
+            thirdPlaceName,
+            fourthPlaceName,
+            firstPlaceScoreTotal,
+            secondPlaceScoreTotal,
+            thirdPlaceScoreTotal,
+            fourthPlaceScoreTotal,
+            newGameButton,
+            exitButton,
+        )
+        wildlifeScorePane.addAll(
+            wildlifeTableTopHalf,
+            wildlifeTableBottomHalf,
+        )
+        habitatScorePane.addAll(
+            habitatTableTopHalf,
+            habitatTableBottomHalf
+        )
+    }
+
+    override fun refreshAfterStartGame() {
+        //clear all information that may still be saved from a previous round. Name and Score labes will be made visible
+        //and rewritten as needed
+        habitatTableTopHalf.clear()
+        habitatTableBottomHalf.clear()
+        wildlifeTableTopHalf.clear()
+        wildlifeTableBottomHalf.clear()
+        firstPlaceName.isVisible = false
+        secondPlaceName.isVisible = false
+        thirdPlaceName.isVisible = false
+        fourthPlaceName.isVisible = false
+        firstPlaceScoreTotal.isVisible = false
+        secondPlaceScoreTotal.isVisible = false
+        thirdPlaceScoreTotal.isVisible = false
+        fourthPlaceScoreTotal.isVisible = false
+
+        habitatTableTopHalf[0, 0] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            text = "👤"
+        )
+        habitatTableTopHalf[0, 1] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("tile1.png")
+        )
+        habitatTableTopHalf[0, 2] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("tile1.png")
+        )
+        habitatTableTopHalf[0, 3] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("tile1.png")
+        )
+        habitatTableTopHalf[0, 4] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("tile1.png")
+        )
+        habitatTableBottomHalf[0, 0] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("tile1.png")
+        )
+        habitatTableBottomHalf[0, 1] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            text = "H"
+        )
+        habitatTableBottomHalf[0, 2] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("pinecone.png")
+        )
+
+        wildlifeTableTopHalf[0, 0] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            text = "👤"
+        )
+        habitatTableTopHalf[0, 1] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("bear.png")
+        )
+        habitatTableTopHalf[0, 2] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("elk.png")
+        )
+        habitatTableTopHalf[0, 3] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("salmon.png")
+        )
+        habitatTableTopHalf[0, 4] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("eagle.png")
+        )
+        habitatTableBottomHalf[0, 0] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("fox.png")
+        )
+        habitatTableBottomHalf[0, 1] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            text = "W"
+        )
+    }
+
+    override fun refreshAfterEndGame(scores: List<Pair<String, List<Int>>>) {
+
+        habitatTableTopHalf[0, 0] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            text = "👤",
+            visual = ColorVisual(153, 172, 255)
+        )
+        habitatTableTopHalf[0, 1] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("tile1.png", entryWidth, entryHeight)
+        )
+        habitatTableTopHalf[0, 2] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("tile1.png", entryWidth, entryHeight)
+        )
+        habitatTableTopHalf[0, 3] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("tile1.png", entryWidth, entryHeight)
+        )
+        habitatTableTopHalf[0, 4] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("tile1.png", entryWidth, entryHeight)
+        )
+        habitatTableBottomHalf[0, 0] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("tile1.png", entryWidth, entryHeight)
+        )
+        habitatTableBottomHalf[0, 1] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            text = "H",
+            visual = ColorVisual(153, 172, 255)
+        )
+        habitatTableBottomHalf[0, 2] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("pinecone.png", entryWidth, entryHeight, offsetX = -15)
+        )
+
+        wildlifeTableTopHalf[0, 0] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            text = "👤",
+            visual = ColorVisual(153, 172, 255)
+        )
+        wildlifeTableTopHalf[0, 1] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("bear.png", entryWidth, entryHeight, offsetX = -15)
+        )
+        wildlifeTableTopHalf[0, 2] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("elk.png", entryWidth, entryHeight, offsetX = -15)
+        )
+        wildlifeTableTopHalf[0, 3] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("salmon.png", entryWidth, entryHeight, offsetX = -15)
+        )
+        wildlifeTableTopHalf[0, 4] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("hawk.png", entryWidth, entryHeight, offsetX = -15)
+        )
+        wildlifeTableBottomHalf[0, 0] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ImageVisual("fox.png", entryWidth, entryHeight, offsetX = -15)
+        )
+        wildlifeTableBottomHalf[0, 1] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            text = "W",
+            visual = ColorVisual(153, 172, 255)
+        )
+
+        val playersTotalScore: MutableList<Pair<String, Int>> = mutableListOf()
+
+        for (i in 0..3) {
+
+            var totalScore = 0
+
+            wildlifeTableTopHalf[i+1, 0] = Label (
+                width = entryWidth,
+                height = entryHeight,
+                text = if (i in scores.indices) scores[i].first else "",
+                visual = ColorVisual(153, 172, 255)
+            )
+
+            var wildlifeSum = 0
+            for (j in 0..4) {
+                val score = Label(
+                    width = entryWidth,
+                    height = entryHeight,
+                    text = if (i in scores.indices) "" + scores[i].second[j] else "",
+                    visual = ColorVisual(181, 181, 181)
+                )
+                when (j) {
+                    4 -> wildlifeTableBottomHalf[i+1, 0] = score
+                    else -> wildlifeTableTopHalf[i+1, j+1] = score
+                }
+                if (i in scores.indices) {
+                    wildlifeSum += scores[i].second[j]
+                }
+            }
+
+            totalScore += wildlifeSum
+
+            wildlifeTableBottomHalf[i+1, 1] = Label(
+                width = entryWidth,
+                height = entryHeight,
+                text = if (i in scores.indices) "" + wildlifeSum else "",
+                visual = ColorVisual(181, 181, 181)
+            )
+
+            habitatTableTopHalf[i+1, 0] = Label (
+                width = entryWidth,
+                height = entryHeight,
+                text = if (i in scores.indices) scores[i].first else "",
+                visual = ColorVisual(153, 172, 255)
+            )
+
+            var habitatSum = 0
+            for (j in 5..9) {
+                val score = Label(
+                    width = entryWidth,
+                    height = entryHeight,
+                    text = if (i in scores.indices) "" + scores[i].second[j] + " | " + scores[i].second[j+5] else "",
+                    visual = ColorVisual(181, 181, 181)
+                )
+                when(j) {
+                    9 -> habitatTableBottomHalf[i+1, 0] = score
+                    else -> habitatTableTopHalf[i+1, j+1-5] = score
+                }
+                if (i in scores.indices) {
+                    habitatSum += scores[i].second[j] + scores[i].second[j+5]
+                }
+            }
+
+            totalScore += habitatSum
+
+            habitatTableBottomHalf[i+1, 1] = Label(
+                width = entryWidth,
+                height = entryHeight,
+                text = if (i in scores.indices) "" + habitatSum else "",
+                visual = ColorVisual(181, 181, 181)
+            )
+            // left over natureTokens
+            habitatTableBottomHalf[i+1, 2] = Label(
+                width = entryWidth,
+                height = entryHeight,
+                text = if (i in scores.indices) "" + scores[i].second[15] else "",
+                visual = ColorVisual(181, 181, 181)
+            )
+            if (i in scores.indices) {
+                totalScore += scores[i].second[15]
+                playersTotalScore.add(Pair(scores[i].first, totalScore))
+            }
+        }
+        setMainScores(playersTotalScore)
+    }
+
+    private fun setMainScores(playersAndScores: List<Pair<String, Int>>) {
+
+        playersAndScores.sortedByDescending{it.second}
+
+        firstPlaceScoreTotal.apply {
+            isVisible = true
+            text = "" + playersAndScores[0].second
+            visual = ColorVisual(255, 207, 0).apply {
+                style.borderRadius = BorderRadius(34)
+            }
+        }
+        firstPlaceName.apply {
+            isVisible = true
+            text = playersAndScores[0].first
+            visual = ColorVisual(255, 207, 0).apply {
+                style.borderRadius = BorderRadius(34)
+            }
+        }
+
+        secondPlaceScoreTotal.apply {
+            isVisible = true
+            text = "" + playersAndScores[1].second
+            if(playersAndScores[1].second == playersAndScores[0].second) {
+                visual =  ColorVisual(255, 207, 0).apply {
+                    style.borderRadius = BorderRadius(34)
+                }
+            }
+        }
+        secondPlaceName.apply {
+            isVisible = true
+            text = playersAndScores[1].first
+            if(playersAndScores[1].second == playersAndScores[0].second) {
+                visual =  ColorVisual(255, 207, 0).apply {
+                    style.borderRadius = BorderRadius(34)
+                }
+            }
+        }
+
+        if(playersAndScores.size > 2) {
+            thirdPlaceScoreTotal.apply {
+                isVisible = true
+                text = "" + playersAndScores[2].second
+                if(playersAndScores[2].second == playersAndScores[0].second) {
+                    visual =  ColorVisual(255, 207, 0).apply {
+                        style.borderRadius = BorderRadius(34)
+                    }
+                }
+            }
+            thirdPlaceName.apply {
+                isVisible = true
+                text = playersAndScores[2].first
+                if(playersAndScores[2].second == playersAndScores[0].second) {
+                    visual =  ColorVisual(255, 207, 0).apply {
+                        style.borderRadius = BorderRadius(34)
+                    }
+                }
+            }
+        }
+
+        if(playersAndScores.size > 3) {
+            fourthPlaceScoreTotal.apply {
+                isVisible = true
+                text = "" + playersAndScores[3].second
+
+                if(playersAndScores[3].second == playersAndScores[0].second) {
+                    visual =  ColorVisual(255, 207, 0).apply {
+                        style.borderRadius = BorderRadius(34)
+                    }
+                }
+            }
+            fourthPlaceName.apply {
+                isVisible = true
+                text = playersAndScores[3].first
+                if(playersAndScores[3].second == playersAndScores[0].second) {
+                    visual =  ColorVisual(255, 207, 0).apply {
+                        style.borderRadius = BorderRadius(34)
+                    }
+                }
+            }
+        }
+    }
+}
