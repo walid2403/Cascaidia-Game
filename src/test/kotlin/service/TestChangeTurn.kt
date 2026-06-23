@@ -105,6 +105,10 @@ class TestChangeTurn {
             "Falscher Spieler an der Reihe")
         assertEquals(3, currentGame.playerQueue.size,
             "Spieler verloren gegangen")
+        assertEquals(0, rootService.history.undoneMoves.size,
+            "Rückgängig gemachte Züge nicht gelöscht")
+        assertEquals(2, rootService.history.prevMoves.size,
+            "Game nicht auf dem Stack abgelegt")
     }
 
     /**
@@ -147,6 +151,10 @@ class TestChangeTurn {
             "Falscher Spieler an der Reihe")
         assertEquals(3, currentGame.playerQueue.size,
             "Spieler verloren gegangen")
+        assertEquals(0, rootService.history.undoneMoves.size,
+            "Rückgängig gemachte Züge nicht gelöscht")
+        assertEquals(2, rootService.history.prevMoves.size,
+            "Game nicht auf dem Stack abgelegt")
     }
 
     /**
@@ -219,6 +227,24 @@ class TestChangeTurn {
             }
             assertFailsWith<IllegalStateException>("Falscher GameState zugelassen")
             { rootService.gameService.changeTurn() }
+            assertEquals(8, currentGame.removedTokens.size,
+                "Removed Tokens trotz Fehler entfernt")
+            assertEquals(3, currentGame.playerQueue.size,
+                "Spieler verloren gegangen")
+            assertEquals(state,currentGame.gameState,
+                "GameState geändert")
         }
+    }
+
+    /**
+     * Überprüft Fälle für Zeilen Abdeckung
+     */
+    @Test
+    fun `line coverage Tests`() {
+        val currentGame = rootService.currentGame
+        assertNotNull(currentGame)
+        rootService.currentGame = null
+        assertFailsWith<IllegalStateException>("Ohne Spiel ausgeführt")
+        { rootService.gameService.changeTurn() }
     }
 }
