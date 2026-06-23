@@ -81,7 +81,35 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * @throws IllegalStateException if the [GameState] is not `MADE_CHOICE`.
      */
     fun rotateTile(right: Boolean) {
+        val game = rootService.currentGame ?: error("No current game")
 
+        check(game.gameState == GameState.MADE_CHOICE) {
+            "Tile can only be rotated after a choice was made."
+        }
+
+        val tileIndex = game.selectedChoice.first
+
+        require(tileIndex in game.choices.indices) {
+            "No valid tile was selected."
+        }
+
+        val selectedTile = game.choices[tileIndex].first
+
+        if (right) {
+            selectedTile.rotation = (selectedTile.rotation + 1) % 6
+
+            if (selectedTile.habs.isNotEmpty()) {
+                val lastHabitat = selectedTile.habs.removeAt(selectedTile.habs.lastIndex)
+                selectedTile.habs.add(0, lastHabitat)
+            }
+        } else {
+            selectedTile.rotation = (selectedTile.rotation + 5) % 6
+
+            if (selectedTile.habs.isNotEmpty()) {
+                val firstHabitat = selectedTile.habs.removeAt(0)
+                selectedTile.habs.add(firstHabitat)
+            }
+        }
     }
 
     /**
