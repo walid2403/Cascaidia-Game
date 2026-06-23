@@ -93,6 +93,17 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
             }
     )
 
+    private val joinButton = Button(
+        width = 100, height = 60,
+        posX = 1920/2 + 230, posY = 1080/2 + 215,
+        text = "Join",
+        font = Font( size = 20,fontWeight = Font.FontWeight.BOLD)).apply {
+        visual = ColorVisual(color = Color(0x99acff)).apply { style.borderRadius = BorderRadius(8) }
+        onMouseClicked = {
+//            app.showMenuScene(JoinOnlineLobbyScene(app,rootService))
+        }
+    }
+
 
 
 
@@ -105,6 +116,7 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
             p4Input,
             name,
             lobbyCode,
+            joinButton,
         )
     }
 }

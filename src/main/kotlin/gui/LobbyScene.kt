@@ -360,7 +360,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         text = "Add Player",
         font = Font(
             size = 50,
-            color = Color(0x000000),
+            color = Color(0xFFFFFF),
             family = "Canva Sans",
             fontWeight = Font.FontWeight.BOLD)
     )
