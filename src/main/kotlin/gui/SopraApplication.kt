@@ -21,18 +21,9 @@ class SopraApplication : BoardGameApplication("SoPra Game") {
     private val helloScene = GameScene(rootService)
 
 
-    private val mainMenuScene = MainMenuScene(this@SopraApplication,rootService).apply {
-    }
+    private val mainMenuScene = MainMenuScene(this@SopraApplication,rootService)
 
-    private val scoreScene = ScoreScene().apply {
-        exitButton.onMouseClicked = {
-            exit()
-        }
-
-        newGameButton.onMouseClicked = {
-            this@SopraApplication.showMenuScene(mainMenuScene)
-        }
-    }
+    private val scoreScene = ScoreScene(this@SopraApplication, rootService)
 
     private val joinOnlineLobbyScene = JoinOnlineLobbyScene(this@SopraApplication, rootService)
 
@@ -43,7 +34,7 @@ class SopraApplication : BoardGameApplication("SoPra Game") {
      */
     init {
         this.showGameScene(helloScene)
-        this.showMenuScene(mainMenuScene)
+        this.showMenuScene(joinOnlineLobbyScene)
         //this.showMenuScene(scoreScene)
     }
 }

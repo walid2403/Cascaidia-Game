@@ -1,6 +1,7 @@
 package gui
 
 import service.Refreshable
+import service.RootService
 import tools.aqua.bgw.components.StaticComponentView
 import tools.aqua.bgw.components.layoutviews.Pane
 import tools.aqua.bgw.components.uicomponents.Button
@@ -12,7 +13,7 @@ import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 import tools.aqua.bgw.components.layoutviews.GridPane
 
-class ScoreScene : MenuScene(1920, 1080), Refreshable {
+class ScoreScene(private val app: SopraApplication,private val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
 
     private val sceneWidth = 1920
     private val sceneHeight = 1080
@@ -110,9 +111,9 @@ class ScoreScene : MenuScene(1920, 1080), Refreshable {
                 scoresUpdated = true
                 fillScoreLists()
                 testList1.add(Pair("a", scoreList))
-                testList1.add(Pair("b", scoreList2))
-                //testList1.add(Pair("c", scoreList3))
-                //testList1.add(Pair("d", scoreList4))
+                //testList1.add(Pair("b", scoreList2))
+                testList1.add(Pair("c", scoreList3))
+                testList1.add(Pair("d", scoreList4))
                 refreshAfterEndGame(testList1)
             }
         }
@@ -392,7 +393,11 @@ class ScoreScene : MenuScene(1920, 1080), Refreshable {
         visual = ColorVisual(181, 181, 181).apply {
             style.borderRadius = BorderRadius(10.0)
         }
-    )
+    ).apply {
+        onMouseClicked = {
+            app.exit()
+        }
+    }
 
     val newGameButton = Button(
         width = 280,
@@ -404,7 +409,11 @@ class ScoreScene : MenuScene(1920, 1080), Refreshable {
         visual = ColorVisual(181, 181, 181).apply {
             style.borderRadius = BorderRadius(10.0)
         }
-    )
+    ).apply {
+        onMouseClicked = {
+            app.showMenuScene(MainMenuScene(app, rootService))
+        }
+    }
 
     //
     // Components for the wildlife and habitatScorePane
@@ -511,27 +520,27 @@ class ScoreScene : MenuScene(1920, 1080), Refreshable {
             text = "👤"
         )
         habitatTableTopHalf[0, 1] = Label (
-            width = entryWidth,
+            width = entryHeight,
             height = entryHeight,
             visual = ImageVisual("tile1.png")
         )
         habitatTableTopHalf[0, 2] = Label (
-            width = entryWidth,
+            width = entryHeight,
             height = entryHeight,
             visual = ImageVisual("tile1.png")
         )
         habitatTableTopHalf[0, 3] = Label (
-            width = entryWidth,
+            width = entryHeight,
             height = entryHeight,
             visual = ImageVisual("tile1.png")
         )
         habitatTableTopHalf[0, 4] = Label (
-            width = entryWidth,
+            width = entryHeight,
             height = entryHeight,
             visual = ImageVisual("tile1.png")
         )
         habitatTableBottomHalf[0, 0] = Label (
-            width = entryWidth,
+            width = entryHeight,
             height = entryHeight,
             visual = ImageVisual("tile1.png")
         )
@@ -668,7 +677,7 @@ class ScoreScene : MenuScene(1920, 1080), Refreshable {
 
         val playersTotalScore: MutableList<Pair<String, Int>> = mutableListOf()
 
-        for (i in 0..3) {
+        for (i in scores.indices) {
 
             var totalScore = 0
 
@@ -752,9 +761,9 @@ class ScoreScene : MenuScene(1920, 1080), Refreshable {
         setMainScores(playersTotalScore)
     }
 
-    private fun setMainScores(playersAndScores: List<Pair<String, Int>>) {
+    private fun setMainScores(playersAndScores2: List<Pair<String, Int>>) {
 
-        playersAndScores.sortedByDescending{it.second}
+        val playersAndScores = playersAndScores2.sortedByDescending{it.second}
 
         firstPlaceScoreTotal.apply {
             isVisible = true
