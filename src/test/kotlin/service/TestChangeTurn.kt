@@ -185,7 +185,7 @@ class TestChangeTurn {
         assertEquals(3, currentGame.playerQueue.size,
             "Spieler verloren gegangen")
 
-
+        currentGame.gameState = GameState.END_OF_TURN
         currentGame.tileStack.push(Tile(100,mutableListOf(), emptyList()))
         currentGame.wildlifeTokens.clear()
         currentGame.removedTokens.clear()
@@ -200,6 +200,7 @@ class TestChangeTurn {
         assertEquals(3, currentGame.playerQueue.size,
             "Spieler verloren gegangen")
 
+        currentGame.gameState = GameState.END_OF_TURN
         currentGame.wildlifeTokens.pushAll(List(12) { WildlifeToken.BEAR })
 
         rootService.gameService.changeTurn()
@@ -246,5 +247,48 @@ class TestChangeTurn {
         rootService.currentGame = null
         assertFailsWith<IllegalStateException>("Ohne Spiel ausgeführt")
         { rootService.gameService.changeTurn() }
+
+
+        rootService.currentGame = currentGame
+        currentGame.playerQueue.clear()
+        currentGame.playerQueue.add(Player("test", PlayerType.EASY_BOT))
+        rootService.gameService.changeTurn()
+        assertEquals(1,rootService.history.prevMoves.size,
+            "Bot Zug auf Stack gespeichert")
+
+        val newGame = CascadiaGame(List(5) { true }, false)
+        val tileStack = mutableListOf<Tile>()
+        val habitats = MutableList(6) { Habitates.MOUNTAINS }
+        for (i in 0 until 5) {
+            tileStack.add(Tile(i,habitats,emptyList()))
+        }
+        newGame.tileStack.pushAll(tileStack)
+        newGame.natureTokens = 10
+        val choices = mutableListOf<Pair<Tile, WildlifeToken>>()
+        for (i in 0 until 4) {
+            val pair = Pair(Tile(10+i,habitats,emptyList()),
+                WildlifeToken.BEAR)
+            choices.add(pair)
+        }
+        newGame.choices += choices
+        newGame.selectedChoice = Pair(0,1)
+        newGame.gameState = GameState.END_OF_TURN
+        val players = mutableListOf<Player>()
+        for (i in 0 until 3) {
+            val player = Player("player$i", PlayerType.HUMAN)
+            players.add(player)
+        }
+        newGame.playerQueue.addAll(players)
+        val removedTokens = MutableList(8) { WildlifeToken.HAWK }
+        newGame.removedTokens.addAll(removedTokens)
+        val wildlifeTokens = List(6) { WildlifeToken.SALMON }
+        newGame.wildlifeTokens.pushAll(wildlifeTokens)
+
+        rootService.currentGame = newGame
+        rootService.history.prevMoves.clear()
+        rootService.history.prevMoves.push(currentGame)
+        rootService.gameService.changeTurn()
+        assertEquals(1,rootService.history.prevMoves.size,
+            "Bot Zug auf Stack gespeichert")
     }
 }
