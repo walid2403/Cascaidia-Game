@@ -8,7 +8,6 @@ import tools.aqua.bgw.components.layoutviews.Pane
 import tools.aqua.bgw.components.uicomponents.Button
 import tools.aqua.bgw.components.uicomponents.CheckBox
 import tools.aqua.bgw.components.uicomponents.Label
-import tools.aqua.bgw.components.uicomponents.TextField
 import tools.aqua.bgw.components.uicomponents.UIComponent
 import tools.aqua.bgw.core.Alignment
 import tools.aqua.bgw.core.BoardGameApplication.Companion.runOnGUIThread
@@ -33,7 +32,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         posX = 635, posY = 230,
         width = 750.0, height = 620.0
     ).apply {
-        visual = ColorVisual(64, 98, 70).apply { style.borderRadius = BorderRadius(8) }
+        visual = ColorVisual(64, 98, 70).apply { style.borderRadius = BorderRadius(35) }
 
     }
 
@@ -41,79 +40,55 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         posX = 635, posY = 230,
         width = 750.0, height = 620.0
     ).apply {
-        visual = ColorVisual(160, 150, 210).apply { style.borderRadius = BorderRadius(8) }
+        visual = ColorVisual(160, 150, 210).apply { style.borderRadius = BorderRadius(35) }
     }
 
 
-    // type inference fails here, so explicit  ": TextField" is required
-    // see https://discuss.kotlinlang.org/t/unexpected-type-checking-recursive-problem/6203/14
-    private val p1Input: TextField = TextField(
+
+    private val p1Input = Label(
         width = 400, height = 50,
         posX = 750/2 - 200, posY = 620/2 - 100,
-        prompt = "Player 1",
+        text = "Player 1",
         font = Font(size = 28)
 
     ).apply {
         visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
-        onTextChanged ={
-            //startButton.isDisabled = !(this.text.trim().isNotEmpty() && p2Input.text.trim().isNotEmpty())
-            if (this.text.isBlank()){
-                this.prompt = "\uD83D\uDC64 Player 1"
-            }
-        }
     }
 
-    // type inference fails here, so explicit  ": TextField" is required
-    // see https://discuss.kotlinlang.org/t/unexpected-type-checking-recursive-problem/6203/14
-    private val p2Input: TextField = TextField(
+
+
+    private val p2Input = Label(
         width = 400, height = 50,
         posX = 750/2 - 200, posY = 620/2 - 15,
-        prompt = "\uD83D\uDC64 Player 2",
+        text = " Player 2",
         font = Font(size = 28)
     ).apply {
         visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
-        onTextChanged = {
-            //startButton.isDisabled = !(p1Input.text.trim().isNotEmpty() && this.text.trim().isNotEmpty())
-            if (this.text.isBlank()) {
-                this.prompt = "Player 2"
-            }
-        }
+
     }
 
-    // type inference fails here, so explicit  ": TextField" is required
-    // see https://discuss.kotlinlang.org/t/unexpected-type-checking-recursive-problem/6203/14
-    private val p3Input: TextField = TextField(
+
+
+    private val p3Input = Label(
         width = 400, height = 50,
         posX = 750/2 - 200, posY = 620/2 + 70,
-        prompt = "+",
+        text = "",
         font = Font(size = 28)
     ).apply {
         visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
-        onTextChanged ={
-            //wenn nichts in den ersten beiden Feldern drin steht, dann funktioniert der Start Button nicht
-            //startButton.isDisabled = !(p1Input.text.trim().isNotEmpty() && p2Input.text.trim().isNotEmpty())
-            if (this.text.isBlank()){
-                this.prompt = "+"
-            }
-        }
     }
 
-    // type inference fails here, so explicit  ": TextField" is required
-    // see https://discuss.kotlinlang.org/t/unexpected-type-checking-recursive-problem/6203/14
-    private val p4Input: TextField = TextField(
+
+
+
+    private val p4Input = Label(
         width = 400, height = 50,
         posX = 750/2 - 200, posY = 620/2 + 155,
-        prompt = "+",
+        text = "",
         font = Font(size = 28)
     ).apply {
         visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
 
-        onTextChanged ={
-            //startButton.isDisabled = !(p1Input.text.trim().isNotEmpty() && p2Input.text.trim().isNotEmpty())
-            if (this.text.isBlank()){
-                this.prompt = "+"
-            }
-        }
     }
 
     private val salmon = Label(
@@ -133,6 +108,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
             salmonCardB.isVisible = true
             hawkCardA.isVisible = false
             hawkCardB.isVisible = false
+            salmonCardA.resize(183, 397)
+            salmonCardB.resize(183, 397)
         }
     }
 
@@ -154,6 +131,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
             salmonCardB.isVisible = false
             hawkCardA.isVisible = true
             hawkCardB.isVisible = true
+            hawkCardA.resize(183, 397)
+            hawkCardB.resize(183, 397)
         }
     }
 
@@ -175,6 +154,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
             salmonCardB.isVisible = false
             hawkCardA.isVisible = false
             hawkCardB.isVisible = false
+            foxCardA.resize(183, 397)
+            foxCardB.resize(183, 397)
         }
     }
 
@@ -197,7 +178,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
             salmonCardB.isVisible = false
             hawkCardA.isVisible = false
             hawkCardB.isVisible = false
-
+            elkCardA.resize(209, 403)
+            elkCardB.resize(209, 403)
         }
     }
 
@@ -225,7 +207,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
     private val bearCardA = Label(
         width = 207, height = 394,
-        posX = 100, posY = 200,
+        posX = 230, posY = 200,
     ).apply {
         visual = ImageVisual("Scoring_Bear_A.png")
         isVisible = false
@@ -233,7 +215,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
     private val bearCardB = Label(
         width = 207, height = 394,
-        posX = 430, posY = 200,
+        posX = 490, posY = 200,
 
     ).apply {
         visual = ImageVisual("Scoring_Bear_B.png")
@@ -243,7 +225,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
     private val elkCardA = Label(
         width = 262, height = 504,
-        posX = 100, posY = 200,
+        posX =  230, posY = 200,
     ).apply {
         visual = ImageVisual("Scoring_Elk_A.png")
         isVisible = false
@@ -251,7 +233,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
     private val elkCardB = Label(
         width = 262, height = 504,
-        posX = 430, posY = 200,
+        posX = 490, posY = 200,
 
         ).apply {
         visual = ImageVisual("Scoring_Elk_B.png")
@@ -260,16 +242,16 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
 
     private val foxCardA = Label(
-        width = 229, height = 497,
-        posX = 100, posY = 200,
+        width = 183, height = 383,
+        posX =  230, posY = 200,
     ).apply {
-        visual = ImageVisual("Scoring_Fox_A.png")
+        visual = ImageVisual(path = "Scoring_Fox_A.png")
         isVisible = false
     }
 
     private val foxCardB = Label(
         width = 229, height = 497,
-        posX = 430, posY = 200,
+        posX = 490, posY = 200,
 
         ).apply {
         visual = ImageVisual("Scoring_Fox_B.png")
@@ -279,7 +261,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
     private val hawkCardA = Label(
         width = 229, height = 497,
-        posX = 100, posY = 200,
+        posX =  230, posY = 200,
     ).apply {
         visual = ImageVisual("Scoring_Hawk_A.png")
         isVisible = false
@@ -287,7 +269,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
     private val hawkCardB = Label(
         width = 229, height = 497,
-        posX = 430, posY = 200,
+        posX = 490, posY = 200,
 
         ).apply {
         visual = ImageVisual("Scoring_Hawk_B.png")
@@ -296,7 +278,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
     private val salmonCardA = Label(
         width = 229, height = 497,
-        posX = 100, posY = 200,
+        posX =  230, posY = 200,
     ).apply {
         visual = ImageVisual("Scoring_Salmon_A.png")
         isVisible = false
@@ -304,7 +286,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
     private val salmonCardB = Label(
         width = 229, height = 497,
-        posX = 430, posY = 200,
+        posX = 490, posY = 200,
 
         ).apply {
         visual = ImageVisual("Scoring_Salmon_B.png")
@@ -314,104 +296,176 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     val checkBoxSalmonA = CheckBox(
         posX = 90,
         posY = 100,
-        width = 250,
+        width = 30,
         height = 50,
         text = "A",
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
-    )
+    ).apply {
+        onMouseClicked ={
+            if (!isChecked){
+                checkBox("checkBoxSalmonA")
+            }
+        }
+    }
+
 
     val checkBoxSalmonB = CheckBox(
         posX = 90,
         posY = 140,
-        width = 250,
+        width = 30,
         height = 50,
         text = "B",
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
-    )
+    ).apply {
+        onMouseClicked ={
+            if (!isChecked){
+                checkBox("checkBoxSalmonB")
+            }
+        }
+    }
+
 
 
     val checkBoxHawkA = CheckBox(
         posX = 200,
         posY = 100,
-        width = 250,
+        width = 30,
         height = 50,
         text = "A",
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
-    )
+    ).apply {
+        onMouseClicked ={
+            if (!isChecked){
+                checkBox("checkBoxHawkA")
+            }
+        }
+    }
 
     val checkBoxHawkB = CheckBox(
         posX = 200,
         posY = 140,
-        width = 250,
+        width = 30,
         height = 50,
         text = "B",
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
-    )
+    ).apply {
+        onMouseClicked ={
+            if (!isChecked){
+                checkBox("checkBoxHawkB")
+            }
+        }
+
+    }
 
     val checkBoxBearA = CheckBox(
         posX = 530,
         posY = 100,
-        width = 250,
+        width = 30,
         height = 50,
         text = "A",
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
-    )
+    ).apply {
+        onMouseClicked ={
+            if (!isChecked){
+                checkBox("checkBoxBearA")
+            }
+        }
+
+    }
 
     val checkBoxBearB = CheckBox(
         posX = 530,
         posY = 140,
-        width = 250,
+        width = 30,
         height = 50,
         text = "B",
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
-    )
+    ).apply {
+        onMouseClicked ={
+            if (!isChecked){
+                checkBox("checkBoxBearB")
+            }
+        }
+
+    }
 
 
     val checkBoxFoxA = CheckBox(
         posX = 310,
         posY = 100,
-        width = 250,
+        width = 30,
         height = 50,
         text = "A",
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
-    )
+    ).apply {
+        onMouseClicked ={
+            if (!isChecked){
+                checkBox("checkBoxFoxA")
+            }
+        }
+
+    }
+
 
     val checkBoxFoxB = CheckBox(
         posX = 310,
         posY = 140,
-        width = 250,
+        width = 30,
         height = 50,
         text = "B",
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
-    )
+    ).apply {
+        onMouseClicked ={
+            if (!isChecked){
+                checkBox("checkBoxFoxB")
+            }
+        }
+
+    }
+
+
 
     val checkBoxElkA = CheckBox(
         posX = 420,
         posY = 100,
-        width = 250,
+        width = 30,
         height = 50,
         text = "A",
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
-    )
+    ).apply {
+        onMouseClicked ={
+            if (!isChecked){
+                checkBox("checkBoxElkA")
+            }
+        }
+
+    }
 
     val checkBoxElkB = CheckBox(
         posX = 420,
         posY = 140,
-        width = 250,
+        width = 30,
         height = 50,
         text = "B",
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
-    )
+    ).apply {
+        onMouseClicked ={
+            if (!isChecked){
+                checkBox("checkBoxElkB")
+            }
+        }
+
+    }
 
 
     private val human = Label(
@@ -450,13 +504,20 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
 
 
-
-
-    private val toggleButton = Button(
-        posX = 1377, posY = 770,
-        width = 80.0, height = 80.0,
-        text = "→",
+    private val arrowLabel = Label(
+        posX = 1327, posY = 720,
+        width = 158.0, height = 130.0,
+        text = "",
         font = Font(size = 22, color = Color.BLACK)
+    ).apply {
+        visual = ColorVisual(160, 150, 210).apply { style.borderRadius = BorderRadius(15) }
+    }
+
+    private val arrowButton = Label(
+        posX = 1380, posY = 750,
+        width = 90.0, height = 90.0,
+        text = "→",
+        font = Font(size = 40, color = Color.BLACK)
     ).apply {
         visual = ColorVisual(160, 150, 210).apply { style.borderRadius = BorderRadius(8) }
         onMouseClicked = {
@@ -465,11 +526,23 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         }
     }
 
-    private val startButton = Button(
-        posX = 750 -8, posY = 620 - 80,
-        width = 80.0, height = 80.0,
-        text = "▶",
+
+    private val startLabel = Label(
+        posX = 700 -8, posY = 620 - 130,
+        width = 142.0, height = 130.0,
+        text = "",
         font = Font(size = 22, color = Color.BLACK)
+    ).apply {
+        visual = ColorVisual(160, 150, 210).apply { style.borderRadius = BorderRadius(15) }
+        this.isVisible = false
+    }
+
+
+    private val startButton = Label(
+        posX = 750 -8, posY = 620 - 100,
+        width = 80.0, height = 50.0,
+        text = "▶",
+        font = Font(size = 40, color = Color.BLACK)
     ).apply {
         visual = ColorVisual(160, 150, 210).apply { style.borderRadius = BorderRadius(8) }
         this.isVisible = false
@@ -483,21 +556,23 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
                 MovementAnimation( // bewegt das sidePanel
                     componentView = hostPanel,
                     fromX = hostPanel.actualPosX,
-                    toX = hostPanel.actualPosX - (hostPanel.width/2),
-                    duration = 500 // dauer
+                    toX = hostPanel.actualPosX - (hostPanel.width/2)+90,
+                    duration = 1000 // dauer
                 ),
                 MovementAnimation( // bewegt das sidePanel
                     componentView = sidePanel,
                     fromX = sidePanel.actualPosX,
-                    toX = sidePanel.actualPosX + (sidePanel.width/2),
-                    duration = 500 // dauer
+                    toX = sidePanel.actualPosX + (sidePanel.width/2)-90,
+                    duration = 1000 // dauer
                 ),
 
                 ).apply {
                 onFinished = {
                     runOnGUIThread {
-                        toggleButton.isVisible = false
+                        arrowButton.isVisible = false
                         startButton.isVisible = true
+                        arrowLabel.isVisible = false
+                        startLabel.isVisible = true
 
                     }
                 }
@@ -511,7 +586,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         listOf(p1Input,p2Input,p3Input,p4Input,
             human,player, exitButton).forEach { hostPanel.add(it) }
 
-        listOf(startButton, bear,elk,hawk,salmon,fox,
+        listOf(startLabel,startButton, bear,elk,hawk,salmon,fox,
             bearCardA,bearCardB,elkCardA,elkCardB,foxCardA,foxCardB,
             hawkCardA,hawkCardB,salmonCardA,salmonCardB,
             checkBoxHawkA,checkBoxHawkB, checkBoxElkA,checkBoxElkB,checkBoxBearA,checkBoxBearB,checkBoxFoxA,
@@ -523,7 +598,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         backgroundOpacity = .5
         addComponents(
             logo,
-            toggleButton,
+            arrowLabel,
+            arrowButton,
             sidePanel,
             hostPanel,
 
@@ -551,5 +627,23 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 //
 //    }
 
+    private fun checkBox(checkBox : String){
 
+        when (checkBox){
+            "checkBoxHawkA" -> checkBoxHawkB.isChecked = false
+            "checkBoxHawkB" -> checkBoxHawkA.isChecked = false
+
+            "checkBoxElkA" -> checkBoxElkB.isChecked = false
+            "checkBoxElkB" -> checkBoxElkA.isChecked = false
+
+            "checkBoxFoxA" -> checkBoxFoxB.isChecked = false
+            "checkBoxFoxB" -> checkBoxFoxA.isChecked = false
+
+            "checkBoxSalmonA" -> checkBoxSalmonB.isChecked = false
+            "checkBoxSalmonB" -> checkBoxSalmonA.isChecked = false
+
+            "checkBoxBearA" -> checkBoxBearB.isChecked = false
+            "checkBoxBearB" -> checkBoxBearA.isChecked = false
+        }
+    }
 }

@@ -37,6 +37,19 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
         }
     }
 
+
+    private val joinButton = Button(
+        width = 100, height = 60,
+        posX = 1920/2 + 230, posY = 1080/2 + 215,
+        text = "Join",
+        font = Font( size = 20,fontWeight = Font.FontWeight.BOLD)).apply {
+        visual = ColorVisual(color = Color(0x99acff)).apply { style.borderRadius = BorderRadius(8) }
+        isDisabled = true
+        onMouseClicked = {
+            app.showMenuScene(JoinOnlineLobbyScene(app,rootService))
+        }
+    }
+
     // type inference fails here, so explicit  ": TextField" is required
     // see https://discuss.kotlinlang.org/t/unexpected-type-checking-recursive-problem/6203/14
     private val p2Input: TextField = TextField(
@@ -46,6 +59,14 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
         font = Font(size = 28)
     ).apply {
         visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
+        onTextChanged = {
+            if (this.text.isBlank()) {
+                joinButton.isDisabled = true
+            } else {
+                joinButton.isDisabled = false
+            }
+
+        }
     }
 
     private val p4Input: TextField = TextField(
@@ -55,6 +76,15 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
         font = Font(size = 28)
     ).apply {
         visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
+        onTextChanged = {
+            if (this.text.isBlank()) {
+                joinButton.isDisabled = true
+            } else {
+                joinButton.isDisabled = false
+            }
+
+        }
+
     }
 
     private val name : Label  = Label(
@@ -93,16 +123,6 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
             }
     )
 
-    private val joinButton = Button(
-        width = 100, height = 60,
-        posX = 1920/2 + 230, posY = 1080/2 + 215,
-        text = "Join",
-        font = Font( size = 20,fontWeight = Font.FontWeight.BOLD)).apply {
-        visual = ColorVisual(color = Color(0x99acff)).apply { style.borderRadius = BorderRadius(8) }
-        onMouseClicked = {
-//            app.showMenuScene(JoinOnlineLobbyScene(app,rootService))
-        }
-    }
 
 
 
