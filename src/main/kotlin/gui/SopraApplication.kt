@@ -34,13 +34,17 @@ class SopraApplication : BoardGameApplication("SoPra Game") {
         }
     }
 
+    private val joinOnlineLobbyScene = JoinOnlineLobbyScene(this@SopraApplication, rootService)
+
+    private val hostOnlineLobbyScene = HostOnlineLobbyScene(this@SopraApplication, rootService)
+
     /**
      * Initializes the application by displaying the [HelloScene].
      */
     init {
         this.showGameScene(helloScene)
         this.showMenuScene(mainMenuScene)
+        //this.showMenuScene(scoreScene)
     }
-
 }
 
