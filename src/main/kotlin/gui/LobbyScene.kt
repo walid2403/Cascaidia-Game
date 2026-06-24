@@ -27,7 +27,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         posY = 0,
         width = 1920,
         height = 1080,
-        visual = ImageVisual("LobbyHintergrund.png")
+        visual = ImageVisual("ScoreSceneBackground.png")
 
     )
 

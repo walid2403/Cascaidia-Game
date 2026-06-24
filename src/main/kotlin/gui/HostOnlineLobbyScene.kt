@@ -25,7 +25,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         posY = 0,
         width = 1920,
         height = 1080,
-        visual = ImageVisual("LobbyHintergrund.png")
+        visual = ImageVisual("ScoreSceneBackground.png")
 
     )
     private val hostPanel = Pane<UIComponent>(
@@ -91,32 +91,9 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
     }
 
-    private val salmon = Label(
-        width = 60, height = 60,
-        posX = 90, posY = 45,
-        font = Font(size = 40)
-    ).apply {
-        visual = ImageVisual("salmon.png")
-        onMouseClicked = {
-            bearCardA.isVisible = false
-            bearCardB.isVisible = false
-            elkCardA.isVisible = false
-            elkCardB.isVisible = false
-            foxCardA.isVisible = false
-            foxCardB.isVisible = false
-            salmonCardA.isVisible = true
-            salmonCardB.isVisible = true
-            hawkCardA.isVisible = false
-            hawkCardB.isVisible = false
-            salmonCardA.resize(183, 397)
-            salmonCardB.resize(183, 397)
-        }
-    }
-
-
     private val hawk = Label(
         width = 60, height = 60,
-        posX = 200, posY = 45,
+        posX = 930/2 - 230, posY = 45,
         font = Font(size = 40)
     ).apply {
         visual = ImageVisual("hawk.png")
@@ -137,33 +114,33 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     }
 
 
-    private val fox = Label(
+    private val salmon = Label(
         width = 60, height = 60,
-        posX = 310, posY = 45,
+        posX = 930/2 - 130, posY = 45,
         font = Font(size = 40)
     ).apply {
-        visual = ImageVisual("fox.png")
+        visual = ImageVisual("salmon.png")
         onMouseClicked = {
             bearCardA.isVisible = false
             bearCardB.isVisible = false
             elkCardA.isVisible = false
             elkCardB.isVisible = false
-            foxCardA.isVisible = true
-            foxCardB.isVisible = true
-            salmonCardA.isVisible = false
-            salmonCardB.isVisible = false
+            foxCardA.isVisible = false
+            foxCardB.isVisible = false
+            salmonCardA.isVisible = true
+            salmonCardB.isVisible = true
             hawkCardA.isVisible = false
             hawkCardB.isVisible = false
-            foxCardA.resize(183, 397)
-            foxCardB.resize(183, 397)
+            salmonCardA.resize(183, 397)
+            salmonCardB.resize(183, 397)
         }
-    }
 
+    }
 
 
     private val elk = Label(
         width = 60, height = 60,
-        posX = 420, posY = 45,
+        posX = 930/2 - 30, posY = 45,
         font = Font(size = 40)
     ).apply {
         visual = ImageVisual("elk.png")
@@ -185,9 +162,34 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
 
 
+    private val fox = Label(
+        width = 60, height = 60,
+        posX = 930/2 + 70, posY = 45,
+        font = Font(size = 40)
+    ).apply {
+        visual = ImageVisual("fox.png")
+
+        onMouseClicked = {
+            bearCardA.isVisible = false
+            bearCardB.isVisible = false
+            elkCardA.isVisible = false
+            elkCardB.isVisible = false
+            foxCardA.isVisible = true
+            foxCardB.isVisible = true
+            salmonCardA.isVisible = false
+            salmonCardB.isVisible = false
+            hawkCardA.isVisible = false
+            hawkCardB.isVisible = false
+            foxCardA.resize(183, 397)
+            foxCardB.resize(183, 397)
+        }
+    }
+
+
+
     private val bear = Label(
         width = 60, height = 60,
-        posX = 530, posY = 45,
+        posX = 930/2 + 170, posY = 45,
         font = Font(size = 40)
     ).apply {
         visual = ImageVisual("bear.png")
@@ -294,7 +296,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     }
 
     val checkBoxSalmonA = CheckBox(
-        posX = 90,
+        posX = salmon.posX,
         posY = 100,
         width = 30,
         height = 50,
@@ -311,7 +313,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
 
     val checkBoxSalmonB = CheckBox(
-        posX = 90,
+        posX = salmon.posX,
         posY = 140,
         width = 30,
         height = 50,
@@ -329,7 +331,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
 
     val checkBoxHawkA = CheckBox(
-        posX = 200,
+        posX = hawk.posX,
         posY = 100,
         width = 30,
         height = 50,
@@ -345,7 +347,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     }
 
     val checkBoxHawkB = CheckBox(
-        posX = 200,
+        posX = hawk.posX,
         posY = 140,
         width = 30,
         height = 50,
@@ -362,7 +364,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     }
 
     val checkBoxBearA = CheckBox(
-        posX = 530,
+        posX =  bear.posX,
         posY = 100,
         width = 30,
         height = 50,
@@ -379,7 +381,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     }
 
     val checkBoxBearB = CheckBox(
-        posX = 530,
+        posX =  bear.posX,
         posY = 140,
         width = 30,
         height = 50,
@@ -397,7 +399,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
 
     val checkBoxFoxA = CheckBox(
-        posX = 310,
+        posX = fox.posX,
         posY = 100,
         width = 30,
         height = 50,
@@ -415,7 +417,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
 
     val checkBoxFoxB = CheckBox(
-        posX = 310,
+        posX = fox.posX,
         posY = 140,
         width = 30,
         height = 50,
@@ -434,7 +436,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
 
     val checkBoxElkA = CheckBox(
-        posX = 420,
+        posX = elk.posX,
         posY = 100,
         width = 30,
         height = 50,
@@ -451,7 +453,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     }
 
     val checkBoxElkB = CheckBox(
-        posX = 420,
+        posX = elk.posX,
         posY = 140,
         width = 30,
         height = 50,
