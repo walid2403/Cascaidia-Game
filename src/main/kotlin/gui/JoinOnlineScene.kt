@@ -60,10 +60,10 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
     ).apply {
         visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
         onTextChanged = {
-            if (this.text.isBlank()) {
-                joinButton.isDisabled = true
-            } else {
+            if (!this.text.isBlank() && !p2Input.text.isBlank()) {
                 joinButton.isDisabled = false
+            } else {
+                joinButton.isDisabled = true
             }
 
         }
@@ -77,10 +77,10 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
     ).apply {
         visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
         onTextChanged = {
-            if (this.text.isBlank()) {
-                joinButton.isDisabled = true
-            } else {
+            if (!this.text.isBlank() && !p2Input.text.isBlank()) {
                 joinButton.isDisabled = false
+            } else {
+                joinButton.isDisabled = true
             }
 
         }
