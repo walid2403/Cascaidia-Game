@@ -55,8 +55,6 @@ class TestChangeTurn {
             players.add(player)
         }
         currentGame.playerQueue.addAll(players)
-        val removedTokens = MutableList(8) { WildlifeToken.HAWK }
-        currentGame.removedTokens.addAll(removedTokens)
         val wildlifeTokens = List(6) { WildlifeToken.SALMON }
         currentGame.wildlifeTokens.pushAll(wildlifeTokens)
 
@@ -281,8 +279,6 @@ class TestChangeTurn {
             players.add(player)
         }
         newGame.playerQueue.addAll(players)
-        val removedTokens = MutableList(8) { WildlifeToken.HAWK }
-        newGame.removedTokens.addAll(removedTokens)
         val wildlifeTokens = List(6) { WildlifeToken.SALMON }
         newGame.wildlifeTokens.pushAll(wildlifeTokens)
 
