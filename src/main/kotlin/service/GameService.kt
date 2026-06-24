@@ -157,6 +157,8 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
 
         game.gameState = GameState.START_OF_TURN
 
+        game.selectedChoice = Pair(-1, -1)
+
         val nextPlayer = game.playerQueue.peek()
 
         if (nextPlayer.board.size == 23) {
