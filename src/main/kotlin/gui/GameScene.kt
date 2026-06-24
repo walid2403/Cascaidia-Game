@@ -16,9 +16,12 @@ import tools.aqua.bgw.core.BoardGameScene
 import tools.aqua.bgw.core.Color
 import tools.aqua.bgw.core.HexOrientation
 import tools.aqua.bgw.style.BorderRadius
+import tools.aqua.bgw.util.BidirectionalMap
 import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
+import entity.*
+import tools.aqua.bgw.visual.Visual
 
 /**
  * Die Klasse GameScene ist die Hauptszene des Cascadia Spiels
@@ -446,6 +449,20 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
     }
 
+    //Silder
+    private val sliderBar = Label(width = 200, height = 4, posX = 400, posY = 398).apply {
+        visual = ColorVisual(170,170,170)
+    }
+    private val sliderPoint = Label(width = 50, height = 50, posX = 400, posY = 375).apply {
+        visual = ColorVisual(170,170,170)
+        onMousePressed = { event ->
+            if(event.posX.toDouble() >= 400.0 && event.posX.toDouble() <= 600) {
+                this.posX = event.posX.toDouble()
+            }
+        }
+    }
+
+
 
 
 
@@ -490,7 +507,9 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
             natureTokenCountOneSide, natureTokenCountTwoSide, natureTokenCountThreeSide, natureTokenCountFourSide,
             cameraPaneOneSide, cameraPaneTwoSide, cameraPaneThreeSide, cameraPaneFourSide,
             LableAboveCamOne, LableAboveCamTwo, LableAboveCamThree, LableAboveCamFour, playerName,
-            bearScoringCard, elkScoringCard, salmonScoringCard, hawkScoringCard, foxScoringCard
+            bearScoringCard, elkScoringCard, salmonScoringCard, hawkScoringCard, foxScoringCard,
+
+            sliderBar, sliderPoint
         )
 
         initializeTest()
@@ -744,6 +763,73 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
         animalChoice1.visual = ImageVisual("bear.png")
         animalChoice2.visual = ImageVisual("elk.png")
     }
+
+
+
+    //Ab hier neu
+
+    private val tileMap = BidirectionalMap<Tile, HexagonView>()
+
+    private fun createTileView() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+
+        val tileList = game.tileStack.peekAll()
+
+        for(tile in tileList) {
+            val hexagon = HexagonView(size = 60, visual = ImageVisual("tile_$tile.id.png"))
+            tileMap.add(tile to hexagon)
+        }
+    }
+
+    private fun createAnimalView(wildlifeToken: WildlifeToken): ImageVisual {
+        var image = when (wildlifeToken) {
+            WildlifeToken.FOX -> ImageVisual("fox.png")
+            WildlifeToken.HAWK -> ImageVisual("hawk.png")
+            WildlifeToken.ELK -> ImageVisual("elk.png")
+            WildlifeToken.BEAR -> ImageVisual("bear.png")
+            WildlifeToken.SALMON -> ImageVisual("salmon.png")
+        }
+        return image
+    }
+
+    private fun resetGame() {
+        listOf(nameOneSide, nameTwoSide, nameThreeSide, nameFourSide, playerName).forEach { it.text = "" }
+        listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).forEach { it.visual = Visual.EMPTY }
+        listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).forEach { it.visual = Visual.EMPTY }
+        listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).forEach { it.clear() }
+        listOf(natureTokenCountOneSide, natureTokenCountTwoSide, natureTokenCountThreeSide, natureTokenCountFourSide).
+        forEach { it.text = "0" }
+    }
+
+
+    override fun refreshAfterStartGame() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+
+        resetGame()
+
+        for(i in 0 .. game.playerQueue.size) {
+            listOf(nameOneSide, nameTwoSide, nameThreeSide, nameFourSide).forEach {
+                it.text = game.playerQueue.elementAt(i).name
+            }
+        }
+
+        createTileView()
+
+        for(i in 0..3) {
+            val hexagon = tileMap.forward(game.choices.elementAt(i).first)
+            listOf(tileChoice1, tileChoice2, tileChoice3, tileChoice4).elementAt(i).visual = hexagon.visual
+            val animal = game.choices.elementAt(i).second
+            listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(i).visual =
+                createAnimalView(animal)
+        }
+
+        //loadStartTiles()
+
+    }
+
+
 
 
 
