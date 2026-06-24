@@ -133,8 +133,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
      * @throws IllegalStateException if there is no current game or
      *                               if not every player has 20 habitat tiles
      */
-    fun calculateScores(): List<List<Int>> {
-        return(listOf(listOf()))
+    fun calculateScores() {
     }
 
     /**
@@ -162,7 +161,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         val nextPlayer = game.playerQueue.peek()
 
         if (nextPlayer.board.size == 23) {
-            onAllRefreshables {refreshAfterEndGame(calculateScores())}
+            calculateScores()
             return
         }
 
