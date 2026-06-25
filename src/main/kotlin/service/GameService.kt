@@ -134,6 +134,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
      *                               if not every player has 20 habitat tiles
      */
     fun calculateScores() {
+        onAllRefreshables {refreshAfterEndGame(emptyList())}
     }
 
     /**
@@ -166,7 +167,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         }
 
         if (nextPlayer.type == PlayerType.HUMAN && game.isLocal) {
-            rootService.history.prevMoves.push(game)
+            rootService.history.prevMoves.push(CascadiaGame(game))
         }
 
         onAllRefreshables { refreshAfterChangeTurn(nextPlayer.board.size == 22) }
