@@ -20,6 +20,24 @@ import tools.aqua.bgw.visual.ImageVisual
 
 class HostOnlineLobbyScene(private val app: SopraApplication, private val rootService: RootService) : MenuScene(1920, 1080), Refreshable  {
 
+    private val sceneWidth = 1920
+    private val sceneHeight = 1080
+    private val paneWidth = 750
+    private val paneHeight = 620
+    private val tabHeight = 130
+    private val tabWidth = 158
+    private val borderThickness = 4
+    private val paneX = (sceneWidth-paneWidth)/2
+    private val paneY = (sceneHeight-paneHeight)/2
+    private val movementDistance = paneWidth/2 - 90
+    private val iconSize = 60
+    private val iconDistance = 30
+    private val nameWidth = 400
+    private val nameHeight = 50
+    private val nameY = paneHeight/2 - 100
+    private val nameDistance = 35
+
+
     private val logo = Label(
         posX = 0,
         posY = 0,
@@ -29,25 +47,65 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
     )
     private val hostPanel = Pane<UIComponent>(
-        posX = 635, posY = 230,
-        width = 750.0, height = 620.0
+        posX = paneX, posY = paneY,
+        width = paneWidth, height = paneHeight,
     ).apply {
         visual = ColorVisual(64, 98, 70).apply { style.borderRadius = BorderRadius(35) }
 
     }
 
     private val sidePanel = Pane<UIComponent>(
-        posX = 635, posY = 230,
-        width = 750.0, height = 620.0
+        posX = paneX, posY = paneY,
+        width = paneWidth, height = paneHeight,
     ).apply {
-        visual = ColorVisual(160, 150, 210).apply { style.borderRadius = BorderRadius(35) }
+        visual = ColorVisual(153, 172, 255).apply { style.borderRadius = BorderRadius(35) }
     }
 
+    private val hostPaneBorder = Label(
+        posX = paneX - borderThickness,
+        posY = paneY - borderThickness,
+        width = paneWidth + borderThickness*2,
+        height = paneHeight + borderThickness*2,
+        visual = ColorVisual(255, 255, 255).apply{
+            style.borderRadius = BorderRadius(35)
+        }
+    )
 
+    private val sidePaneBorder = Label(
+        posX = paneX - borderThickness,
+        posY = paneY - borderThickness,
+        width = paneWidth + borderThickness*2,
+        height = paneHeight + borderThickness*2,
+        visual = ColorVisual(255, 255, 255).apply{
+            style.borderRadius = BorderRadius(35)
+        }
+    )
+
+    private val tabBorder = Label(
+        posX = paneX + paneWidth - tabWidth + 100 - borderThickness,
+        posY = paneY + paneHeight - tabHeight - borderThickness,
+        width = tabWidth + 2*borderThickness,
+        height = tabHeight + 2*borderThickness,
+        visual = ColorVisual(255, 255, 255).apply {
+            style.borderRadius = BorderRadius(15.0)
+        }
+    )
+
+    private val tab2Border = Label(
+        posX = tabBorder.posX + movementDistance,
+        posY = paneY + paneHeight - tabHeight - borderThickness,
+        width = tabWidth + 2*borderThickness,
+        height = tabHeight + 2*borderThickness,
+        visual = ColorVisual(255, 255, 255).apply {
+            style.borderRadius = BorderRadius(15.0)
+        }
+    ).apply {
+        isVisible = false
+    }
 
     private val p1Input = Label(
-        width = 400, height = 50,
-        posX = 750/2 - 200, posY = 620/2 - 100,
+        width = nameWidth, height = nameHeight,
+        posX = (paneWidth-nameWidth)/2, posY = nameY,
         text = "Player 1",
         font = Font(size = 28)
 
@@ -58,9 +116,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
 
     private val p2Input = Label(
-        width = 400, height = 50,
-        posX = 750/2 - 200, posY = 620/2 - 15,
-        text = " Player 2",
+        width = nameWidth, height = nameHeight,
+        posX = (paneWidth - nameWidth)/2, posY = nameY + nameHeight + nameDistance,        text = " Player 2",
         font = Font(size = 28)
     ).apply {
         visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
@@ -70,8 +127,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
 
     private val p3Input = Label(
-        width = 400, height = 50,
-        posX = 750/2 - 200, posY = 620/2 + 70,
+        width = nameWidth, height = nameHeight,
+        posX = (paneWidth - nameWidth)/2, posY = nameY + 2*nameHeight + 2*nameDistance,
         text = "",
         font = Font(size = 28)
     ).apply {
@@ -82,8 +139,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
 
     private val p4Input = Label(
-        width = 400, height = 50,
-        posX = 750/2 - 200, posY = 620/2 + 155,
+        width = nameWidth, height = nameHeight,
+        posX = (paneWidth - nameWidth)/2, posY = nameY + 3*nameHeight + 3*nameDistance,
         text = "",
         font = Font(size = 28)
     ).apply {
@@ -91,12 +148,34 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
     }
 
-    private val hawk = Label(
-        width = 60, height = 60,
-        posX = 930/2 - 230, posY = 45,
+    private val elk = Label(
+        width = iconSize + 15, height = iconSize + 15,
+        posX = (paneWidth)/2 + 90 - (iconSize + 15)/2, posY = 30,
         font = Font(size = 40)
     ).apply {
-        visual = ImageVisual("hawk.png")
+        visual = ImageVisual("elk.png", iconSize, iconSize)
+        onMouseClicked = {
+            bearCardA.isVisible = false
+            bearCardB.isVisible = false
+            elkCardA.isVisible = true
+            elkCardB.isVisible = true
+            foxCardA.isVisible = false
+            foxCardB.isVisible = false
+            salmonCardA.isVisible = false
+            salmonCardB.isVisible = false
+            hawkCardA.isVisible = false
+            hawkCardB.isVisible = false
+            elkCardA.resize(209, 403)
+            elkCardB.resize(209, 403)
+        }
+    }
+
+    private val hawk = Label(
+        width = iconSize + 15, height = iconSize + 15,
+        posX = elk.posX - 2*iconDistance - 2*(iconSize + 15), posY = 30,
+        font = Font(size = 40)
+    ).apply {
+        visual = ImageVisual("hawk.png", iconSize, iconSize)
         onMouseClicked = {
             bearCardA.isVisible = false
             bearCardB.isVisible = false
@@ -113,13 +192,12 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         }
     }
 
-
     private val salmon = Label(
-        width = 60, height = 60,
-        posX = 930/2 - 130, posY = 45,
+        width = iconSize + 15, height = iconSize + 15,
+        posX = elk.posX - iconDistance - (iconSize + 15), posY = 30,
         font = Font(size = 40)
     ).apply {
-        visual = ImageVisual("salmon.png")
+        visual = ImageVisual("salmon.png", iconSize, iconSize)
         onMouseClicked = {
             bearCardA.isVisible = false
             bearCardB.isVisible = false
@@ -137,37 +215,11 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
     }
 
-
-    private val elk = Label(
-        width = 60, height = 60,
-        posX = 930/2 - 30, posY = 45,
-        font = Font(size = 40)
-    ).apply {
-        visual = ImageVisual("elk.png")
-        onMouseClicked = {
-            bearCardA.isVisible = false
-            bearCardB.isVisible = false
-            elkCardA.isVisible = true
-            elkCardB.isVisible = true
-            foxCardA.isVisible = false
-            foxCardB.isVisible = false
-            salmonCardA.isVisible = false
-            salmonCardB.isVisible = false
-            hawkCardA.isVisible = false
-            hawkCardB.isVisible = false
-            elkCardA.resize(209, 403)
-            elkCardB.resize(209, 403)
-        }
-    }
-
-
-
     private val fox = Label(
-        width = 60, height = 60,
-        posX = 930/2 + 70, posY = 45,
-        font = Font(size = 40)
+        width = iconSize + 15, height = iconSize + 15,
+        posX = elk.posX + iconDistance + iconSize + 15, posY = 30,        font = Font(size = 40)
     ).apply {
-        visual = ImageVisual("fox.png")
+        visual = ImageVisual("fox.png", iconSize, iconSize)
 
         onMouseClicked = {
             bearCardA.isVisible = false
@@ -188,11 +240,11 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
 
     private val bear = Label(
-        width = 60, height = 60,
-        posX = 930/2 + 170, posY = 45,
+        width = iconSize + 15, height = iconSize + 15,
+        posX = elk.posX + 2*iconDistance + 2*(iconSize + 15), posY = 30,
         font = Font(size = 40)
     ).apply {
-        visual = ImageVisual("bear.png")
+        visual = ImageVisual("bear.png", iconSize, iconSize)
         onMouseClicked = {
             bearCardA.isVisible = true
             bearCardB.isVisible = true
@@ -296,7 +348,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     }
 
     val checkBoxSalmonA = CheckBox(
-        posX = salmon.posX,
+        posX = salmon.posX + 10,
         posY = 100,
         width = 30,
         height = 50,
@@ -311,9 +363,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         }
     }
 
-
     val checkBoxSalmonB = CheckBox(
-        posX = salmon.posX,
+        posX = salmon.posX + 10,
         posY = 140,
         width = 30,
         height = 50,
@@ -328,10 +379,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         }
     }
 
-
-
     val checkBoxHawkA = CheckBox(
-        posX = hawk.posX,
+        posX = hawk.posX + 10,
         posY = 100,
         width = 30,
         height = 50,
@@ -347,7 +396,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     }
 
     val checkBoxHawkB = CheckBox(
-        posX = hawk.posX,
+        posX = hawk.posX + 10,
         posY = 140,
         width = 30,
         height = 50,
@@ -364,7 +413,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     }
 
     val checkBoxBearA = CheckBox(
-        posX =  bear.posX,
+        posX =  bear.posX + 10,
         posY = 100,
         width = 30,
         height = 50,
@@ -381,7 +430,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     }
 
     val checkBoxBearB = CheckBox(
-        posX =  bear.posX,
+        posX =  bear.posX + 10,
         posY = 140,
         width = 30,
         height = 50,
@@ -399,7 +448,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
 
     val checkBoxFoxA = CheckBox(
-        posX = fox.posX,
+        posX = fox.posX + 10,
         posY = 100,
         width = 30,
         height = 50,
@@ -415,9 +464,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
     }
 
-
     val checkBoxFoxB = CheckBox(
-        posX = fox.posX,
+        posX = fox.posX + 10,
         posY = 140,
         width = 30,
         height = 50,
@@ -433,10 +481,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
     }
 
-
-
     val checkBoxElkA = CheckBox(
-        posX = elk.posX,
+        posX = elk.posX + 10,
         posY = 100,
         width = 30,
         height = 50,
@@ -453,7 +499,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     }
 
     val checkBoxElkB = CheckBox(
-        posX = elk.posX,
+        posX = elk.posX + 10,
         posY = 140,
         width = 30,
         height = 50,
@@ -469,14 +515,11 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
     }
 
-
     private val human = Label(
         width = 200, height = 60,
         posX = 500, posY = 45,
         font = Font(size = 40)
     ).apply { visual = ImageVisual("Auswahl.png") }
-
-
 
     private val player = Label(
         width = 300, height = 100,
@@ -488,8 +531,6 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
             family = "Canva Sans",
             fontWeight = Font.FontWeight.BOLD)
     )
-
-
 
     private val exitButton = Button(
         width = 100, height = 60,
@@ -507,21 +548,21 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
 
     private val arrowLabel = Label(
-        posX = 1327, posY = 720,
-        width = 158.0, height = 130.0,
+        posX = paneX + paneWidth - tabWidth + 100, posY = paneY + paneHeight - tabHeight,
+        width = tabWidth, height = tabHeight,
         text = "",
         font = Font(size = 22, color = Color.BLACK)
     ).apply {
-        visual = ColorVisual(160, 150, 210).apply { style.borderRadius = BorderRadius(15) }
+        visual = ColorVisual(153, 172, 255).apply { style.borderRadius = BorderRadius(15) }
     }
 
     private val arrowButton = Label(
-        posX = 1380, posY = 750,
+        posX = paneX + paneWidth + 5, posY = paneY + paneHeight -110,
         width = 90.0, height = 90.0,
         text = "→",
         font = Font(size = 40, color = Color.BLACK)
     ).apply {
-        visual = ColorVisual(160, 150, 210).apply { style.borderRadius = BorderRadius(8) }
+        visual = ColorVisual(153, 172, 255).apply { style.borderRadius = BorderRadius(8) }
         onMouseClicked = {
             expandPanel()
 
@@ -530,12 +571,12 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
 
     private val startLabel = Label(
-        posX = 700 -8, posY = 620 - 130,
+        posX = paneWidth - 42, posY = paneHeight - tabHeight,
         width = 142.0, height = 130.0,
         text = "",
         font = Font(size = 22, color = Color.BLACK)
     ).apply {
-        visual = ColorVisual(160, 150, 210).apply { style.borderRadius = BorderRadius(15) }
+        visual = ColorVisual(153, 172, 255).apply { style.borderRadius = BorderRadius(15) }
         this.isVisible = false
     }
 
@@ -546,7 +587,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         text = "▶",
         font = Font(size = 40, color = Color.BLACK)
     ).apply {
-        visual = ColorVisual(160, 150, 210).apply { style.borderRadius = BorderRadius(8) }
+        visual = ColorVisual(153, 172, 255).apply { style.borderRadius = BorderRadius(8) }
         this.isVisible = false
     }
 
@@ -555,8 +596,14 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
         playAnimation(
             ParallelAnimation(
-                MovementAnimation( // bewegt das sidePanel
+                MovementAnimation( // bewegt das hostPanel
                     componentView = hostPanel,
+                    fromX = hostPanel.actualPosX,
+                    toX = hostPanel.actualPosX - (hostPanel.width/2)+90,
+                    duration = 1000 // dauer
+                ),
+                MovementAnimation( // bewegt die Umrandung des hostPanel
+                    componentView = hostPaneBorder,
                     fromX = hostPanel.actualPosX,
                     toX = hostPanel.actualPosX - (hostPanel.width/2)+90,
                     duration = 1000 // dauer
@@ -567,6 +614,17 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
                     toX = sidePanel.actualPosX + (sidePanel.width/2)-90,
                     duration = 1000 // dauer
                 ),
+                MovementAnimation( // bewegt die Umrandung des sidePanel
+                    componentView = sidePaneBorder,
+                    fromX = sidePanel.actualPosX,
+                    toX = sidePanel.actualPosX + (sidePanel.width/2)-90,
+                    duration = 1000 // dauer
+                ),
+//                MovementAnimation( // bewegt die Umrandung des Tabs an der Seite
+//                    componentView = tabBorder,
+//                    byX = movementDistance,
+//                    duration = 1000 // dauer
+//                ),
 
                 ).apply {
                 onFinished = {
@@ -575,6 +633,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
                         startButton.isVisible = true
                         arrowLabel.isVisible = false
                         startLabel.isVisible = true
+                        tabBorder.isVisible = false
+                        tab2Border.isVisible = true
 
                     }
                 }
@@ -600,11 +660,14 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         backgroundOpacity = .5
         addComponents(
             logo,
+            tabBorder,
+            tab2Border,
+            sidePaneBorder,
+            sidePanel,
             arrowLabel,
             arrowButton,
-            sidePanel,
+            hostPaneBorder,
             hostPanel,
-
             )
     }
 

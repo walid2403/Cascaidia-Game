@@ -6,10 +6,8 @@ import tools.aqua.bgw.animation.MovementAnimation
 import tools.aqua.bgw.animation.ParallelAnimation
 import tools.aqua.bgw.components.StaticComponentView
 import tools.aqua.bgw.components.layoutviews.Pane
-import tools.aqua.bgw.components.uicomponents.Button
 import tools.aqua.bgw.components.uicomponents.CheckBox
 import tools.aqua.bgw.components.uicomponents.Label
-import tools.aqua.bgw.components.uicomponents.TextField
 import tools.aqua.bgw.core.Alignment
 import tools.aqua.bgw.core.Color
 import tools.aqua.bgw.core.MenuScene
@@ -27,7 +25,7 @@ class JoinOnlineLobbyScene (
     private val paneWidth = 750
     private val paneHeight = 620
     private val tabHeight = 130
-    private val tabWidth = 200
+    private val tabWidth = 130
     private val borderThickness = 4
     private val paneX = (sceneWidth-paneWidth)/2
     private val paneY = (sceneHeight-paneHeight)/2
@@ -144,6 +142,28 @@ class JoinOnlineLobbyScene (
         }
     }
 
+    private val playerTypeOverview = Label(
+        width = 200,
+        height = 60,
+        posX = 500,
+        posY = 45,
+        font = Font(size = 40)
+    ).apply { visual = ImageVisual("Auswahl.png") }
+
+
+
+    private val header = Label(
+        width = 300, height = 100,
+        posX = 750.0/2 - 150, posY = 30,
+        text = "Join",
+        font = Font(
+            size = 50,
+            color = Color(0xFFFFFF),
+            family = "Canva Sans",
+            fontWeight = Font.FontWeight.BOLD)
+    )
+
+
     private val p1Input = Label(
         width = nameWidth,
         height = nameHeight,
@@ -185,8 +205,10 @@ class JoinOnlineLobbyScene (
     )
 
     private val elkIcon = Label(
-        posX = paneX + (paneWidth)/2 + 90 - (iconSize + 15)/2,
-        posY = paneY + 30,
+//        posX = paneX + (paneWidth)/2 + 90 - (iconSize + 15)/2,
+//        posY = paneY + 30,
+        posX = (paneWidth)/2 + 90 - (iconSize + 15)/2,
+        posY = 30,
         width = iconSize + 15,
         height = iconSize + 15,
         visual = ImageVisual("elk.png", iconSize, iconSize)
@@ -210,7 +232,8 @@ class JoinOnlineLobbyScene (
 
     private val hawkIcon = Label(
         posX = elkIcon.posX - 2*iconDistance - 2*(iconSize + 15),
-        posY = paneY + 30,
+//        posY = paneY + 30,
+        posY = 30,
         width = iconSize + 15,
         height = iconSize + 15,
         visual = ImageVisual("hawk.png", iconSize, iconSize)
@@ -233,7 +256,8 @@ class JoinOnlineLobbyScene (
 
     private val salmonIcon = Label(
         posX = elkIcon.posX - iconDistance - (iconSize + 15),
-        posY = paneY + 30,
+//        posY = paneY + 30,
+        posY = 30,
         width = iconSize + 15,
         height = iconSize + 15,
         visual = ImageVisual("salmon.png", iconSize, iconSize)
@@ -258,7 +282,8 @@ class JoinOnlineLobbyScene (
 
     private val foxIcon = Label(
         posX = elkIcon.posX + iconDistance + iconSize + 15,
-        posY = paneY + 30,
+//        posY = paneY + 30,
+        posY = 30,
         width = iconSize + 15,
         height = iconSize + 15,
         visual = ImageVisual("fox.png", iconSize, iconSize)
@@ -281,7 +306,8 @@ class JoinOnlineLobbyScene (
 
     private val bearIcon = Label(
         posX = elkIcon.posX + 2*iconDistance + 2*(iconSize + 15),
-        posY = paneY + 30,
+//        posY = paneY + 30,
+        posY = 30,
         width = iconSize + 15,
         height = iconSize + 15,
         visual = ImageVisual("bear.png", iconSize, iconSize)
@@ -302,7 +328,7 @@ class JoinOnlineLobbyScene (
     }
 
     val checkBoxSalmonA = CheckBox(
-        posX = 90,
+        posX = salmonIcon.posX + 10,
         posY = 100,
         width = 30,
         height = 50,
@@ -319,7 +345,7 @@ class JoinOnlineLobbyScene (
 
 
     val checkBoxSalmonB = CheckBox(
-        posX = 90,
+        posX = salmonIcon.posX + 10,
         posY = 140,
         width = 30,
         height = 50,
@@ -337,7 +363,7 @@ class JoinOnlineLobbyScene (
 
 
     val checkBoxHawkA = CheckBox(
-        posX = 200,
+        posX = hawkIcon.posX + 10,
         posY = 100,
         width = 30,
         height = 50,
@@ -353,7 +379,7 @@ class JoinOnlineLobbyScene (
     }
 
     val checkBoxHawkB = CheckBox(
-        posX = 200,
+        posX = hawkIcon.posX + 10,
         posY = 140,
         width = 30,
         height = 50,
@@ -370,7 +396,7 @@ class JoinOnlineLobbyScene (
     }
 
     val checkBoxBearA = CheckBox(
-        posX = 530,
+        posX = bearIcon.posX + 10,
         posY = 100,
         width = 30,
         height = 50,
@@ -387,7 +413,7 @@ class JoinOnlineLobbyScene (
     }
 
     val checkBoxBearB = CheckBox(
-        posX = 530,
+        posX = bearIcon.posX + 10,
         posY = 140,
         width = 30,
         height = 50,
@@ -405,7 +431,7 @@ class JoinOnlineLobbyScene (
 
 
     val checkBoxFoxA = CheckBox(
-        posX = 310,
+        posX = foxIcon.posX + 10,
         posY = 100,
         width = 30,
         height = 50,
@@ -423,7 +449,7 @@ class JoinOnlineLobbyScene (
 
 
     val checkBoxFoxB = CheckBox(
-        posX = 310,
+        posX = foxIcon.posX + 10,
         posY = 140,
         width = 30,
         height = 50,
@@ -442,7 +468,7 @@ class JoinOnlineLobbyScene (
 
 
     val checkBoxElkA = CheckBox(
-        posX = 420,
+        posX = elkIcon.posX + 10,
         posY = 100,
         width = 30,
         height = 50,
@@ -459,7 +485,7 @@ class JoinOnlineLobbyScene (
     }
 
     val checkBoxElkB = CheckBox(
-        posX = 420,
+        posX = elkIcon.posX + 10,
         posY = 140,
         width = 30,
         height = 50,
@@ -476,17 +502,20 @@ class JoinOnlineLobbyScene (
     }
 
     private val bearCardA = Label(
-        width = 207, height = 394,
-        posX = 100, posY = 200,
+        width = 207,
+        height = 394,
+        posX = 230,
+        posY = 200,
     ).apply {
         visual = ImageVisual("Scoring_Bear_A.png")
         isVisible = false
     }
 
     private val bearCardB = Label(
-        width = 207, height = 394,
-        posX = 430, posY = 200,
-
+        width = 207,
+        height = 394,
+        posX = 490,
+        posY = 200,
         ).apply {
         visual = ImageVisual("Scoring_Bear_B.png")
         isVisible = false
@@ -494,17 +523,20 @@ class JoinOnlineLobbyScene (
 
 
     private val elkCardA = Label(
-        width = 262, height = 504,
-        posX = 100, posY = 200,
+        width = 262,
+        height = 504,
+        posX = 230,
+        posY = 200,
     ).apply {
         visual = ImageVisual("Scoring_Elk_A.png")
         isVisible = false
     }
 
     private val elkCardB = Label(
-        width = 262, height = 504,
-        posX = 430, posY = 200,
-
+        width = 262,
+        height = 504,
+        posX = 490,
+        posY = 200,
         ).apply {
         visual = ImageVisual("Scoring_Elk_B.png")
         isVisible = false
@@ -512,17 +544,20 @@ class JoinOnlineLobbyScene (
 
 
     private val foxCardA = Label(
-        width = 229, height = 497,
-        posX = 100, posY = 200,
+        width = 229,
+        height = 497,
+        posX = 230,
+        posY = 200,
     ).apply {
         visual = ImageVisual("Scoring_Fox_A.png")
         isVisible = false
     }
 
     private val foxCardB = Label(
-        width = 229, height = 497,
-        posX = 430, posY = 200,
-
+        width = 229,
+        height = 497,
+        posX = 490,
+        posY = 200,
         ).apply {
         visual = ImageVisual("Scoring_Fox_B.png")
         isVisible = false
@@ -530,34 +565,40 @@ class JoinOnlineLobbyScene (
 
 
     private val hawkCardA = Label(
-        width = 229, height = 497,
-        posX = 100, posY = 200,
+        width = 229,
+        height = 497,
+        posX = 230,
+        posY = 200,
     ).apply {
         visual = ImageVisual("Scoring_Hawk_A.png")
         isVisible = false
     }
 
     private val hawkCardB = Label(
-        width = 229, height = 497,
-        posX = 430, posY = 200,
-
+        width = 229,
+        height = 497,
+        posX = 490,
+        posY = 200,
         ).apply {
         visual = ImageVisual("Scoring_Hawk_B.png")
         isVisible = false
     }
 
     private val salmonCardA = Label(
-        width = 229, height = 497,
-        posX = 100, posY = 200,
+        width = 229,
+        height = 497,
+        posX = 230,
+        posY = 200,
     ).apply {
         visual = ImageVisual("Scoring_Salmon_A.png")
         isVisible = false
     }
 
     private val salmonCardB = Label(
-        width = 229, height = 497,
-        posX = 430, posY = 200,
-
+        width = 229,
+        height = 497,
+        posX = 490,
+        posY = 200,
         ).apply {
         visual = ImageVisual("Scoring_Salmon_B.png")
         isVisible = false
@@ -569,23 +610,30 @@ class JoinOnlineLobbyScene (
             tabBorder,
             scoreCardPaneBorder,
             scoreCardSelectionPane,
-            foxIcon,
-            elkIcon,
-            bearIcon,
-            hawkIcon,
-            salmonIcon,
+//            foxIcon,
+//            elkIcon,
+//            bearIcon,
+//            hawkIcon,
+//            salmonIcon,
             foldOutTab,
             playerPaneBorder,
             playerViewPane,
         )
         playerViewPane.addAll(
             backArrow,
+            playerTypeOverview,
+            header,
             p1Input,
             p2Input,
             p3Input,
             p4Input,
         )
         scoreCardSelectionPane.addAll(
+            foxIcon,
+            elkIcon,
+            bearIcon,
+            hawkIcon,
+            salmonIcon,
             elkCardA,
             elkCardB,
             hawkCardA,
@@ -657,26 +705,26 @@ class JoinOnlineLobbyScene (
                     foldOutTab,
                     byX = movementDistance,
                 ),
-                MovementAnimation(
-                    elkIcon,
-                    byX = movementDistance,
-                ),
-                MovementAnimation(
-                    hawkIcon,
-                    byX = movementDistance,
-                ),
-                MovementAnimation(
-                    salmonIcon,
-                    byX = movementDistance,
-                ),
-                MovementAnimation(
-                    bearIcon,
-                    byX = movementDistance,
-                ),
-                MovementAnimation(
-                    foxIcon,
-                    byX = movementDistance,
-                )
+//                MovementAnimation(
+//                    elkIcon,
+//                    byX = movementDistance,
+//                ),
+//                MovementAnimation(
+//                    hawkIcon,
+//                    byX = movementDistance,
+//                ),
+//                MovementAnimation(
+//                    salmonIcon,
+//                    byX = movementDistance,
+//                ),
+//                MovementAnimation(
+//                    bearIcon,
+//                    byX = movementDistance,
+//                ),
+//                MovementAnimation(
+//                    foxIcon,
+//                    byX = movementDistance,
+//                )
             )
         )
     }
@@ -708,26 +756,26 @@ class JoinOnlineLobbyScene (
                     foldOutTab,
                     byX = -movementDistance,
                 ),
-                MovementAnimation(
-                    elkIcon,
-                    byX = -movementDistance,
-                ),
-                MovementAnimation(
-                    hawkIcon,
-                    byX = -movementDistance,
-                ),
-                MovementAnimation(
-                    salmonIcon,
-                    byX = -movementDistance,
-                ),
-                MovementAnimation(
-                    bearIcon,
-                    byX = -movementDistance,
-                ),
-                MovementAnimation(
-                    foxIcon,
-                    byX = -movementDistance,
-                )
+//                MovementAnimation(
+//                    elkIcon,
+//                    byX = -movementDistance,
+//                ),
+//                MovementAnimation(
+//                    hawkIcon,
+//                    byX = -movementDistance,
+//                ),
+//                MovementAnimation(
+//                    salmonIcon,
+//                    byX = -movementDistance,
+//                ),
+//                MovementAnimation(
+//                    bearIcon,
+//                    byX = -movementDistance,
+//                ),
+//                MovementAnimation(
+//                    foxIcon,
+//                    byX = -movementDistance,
+//                )
             )
         )
     }
