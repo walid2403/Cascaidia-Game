@@ -10,7 +10,7 @@ import java.io.Serializable
  * @property undoneMoves Hält die rückgängig gemachten Spielstände als [CascadiaGame] Objekte auf einem [Stack]
  */
 
-class CascadiaGames : Serializable {
+class CascadiaGames {
     val prevMoves: Stack<CascadiaGame> = Stack()
     val undoneMoves: Stack<CascadiaGame> = Stack()
 }

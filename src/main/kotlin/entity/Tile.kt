@@ -22,7 +22,7 @@ import java.io.Serializable
  * keinen Bewohner hat, ist der Parameter nullable
  */
 
-class Tile(val id: Int, val habs: MutableList<Habitates>, val possibles: List<WildlifeToken>) : Serializable{
+class Tile(val id: Int, val habs: MutableList<Habitates>, val possibles: List<WildlifeToken>) {
     var rotation: Int = 0
     var occupant: WildlifeToken? = null
 }

@@ -3,8 +3,8 @@ package service
 import entity.*
 import java.io.File
 import entity.SaveState
-import java.io.FileOutputStream
-import java.io.ObjectOutputStream
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.module.SimpleModule
 
 
 /**
@@ -13,6 +13,11 @@ import java.io.ObjectOutputStream
 
 class PlayerActionService(private val rootService: RootService) : AbstractRefreshingService() {
 
+    private val mapper = jacksonObjectMapper().apply {
+        val module = SimpleModule()
+        module.addKeyDeserializer(Triple::class.java, TripleKeyDeserializer())
+        registerModule(module)
+    }
 
     /**
      * Allows the active player to swap any number (0..4) of wildlife tokens in the market
@@ -129,16 +134,14 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
     }
 
-/**
- * Helper function to convert a live [CascadiaGame] into a serializable [GameSnapshot].
- *
- * Extracts data from non-serializable structures like the BGW stacks or Java queues
- * and safely stores them as standard Kotlin lists. This is necessary to avoid
- * NotSerializableExceptions during the save process.
- *
- * @param game The active [CascadiaGame] to be converted.
- * @return A pure data container ([GameSnapshot]) representing the given game.
- */
+    /**
+     * Creates a snapshot of the current game state for persistence or undo/redo functionality.
+     *
+     * @param game The current instance of the game [CascadiaGame] whose state is to be captured.
+     * @return A [GameSnapshot] object representing the current game state, including the tile stack,
+     * nature tokens, player choices, selected choice, game state, player queue, removed tokens,
+     * wildlife tokens, scoring cards, and local game information.
+     */
     private fun createSnapshot(game: CascadiaGame): GameSnapshot {
         return GameSnapshot(
             tileStackList = game.tileStack.peekAll(),
@@ -146,14 +149,13 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             choicesList = game.choices.toList(),
             selectedChoice = game.selectedChoice,
             gameState = game.gameState,
-            playerList = game.playerQueue.toList(),
+            playerQueue = java.util.ArrayDeque(game.playerQueue),
             removedTokensList = game.removedTokens.toList(),
             wildlifeTokensList = game.wildlifeTokens.peekAll(),
             scoringCards = game.scoringCards,
             isLocal = game.isLocal
         )
     }
-
     /**
      * Interrupts the current game and saves it under the specified name.
      *
@@ -168,28 +170,24 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * @throws IllegalArgumentException if the name is empty, or if the game is not in a state where it can be saved.
      */
     fun saveGame(name: String) {
-        val game = rootService.currentGame ?: throw IllegalStateException("No game is currently running.")
-        if (name.isEmpty()) throw IllegalArgumentException("The name cannot be empty.")
+        val game = rootService.currentGame ?: throw IllegalStateException("Kein aktives Spiel zum Speichern vorhanden.")
+        if (name.isEmpty()) throw IllegalArgumentException("Der Name darf nicht leer sein.")
         if (!game.isLocal || game.playerQueue.any { it.type == PlayerType.NETWORK }) {
-            throw IllegalArgumentException("The save feature is not available for network games.")
+            throw IllegalArgumentException("Netzwerkspiele können nicht gespeichert werden.")
         }
 
-        val folder = File("SavedGames")
+        // Ordnerstruktur vorbereiten unter Nutzung deiner RootService-Konstanten
+        val folder = File(RootService.SAVE_DIRECTORY)
         if (!folder.exists()) folder.mkdirs()
-
         val file = File(folder, "$name${RootService.SAVE_EXTENSION}")
 
-        ObjectOutputStream(FileOutputStream(file)).use { stream ->
-
-            val state = SaveState(
-                currentGame = createSnapshot(game),
-
-                prevMovesList = rootService.history.prevMoves.peekAll().map{ createSnapshot(it) },
-                undoneMovesList = rootService.history.undoneMoves.peekAll().map { createSnapshot(it) }
-            )
-
-            stream.writeObject(state)
-        }
+        // Gesamtzustand inklusive Historie abbilden
+        val state = SaveState(
+            currentGame = createSnapshot(game),
+            prevMovesList = rootService.history.prevMoves.peekAll().map { createSnapshot(it) },
+            undoneMovesList = rootService.history.undoneMoves.peekAll().map { createSnapshot(it) }
+        )
+        mapper.writeValue(file, state)
     }
 
     /**

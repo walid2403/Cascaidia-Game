@@ -28,7 +28,7 @@ import java.util.ArrayDeque
  * @property isLocal Ein [Boolean] welcher angibt, ob das Spiel lokal läuft oder in einem Network
  */
 
-class CascadiaGame(val scoringCards: List<Boolean>, val isLocal: Boolean) : Serializable {
+class CascadiaGame(val scoringCards: List<Boolean>, val isLocal: Boolean) {
 
     val tileStack: Stack<Tile> = Stack()
 

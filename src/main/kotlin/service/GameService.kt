@@ -3,12 +3,32 @@ package service
 import entity.*
 import entity.SaveState
 import java.io.*
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.databind.module.SimpleModule
 
 /**
  * The game service class of the Cascadia Game. It includes all functions which work mostly on the system-logic side
  */
 
 class GameService(private val rootService: RootService): AbstractRefreshingService() {
+
+    /**
+     * A Jackson object mapper configured with a custom `SimpleModule` to handle
+     * specific key deserialization needs for JSON Maps.
+     *
+     * This mapper enables seamless conversion of JSON map keys formatted as strings
+     * (e.g., `(1, -1, 0)`) into actual Kotlin `Triple<Int, Int, Int>` objects
+     * through the `TripleKeyDeserializer`.
+     *
+     * The customization is essential for deserializing game-related data structures
+     * that involve triples as keys.
+     */
+    private val mapper = jacksonObjectMapper().apply {
+        val module = SimpleModule()
+        module.addKeyDeserializer(Triple::class.java, TripleKeyDeserializer())
+        registerModule(module)
+    }
 
     /**
      * A function to start a new game from scratch
@@ -28,28 +48,31 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
     }
 
     /**
-     * Helper function to reconstruct a fully playable [CascadiaGame] from a [GameSnapshot].
-     * * Reconstructs the non-serializable BGW stacks from safe Kotlin lists and restores all other state variables.
-     * * @param snapshot The saved state of a single game.
-     * @return A live [CascadiaGame] object ready to be played.
+     * Restores a `CascadiaGame` instance from a provided `GameSnapshot`.
+     *
+     * This method initializes a new `CascadiaGame` object based on the state encapsulated
+     * in the given `GameSnapshot`. It restores the game elements such as nature tokens, state,
+     * selected choices, players, and token stacks.
+     *
+     * @param snapshot The `GameSnapshot` object containing the serialized game state to restore.
+     * @return A new `CascadiaGame` instance with the restored game state.
      */
     private fun restoreSnapshot(snapshot: GameSnapshot): CascadiaGame {
-
         val game = CascadiaGame(snapshot.scoringCards, snapshot.isLocal)
-
         game.natureTokens = snapshot.natureTokens
         game.gameState = snapshot.gameState
         game.selectedChoice = snapshot.selectedChoice
 
         game.choices.clear()
         game.choices.addAll(snapshot.choicesList)
-
         game.removedTokens.clear()
         game.removedTokens.addAll(snapshot.removedTokensList)
 
-        snapshot.tileStackList.reversed().forEach { game.tileStack.push(it) }
-        snapshot.wildlifeTokensList.reversed().forEach { game.wildlifeTokens.push(it) }
-        snapshot.playerList.forEach { game.playerQueue.add(it) }
+        snapshot.tileStackList.forEach { game.tileStack.push(it) }
+        snapshot.wildlifeTokensList.forEach { game.wildlifeTokens.push(it) }
+
+        game.playerQueue.clear()
+        game.playerQueue.addAll(snapshot.playerQueue)
 
         return game
     }
@@ -64,33 +87,23 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
      */
     fun loadGame(name: String) {
 
-        if (rootService.currentGame != null) {
-            throw IllegalStateException("A game is already running.")
-        }
-        if (name.isBlank()) {
-            throw IllegalArgumentException("The save name cannot be empty.")
-        }
+        if (rootService.currentGame != null) throw IllegalStateException("Es läuft bereits ein Spiel.")
+        if (name.isBlank()) throw IllegalArgumentException("Der Name darf nicht leer sein.")
 
         val file = File(RootService.SAVE_DIRECTORY, "$name${RootService.SAVE_EXTENSION}")
+        if (!file.exists()) throw IllegalArgumentException("Spielstand '$name' existiert nicht.")
 
-        if (!file.exists()) {
-            throw IllegalArgumentException("Save game '$name' does not exist.")
-        }
-
-        val loadedState = ObjectInputStream(FileInputStream(file)).use { stream ->
-            stream.readObject() as SaveState
-        }
+        val loadedState: SaveState = mapper.readValue(file)
 
         rootService.currentGame = restoreSnapshot(loadedState.currentGame)
 
         rootService.history.prevMoves.clear()
-
-        loadedState.prevMovesList.reversed().forEach { snapshot ->
+        loadedState.prevMovesList.forEach { snapshot ->
             rootService.history.prevMoves.push(restoreSnapshot(snapshot))
         }
 
         rootService.history.undoneMoves.clear()
-        loadedState.undoneMovesList.reversed().forEach { snapshot ->
+        loadedState.undoneMovesList.forEach { snapshot ->
             rootService.history.undoneMoves.push(restoreSnapshot(snapshot))
         }
 

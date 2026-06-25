@@ -15,7 +15,7 @@ import java.io.Serializable
  * und einem [Tile] Objekt
  */
 
-class Player(val name: String, val type: PlayerType) : Serializable {
+class Player(val name: String, val type: PlayerType) {
     var natureTokens: Int = 0
 
     val board: MutableMap<Triple<Int, Int, Int>, Tile> = mutableMapOf()
