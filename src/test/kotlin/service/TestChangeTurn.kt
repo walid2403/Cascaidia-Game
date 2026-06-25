@@ -49,11 +49,12 @@ class TestChangeTurn {
         val players = mutableListOf<Player>()
         for (i in 0 until 3) {
             val player = Player("player$i", PlayerType.HUMAN)
+            for (j in 0..20) {
+                player.board[Triple(0,0,j)] = Tile("$i$j".toInt(), habitats, emptyList())
+            }
             players.add(player)
         }
         currentGame.playerQueue.addAll(players)
-        val removedTokens = MutableList(8) { WildlifeToken.HAWK }
-        currentGame.removedTokens.addAll(removedTokens)
         val wildlifeTokens = List(6) { WildlifeToken.SALMON }
         currentGame.wildlifeTokens.pushAll(wildlifeTokens)
 
@@ -83,23 +84,10 @@ class TestChangeTurn {
             "Refresh nicht aufgerufen")
         assertFalse(lastRound,
             "Der nächste Spieler hat noch nicht seinen letzten Zug")
-//        assertTrue(currentGame.removedTokens.isEmpty(),
-//            "Temporär entfernte Tokens sind nicht vollständig zurückgelegt")
-        // Soll nicht mehr in changeTurn gemacht werden
+        assertTrue(currentGame.removedTokens.isEmpty(),
+            "Temporär entfernte Tokens sind nicht vollständig zurückgelegt")
         assertEquals(GameState.START_OF_TURN, currentGame.gameState,
             "GameState wurde nicht passend geändert")
-//        assertNotEquals(WildlifeToken.BEAR, currentGame.choices[1].second,
-//            "Token nicht richtig ausgetauscht")
-        // Soll nicht mehr in changeTurn gemacht werden
-//        assertEquals(4, currentGame.choices[0].first.id,
-//            "Tile nicht richtig ausgetauscht")
-        // Das ist die Aufgabe von placeTile() nicht changeTurn()
-//        assertEquals(13, currentGame.wildlifeTokens.size,
-//            "Falsche Anzahl an WildlifeToken")
-        // Soll nicht mehr in changeTurn gemacht werden
-//        assertEquals(4, currentGame.tileStack.size,
-//            "Falsche Anzahl Tiles")
-        // Das ist die Aufgabe von placeTile() nicht changeTurn()
         assertTrue(currentGame.scoringCards.fold(true) {acc, bool -> acc && bool},
             "Die scoringCards wurden verändert")
         assertEquals(10, currentGame.natureTokens,
@@ -124,32 +112,19 @@ class TestChangeTurn {
     fun `korrekter Fall letzte Runde`() {
         val currentGame = rootService.currentGame
         assertNotNull(currentGame)
-        repeat(2) {
-            currentGame.tileStack.pop()
-        }
+        currentGame.playerQueue.forEach { it.board[Triple(0,0,-1)] = Tile(-1,
+            MutableList(6) { Habitates.MOUNTAINS }, emptyList()) }
 
         rootService.gameService.changeTurn()
 
         assertTrue(refreshWasCalled,
             "Refresh nicht aufgerufen")
-//        assertTrue(lastRound,
-//            "Der nächste Spieler ist schon in seinem letzten Zug")
-        // Ich prüfe die Bedingung der letzten Runde über die größe der Tilemap des Spielers, nicht über die Anzahl
-        // von Tiles im Stack
-//        assertTrue(currentGame.removedTokens.isEmpty(),
-//            "Temporär entfernte Tokens sind nicht vollständig zurückgelegt")
-        // Soll nicht mehr in changeTurn gemacht werden
+        assertTrue(lastRound,
+            "Der nächste Spieler ist schon in seinem letzten Zug")
+        assertTrue(currentGame.removedTokens.isEmpty(),
+            "Temporär entfernte Tokens sind nicht vollständig zurückgelegt")
         assertEquals(GameState.START_OF_TURN, currentGame.gameState,
             "GameState wurde nicht passend geändert")
-//      assertNotEquals(WildlifeToken.BEAR, currentGame.choices[1].second,
-//            "Token nicht richtig ausgetauscht")
-//      assertEquals(4, currentGame.choices[0].first.id,
-//            "Tile nicht richtig ausgetauscht")
-//        assertEquals(13, currentGame.wildlifeTokens.size,
-//            "Falsche Anzahl an WildlifeToken")
-//        assertEquals(2, currentGame.tileStack.size,
-//            "Falsche Anzahl Tiles")
-        // Siehe Test 1
         assertTrue(currentGame.scoringCards.fold(true) {acc, bool -> acc && bool},
             "Die scoringCards wurden verändert")
         assertEquals(10, currentGame.natureTokens,
@@ -173,44 +148,17 @@ class TestChangeTurn {
     fun `nach letztem Zug`() {
         val currentGame = rootService.currentGame
         assertNotNull(currentGame)
-        repeat(5) {
-            currentGame.tileStack.pop()
-        }
-        // Hier wird vermutlich alles fehlschlagen weil meine Funktion kein Ende des Spiels erkennen wird
+        currentGame.playerQueue.forEach { it.board[Triple(0,0,-1)] = Tile(-1,
+            MutableList(6) { Habitates.MOUNTAINS }, emptyList())
+            it.board[Triple(0,0,-2)] = Tile(-2,
+                MutableList(6) { Habitates.MOUNTAINS }, emptyList()) }
         var calledCalculateScores = false
         val testRefresh = object : Refreshable {
-            override fun refreshAfterEndGame(scores: List<List<Int>>) {
+            override fun refreshAfterEndGame() {
                 calledCalculateScores = true
             }
         }
         rootService.addRefreshable(testRefresh)
-
-        rootService.gameService.changeTurn()
-
-        assertFalse(refreshWasCalled,
-            "Refresh wurde aufgerufen")
-        assertTrue(calledCalculateScores,
-            "CalculateScores wurde nicht aufgerufen")
-        calledCalculateScores = false
-        assertEquals(3, currentGame.playerQueue.size,
-            "Spieler verloren gegangen")
-
-
-        currentGame.tileStack.push(Tile(100,mutableListOf(), emptyList()))
-        currentGame.wildlifeTokens.clear()
-        currentGame.removedTokens.clear()
-
-        rootService.gameService.changeTurn()
-
-        assertFalse(refreshWasCalled,
-            "Refresh wurde aufgerufen")
-        assertTrue(calledCalculateScores,
-            "CalculateScores wurde nicht aufgerufen")
-        calledCalculateScores = false
-        assertEquals(3, currentGame.playerQueue.size,
-            "Spieler verloren gegangen")
-
-        currentGame.wildlifeTokens.pushAll(List(12) { WildlifeToken.BEAR })
 
         rootService.gameService.changeTurn()
 
@@ -247,6 +195,38 @@ class TestChangeTurn {
     }
 
     /**
+     * Überprüft, ob eine deep copy erstellt wird
+     */
+    @Test
+    fun `teste deep copy`() {
+        val currentGame = rootService.currentGame
+        assertNotNull(currentGame)
+
+        rootService.gameService.changeTurn()
+
+        currentGame.playerQueue.forEach { it.board[Triple(0,0,-1)] =
+            Tile(-1,mutableListOf(), emptyList())}
+        assertEquals(80, rootService.history.undoneMoves.peek().playerQueue.fold(0)
+        {acc, p -> acc + p.board.size }, "Board wurde verändert")
+
+        currentGame.choices.add(Pair(Tile(-1,mutableListOf(), emptyList()), WildlifeToken.ELK))
+        assertEquals(4, rootService.history.undoneMoves.peek().choices.size,
+            "Choices wurden verändert")
+
+        currentGame.removedTokens.add(WildlifeToken.ELK)
+        assertTrue(rootService.history.undoneMoves.peek().removedTokens.isEmpty(),
+            "RemovedTokens wurden verändert")
+
+        currentGame.wildlifeTokens.push(WildlifeToken.ELK)
+        assertEquals(6, rootService.history.undoneMoves.peek().wildlifeTokens.size,
+            "WildlifeTokens wurden verändert")
+
+        currentGame.tileStack.pop()
+        assertEquals(4, rootService.history.undoneMoves.peek().tileStack.size,
+            "TileStack wurde verändert")
+    }
+
+    /**
      * Überprüft Fälle für Zeilen Abdeckung
      */
     @Test
@@ -256,5 +236,46 @@ class TestChangeTurn {
         rootService.currentGame = null
         assertFailsWith<IllegalStateException>("Ohne Spiel ausgeführt")
         { rootService.gameService.changeTurn() }
+
+
+        rootService.currentGame = currentGame
+        currentGame.playerQueue.clear()
+        currentGame.playerQueue.add(Player("test", PlayerType.EASY_BOT))
+        rootService.gameService.changeTurn()
+        assertEquals(1,rootService.history.prevMoves.size,
+            "Bot Zug auf Stack gespeichert")
+
+        val newGame = CascadiaGame(List(5) { true }, false)
+        val tileStack = mutableListOf<Tile>()
+        val habitats = MutableList(6) { Habitates.MOUNTAINS }
+        for (i in 0 until 5) {
+            tileStack.add(Tile(i,habitats,emptyList()))
+        }
+        newGame.tileStack.pushAll(tileStack)
+        newGame.natureTokens = 10
+        val choices = mutableListOf<Pair<Tile, WildlifeToken>>()
+        for (i in 0 until 4) {
+            val pair = Pair(Tile(10+i,habitats,emptyList()),
+                WildlifeToken.BEAR)
+            choices.add(pair)
+        }
+        newGame.choices += choices
+        newGame.selectedChoice = Pair(0,1)
+        newGame.gameState = GameState.END_OF_TURN
+        val players = mutableListOf<Player>()
+        for (i in 0 until 3) {
+            val player = Player("player$i", PlayerType.HUMAN)
+            players.add(player)
+        }
+        newGame.playerQueue.addAll(players)
+        val wildlifeTokens = List(6) { WildlifeToken.SALMON }
+        newGame.wildlifeTokens.pushAll(wildlifeTokens)
+
+        rootService.currentGame = newGame
+        rootService.history.prevMoves.clear()
+        rootService.history.prevMoves.push(currentGame)
+        rootService.gameService.changeTurn()
+        assertEquals(1,rootService.history.prevMoves.size,
+            "Bot Zug auf Stack gespeichert")
     }
 }
