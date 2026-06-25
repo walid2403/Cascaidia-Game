@@ -88,14 +88,6 @@ class TestChangeTurn {
             "Temporär entfernte Tokens sind nicht vollständig zurückgelegt")
         assertEquals(GameState.START_OF_TURN, currentGame.gameState,
             "GameState wurde nicht passend geändert")
-        /*assertNotEquals(WildlifeToken.BEAR, currentGame.choices[1].second,
-            "Token nicht richtig ausgetauscht")
-        assertEquals(4, currentGame.choices[0].first.id,
-            "Tile nicht richtig ausgetauscht")
-        assertEquals(13, currentGame.wildlifeTokens.size,
-            "Falsche Anzahl an WildlifeToken")
-        assertEquals(4, currentGame.tileStack.size,
-            "Falsche Anzahl Tiles")*/
         assertTrue(currentGame.scoringCards.fold(true) {acc, bool -> acc && bool},
             "Die scoringCards wurden verändert")
         assertEquals(10, currentGame.natureTokens,
@@ -133,14 +125,6 @@ class TestChangeTurn {
             "Temporär entfernte Tokens sind nicht vollständig zurückgelegt")
         assertEquals(GameState.START_OF_TURN, currentGame.gameState,
             "GameState wurde nicht passend geändert")
-        /*assertNotEquals(WildlifeToken.BEAR, currentGame.choices[1].second,
-            "Token nicht richtig ausgetauscht")
-        assertEquals(4, currentGame.choices[0].first.id,
-            "Tile nicht richtig ausgetauscht")
-        assertEquals(13, currentGame.wildlifeTokens.size,
-            "Falsche Anzahl an WildlifeToken")
-        assertEquals(2, currentGame.tileStack.size,
-            "Falsche Anzahl Tiles")*/
         assertTrue(currentGame.scoringCards.fold(true) {acc, bool -> acc && bool},
             "Die scoringCards wurden verändert")
         assertEquals(10, currentGame.natureTokens,
@@ -184,33 +168,6 @@ class TestChangeTurn {
             "CalculateScores wurde nicht aufgerufen")
         assertEquals(3, currentGame.playerQueue.size,
             "Spieler verloren gegangen")
-        /*
-        currentGame.gameState = GameState.END_OF_TURN
-        currentGame.tileStack.push(Tile(100,mutableListOf(), emptyList()))
-        currentGame.wildlifeTokens.clear()
-        currentGame.removedTokens.clear()
-
-        rootService.gameService.changeTurn()
-
-        assertFalse(refreshWasCalled,
-            "Refresh wurde aufgerufen")
-        assertTrue(calledCalculateScores,
-            "CalculateScores wurde nicht aufgerufen")
-        calledCalculateScores = false
-        assertEquals(3, currentGame.playerQueue.size,
-            "Spieler verloren gegangen")
-
-        currentGame.gameState = GameState.END_OF_TURN
-        currentGame.wildlifeTokens.pushAll(List(12) { WildlifeToken.BEAR })
-
-        rootService.gameService.changeTurn()
-
-        assertFalse(refreshWasCalled,
-            "Refresh wurde aufgerufen")
-        assertTrue(calledCalculateScores,
-            "CalculateScores wurde nicht aufgerufen")
-        assertEquals(3, currentGame.playerQueue.size,
-            "Spieler verloren gegangen")*/
     }
 
     /**
@@ -235,6 +192,38 @@ class TestChangeTurn {
             assertEquals(state,currentGame.gameState,
                 "GameState geändert")
         }
+    }
+
+    /**
+     * Überprüft, ob eine deep copy erstellt wird
+     */
+    @Test
+    fun `teste deep copy`() {
+        val currentGame = rootService.currentGame
+        assertNotNull(currentGame)
+
+        rootService.gameService.changeTurn()
+
+        currentGame.playerQueue.forEach { it.board[Triple(0,0,-1)] =
+            Tile(-1,mutableListOf(), emptyList())}
+        assertEquals(80, rootService.history.undoneMoves.peek().playerQueue.fold(0)
+        {acc, p -> acc + p.board.size }, "Board wurde verändert")
+
+        currentGame.choices.add(Pair(Tile(-1,mutableListOf(), emptyList()), WildlifeToken.ELK))
+        assertEquals(4, rootService.history.undoneMoves.peek().choices.size,
+            "Choices wurden verändert")
+
+        currentGame.removedTokens.add(WildlifeToken.ELK)
+        assertTrue(rootService.history.undoneMoves.peek().removedTokens.isEmpty(),
+            "RemovedTokens wurden verändert")
+
+        currentGame.wildlifeTokens.push(WildlifeToken.ELK)
+        assertEquals(6, rootService.history.undoneMoves.peek().wildlifeTokens.size,
+            "WildlifeTokens wurden verändert")
+
+        currentGame.tileStack.pop()
+        assertEquals(4, rootService.history.undoneMoves.peek().tileStack.size,
+            "TileStack wurde verändert")
     }
 
     /**
