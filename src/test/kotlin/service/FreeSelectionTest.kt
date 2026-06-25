@@ -36,7 +36,7 @@ class FreeSelectionTest {
             choices.add(pair)
         }
         currentGame.choices += choices
-        currentGame.selectedChoice = Pair(0,1)
+        currentGame.selectedChoice = Pair(-1,-1)
         currentGame.gameState = GameState.START_OF_TURN
         val players = mutableListOf<Player>()
         for (i in 0 until 3) {
@@ -175,10 +175,10 @@ class FreeSelectionTest {
         val game = rootService.currentGame
         assertNotNull(game)
 
-        assertFailsWith<IllegalStateException> { rootService.playerActionService.freeSelection(-1, 0) }
-        assertFailsWith<IllegalStateException> { rootService.playerActionService.freeSelection(0, -1) }
-        assertFailsWith<IllegalStateException> { rootService.playerActionService.freeSelection(4, 0) }
-        assertFailsWith<IllegalStateException> { rootService.playerActionService.freeSelection(0, 4) }
+        assertFailsWith<IllegalArgumentException> { rootService.playerActionService.freeSelection(-1, 0) }
+        assertFailsWith<IllegalArgumentException> { rootService.playerActionService.freeSelection(0, -1) }
+        assertFailsWith<IllegalArgumentException> { rootService.playerActionService.freeSelection(4, 0) }
+        assertFailsWith<IllegalArgumentException> { rootService.playerActionService.freeSelection(0, 4) }
 
         assertFalse(refreshWasCalled)
 

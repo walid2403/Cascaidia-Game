@@ -37,7 +37,7 @@ class ChangeWildlife {
             choices.add(pair)
         }
         currentGame.choices += choices
-        currentGame.selectedChoice = Pair(0,1)
+        currentGame.selectedChoice = Pair(-1,-1)
         currentGame.gameState = GameState.START_OF_TURN
         val players = mutableListOf<Player>()
         for (i in 0 until 3) {

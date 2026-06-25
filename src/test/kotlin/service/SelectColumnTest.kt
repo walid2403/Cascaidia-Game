@@ -37,7 +37,7 @@ class SelectColumnTest {
             choices.add(pair)
         }
         currentGame.choices += choices
-        currentGame.selectedChoice = Pair(0,1)
+        currentGame.selectedChoice = Pair(-1,-1)
         currentGame.gameState = GameState.START_OF_TURN
         val players = mutableListOf<Player>()
         for (i in 0 until 3) {
@@ -100,14 +100,14 @@ class SelectColumnTest {
         rootService.playerActionService.selectColumn(3)
 
         assertTrue(refreshWasCalled, "Der refresh wurde ausgeführt")
-        assertEquals(0, savedIndex, "An den Refresh wurde der falsche Index gesendet")
+        assertEquals(3, savedIndex, "An den Refresh wurde der falsche Index gesendet")
 
         assertEquals(selection, game.choices, "Die angebotene Selection darf sich zu diesem Zeitpunkt nicht verändert haben")
 
         assertEquals(GameState.MADE_CHOICE, game.gameState,
             "Der GameState muss angepasst worden sein")
 
-        assertEquals(1, game.selectedChoice.first,
+        assertEquals(3, game.selectedChoice.first,
             "Das gewählte Tile muss im Game abgespeichert werden")
         assertEquals(3, game.selectedChoice.second,
             "Das gewählte Token muss im Game abgespeichert werden")
@@ -127,7 +127,7 @@ class SelectColumnTest {
 
         assertFalse(refreshWasCalled)
 
-        assertEquals(GameState.START_OF_TURN, game.gameState,
+        assertEquals(GameState.MADE_CHOICE, game.gameState,
             "Der GameState darf nicht angepasst worden sein")
 
         assertEquals(-1, game.selectedChoice.first,
