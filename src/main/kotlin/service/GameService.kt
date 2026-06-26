@@ -134,7 +134,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
      *                               if not every player has 20 habitat tiles
      */
     fun calculateScores() {
-
+        onAllRefreshables {refreshAfterEndGame(emptyList())}
     }
 
     /**
@@ -146,5 +146,30 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
      *@throws IllegalArgumentException if the [CascadiaGame.playerQueue] is empty
      */
     fun changeTurn() {
+        val game = rootService.currentGame
+        checkNotNull(game) {"No current game"}
+
+        val checkCondition = game.gameState == GameState.PLAYED_TILE || game.gameState == GameState.END_OF_TURN
+        check(checkCondition) {"Current Turn can not be ended"}
+
+        val currentPlayer = game.playerQueue.poll()
+        game.playerQueue.add(currentPlayer)
+
+        game.gameState = GameState.START_OF_TURN
+
+        game.selectedChoice = Pair(-1, -1)
+
+        val nextPlayer = game.playerQueue.peek()
+
+        if (nextPlayer.board.size == 23) {
+            calculateScores()
+            return
+        }
+
+        if (nextPlayer.type == PlayerType.HUMAN && game.isLocal) {
+            rootService.history.prevMoves.push(CascadiaGame(game))
+        }
+
+        onAllRefreshables { refreshAfterChangeTurn(nextPlayer.board.size == 22) }
     }
 }
