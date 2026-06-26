@@ -36,6 +36,9 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     private val nameHeight = 50
     private val nameY = paneHeight/2 - 100
     private val nameDistance = 35
+    private val buttonWidth = 50
+    private val buttonHeight = 50
+    private val downUpButtonDistance = 20
 
 
     private val logo = Label(
@@ -103,6 +106,89 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         isVisible = false
     }
 
+    private val downButtonP1 = Button(
+        width = buttonWidth, height = buttonHeight,
+        posX = (paneWidth+nameWidth)/2 + downUpButtonDistance ,posY = nameY,
+        text = "↓",font = Font(size = 28)
+    ).apply{
+        visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
+        onMouseClicked ={
+                if((p1Input.posY.toInt() == nameY) &&
+                    (p2Input.posY.toInt() == nameY + nameHeight + nameDistance)) {
+                    buttonsDown(p1Input,p2Input)
+                }
+        }
+    }
+
+    private val downButtonP2 = Button(
+        width = buttonWidth, height = buttonHeight,
+        posX = (paneWidth+nameWidth)/2 + downUpButtonDistance ,posY = nameY + nameHeight + nameDistance,
+        text = "↓",font = Font(size = 28)
+    ).apply{
+        visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
+
+    }
+
+    private val downButtonP3 = Button(
+        width = buttonWidth, height = buttonHeight,
+        posX = (paneWidth+nameWidth)/2 + downUpButtonDistance ,posY = nameY + 2*nameHeight + 2*nameDistance,
+        text = "↓",font = Font(size = 28)
+    ).apply{
+        visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
+
+    }
+
+//    private val downButtonP4 = Button(
+//        width = buttonWidth, height = buttonHeight,
+//        posX = (paneWidth+nameWidth)/2 + downUpButtonDistance ,posY = nameY + 3*nameHeight + 3*nameDistance,
+//        text = "↓",font = Font(size = 28)
+//    ).apply{
+//        visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
+//
+//    }
+
+
+//    private val upButtonP1 = Button(
+//        width = buttonWidth, height = buttonHeight,
+//        posX = (paneWidth+nameWidth)/2 + 2*downUpButtonDistance + buttonWidth  ,posY = nameY,
+//        text = "↑",font = Font(size = 28)
+//    ).apply{
+//        visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
+//
+//    }
+
+    private val upButtonP2 = Button(
+        width = buttonWidth, height = buttonHeight,
+        posX = (paneWidth+nameWidth)/2 +  2*downUpButtonDistance + buttonWidth ,
+        posY = nameY + nameHeight + nameDistance,
+        text = "↑",font = Font(size = 28)
+    ).apply{
+        visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
+
+    }
+
+    private val upButtonP3 = Button(
+        width = buttonWidth, height = buttonHeight,
+        posX = (paneWidth+nameWidth)/2 + 2*downUpButtonDistance + buttonWidth ,
+        posY = nameY + 2*nameHeight + 2*nameDistance,
+        text = "↑",font = Font(size = 28)
+    ).apply{
+        visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
+
+    }
+
+    private val upButtonP4 = Button(
+        width = buttonWidth, height = buttonHeight,
+        posX = (paneWidth+nameWidth)/2 +  2*downUpButtonDistance + buttonWidth  ,
+        posY = nameY + 3*nameHeight + 3*nameDistance,
+        text = "↑",font = Font(size = 28)
+    ).apply{
+        visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
+
+    }
+
+
+
     private val p1Input = Label(
         width = nameWidth, height = nameHeight,
         posX = (paneWidth-nameWidth)/2, posY = nameY,
@@ -117,7 +203,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
     private val p2Input = Label(
         width = nameWidth, height = nameHeight,
-        posX = (paneWidth - nameWidth)/2, posY = nameY + nameHeight + nameDistance,        text = " Player 2",
+        posX = (paneWidth - nameWidth)/2, posY = nameY + nameHeight + nameDistance,
+        text = " Player 2",
         font = Font(size = 28)
     ).apply {
         visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
@@ -645,7 +732,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
     init {
 
-        listOf(p1Input,p2Input,p3Input,p4Input,
+        listOf(p1Input,p2Input,p3Input,p4Input, downButtonP1, downButtonP2, downButtonP3,
+             upButtonP2, upButtonP3, upButtonP4,
             human,player, exitButton).forEach { hostPanel.add(it) }
 
         listOf(startLabel,startButton, bear,elk,hawk,salmon,fox,
@@ -663,9 +751,9 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
             tabBorder,
             tab2Border,
             sidePaneBorder,
-            sidePanel,
             arrowLabel,
             arrowButton,
+            sidePanel,
             hostPaneBorder,
             hostPanel,
             )
@@ -710,5 +798,28 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
             "checkBoxBearA" -> checkBoxBearB.isChecked = false
             "checkBoxBearB" -> checkBoxBearA.isChecked = false
         }
+    }
+
+
+    private fun buttonsDown (label1 : Label, label2 : Label){
+        val l1 = label1.posY
+        val l2 = label2.posY
+
+        playAnimation(
+            ParallelAnimation(
+                MovementAnimation(
+                    componentView = label1,
+                    fromY = l1,
+                    toY = l2,
+                    duration = 500 // dauer
+                ),
+                MovementAnimation(
+                    componentView = label2,
+                    fromY = l2,
+                    toY = l1,
+                    duration = 500 // dauer
+                )
+            )
+        )
     }
 }
