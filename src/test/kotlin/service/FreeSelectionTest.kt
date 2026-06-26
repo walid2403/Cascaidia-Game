@@ -155,7 +155,7 @@ class FreeSelectionTest {
 
         assertFalse(refreshWasCalled)
 
-        assertEquals(GameState.START_OF_TURN, game.gameState,
+        assertEquals(GameState.MADE_CHOICE, game.gameState,
             "Der GameState darf nicht angepasst worden sein")
 
         assertEquals(-1, game.selectedChoice.first,
