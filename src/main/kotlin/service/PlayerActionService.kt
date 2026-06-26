@@ -106,14 +106,14 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             "Zug ungültig: wildlifeIndex $wildlifeIndex außerhalb des Markts"
         }
 
-        if(tileIndex != wildlifeIndex){
-            //wirft automatisch ein IllegalStateException.
-            // NUR WENN es eine echte freie Auswahl ist, muss er einen Token haben.
-            check(currentPlayer.natureTokens > 0) {
-                "Spieler besitzt Kein NatureToken, um ungleiche Paare zu wählen"
-            }
-            currentPlayer.natureTokens--
+        //wirft automatisch ein IllegalStateException.
+        // NUR WENN es eine echte freie Auswahl ist, muss er einen Token haben.
+        check(currentPlayer.natureTokens > 0) {
+            "Spieler besitzt Kein NatureToken, um ungleiche Paare zu wählen"
         }
+
+
+        currentPlayer.natureTokens--
         currentGame.selectedChoice = Pair(tileIndex,wildlifeIndex)
         currentGame.gameState = GameState.MADE_CHOICE
 
@@ -142,7 +142,8 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             "Spieler darf Aktuell kein Combination auswählen"
         }
         //wirft automatisch ein IllegalArgumentException
-        require (index in 0..3){
+        check (index in 0..3){ //war require
+
             "Zug ungültig: Index $index außerhalb des Markts"
 
         }
