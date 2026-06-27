@@ -113,7 +113,13 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
             exterminate(false)
             return
         }else {
+            for (token in game.removedTokens) {
+                game.wildlifeTokens.push(token)
+            }
+            game.wildlifeTokens.shuffle()
+            game.removedTokens.clear()
             //refreshing only at the final resolved state
+
             onAllRefreshables {
                 refreshAfterExterminate()
             }
@@ -193,6 +199,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
                     node.neighbours[(3.5 - (i*1.5)).toInt()] = nodes.first { it.tile == zChange }
                 }
             }
+            nodes.add(node)//this is needed
         }
         return nodes
     }
