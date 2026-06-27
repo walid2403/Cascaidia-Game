@@ -106,7 +106,6 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
             refreshAfterEndGame(scores)
         }
     }
-
     private fun createGraph(board: Map<Triple<Int,Int,Int>,Tile>) : List<Node>{
         val nodes = mutableListOf<Node>()
         val seen = mutableListOf<Tile>()
@@ -117,17 +116,17 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
             val second = entry.key.second
             val third = entry.key.third
             for (i in listOf(-1,1)) {
-                val xChange = board[Triple(first+i,second,third)]
-                val yChange = board[Triple(first,second+i,third)]
-                val zChange = board[Triple(first,second,third+i)]
-                if (xChange in seen) {
-                    node.neighbours[(1.5 - (i*1.5)).toInt()] = nodes.first { it.tile == xChange }
+                val xAxis = board[Triple(first,second-i,third+i)]
+                val yAxis = board[Triple(first+i,second,third-i)]
+                val zAxis = board[Triple(first+i,second-i,third)]
+                if (xAxis in seen) {
+                    node.neighbours[(1.5 - (i*1.5)).toInt()] = nodes.first { it.tile == xAxis }
                 }
-                if (yChange in seen) {
-                    node.neighbours[(2.5 - (i*1.5)).toInt()] = nodes.first { it.tile == yChange }
+                if (yAxis in seen) {
+                    node.neighbours[(2.5 - (i*1.5)).toInt()] = nodes.first { it.tile == yAxis }
                 }
-                if (zChange in seen) {
-                    node.neighbours[(3.5 - (i*1.5)).toInt()] = nodes.first { it.tile == zChange }
+                if (zAxis in seen) {
+                    node.neighbours[(3.5 - (i*1.5)).toInt()] = nodes.first { it.tile == zAxis }
                 }
             }
         }
