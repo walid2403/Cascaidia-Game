@@ -117,21 +117,25 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
 
 
 //    private val infoButton : Label  = Label(
-//        posX =1920/2 - 200 , posY = 550,
+//        posX =1920/2 - 230 , posY = 540,
 //        width = 50, height = 50,
-//        text = "",
+//        text = "!",
+//        font = Font(size = 30),
 //        visual = ColorVisual(color = Color(0xFFFFFF))
 //    ).apply {
+//        visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(360) }
 //        onMouseEntered ={
 //            infoBox.isVisible = true
 //        }
 //        onMouseExited = { infoBox.isVisible = false }
 //    }
-//
+
 //    private val infoBox : Label  = Label(
-//        posX =1920/2 - 200 , posY = 550,
-//        width = 500, height = 30,
-//        text = "the Lobby-Code is optional. If you don't enter on a random one will be assigned to you",
+//        posX =1920/2 - 280 , posY = 550,
+//        width = 50, height = 80,
+//        text = "the Lobby-Code is optional." +
+//                "\n If you don't enter on a random one" +
+//                "\n will be assigned to you",
 //        visual = ColorVisual(color = Color(0xFFFFFF))
 //            .apply {
 //                transparency = 0.7
