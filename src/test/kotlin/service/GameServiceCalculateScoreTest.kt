@@ -10,7 +10,7 @@ import kotlin.test.assertFailsWith
 /**
  * the tests for fun calculateScores()
  */
-class GameServiceCalculateScoresTest {
+class GameServiceCalculateScoreTest {
 
     private class TestRefreshable : Refreshable {
         var receivedScores: List<Pair<String, List<Int>>>? = null
