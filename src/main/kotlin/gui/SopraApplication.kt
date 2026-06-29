@@ -30,7 +30,7 @@ class SopraApplication : BoardGameApplication("SoPra Game") {
     private val hostOnlineLobbyScene = HostOnlineLobbyScene(this@SopraApplication, rootService)
 
     /**
-     * Initializes the application by displaying the [HelloScene].
+     * Initializes the application by displaying the [MainMenuScene].
      */
     init {
         this.showGameScene(helloScene)

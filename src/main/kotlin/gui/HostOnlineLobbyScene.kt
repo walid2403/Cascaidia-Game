@@ -17,6 +17,7 @@ import tools.aqua.bgw.style.BorderRadius
 import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
+import tools.aqua.bgw.visual.Visual
 
 class HostOnlineLobbyScene(private val app: SopraApplication, private val rootService: RootService) : MenuScene(1920, 1080), Refreshable  {
 
@@ -25,8 +26,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     private val paneWidth = 750
     private val paneHeight = 620
     private val tabHeight = 130
-    private val tabWidth = 158
-    private val borderThickness = 4
+    private val tabWidth = 130
     private val paneX = (sceneWidth-paneWidth)/2
     private val paneY = (sceneHeight-paneHeight)/2
     private val movementDistance = paneWidth/2 - 90
@@ -61,57 +61,18 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         posX = paneX, posY = paneY,
         width = paneWidth, height = paneHeight,
     ).apply {
-        visual = ColorVisual(64, 98, 70).apply { style.borderRadius = BorderRadius(35) }
-
+        visual = ImageVisual("HostMenuBackground.png").apply {
+            style.borderRadius = BorderRadius(35)
+        }
     }
 
     private val sidePanel = Pane<UIComponent>(
         posX = paneX, posY = paneY,
         width = paneWidth, height = paneHeight,
     ).apply {
-        visual = ColorVisual(153, 172, 255).apply { style.borderRadius = BorderRadius(35) }
-    }
-
-    private val hostPaneBorder = Label(
-        posX = paneX - borderThickness,
-        posY = paneY - borderThickness,
-        width = paneWidth + borderThickness*2,
-        height = paneHeight + borderThickness*2,
-        visual = ColorVisual(255, 255, 255).apply{
+        visual = ImageVisual("ScoreCardPaneBackground.png").apply {
             style.borderRadius = BorderRadius(35)
         }
-    )
-
-    private val sidePaneBorder = Label(
-        posX = paneX - borderThickness,
-        posY = paneY - borderThickness,
-        width = paneWidth + borderThickness*2,
-        height = paneHeight + borderThickness*2,
-        visual = ColorVisual(255, 255, 255).apply{
-            style.borderRadius = BorderRadius(35)
-        }
-    )
-
-    private val tabBorder = Label(
-        posX = paneX + paneWidth - tabWidth + 100 - borderThickness,
-        posY = paneY + paneHeight - tabHeight - borderThickness,
-        width = tabWidth + 2*borderThickness,
-        height = tabHeight + 2*borderThickness,
-        visual = ColorVisual(255, 255, 255).apply {
-            style.borderRadius = BorderRadius(15.0)
-        }
-    )
-
-    private val tab2Border = Label(
-        posX = tabBorder.posX + movementDistance,
-        posY = paneY + paneHeight - tabHeight - borderThickness,
-        width = tabWidth + 2*borderThickness,
-        height = tabHeight + 2*borderThickness,
-        visual = ColorVisual(255, 255, 255).apply {
-            style.borderRadius = BorderRadius(15.0)
-        }
-    ).apply {
-        isVisible = false
     }
 
     private val downButtonP1 = Button(
@@ -131,34 +92,34 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 //                    buttonsDown(p2Input,p1Input)
 //                }
 //               else if ()
-                if (p1Input.posY.toInt() == nameY){
-                    when (posYDownP1){
-                        p2Input.posY.toInt() -> {buttonsDown(p1Input,p2Input)}
-                        p3Input.posY.toInt() -> {buttonsDown(p1Input,p3Input)}
-                        p4Input.posY.toInt() -> {buttonsDown(p1Input,p4Input)}
-                    }
+            if (p1Input.posY.toInt() == nameY){
+                when (posYDownP1){
+                    p2Input.posY.toInt() -> {buttonsDown(p1Input,p2Input)}
+                    p3Input.posY.toInt() -> {buttonsDown(p1Input,p3Input)}
+                    p4Input.posY.toInt() -> {buttonsDown(p1Input,p4Input)}
                 }
-                else if (p2Input.posY.toInt() == nameY){
-                    when (posYDownP1){
-                        p1Input.posY.toInt() -> {buttonsDown(p2Input,p1Input)}
-                        p3Input.posY.toInt() -> {buttonsDown(p2Input,p3Input)}
-                        p4Input.posY.toInt() -> {buttonsDown(p2Input,p4Input)}
-                    }
+            }
+            else if (p2Input.posY.toInt() == nameY){
+                when (posYDownP1){
+                    p1Input.posY.toInt() -> {buttonsDown(p2Input,p1Input)}
+                    p3Input.posY.toInt() -> {buttonsDown(p2Input,p3Input)}
+                    p4Input.posY.toInt() -> {buttonsDown(p2Input,p4Input)}
                 }
-                else if (p3Input.posY.toInt() == nameY){
-                    when (posYDownP1){
-                        p1Input.posY.toInt() -> {buttonsDown(p3Input,p1Input)}
-                        p2Input.posY.toInt() -> {buttonsDown(p3Input,p2Input)}
-                        p4Input.posY.toInt() -> {buttonsDown(p3Input,p4Input)}
-                    }
+            }
+            else if (p3Input.posY.toInt() == nameY){
+                when (posYDownP1){
+                    p1Input.posY.toInt() -> {buttonsDown(p3Input,p1Input)}
+                    p2Input.posY.toInt() -> {buttonsDown(p3Input,p2Input)}
+                    p4Input.posY.toInt() -> {buttonsDown(p3Input,p4Input)}
                 }
-                else if (p4Input.posY.toInt() == nameY){
-                    when (posYDownP1){
-                        p1Input.posY.toInt() -> {buttonsDown(p4Input,p1Input)}
-                        p2Input.posY.toInt() -> {buttonsDown(p4Input,p2Input)}
-                        p3Input.posY.toInt() -> {buttonsDown(p4Input,p3Input)}
-                    }
+            }
+            else if (p4Input.posY.toInt() == nameY){
+                when (posYDownP1){
+                    p1Input.posY.toInt() -> {buttonsDown(p4Input,p1Input)}
+                    p2Input.posY.toInt() -> {buttonsDown(p4Input,p2Input)}
+                    p3Input.posY.toInt() -> {buttonsDown(p4Input,p3Input)}
                 }
+            }
         }
     }
 
@@ -311,7 +272,6 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     }
 
 
-
     private val p2Input = Label(
         width = nameWidth, height = nameHeight,
         posX = (paneWidth - nameWidth)/2, posY = nameY + nameHeight + nameDistance,
@@ -323,7 +283,6 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     }
 
 
-
     private val p3Input = Label(
         width = nameWidth, height = nameHeight,
         posX = (paneWidth - nameWidth)/2, posY = nameY + 2*nameHeight + 2*nameDistance,
@@ -332,8 +291,6 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     ).apply {
         visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
     }
-
-
 
 
     private val p4Input = Label(
@@ -353,16 +310,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     ).apply {
         visual = ImageVisual("elk.png", iconSize, iconSize)
         onMouseClicked = {
-            bearCardA.isVisible = false
-            bearCardB.isVisible = false
-            elkCardA.isVisible = true
-            elkCardB.isVisible = true
-            foxCardA.isVisible = false
-            foxCardB.isVisible = false
-            salmonCardA.isVisible = false
-            salmonCardB.isVisible = false
-            hawkCardA.isVisible = false
-            hawkCardB.isVisible = false
+            showScoreCards(elkCardA, elkCardB)
             elkCardA.resize(209, 403)
             elkCardB.resize(209, 403)
         }
@@ -375,16 +323,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     ).apply {
         visual = ImageVisual("hawk.png", iconSize, iconSize)
         onMouseClicked = {
-            bearCardA.isVisible = false
-            bearCardB.isVisible = false
-            elkCardA.isVisible = false
-            elkCardB.isVisible = false
-            foxCardA.isVisible = false
-            foxCardB.isVisible = false
-            salmonCardA.isVisible = false
-            salmonCardB.isVisible = false
-            hawkCardA.isVisible = true
-            hawkCardB.isVisible = true
+            showScoreCards(hawkCardA, hawkCardB)
             hawkCardA.resize(183, 397)
             hawkCardB.resize(183, 397)
         }
@@ -397,20 +336,10 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     ).apply {
         visual = ImageVisual("salmon.png", iconSize, iconSize)
         onMouseClicked = {
-            bearCardA.isVisible = false
-            bearCardB.isVisible = false
-            elkCardA.isVisible = false
-            elkCardB.isVisible = false
-            foxCardA.isVisible = false
-            foxCardB.isVisible = false
-            salmonCardA.isVisible = true
-            salmonCardB.isVisible = true
-            hawkCardA.isVisible = false
-            hawkCardB.isVisible = false
+            showScoreCards(salmonCardA, salmonCardB)
             salmonCardA.resize(183, 397)
             salmonCardB.resize(183, 397)
         }
-
     }
 
     private val fox = Label(
@@ -420,22 +349,11 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         visual = ImageVisual("fox.png", iconSize, iconSize)
 
         onMouseClicked = {
-            bearCardA.isVisible = false
-            bearCardB.isVisible = false
-            elkCardA.isVisible = false
-            elkCardB.isVisible = false
-            foxCardA.isVisible = true
-            foxCardB.isVisible = true
-            salmonCardA.isVisible = false
-            salmonCardB.isVisible = false
-            hawkCardA.isVisible = false
-            hawkCardB.isVisible = false
+            showScoreCards(foxCardA, foxCardB)
             foxCardA.resize(183, 397)
             foxCardB.resize(183, 397)
         }
     }
-
-
 
     private val bear = Label(
         width = iconSize + 15, height = iconSize + 15,
@@ -444,16 +362,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     ).apply {
         visual = ImageVisual("bear.png", iconSize, iconSize)
         onMouseClicked = {
-            bearCardA.isVisible = true
-            bearCardB.isVisible = true
-            elkCardA.isVisible = false
-            elkCardB.isVisible = false
-            foxCardA.isVisible = false
-            foxCardB.isVisible = false
-            salmonCardA.isVisible = false
-            salmonCardB.isVisible = false
-            hawkCardA.isVisible = false
-            hawkCardB.isVisible = false
+            showScoreCards(bearCardA, bearCardB)
         }
     }
 
@@ -713,29 +622,11 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
     }
 
-    private val human = Label(
-        width = 200, height = 60,
-        posX = 500, posY = 45,
-        font = Font(size = 40)
-    ).apply { visual = ImageVisual("Auswahl.png") }
-
-    private val player = Label(
-        width = 300, height = 100,
-        posX = 750.0/2 - 150, posY = 30,
-        text = "Host",
-        font = Font(
-            size = 50,
-            color = Color(0xFFFFFF),
-            family = "Canva Sans",
-            fontWeight = Font.FontWeight.BOLD)
-    )
-
     private val exitButton = Button(
-        width = 100, height = 60,
-        posX = 750/2 -330, posY = 620/2-300,
-        text = "←",font = Font(size = 70,color = Color(0xFFFFFF))
+        width = 78, height = 78,
+        posX = 33, posY = 23,
+        visual = Visual.EMPTY
     ).apply {
-        visual = ColorVisual(64, 98, 70).apply { style.borderRadius = BorderRadius(8) }
         onMouseClicked = {
             app.showMenuScene(MainMenuScene(app,rootService))
         }
@@ -743,29 +634,32 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
 //    "◀──",
 
-
-
-    private val arrowLabel = Label(
-        posX = paneX + paneWidth - tabWidth + 100, posY = paneY + paneHeight - tabHeight,
-        width = tabWidth, height = tabHeight,
-        text = "",
-        font = Font(size = 22, color = Color.BLACK)
+    private val tabLabel = Label(
+        posX = paneX + paneWidth - tabWidth + 80,
+        posY = paneY + paneHeight - tabHeight,
+        width = tabWidth,
+        height = tabHeight,
+        visual = ImageVisual("FoldOutTab.png").apply {
+            style.borderRadius = BorderRadius(15.0)
+        }
     ).apply {
-        visual = ColorVisual(153, 172, 255).apply { style.borderRadius = BorderRadius(15) }
-    }
-
-    private val arrowButton = Label(
-        posX = paneX + paneWidth + 5, posY = paneY + paneHeight -110,
-        width = 90.0, height = 90.0,
-        text = "→",
-        font = Font(size = 40, color = Color.BLACK)
-    ).apply {
-        visual = ColorVisual(153, 172, 255).apply { style.borderRadius = BorderRadius(8) }
         onMouseClicked = {
             expandPanel()
-
         }
     }
+
+//    private val arrowButton = Label(
+//        posX = paneX + paneWidth + 5, posY = paneY + paneHeight -110,
+//        width = 90.0, height = 90.0,
+//        text = "→",
+//        font = Font(size = 40, color = Color.BLACK)
+//    ).apply {
+//        visual = ColorVisual(153, 172, 255).apply { style.borderRadius = BorderRadius(8) }
+//        onMouseClicked = {
+//            expandPanel()
+//
+//        }
+//    }
 
 
     private val startLabel = Label(
@@ -782,62 +676,9 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     private val startButton = Label(
         posX = 750 -8, posY = 620 - 100,
         width = 80.0, height = 50.0,
-        text = "▶",
-        font = Font(size = 40, color = Color.BLACK)
+        visual = Visual.EMPTY
     ).apply {
-        visual = ColorVisual(153, 172, 255).apply { style.borderRadius = BorderRadius(8) }
         this.isVisible = false
-    }
-
-
-    private fun expandPanel() {
-
-        playAnimation(
-            ParallelAnimation(
-                MovementAnimation( // bewegt das hostPanel
-                    componentView = hostPanel,
-                    fromX = hostPanel.actualPosX,
-                    toX = hostPanel.actualPosX - (hostPanel.width/2)+90,
-                    duration = 1000 // dauer
-                ),
-                MovementAnimation( // bewegt die Umrandung des hostPanel
-                    componentView = hostPaneBorder,
-                    fromX = hostPanel.actualPosX,
-                    toX = hostPanel.actualPosX - (hostPanel.width/2)+90,
-                    duration = 1000 // dauer
-                ),
-                MovementAnimation( // bewegt das sidePanel
-                    componentView = sidePanel,
-                    fromX = sidePanel.actualPosX,
-                    toX = sidePanel.actualPosX + (sidePanel.width/2)-90,
-                    duration = 1000 // dauer
-                ),
-                MovementAnimation( // bewegt die Umrandung des sidePanel
-                    componentView = sidePaneBorder,
-                    fromX = sidePanel.actualPosX,
-                    toX = sidePanel.actualPosX + (sidePanel.width/2)-90,
-                    duration = 1000 // dauer
-                ),
-//                MovementAnimation( // bewegt die Umrandung des Tabs an der Seite
-//                    componentView = tabBorder,
-//                    byX = movementDistance,
-//                    duration = 1000 // dauer
-//                ),
-
-                ).apply {
-                onFinished = {
-                    runOnGUIThread {
-                        arrowButton.isVisible = false
-                        startButton.isVisible = true
-                        arrowLabel.isVisible = false
-                        startLabel.isVisible = true
-                        tabBorder.isVisible = false
-                        tab2Border.isVisible = true
-
-                    }
-                }
-            }
-        )
     }
 
 
@@ -845,9 +686,9 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
         listOf(p1Input,p2Input,p3Input,p4Input, downButtonP1, downButtonP2, downButtonP3, shuffleButton,
 //             upButtonP2, upButtonP3, upButtonP4,
-            human,player, exitButton).forEach { hostPanel.add(it) }
+            exitButton).forEach { hostPanel.add(it) }
 
-        listOf(startLabel,startButton, bear,elk,hawk,salmon,fox,
+        listOf(startButton, bear,elk,hawk,salmon,fox,
             bearCardA,bearCardB,elkCardA,elkCardB,foxCardA,foxCardB,
             hawkCardA,hawkCardB,salmonCardA,salmonCardB,
             checkBoxHawkA,checkBoxHawkB, checkBoxElkA,checkBoxElkB,checkBoxBearA,checkBoxBearB,checkBoxFoxA,
@@ -859,17 +700,58 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         backgroundOpacity = .5
         addComponents(
             logo,
-            tabBorder,
-            tab2Border,
-            sidePaneBorder,
-            arrowLabel,
-            arrowButton,
+            //arrowButton,
             sidePanel,
-            hostPaneBorder,
+            tabLabel,
             hostPanel,
             )
     }
 
+    private fun expandPanel() {
+
+        playAnimation(
+            ParallelAnimation(
+                MovementAnimation( // bewegt das hostPanel
+                    componentView = hostPanel,
+                    fromX = hostPanel.actualPosX,
+                    toX = hostPanel.actualPosX - (hostPanel.width/2)+90,
+                    duration = 1000 // dauer
+                ),
+                MovementAnimation( // bewegt das sidePanel
+                    componentView = sidePanel,
+                    fromX = sidePanel.actualPosX,
+                    toX = sidePanel.actualPosX + (sidePanel.width/2)-90,
+                    duration = 1000 // dauer
+                ),
+                MovementAnimation( // bewegt das Tab
+                    componentView = tabLabel,
+                    fromX = sidePanel.actualPosX,
+                    toX = sidePanel.actualPosX + (sidePanel.width/2)-90,
+                    duration = 1000 // dauer
+                )
+
+                ).apply {
+                onFinished = {
+                    runOnGUIThread {
+                        //arrowButton.isVisible = false
+                        startButton.isVisible = true
+                        tabLabel.apply {
+                            visual = ImageVisual("StartGameTab.png").apply {
+                                style.borderRadius = BorderRadius(15)
+                            }
+                            onMouseClicked = {
+                                TODO("startGame muss aufgerufen werden")
+                            }
+                        }
+                        //startLabel.isVisible = true
+                        //tabBorder.isVisible = false
+                        //tab2Border.isVisible = true
+
+                    }
+                }
+            }
+        )
+    }
 
     private fun names() : List<String> {
         return listOf(p1Input.text.trim(),p2Input.text.trim(),p3Input.text.trim(),p4Input.text.trim())
@@ -932,5 +814,14 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
                 )
             )
         )
+    }
+
+    private fun showScoreCards(cardA: Label, cardB: Label) {
+        val cards = listOf(salmonCardA, salmonCardB, hawkCardA, hawkCardB, foxCardA, foxCardB,
+            bearCardA, bearCardB, elkCardA, elkCardB)
+        cards.forEach { card ->
+            if(card == cardA || card == cardB) card.isVisible = true
+            else card.isVisible = false
+        }
     }
 }

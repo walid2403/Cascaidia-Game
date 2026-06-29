@@ -27,10 +27,10 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
     private var playerNum = 4
 
     //temporary lists to test the score scene visuals
-    private val scoreList: MutableList<Int> = ArrayList()
-    private val scoreList2: MutableList<Int> = ArrayList()
-    private val scoreList3: MutableList<Int> = ArrayList()
-    private val scoreList4: MutableList<Int> = ArrayList()
+    private var scoreList: MutableList<Int> = mutableListOf(3,4,1,7,0,9,3,1,3,5,2,0,7,3,5,1)
+    private val scoreList2: MutableList<Int> = mutableListOf(5,3,7,9,1,1,2,1,3,6,4,0,7,4,6,8)
+    private val scoreList3: MutableList<Int> = mutableListOf(3,3,5,7,1,1,2,8,6,0,0,6,3,2,8,5)
+    private val scoreList4: MutableList<Int> = mutableListOf(1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7)
     private val testList1: MutableList<Pair<String, List<Int>>> = ArrayList()
     var scoresUpdated = false
 
@@ -110,7 +110,6 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
             //temporary, used to test the score scene visuals, can be deleted later!
             if(!scoresUpdated) {
                 scoresUpdated = true
-                fillScoreLists()
                 //testList1.add(Pair("a", scoreList))
                 testList1.add(Pair("b", scoreList2))
                 testList1.add(Pair("c", scoreList3))
@@ -118,82 +117,6 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
                 refreshAfterEndGame(testList1)
             }
         }
-    }
-
-    private fun fillScoreLists() {
-        scoreList.add(1)
-        scoreList.add(3)
-        scoreList.add(7)
-        scoreList.add(15)
-        scoreList.add(0)
-
-        scoreList.add(2)
-        scoreList.add(3)
-        scoreList.add(6)
-        scoreList.add(1)
-        scoreList.add(3)
-
-        scoreList.add(6)
-        scoreList.add(2)
-        scoreList.add(0)
-        scoreList.add(0)
-        scoreList.add(1)
-        scoreList.add(2)
-
-        scoreList2.add(2)
-        scoreList2.add(2)
-        scoreList2.add(2)
-        scoreList2.add(2)
-        scoreList2.add(2)
-
-        scoreList2.add(2)
-        scoreList2.add(2)
-        scoreList2.add(2)
-        scoreList2.add(2)
-        scoreList2.add(2)
-
-        scoreList2.add(2)
-        scoreList2.add(2)
-        scoreList2.add(2)
-        scoreList2.add(2)
-        scoreList2.add(2)
-        scoreList2.add(2)
-
-        scoreList3.add(1)
-        scoreList3.add(1)
-        scoreList3.add(1)
-        scoreList3.add(1)
-        scoreList3.add(1)
-
-        scoreList3.add(1)
-        scoreList3.add(1)
-        scoreList3.add(1)
-        scoreList3.add(1)
-        scoreList3.add(1)
-
-        scoreList3.add(1)
-        scoreList3.add(1)
-        scoreList3.add(1)
-        scoreList3.add(1)
-        scoreList3.add(1)
-        scoreList3.add(2)
-
-        scoreList4.add(3)
-        scoreList4.add(4)
-        scoreList4.add(3)
-        scoreList4.add(4)
-        scoreList4.add(3)
-        scoreList4.add(4)
-        scoreList4.add(3)
-        scoreList4.add(4)
-        scoreList4.add(3)
-        scoreList4.add(4)
-        scoreList4.add(3)
-        scoreList4.add(4)
-        scoreList4.add(3)
-        scoreList4.add(4)
-        scoreList4.add(3)
-        scoreList4.add(3)
     }
 
     private val mainScoreTabOverlay = Label (

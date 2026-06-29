@@ -12,26 +12,40 @@ import tools.aqua.bgw.style.BorderRadius
 import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
+import tools.aqua.bgw.visual.Visual
 
 class HostOnlineScene(private val app: SopraApplication,private val rootService: RootService) : MenuScene(1920, 1080), Refreshable  {
 
+    private val sceneWidth = 1920
+    private val sceneHeight = 1080
+    private val paneX = (sceneWidth - 750) / 2
+    private val paneY = (sceneHeight - 620) / 2
+    private val paneWidth = 750
+    private val paneHeight = 620
 
     private val logo = Label(
         posX = 0,
         posY = 0,
         width = 1920,
         height = 1080,
-        visual = ImageVisual("HostHintergrund.png")
+        visual = ImageVisual("GameConfigMenuBackground.png")
+    )
 
+    private val menuBackground = Label(
+        posX = paneX,
+        posY = paneY,
+        width = paneWidth,
+        height = paneHeight,
+        visual = ImageVisual("HostMenuBackground.png").apply {
+            style.borderRadius = BorderRadius(35)
+        }
     )
 
     val exitButton = Button(
-        width = 100, height = 60,
-        posX = 1920/2-330, posY = 1080/2-300,
-        text = "←",font = Font(size = 70, color = Color(0xFFFFFF))
+        width = 78, height = 78,
+        posX = paneX + 33, posY = paneY + 23,
+        visual = Visual.EMPTY
     ).apply {
-        visual = ColorVisual(64, 98, 70).apply { style.borderRadius = BorderRadius(8) }
-
         onMouseClicked = {
             app.showMenuScene(MainMenuScene(app,rootService))
         }
@@ -152,6 +166,7 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
         backgroundOpacity = .5
         addComponents(
             logo,
+            menuBackground,
             exitButton,
             p2Input,
             p4Input,

@@ -6,6 +6,7 @@ import tools.aqua.bgw.animation.MovementAnimation
 import tools.aqua.bgw.animation.ParallelAnimation
 import tools.aqua.bgw.components.StaticComponentView
 import tools.aqua.bgw.components.layoutviews.Pane
+import tools.aqua.bgw.components.uicomponents.Button
 import tools.aqua.bgw.components.uicomponents.CheckBox
 import tools.aqua.bgw.components.uicomponents.Label
 import tools.aqua.bgw.core.Alignment
@@ -15,6 +16,7 @@ import tools.aqua.bgw.style.BorderRadius
 import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
+import tools.aqua.bgw.visual.Visual
 
 class JoinOnlineLobbyScene (
     private val app: SopraApplication,
@@ -26,7 +28,6 @@ class JoinOnlineLobbyScene (
     private val paneHeight = 620
     private val tabHeight = 130
     private val tabWidth = 130
-    private val borderThickness = 4
     private val paneX = (sceneWidth-paneWidth)/2
     private val paneY = (sceneHeight-paneHeight)/2
     private val movementDistance = paneWidth/2 - 90
@@ -44,7 +45,7 @@ class JoinOnlineLobbyScene (
         posY = 0,
         width = sceneWidth,
         height = sceneHeight,
-        visual = ImageVisual("ScoreSceneBackground.png")
+        visual = ImageVisual("GameConfigMenuBackground.png")
     )
 
     private val playerViewPane = Pane<StaticComponentView<*>>(
@@ -52,7 +53,7 @@ class JoinOnlineLobbyScene (
         posY = paneY,
         width = paneWidth,
         height = paneHeight,
-        visual = ColorVisual(64, 98, 70).apply{
+        visual = ImageVisual("JoinMenuBackground.png").apply{
             style.borderRadius = BorderRadius(35)
         }
     )
@@ -62,48 +63,26 @@ class JoinOnlineLobbyScene (
         posY = paneY,
         width = paneWidth,
         height = paneHeight,
-        visual = ColorVisual(153, 172, 255).apply{
-            style.borderRadius = BorderRadius(35)
-        }
-    )
-
-    private val playerPaneBorder = Label(
-        posX = paneX - borderThickness,
-        posY = paneY - borderThickness,
-        width = paneWidth + borderThickness*2,
-        height = paneHeight + borderThickness*2,
-        visual = ColorVisual(255, 255, 255).apply{
-            style.borderRadius = BorderRadius(35)
-        }
-    )
-
-    private val scoreCardPaneBorder = Label(
-        posX = paneX - borderThickness,
-        posY = paneY - borderThickness,
-        width = paneWidth + borderThickness*2,
-        height = paneHeight + borderThickness*2,
-        visual = ColorVisual(255, 255, 255).apply{
+        visual = ImageVisual("ScoreCardPaneBackground.png").apply{
             style.borderRadius = BorderRadius(35)
         }
     )
 
     private val foldOutTab = Label(
-        posX = paneX + paneWidth - tabWidth + 100,
+        posX = paneX + paneWidth - tabWidth + 80,
         posY = paneY + paneHeight - tabHeight,
         width = tabWidth,
         height = tabHeight,
-        visual = ColorVisual(153, 172, 255).apply {
+        visual = ImageVisual("FoldOutTab.png").apply {
             style.borderRadius = BorderRadius(15.0)
         }
     ).apply {
         onMouseClicked = {
             if(!panelsOut) {
                 movePanelsOut()
-                //moveContentsOut()
                 panelsOut = true
             } else {
                 movePanelsIn()
-                //moveContentsIn()
                 panelsOut = false
             }
             checkBoxHawkA.isDisabled = true
@@ -119,50 +98,15 @@ class JoinOnlineLobbyScene (
         }
     }
 
-    private val tabBorder = Label(
-        posX = paneX + paneWidth - tabWidth + 100 - borderThickness,
-        posY = paneY + paneHeight - tabHeight - borderThickness,
-        width = tabWidth + 2*borderThickness,
-        height = tabHeight + 2*borderThickness,
-        visual = ColorVisual(255, 255, 255).apply {
-            style.borderRadius = BorderRadius(15.0)
-        }
-    )
-
-    val backArrow = Label(
-        posX = 30,
-        posY = 30,
-        width = 80,
-        height = 60,
-        text = "⇐",
-        font = Font(size = 50, color = Color.WHITE)
+    val backArrow = Button(
+        width = 78, height = 78,
+        posX = 33, posY = 23,
+        visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
             app.showMenuScene(JoinOnlineScene(app, rootService))
         }
     }
-
-    private val playerTypeOverview = Label(
-        width = 200,
-        height = 60,
-        posX = 500,
-        posY = 45,
-        font = Font(size = 40)
-    ).apply { visual = ImageVisual("Auswahl.png") }
-
-
-
-    private val header = Label(
-        width = 300, height = 100,
-        posX = 750.0/2 - 150, posY = 30,
-        text = "Join",
-        font = Font(
-            size = 50,
-            color = Color(0xFFFFFF),
-            family = "Canva Sans",
-            fontWeight = Font.FontWeight.BOLD)
-    )
-
 
     private val p1Input = Label(
         width = nameWidth,
@@ -205,8 +149,6 @@ class JoinOnlineLobbyScene (
     )
 
     private val elkIcon = Label(
-//        posX = paneX + (paneWidth)/2 + 90 - (iconSize + 15)/2,
-//        posY = paneY + 30,
         posX = (paneWidth)/2 + 90 - (iconSize + 15)/2,
         posY = 30,
         width = iconSize + 15,
@@ -215,16 +157,7 @@ class JoinOnlineLobbyScene (
     ).apply {
         visual = ImageVisual("elk.png")
         onMouseClicked = {
-            bearCardA.isVisible = false
-            bearCardB.isVisible = false
-            elkCardA.isVisible = true
-            elkCardB.isVisible = true
-            foxCardA.isVisible = false
-            foxCardB.isVisible = false
-            salmonCardA.isVisible = false
-            salmonCardB.isVisible = false
-            hawkCardA.isVisible = false
-            hawkCardB.isVisible = false
+            showScoreCards(elkCardA, elkCardB)
             elkCardA.resize(209, 403)
             elkCardB.resize(209, 403)
         }
@@ -232,7 +165,6 @@ class JoinOnlineLobbyScene (
 
     private val hawkIcon = Label(
         posX = elkIcon.posX - 2*iconDistance - 2*(iconSize + 15),
-//        posY = paneY + 30,
         posY = 30,
         width = iconSize + 15,
         height = iconSize + 15,
@@ -240,49 +172,27 @@ class JoinOnlineLobbyScene (
     ).apply {
         visual = ImageVisual("hawk.png")
         onMouseClicked = {
-            bearCardA.isVisible = false
-            bearCardB.isVisible = false
-            elkCardA.isVisible = false
-            elkCardB.isVisible = false
-            foxCardA.isVisible = false
-            foxCardB.isVisible = false
-            salmonCardA.isVisible = false
-            salmonCardB.isVisible = false
-            hawkCardA.isVisible = true
-            hawkCardB.isVisible = true
+            showScoreCards(hawkCardA, hawkCardB)
             hawkCardA.resize(183, 397)
             hawkCardB.resize(183, 397)        }
     }
 
     private val salmonIcon = Label(
         posX = elkIcon.posX - iconDistance - (iconSize + 15),
-//        posY = paneY + 30,
         posY = 30,
         width = iconSize + 15,
         height = iconSize + 15,
         visual = ImageVisual("salmon.png", iconSize, iconSize)
     ).apply {
         onMouseClicked = {
-            onMouseClicked = {
-                bearCardA.isVisible = false
-                bearCardB.isVisible = false
-                elkCardA.isVisible = false
-                elkCardB.isVisible = false
-                foxCardA.isVisible = false
-                foxCardB.isVisible = false
-                salmonCardA.isVisible = true
-                salmonCardB.isVisible = true
-                hawkCardA.isVisible = false
-                hawkCardB.isVisible = false
-                salmonCardA.resize(183, 397)
-                salmonCardB.resize(183, 397)
-            }
+            showScoreCards(salmonCardA, salmonCardB)
+            salmonCardA.resize(183, 397)
+            salmonCardB.resize(183, 397)
         }
     }
 
     private val foxIcon = Label(
         posX = elkIcon.posX + iconDistance + iconSize + 15,
-//        posY = paneY + 30,
         posY = 30,
         width = iconSize + 15,
         height = iconSize + 15,
@@ -290,23 +200,13 @@ class JoinOnlineLobbyScene (
     ).apply {
         visual = ImageVisual("fox.png")
         onMouseClicked = {
-            bearCardA.isVisible = false
-            bearCardB.isVisible = false
-            elkCardA.isVisible = false
-            elkCardB.isVisible = false
-            foxCardA.isVisible = true
-            foxCardB.isVisible = true
-            salmonCardA.isVisible = false
-            salmonCardB.isVisible = false
-            hawkCardA.isVisible = false
-            hawkCardB.isVisible = false
+            showScoreCards(foxCardA, foxCardB)
             foxCardA.resize(183, 397)
             foxCardB.resize(183, 397)        }
     }
 
     private val bearIcon = Label(
         posX = elkIcon.posX + 2*iconDistance + 2*(iconSize + 15),
-//        posY = paneY + 30,
         posY = 30,
         width = iconSize + 15,
         height = iconSize + 15,
@@ -314,16 +214,7 @@ class JoinOnlineLobbyScene (
     ).apply {
         visual = ImageVisual("bear.png")
         onMouseClicked = {
-            bearCardA.isVisible = true
-            bearCardB.isVisible = true
-            elkCardA.isVisible = false
-            elkCardB.isVisible = false
-            foxCardA.isVisible = false
-            foxCardB.isVisible = false
-            salmonCardA.isVisible = false
-            salmonCardB.isVisible = false
-            hawkCardA.isVisible = false
-            hawkCardB.isVisible = false
+            showScoreCards(bearCardA, bearCardB)
         }
     }
 
@@ -335,14 +226,7 @@ class JoinOnlineLobbyScene (
         text = "A",
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
-    ).apply {
-        onMouseClicked ={
-            if (!isChecked){
-                checkBox("checkBoxSalmonA")
-            }
-        }
-    }
-
+    )
 
     val checkBoxSalmonB = CheckBox(
         posX = salmonIcon.posX + 10,
@@ -352,15 +236,7 @@ class JoinOnlineLobbyScene (
         text = "B",
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
-    ).apply {
-        onMouseClicked ={
-            if (!isChecked){
-                checkBox("checkBoxSalmonB")
-            }
-        }
-    }
-
-
+    )
 
     val checkBoxHawkA = CheckBox(
         posX = hawkIcon.posX + 10,
@@ -370,13 +246,7 @@ class JoinOnlineLobbyScene (
         text = "A",
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
-    ).apply {
-        onMouseClicked ={
-            if (!isChecked){
-                checkBox("checkBoxHawkA")
-            }
-        }
-    }
+    )
 
     val checkBoxHawkB = CheckBox(
         posX = hawkIcon.posX + 10,
@@ -386,14 +256,7 @@ class JoinOnlineLobbyScene (
         text = "B",
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
-    ).apply {
-        onMouseClicked ={
-            if (!isChecked){
-                checkBox("checkBoxHawkB")
-            }
-        }
-
-    }
+    )
 
     val checkBoxBearA = CheckBox(
         posX = bearIcon.posX + 10,
@@ -403,14 +266,7 @@ class JoinOnlineLobbyScene (
         text = "A",
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
-    ).apply {
-        onMouseClicked ={
-            if (!isChecked){
-                checkBox("checkBoxBearA")
-            }
-        }
-
-    }
+    )
 
     val checkBoxBearB = CheckBox(
         posX = bearIcon.posX + 10,
@@ -420,15 +276,7 @@ class JoinOnlineLobbyScene (
         text = "B",
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
-    ).apply {
-        onMouseClicked ={
-            if (!isChecked){
-                checkBox("checkBoxBearB")
-            }
-        }
-
-    }
-
+    )
 
     val checkBoxFoxA = CheckBox(
         posX = foxIcon.posX + 10,
@@ -438,15 +286,7 @@ class JoinOnlineLobbyScene (
         text = "A",
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
-    ).apply {
-        onMouseClicked ={
-            if (!isChecked){
-                checkBox("checkBoxFoxA")
-            }
-        }
-
-    }
-
+    )
 
     val checkBoxFoxB = CheckBox(
         posX = foxIcon.posX + 10,
@@ -456,16 +296,7 @@ class JoinOnlineLobbyScene (
         text = "B",
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
-    ).apply {
-        onMouseClicked ={
-            if (!isChecked){
-                checkBox("checkBoxFoxB")
-            }
-        }
-
-    }
-
-
+    )
 
     val checkBoxElkA = CheckBox(
         posX = elkIcon.posX + 10,
@@ -475,14 +306,7 @@ class JoinOnlineLobbyScene (
         text = "A",
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
-    ).apply {
-        onMouseClicked ={
-            if (!isChecked){
-                checkBox("checkBoxElkA")
-            }
-        }
-
-    }
+    )
 
     val checkBoxElkB = CheckBox(
         posX = elkIcon.posX + 10,
@@ -492,14 +316,7 @@ class JoinOnlineLobbyScene (
         text = "B",
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
-    ).apply {
-        onMouseClicked ={
-            if (!isChecked){
-                checkBox("checkBoxElkB")
-            }
-        }
-
-    }
+    )
 
     private val bearCardA = Label(
         width = 207,
@@ -521,7 +338,6 @@ class JoinOnlineLobbyScene (
         isVisible = false
     }
 
-
     private val elkCardA = Label(
         width = 262,
         height = 504,
@@ -542,7 +358,6 @@ class JoinOnlineLobbyScene (
         isVisible = false
     }
 
-
     private val foxCardA = Label(
         width = 229,
         height = 497,
@@ -562,7 +377,6 @@ class JoinOnlineLobbyScene (
         visual = ImageVisual("Scoring_Fox_B.png")
         isVisible = false
     }
-
 
     private val hawkCardA = Label(
         width = 229,
@@ -607,22 +421,12 @@ class JoinOnlineLobbyScene (
     init {
         addComponents(
             backgroundImage,
-            tabBorder,
-            scoreCardPaneBorder,
             scoreCardSelectionPane,
-//            foxIcon,
-//            elkIcon,
-//            bearIcon,
-//            hawkIcon,
-//            salmonIcon,
             foldOutTab,
-            playerPaneBorder,
             playerViewPane,
         )
         playerViewPane.addAll(
             backArrow,
-            playerTypeOverview,
-            header,
             p1Input,
             p2Input,
             p3Input,
@@ -658,26 +462,6 @@ class JoinOnlineLobbyScene (
 
     }
 
-    private fun checkBox(checkBox : String){
-
-        when (checkBox){
-            "checkBoxHawkA" -> checkBoxHawkB.isChecked = false
-            "checkBoxHawkB" -> checkBoxHawkA.isChecked = false
-
-            "checkBoxElkA" -> checkBoxElkB.isChecked = false
-            "checkBoxElkB" -> checkBoxElkA.isChecked = false
-
-            "checkBoxFoxA" -> checkBoxFoxB.isChecked = false
-            "checkBoxFoxB" -> checkBoxFoxA.isChecked = false
-
-            "checkBoxSalmonA" -> checkBoxSalmonB.isChecked = false
-            "checkBoxSalmonB" -> checkBoxSalmonA.isChecked = false
-
-            "checkBoxBearA" -> checkBoxBearB.isChecked = false
-            "checkBoxBearB" -> checkBoxBearA.isChecked = false
-        }
-    }
-
     private fun movePanelsOut() {
         playAnimation(
             ParallelAnimation(
@@ -686,46 +470,20 @@ class JoinOnlineLobbyScene (
                     byX = -movementDistance,
                 ),
                 MovementAnimation(
-                    playerPaneBorder,
-                    byX = -movementDistance,
-                ),
-                MovementAnimation(
-                    scoreCardPaneBorder,
-                    byX = movementDistance,
-                ),
-                MovementAnimation(
                     scoreCardSelectionPane,
-                    byX = movementDistance,
-                ),
-                MovementAnimation(
-                    tabBorder,
                     byX = movementDistance,
                 ),
                 MovementAnimation(
                     foldOutTab,
                     byX = movementDistance,
-                ),
-//                MovementAnimation(
-//                    elkIcon,
-//                    byX = movementDistance,
-//                ),
-//                MovementAnimation(
-//                    hawkIcon,
-//                    byX = movementDistance,
-//                ),
-//                MovementAnimation(
-//                    salmonIcon,
-//                    byX = movementDistance,
-//                ),
-//                MovementAnimation(
-//                    bearIcon,
-//                    byX = movementDistance,
-//                ),
-//                MovementAnimation(
-//                    foxIcon,
-//                    byX = movementDistance,
-//                )
-            )
+                )
+            ).apply {
+                onFinished = {
+                    foldOutTab.visual = ImageVisual("FoldInTab.png").apply {
+                        style.borderRadius = BorderRadius(15)
+                    }
+                }
+            }
         )
     }
 
@@ -737,46 +495,29 @@ class JoinOnlineLobbyScene (
                     byX = movementDistance,
                 ),
                 MovementAnimation(
-                    playerPaneBorder,
-                    byX = movementDistance,
-                ),
-                MovementAnimation(
-                    scoreCardPaneBorder,
-                    byX = -movementDistance,
-                ),
-                MovementAnimation(
                     scoreCardSelectionPane,
-                    byX = -movementDistance,
-                ),
-                MovementAnimation(
-                    tabBorder,
                     byX = -movementDistance,
                 ),
                 MovementAnimation(
                     foldOutTab,
                     byX = -movementDistance,
-                ),
-//                MovementAnimation(
-//                    elkIcon,
-//                    byX = -movementDistance,
-//                ),
-//                MovementAnimation(
-//                    hawkIcon,
-//                    byX = -movementDistance,
-//                ),
-//                MovementAnimation(
-//                    salmonIcon,
-//                    byX = -movementDistance,
-//                ),
-//                MovementAnimation(
-//                    bearIcon,
-//                    byX = -movementDistance,
-//                ),
-//                MovementAnimation(
-//                    foxIcon,
-//                    byX = -movementDistance,
-//                )
-            )
+                )
+            ).apply {
+                onFinished = {
+                    foldOutTab.visual = ImageVisual("FoldOutTab.png").apply {
+                        style.borderRadius = BorderRadius(15)
+                    }
+                }
+            }
         )
+    }
+
+    private fun showScoreCards(cardA: Label, cardB: Label) {
+        val cards = listOf(salmonCardA, salmonCardB, hawkCardA, hawkCardB, foxCardA, foxCardB,
+            bearCardA, bearCardB, elkCardA, elkCardB)
+        cards.forEach { card ->
+            if(card == cardA || card == cardB) card.isVisible = true
+            else card.isVisible = false
+        }
     }
 }
