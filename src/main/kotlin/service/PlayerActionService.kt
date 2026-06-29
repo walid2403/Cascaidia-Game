@@ -46,7 +46,10 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         require(indices.all { it in 0..3 }) { "Die angegebenen Plätze müssen zwischen 0 und 3 liegen!" }
         require(indices.distinct().size == indices.size) {"Ein Index darf nicht doppelt in der Liste vorkommen"}
         //Sind genug Tiere zum Tauschen da?
-        require(currentGame.wildlifeTokens.size >= indices.size) { rootService.gameService.calculateScores() }
+        if(currentGame.wildlifeTokens.size < indices.size) {
+            rootService.gameService.calculateScores()
+            return
+        }
 
         val alteTierToken: MutableList<WildlifeToken> = mutableListOf()
 
