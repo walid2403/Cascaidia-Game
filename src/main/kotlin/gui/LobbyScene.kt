@@ -35,9 +35,13 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     private val nameY = paneHeight / 2 - 80
     private val nameDistance = 25
     private val movementDistance = paneWidth / 2 - 90
-    private val buttonSize = 80
+    private val buttonHeight = 84
+    private val buttonWidth = 83
     private val iconSize = 63
     private val iconDistance = 30
+    private val cardY = 230
+    private val cardAX = 245
+    private val cardBX = 505
 
 
     private val logo = Label(
@@ -149,139 +153,111 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     private var p3Type = 3
     private var p4Type = 3
 
-    private val p1TypeButtonLeft = Button(
-        width = buttonSize, height = buttonSize,
-        posX = 63, posY = p1Input.posY - (buttonSize - nameHeight) / 2,
-        text = "←",
-        font = Font(size = 28),
-        visual = ColorVisual(153, 172, 255).apply {
-            style.borderRadius = BorderRadius(buttonSize / 2)
-        }
+    private val p1TypeButtonLeft = Label(
+        width = buttonWidth, height = buttonHeight,
+        posX = nameX - buttonWidth + 32,
+        posY = p1Input.posY - (84 - nameHeight) / 2,
+        visual = ImageVisual("PlayerTypeButtonLeft.png")
     ).apply {
         onMouseClicked = {
             p1Type = changePlayerType(1, true, p1Type)
         }
     }
 
-    private val p2TypeButtonLeft = Button(
-        width = buttonSize, height = buttonSize,
-        posX = 63, posY = p2Input.posY - (buttonSize - nameHeight) / 2,
-        text = "←",
-        font = Font(size = 28),
-        visual = ColorVisual(153, 172, 255).apply {
-            style.borderRadius = BorderRadius(buttonSize / 2)
-        }
+    private val p2TypeButtonLeft = Label(
+        width = buttonWidth, height = buttonHeight,
+        posX = nameX - buttonWidth + 32,
+        posY = p2Input.posY - 1 - (84 - nameHeight) / 2,
+        visual = ImageVisual("PlayerTypeButtonLeft.png")
     ).apply {
         onMouseClicked = {
             p2Type = changePlayerType(2, true, p2Type)
         }
     }
 
-    private val p3TypeButtonLeft = Button(
-        width = buttonSize, height = buttonSize,
-        posX = 63, posY = p3Input.posY - (buttonSize - nameHeight) / 2,
-        text = "←",
-        font = Font(size = 28),
-        visual = ColorVisual(153, 172, 255).apply {
-            style.borderRadius = BorderRadius(buttonSize / 2)
-        }
+    private val p3TypeButtonLeft = Label(
+        width = buttonWidth, height = buttonHeight,
+        posX = nameX - buttonWidth + 32,
+        posY = p3Input.posY - 1 - (84 - nameHeight) / 2,
+        visual = ImageVisual("PlayerTypeButtonLeft.png")
     ).apply {
         onMouseClicked = {
             p3Type = changePlayerType(3, true, p3Type)
         }
     }
 
-    private val p4TypeButtonLeft = Button(
-        width = buttonSize, height = buttonSize,
-        posX = 63, posY = p4Input.posY - (buttonSize - nameHeight) / 2,
-        text = "←",
-        font = Font(size = 28),
-        visual = ColorVisual(153, 172, 255).apply {
-            style.borderRadius = BorderRadius(buttonSize / 2)
-        }
+    private val p4TypeButtonLeft = Label(
+        width = buttonWidth, height = buttonHeight,
+        posX = nameX - buttonWidth + 32,
+        posY = p4Input.posY - 1 - (84 - nameHeight) / 2,
+        visual = ImageVisual("PlayerTypeButtonLeft.png")
     ).apply {
         onMouseClicked = {
             p4Type = changePlayerType(4, true, p4Type)
         }
     }
 
-    private val p1TypeButtonRight = Button(
-        width = buttonSize, height = buttonSize,
-        posX = nameX + nameWidth - 32, posY = p1Input.posY - (buttonSize - nameHeight) / 2,
-        text = "←",
-        font = Font(size = 28),
-        visual = ColorVisual(153, 172, 255).apply {
-            style.borderRadius = BorderRadius(buttonSize / 2)
-        }
+    private val p1TypeButtonRight = Label(
+        width = buttonWidth, height = buttonHeight,
+        posX = nameX + nameWidth - 32,
+        posY = p1Input.posY - (84 - nameHeight) / 2,
+        visual = ImageVisual("PlayerTypeButtonRight.png")
     ).apply {
         onMouseClicked = {
             p1Type = changePlayerType(1, false, p1Type)
         }
-        rotation = 180.0
     }
 
-    private val p2TypeButtonRight = Button(
-        width = buttonSize, height = buttonSize,
-        posX = nameX + nameWidth - 32, posY = p2Input.posY - (buttonSize - nameHeight) / 2,
-        text = "←",
-        font = Font(size = 28),
-        visual = ColorVisual(153, 172, 255).apply {
-            style.borderRadius = BorderRadius(buttonSize / 2)
-        }
+    private val p2TypeButtonRight = Label(
+        width = buttonWidth, height = buttonHeight,
+        posX = nameX + nameWidth - 32,
+        posY = p2Input.posY - 1 -  (84 - nameHeight) / 2,
+        visual = ImageVisual("PlayerTypeButtonRight.png")
     ).apply {
         onMouseClicked = {
             p2Type = changePlayerType(2, false, p2Type)
         }
-        rotation = 180.0
     }
 
-    private val p3TypeButtonRight = Button(
-        width = buttonSize, height = buttonSize,
-        posX = nameX + nameWidth - 32, posY = p3Input.posY - (buttonSize - nameHeight) / 2,
-        text = "←",
-        font = Font(size = 28),
-        visual = ColorVisual(153, 172, 255).apply {
-            style.borderRadius = BorderRadius(buttonSize / 2)
-        }
+    private val p3TypeButtonRight = Label(
+        width = buttonWidth, height = buttonHeight,
+        posX = nameX + nameWidth - 32,
+        posY = p3Input.posY - 1 - (84 - nameHeight) / 2,
+        visual = ImageVisual("PlayerTypeButtonRight.png")
     ).apply {
         onMouseClicked = {
             p3Type = changePlayerType(3, false, p3Type)
         }
-        rotation = 180.0
     }
 
-    private val p4TypeButtonRight = Button(
-        width = buttonSize, height = buttonSize,
-        posX = nameX + nameWidth - 32, posY = p4Input.posY - (buttonSize - nameHeight) / 2,
-        text = "←",
-        font = Font(size = 28),
-        visual = ColorVisual(153, 172, 255).apply {
-            style.borderRadius = BorderRadius(buttonSize / 2)
-        }
+    private val p4TypeButtonRight = Label(
+        width = buttonWidth, height = buttonHeight,
+        posX = nameX + nameWidth - 32,
+        posY = p4Input.posY - 1 - (84 - nameHeight) / 2,
+        visual = ImageVisual("PlayerTypeButtonRight.png")
     ).apply {
         onMouseClicked = {
             p4Type = changePlayerType(4, false, p4Type)
         }
-        rotation = 180.0
     }
 
     private val p1Icon = Label(
         width = iconSize, height = iconSize,
-        posX = p4TypeButtonLeft.posX + buttonSize + 5,
+        posX = p4TypeButtonLeft.posX + buttonWidth + 5,
         posY = p1Input.posY - (iconSize - nameHeight) / 2,
         visual = ImageVisual("HumanIcon.png")
     )
 
     private val p2Icon = Label(
         width = iconSize, height = iconSize,
-        posX = p4TypeButtonLeft.posX + buttonSize + 5,
+        posX = p4TypeButtonLeft.posX + buttonWidth + 5,
         posY = p2Input.posY - (iconSize - nameHeight) / 2,
         visual = ImageVisual("HumanIcon.png")
     )
 
     private val p3Icon = Label(
         width = iconSize, height = iconSize,
-        posX = p4TypeButtonLeft.posX + buttonSize + 5,
+        posX = p4TypeButtonLeft.posX + buttonWidth + 5,
         posY = p3Input.posY - (iconSize - nameHeight) / 2,
     ).apply {
         isVisible = false
@@ -289,7 +265,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val p4Icon = Label(
         width = iconSize, height = iconSize,
-        posX = p4TypeButtonLeft.posX + buttonSize + 5,
+        posX = p4TypeButtonLeft.posX + buttonWidth + 5,
         posY = p4Input.posY - (iconSize - nameHeight) / 2,
     ).apply {
         isVisible = false
@@ -330,8 +306,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         visual = ImageVisual("elk.png", iconSize, iconSize)
         onMouseClicked = {
             showScoreCards(elkCardA, elkCardB)
-            elkCardA.resize(209, 403)
-            elkCardB.resize(209, 403)
         }
     }
 
@@ -343,8 +317,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         visual = ImageVisual("hawk.png", iconSize, iconSize)
         onMouseClicked = {
             showScoreCards(hawkCardA, hawkCardB)
-            hawkCardA.resize(183, 397)
-            hawkCardB.resize(183, 397)
         }
     }
 
@@ -356,8 +328,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         visual = ImageVisual("salmon.png", iconSize, iconSize)
         onMouseClicked = {
             showScoreCards(salmonCardA, salmonCardB)
-            salmonCardA.resize(183, 397)
-            salmonCardB.resize(183, 397)
         }
     }
 
@@ -369,8 +339,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
         onMouseClicked = {
             showScoreCards(foxCardA, foxCardB)
-            foxCardA.resize(183, 397)
-            foxCardB.resize(183, 397)
         }
     }
 
@@ -387,7 +355,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val bearCardA = Label(
         width = 207, height = 394,
-        posX = 230, posY = 200,
+        posX = cardAX - 5, posY = cardY,
     ).apply {
         visual = ImageVisual("Scoring_Bear_A.png")
         isVisible = false
@@ -395,17 +363,15 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val bearCardB = Label(
         width = 207, height = 394,
-        posX = 490, posY = 200,
-
+        posX = cardBX - 5, posY = cardY,
         ).apply {
         visual = ImageVisual("Scoring_Bear_B.png")
         isVisible = false
     }
 
-
     private val elkCardA = Label(
         width = 262, height = 504,
-        posX = 230, posY = 200,
+        posX = cardAX, posY = cardY,
     ).apply {
         visual = ImageVisual("Scoring_Elk_A.png")
         isVisible = false
@@ -413,17 +379,16 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val elkCardB = Label(
         width = 262, height = 504,
-        posX = 490, posY = 200,
+        posX = cardBX - 5, posY = cardY,
 
         ).apply {
         visual = ImageVisual("Scoring_Elk_B.png")
         isVisible = false
     }
 
-
     private val foxCardA = Label(
         width = 229, height = 497,
-        posX = 230, posY = 200,
+        posX = cardAX, posY = cardY,
     ).apply {
         visual = ImageVisual("Scoring_Fox_A.png")
         isVisible = false
@@ -431,8 +396,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val foxCardB = Label(
         width = 229, height = 497,
-        posX = 490, posY = 200,
-
+        posX = cardBX, posY = cardY,
         ).apply {
         visual = ImageVisual("Scoring_Fox_B.png")
         isVisible = false
@@ -441,7 +405,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val hawkCardA = Label(
         width = 229, height = 497,
-        posX = 230, posY = 200,
+        posX = cardAX, posY = cardY,
     ).apply {
         visual = ImageVisual("Scoring_Hawk_A.png")
         isVisible = false
@@ -449,7 +413,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val hawkCardB = Label(
         width = 229, height = 497,
-        posX = 490, posY = 200,
+        posX = cardBX, posY = cardY,
 
         ).apply {
         visual = ImageVisual("Scoring_Hawk_B.png")
@@ -458,7 +422,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val salmonCardA = Label(
         width = 229, height = 497,
-        posX = 230, posY = 200,
+        posX = cardAX, posY = cardY,
     ).apply {
         visual = ImageVisual("Scoring_Salmon_A.png")
         isVisible = false
@@ -466,13 +430,11 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val salmonCardB = Label(
         width = 229, height = 497,
-        posX = 490, posY = 200,
-
+        posX = cardBX, posY = cardY,
         ).apply {
         visual = ImageVisual("Scoring_Salmon_B.png")
         isVisible = false
     }
-
 
     val checkBoxSalmonA = CheckBox(
         posX = salmon.posX + 10,
@@ -485,7 +447,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     ).apply {
         onMouseClicked = {
             if (!isChecked) {
-                uncheckBox(checkBoxSalmonB)
+                checkBox("checkBoxSalmonA")
             }
         }
     }
@@ -571,9 +533,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
                 checkBox("checkBoxBearB")
             }
         }
-
     }
-
 
     val checkBoxFoxA = CheckBox(
         posX = fox.posX + 10,
@@ -589,7 +549,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
                 checkBox("checkBoxFoxA")
             }
         }
-
     }
 
 
@@ -625,7 +584,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
                 checkBox("checkBoxElkA")
             }
         }
-
     }
 
     val checkBoxElkB = CheckBox(
@@ -642,61 +600,22 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
                 checkBox("checkBoxElkB")
             }
         }
-
     }
 
-//    private val barOne = Label(
-//        width = 650, height = 4,
-//        posX = 55, posY = 210).apply { visual= ColorVisual(0,0,0) }
-//
-//    private val barTwo = Label(
-//        width = 3, height = 45,
-//        posX = 200, posY = 160).apply { visual= ColorVisual(0,0,0) }
-//
-//    private val barThree = Label(
-//        width = 3, height = 45,
-//        posX = 360, posY = 160).apply { visual= ColorVisual(0,0,0) }
-//
-//    private val barFour = Label(
-//        width = 3, height = 45,
-//        posX = 535, posY = 160).apply { visual= ColorVisual(0,0,0) }
-
-
-//    private val human = Label(
-//        width = 130, height = 45,
-//        posX = 50, posY = 160,
-//        ).apply { visual = ImageVisual("Mensch.png") }
-
-
-//    private val easyBot = Label(
-//        width = 140, height = 45,
-//        posX = 210, posY = 160,
-//    ).apply { visual = ImageVisual("EasyBot.png") }
-
-
-//    private val hardBot = Label(
-//        width = 150, height = 45,
-//        posX = 365, posY = 160,
-//    ).apply { visual = ImageVisual("HardBot.png") }
-//
-//
-//    private val emptySlot = Label(
-//        width = 150, height = 45,
-//        posX = 545, posY = 160,
-//    ).apply { visual = ImageVisual("EmptySlot.png") }
-
-
-//    private val player = Label(
-//        width = 300, height = 100,
-//        posX = 750.0/2 - 150, posY = 30,
-//        text = "Add Player",
-//        font = Font(
-//            size = 50,
-//            color = Color(0xFFFFFF),
-//            family = "Canva Sans",
-//            fontWeight = Font.FontWeight.BOLD)
-//    )
-
+    private val randomScoreCards = Button(
+        width = 100, height = 30,
+        posX = paneWidth - 130,
+        posY = checkBoxElkB.posY + checkBoxElkA.height,
+        text = "Random",
+        font = Font(size = 18, color = Color.WHITE),
+        visual = ColorVisual(101, 130, 255).apply {
+            style.borderRadius = BorderRadius(15)
+        }
+    ).apply {
+        onMouseClicked = {
+            randomizeScoreCards()
+        }
+    }
 
     private val exitButton = Button(
         width = 78, height = 78,
@@ -725,7 +644,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     }
 
 
-    private val arrowLabel = Label(
+    private val tabLabel = Label(
         posX = paneX + paneWidth - tabWidth + 80,
         posY = paneY + paneHeight - tabHeight,
         width = tabWidth,
@@ -734,22 +653,11 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
             style.borderRadius = BorderRadius(15.0)
         }
     ).apply {
-        //visual = ColorVisual(160, 150, 210).apply { style.borderRadius = BorderRadius(15) }
         onMouseClicked = {
             expandPanel()
+            resizeScoreCards()
         }
     }
-
-//    private val arrowButton = Label(
-//        posX = 1380, posY = 750,
-//        width = 90.0, height = 90.0,
-//        text = "→",
-//        font = Font(size = 40, color = Color.BLACK)
-//    ).apply {
-//        visual = ColorVisual(160, 150, 210).apply { style.borderRadius = BorderRadius(8) }
-//
-//    }
-
 
     private val startLabel = Label(
         posX = 700 - 8, posY = 620 - 130,
@@ -760,7 +668,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         visual = ColorVisual(160, 150, 210).apply { style.borderRadius = BorderRadius(15) }
         this.isVisible = false
     }
-
 
     private val startButton = Label(
         posX = 750 - 8, posY = 620 - 100,
@@ -789,7 +696,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
             bearCardA, bearCardB, elkCardA, elkCardB, foxCardA, foxCardB,
             hawkCardA, hawkCardB, salmonCardA, salmonCardB,
             checkBoxHawkA, checkBoxHawkB, checkBoxElkA, checkBoxElkB, checkBoxBearA, checkBoxBearB, checkBoxFoxA,
-            checkBoxFoxB, checkBoxSalmonA, checkBoxSalmonB
+            checkBoxFoxB, checkBoxSalmonA, checkBoxSalmonB, randomScoreCards
         ).forEach { sidePanel.add(it) }
 
 
@@ -797,7 +704,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         addComponents(
             logo,
             sidePanel,
-            arrowLabel,
+            tabLabel,
             //arrowButton,
             hostPanel,
         )
@@ -818,7 +725,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
                     duration = 1000 // dauer
                 ),
                 MovementAnimation(
-                    arrowLabel,
+                    tabLabel,
                     byX = movementDistance,
                 )
             ).apply {
@@ -828,7 +735,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
                         //arrowLabel.isVisible = false
                         //startLabel.isVisible = true
                         //startButton.isVisible = true
-                        arrowLabel.apply {
+                        tabLabel.apply {
                             visual = ImageVisual("StartGameTab.png").apply {
                                 style.borderRadius = BorderRadius(15)
                             }
@@ -974,6 +881,30 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
             if(card == cardA || card == cardB) card.isVisible = true
             else card.isVisible = false
         }
+    }
+
+    private fun randomizeScoreCards() {
+        val randomizerList = mutableListOf(true, false)
+        val scoreCards = listOf(Pair(checkBoxBearA, checkBoxBearB), Pair(checkBoxSalmonA, checkBoxSalmonB),
+            Pair(checkBoxHawkA, checkBoxHawkB), Pair(checkBoxFoxA, checkBoxFoxB), Pair(checkBoxElkA, checkBoxElkB))
+        for (pair in scoreCards) {
+            randomizerList.shuffle()
+            pair.first.isChecked = randomizerList[0]
+            pair.second.isChecked = randomizerList[1]
+        }
+    }
+
+    private fun resizeScoreCards() {
+        elkCardA.resize(192, 370)
+        elkCardB.resize(192, 370)
+        hawkCardA.resize(170, 370)
+        hawkCardB.resize(170, 370)
+        salmonCardA.resize(170, 370)
+        salmonCardB.resize(170, 370)
+        foxCardA.resize(170, 370)
+        foxCardB.resize(170, 370)
+        bearCardA.resize(194, 370)
+        bearCardB.resize(194, 370)
     }
 }
 
