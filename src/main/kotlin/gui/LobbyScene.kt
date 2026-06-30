@@ -23,20 +23,29 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val sceneWidth = 1920
     private val sceneHeight = 1080
+
     private val paneWidth = 750
     private val paneHeight = 620
     private val paneX = (sceneWidth - paneWidth) / 2
     private val paneY = (sceneHeight - paneHeight) / 2
+
     private val tabHeight = 130
     private val tabWidth = 130
-    private val nameWidth = 560
-    private val nameHeight = 70
-    private val nameX = (paneWidth - nameWidth) / 2
-    private val nameY = paneHeight / 2 - 80
-    private val nameDistance = 25
+
+    private val nameWidth = 374
+    private val nameHeight = 66
+    private val nameX = 225
+    private val nameY = 232
+    private val nameDistance = 29
+
     private val movementDistance = paneWidth / 2 - 90
-    private val buttonHeight = 84
-    private val buttonWidth = 83
+
+    private val buttonHeight = 88
+    private val buttonWidth = 88
+    private val buttonY = 218
+    private val leftButtonX = 66
+    private val rightButtonX = 600
+
     private val iconSize = 63
     private val iconDistance = 30
     private val cardY = 230
@@ -74,8 +83,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     // type inference fails here, so explicit  ": TextField" is required
     // see https://discuss.kotlinlang.org/t/unexpected-type-checking-recursive-problem/6203/14
     private val p1Input: TextField = TextField(
-        width = nameWidth - 126, height = nameHeight - 1,
-        posX = nameX + 126, posY = nameY + 1,
+        width = nameWidth, height = nameHeight,
+        posX = nameX, posY = nameY,
         prompt = "Player 1",
         font = Font(size = 31)
 
@@ -92,8 +101,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     // type inference fails here, so explicit  ": TextField" is required
     // see https://discuss.kotlinlang.org/t/unexpected-type-checking-recursive-problem/6203/14
     private val p2Input: TextField = TextField(
-        width = nameWidth - 126, height = nameHeight - 1,
-        posX = nameX + 126, posY = nameY + nameHeight + nameDistance + 1,
+        width = nameWidth, height = nameHeight,
+        posX = nameX, posY = nameY + nameHeight + nameDistance,
         prompt = "Player 2",
         font = Font(size = 31),
 
@@ -110,8 +119,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     // type inference fails here, so explicit  ": TextField" is required
     // see https://discuss.kotlinlang.org/t/unexpected-type-checking-recursive-problem/6203/14
     private val p3Input: TextField = TextField(
-        width = nameWidth - 126, height = nameHeight - 1,
-        posX = nameX + 126, posY = nameY + 2 * nameHeight + 2 * nameDistance + 1,
+        width = nameWidth, height = nameHeight,
+        posX = nameX, posY = nameY + 2 * nameHeight + 2 * nameDistance,
         prompt = "Player3",
         font = Font(size = 31)
     ).apply {
@@ -130,8 +139,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     // type inference fails here, so explicit  ": TextField" is required
     // see https://discuss.kotlinlang.org/t/unexpected-type-checking-recursive-problem/6203/14
     private val p4Input: TextField = TextField(
-        width = nameWidth - 126, height = nameHeight - 1,
-        posX = nameX + 126, posY = nameY + 3 * nameHeight + 3 * nameDistance + 1,
+        width = nameWidth, height = nameHeight,
+        posX = nameX, posY = nameY + 3 * nameHeight + 3 * nameDistance,
         prompt = "Player4",
         font = Font(size = 31)
     ).apply {
@@ -155,9 +164,10 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val p1TypeButtonLeft = Label(
         width = buttonWidth, height = buttonHeight,
-        posX = nameX - buttonWidth + 32,
-        posY = p1Input.posY - (84 - nameHeight) / 2,
-        visual = ImageVisual("PlayerTypeButtonLeft.png")
+        posX = leftButtonX,
+        posY = buttonY,
+        //visual = ImageVisual("PlayerTypeButtonLeft.png")
+        visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
             p1Type = changePlayerType(1, true, p1Type)
@@ -166,9 +176,11 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val p2TypeButtonLeft = Label(
         width = buttonWidth, height = buttonHeight,
-        posX = nameX - buttonWidth + 32,
+        posX = leftButtonX,
         posY = p2Input.posY - 1 - (84 - nameHeight) / 2,
-        visual = ImageVisual("PlayerTypeButtonLeft.png")
+        //visual = ImageVisual("PlayerTypeButtonLeft.png")
+        visual = Visual.EMPTY
+
     ).apply {
         onMouseClicked = {
             p2Type = changePlayerType(2, true, p2Type)
@@ -177,9 +189,11 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val p3TypeButtonLeft = Label(
         width = buttonWidth, height = buttonHeight,
-        posX = nameX - buttonWidth + 32,
+        posX = leftButtonX,
         posY = p3Input.posY - 1 - (84 - nameHeight) / 2,
-        visual = ImageVisual("PlayerTypeButtonLeft.png")
+//        visual = ImageVisual("PlayerTypeButtonLeft.png"),
+        visual = Visual.EMPTY
+
     ).apply {
         onMouseClicked = {
             p3Type = changePlayerType(3, true, p3Type)
@@ -188,9 +202,11 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val p4TypeButtonLeft = Label(
         width = buttonWidth, height = buttonHeight,
-        posX = nameX - buttonWidth + 32,
+        posX = leftButtonX,
         posY = p4Input.posY - 1 - (84 - nameHeight) / 2,
-        visual = ImageVisual("PlayerTypeButtonLeft.png")
+        //visual = ImageVisual("PlayerTypeButtonLeft.png"),
+        visual = Visual.EMPTY
+
     ).apply {
         onMouseClicked = {
             p4Type = changePlayerType(4, true, p4Type)
@@ -199,9 +215,10 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val p1TypeButtonRight = Label(
         width = buttonWidth, height = buttonHeight,
-        posX = nameX + nameWidth - 32,
-        posY = p1Input.posY - (84 - nameHeight) / 2,
-        visual = ImageVisual("PlayerTypeButtonRight.png")
+        posX = rightButtonX,
+        posY = 218,
+        //visual = ImageVisual("PlayerTypeButtonRight.png"),
+        visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
             p1Type = changePlayerType(1, false, p1Type)
@@ -210,9 +227,10 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val p2TypeButtonRight = Label(
         width = buttonWidth, height = buttonHeight,
-        posX = nameX + nameWidth - 32,
+        posX = rightButtonX,
         posY = p2Input.posY - 1 -  (84 - nameHeight) / 2,
-        visual = ImageVisual("PlayerTypeButtonRight.png")
+        //visual = ImageVisual("PlayerTypeButtonRight.png")
+        visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
             p2Type = changePlayerType(2, false, p2Type)
@@ -221,9 +239,10 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val p3TypeButtonRight = Label(
         width = buttonWidth, height = buttonHeight,
-        posX = nameX + nameWidth - 32,
+        posX = rightButtonX,
         posY = p3Input.posY - 1 - (84 - nameHeight) / 2,
-        visual = ImageVisual("PlayerTypeButtonRight.png")
+        //visual = ImageVisual("PlayerTypeButtonRight.png")
+        visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
             p3Type = changePlayerType(3, false, p3Type)
@@ -232,9 +251,10 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val p4TypeButtonRight = Label(
         width = buttonWidth, height = buttonHeight,
-        posX = nameX + nameWidth - 32,
+        posX = rightButtonX,
         posY = p4Input.posY - 1 - (84 - nameHeight) / 2,
-        visual = ImageVisual("PlayerTypeButtonRight.png")
+        //visual = ImageVisual("PlayerTypeButtonRight.png")
+        visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
             p4Type = changePlayerType(4, false, p4Type)
@@ -243,8 +263,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val p1Icon = Label(
         width = iconSize, height = iconSize,
-        posX = p4TypeButtonLeft.posX + buttonWidth + 5,
-        posY = p1Input.posY - (iconSize - nameHeight) / 2,
+        posX = 155,
+        posY = 234,
         visual = ImageVisual("HumanIcon.png")
     )
 
@@ -273,14 +293,14 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val noP1 = Label(
         width = iconSize, height = iconSize,
-        posX = nameX + (nameWidth - iconSize)/2, posY = p1Input.posY - (iconSize - nameHeight) / 2,
+        posX = 343, posY = p1Input.posY - (iconSize - nameHeight) / 2,
     ).apply {
         isVisible = false
     }
 
     private val noP2 = Label(
         width = iconSize, height = iconSize,
-        posX = nameX + (nameWidth - iconSize)/2, posY = p2Input.posY - (iconSize - nameHeight) / 2,
+        posX = 343, posY = p2Input.posY - (iconSize - nameHeight) / 2,
         visual = ImageVisual("NotPlayingIcon.png")
     ).apply {
         isVisible = false
@@ -288,13 +308,13 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val noP3 = Label(
         width = iconSize, height = iconSize,
-        posX = nameX + (nameWidth - iconSize)/2, posY = p3Input.posY - (iconSize - nameHeight) / 2,
+        posX = 343, posY = p3Input.posY - (iconSize - nameHeight) / 2,
         visual = ImageVisual("NotPlayingIcon.png")
     )
 
     private val noP4 = Label(
         width = iconSize, height = iconSize,
-        posX = nameX + (nameWidth - iconSize)/2, posY = p4Input.posY - (iconSize - nameHeight) / 2,
+        posX = 343, posY = p4Input.posY - (iconSize - nameHeight) / 2,
         visual = ImageVisual("NotPlayingIcon.png")
     )
 
@@ -799,22 +819,18 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         val newType = if (left) {
             (playerType + 3) % 4
         } else {
-            (playerType + 5)%4
+            (playerType + 1)%4
         }
 
         val newVisual = when (newType) {
-            0 -> {
-                ImageVisual("HumanIcon.png")
-            }
-            1 -> {
-                ImageVisual("EasyBotIcon.png")
-            }
-            2 -> {
-                ImageVisual("HardBotIcon.png")
-            }
-            3 -> {
-                ImageVisual("NotPlayingIcon.png")
-            }
+            0 -> ImageVisual("HumanIcon.png")
+
+            1 -> ImageVisual("EasyBotIcon.png")
+
+            2 -> ImageVisual("HardBotIcon.png")
+
+            3 -> ImageVisual("NotPlayingIcon.png")
+
             else -> throw IllegalArgumentException("Only 4 possible visuals, $newType is invalid")
         }
 

@@ -41,17 +41,6 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
         }
     )
 
-//    val exitButton = Button(
-//        width = 100, height = 60,
-//        posX = sceneWidth/2-330, posY = sceneHeight/2-300,
-//        //text = "←",font = Font(size = 70, color = Color(0xFFFFFF))
-//    ).apply {
-//        visual = ColorVisual(64, 98, 70).apply { style.borderRadius = BorderRadius(8) }
-//
-//        onMouseClicked = {
-//            app.showMenuScene(MainMenuScene(app,rootService))
-//        }
-//    }
     val exitButton = Button(
         width = 78, height = 78,
         posX = paneX + 33, posY = paneY + 23,
@@ -62,18 +51,51 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
         }
     }
 
+    private var playerType = 0
+
+    private val playerTypeIcon = Label(
+        posX = sceneWidth/2 - 195 - 110,
+        posY = 440,
+        width = 110,
+        height = 70,
+        visual = ImageVisual("HumanIcon2.png")
+    )
+
+    private val switchTypeLeftButton = Button(
+        posX = playerTypeIcon.posX,
+        posY = playerTypeIcon.posY,
+        width = 45,
+        height = 110,
+        visual = Visual.EMPTY
+    ).apply {
+        onMouseClicked = {
+            playerType = changePlayerType(true, playerType)
+        }
+    }
+
+    private val switchTypeRightButton = Button(
+        posX = playerTypeIcon.posX + playerTypeIcon.width - 45,
+        posY = playerTypeIcon.posY,
+        width = 45,
+        height = 110,
+        visual = Visual.EMPTY
+    ).apply {
+        onMouseClicked = {
+            playerType = changePlayerType(false, playerType)
+        }
+    }
 
     // type inference fails here, so explicit  ": TextField" is required
     // see https://discuss.kotlinlang.org/t/unexpected-type-checking-recursive-problem/6203/14
-    private val p2Input: TextField = TextField(
+    private val nameInput: TextField = TextField(
         width = 400, height = 50,
         posX = 1920/2 - 180, posY = 450,
         prompt = "",
         font = Font(size = 28)
     ).apply {
-        visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
+        visual = ColorVisual(204, 212, 209).apply { style.borderRadius = BorderRadius(8) }
         onTextChanged = {
-            if (!this.text.isBlank() && !p4Input.text.isBlank()) {
+            if (!this.text.isBlank() && !lobbyCodeInput.text.isBlank()) {
                 joinButton.isDisabled = false
             } else {
                 joinButton.isDisabled = true
@@ -82,23 +104,21 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
         }
     }
 
-    private val p4Input: TextField = TextField(
+    private val lobbyCodeInput: TextField = TextField(
         width = 400, height = 50,
         posX = 1920/2 - 180, posY = 600,
         prompt = "",
         font = Font(size = 28)
     ).apply {
-        visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
+        visual = ColorVisual(204, 212, 209).apply { style.borderRadius = BorderRadius(8) }
         onTextChanged = {
 
-            if (!this.text.isBlank() && !p2Input.text.isBlank()) {
+            if (!this.text.isBlank() && !nameInput.text.isBlank()) {
                 joinButton.isDisabled = false
             } else {
                 joinButton.isDisabled = true
             }
-
         }
-
     }
 
     private val joinButton = Button(
@@ -143,15 +163,10 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
         ),
         alignment = Alignment.CENTER,
         isWrapText = false,
-        visual = ColorVisual(color = Color(0xFFFFFF))
-            .apply {
-                transparency = 0.0
-            }
+        visual = ColorVisual(color = Color(0xFFFFFF)).apply {
+            transparency = 0.0
+        }
     )
-
-
-
-
 
     init {
         backgroundOpacity = .5
@@ -159,11 +174,36 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
             logo,
             menuBackground,
             exitButton,
-            p2Input,
-            p4Input,
+            nameInput,
+            lobbyCodeInput,
             name,
             lobbyCode,
             joinButton,
+            playerTypeIcon,
+            switchTypeLeftButton,
+            switchTypeRightButton,
         )
+    }
+
+    private fun changePlayerType(leftButton: Boolean, playerType: Int): Int {
+        val newType = if (leftButton) {
+            (playerType + 2) % 3
+        } else {
+            (playerType + 1) % 3
+        }
+
+        val newVisual = when (newType) {
+            0 -> ImageVisual("HumanIcon2.png")
+
+            1 -> ImageVisual("EasyBotIcon2.png")
+
+            2 -> ImageVisual("HardBotIcon2.png")
+
+            else -> throw IllegalArgumentException("Only possible visuals, $newType is invalid")
+        }
+
+        playerTypeIcon.visual = newVisual
+
+        return newType
     }
 }
