@@ -112,6 +112,11 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
             exterminate(false)
             return
         }else {
+            for (token in game.removedTokens) {
+                game.wildlifeTokens.push(token)
+            }
+            game.removedTokens.clear()
+            game.wildlifeTokens.shuffle()
             //refreshing only at the final resolved state
             onAllRefreshables {
                 refreshAfterExterminate()
