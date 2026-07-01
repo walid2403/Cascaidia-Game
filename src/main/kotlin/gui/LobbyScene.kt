@@ -18,6 +18,7 @@ import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 import tools.aqua.bgw.visual.Visual
+import gui.HostOnlineLobbyScene
 
 class LobbyScene(private val app: SopraApplication, private val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
 
@@ -166,7 +167,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = buttonWidth, height = buttonHeight,
         posX = leftButtonX,
         posY = buttonY,
-        //visual = ImageVisual("PlayerTypeButtonLeft.png")
         visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
@@ -178,7 +178,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = buttonWidth, height = buttonHeight,
         posX = leftButtonX,
         posY = p2Input.posY - 1 - (84 - nameHeight) / 2,
-        //visual = ImageVisual("PlayerTypeButtonLeft.png")
         visual = Visual.EMPTY
 
     ).apply {
@@ -191,7 +190,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = buttonWidth, height = buttonHeight,
         posX = leftButtonX,
         posY = p3Input.posY - 1 - (84 - nameHeight) / 2,
-//        visual = ImageVisual("PlayerTypeButtonLeft.png"),
         visual = Visual.EMPTY
 
     ).apply {
@@ -204,7 +202,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = buttonWidth, height = buttonHeight,
         posX = leftButtonX,
         posY = p4Input.posY - 1 - (84 - nameHeight) / 2,
-        //visual = ImageVisual("PlayerTypeButtonLeft.png"),
         visual = Visual.EMPTY
 
     ).apply {
@@ -217,7 +214,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = buttonWidth, height = buttonHeight,
         posX = rightButtonX,
         posY = 218,
-        //visual = ImageVisual("PlayerTypeButtonRight.png"),
         visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
@@ -229,7 +225,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = buttonWidth, height = buttonHeight,
         posX = rightButtonX,
         posY = p2Input.posY - 1 -  (84 - nameHeight) / 2,
-        //visual = ImageVisual("PlayerTypeButtonRight.png")
         visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
@@ -241,7 +236,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = buttonWidth, height = buttonHeight,
         posX = rightButtonX,
         posY = p3Input.posY - 1 - (84 - nameHeight) / 2,
-        //visual = ImageVisual("PlayerTypeButtonRight.png")
         visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
@@ -253,7 +247,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = buttonWidth, height = buttonHeight,
         posX = rightButtonX,
         posY = p4Input.posY - 1 - (84 - nameHeight) / 2,
-        //visual = ImageVisual("PlayerTypeButtonRight.png")
         visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
@@ -640,16 +633,12 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     private val exitButton = Button(
         width = 78, height = 78,
         posX = 33, posY = 23,
-        //text = "←",font = Font(size = 70,color = Color(0xFFFFFF))
     ).apply {
-        //visual = ColorVisual(64, 98, 70).apply { style.borderRadius = BorderRadius(8) }
         visual = Visual.EMPTY
         onMouseClicked = {
             app.showMenuScene(MainMenuScene(app, rootService))
         }
     }
-
-//    "◀──",
 
 
     private val shuffleButton = Button(
@@ -675,7 +664,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     ).apply {
         onMouseClicked = {
             expandPanel()
-            resizeScoreCards()
+            app.hostOnlineLobbyScene.resizeScoreCards()
         }
     }
 
@@ -907,18 +896,18 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         }
     }
 
-    private fun resizeScoreCards() {
-        elkCardA.resize(192, 370)
-        elkCardB.resize(192, 370)
-        hawkCardA.resize(170, 370)
-        hawkCardB.resize(170, 370)
-        salmonCardA.resize(170, 370)
-        salmonCardB.resize(170, 370)
-        foxCardA.resize(170, 370)
-        foxCardB.resize(170, 370)
-        bearCardA.resize(194, 370)
-        bearCardB.resize(194, 370)
-    }
+//    private fun resizeScoreCards() {
+//        elkCardA.resize(192, 370)
+//        elkCardB.resize(192, 370)
+//        hawkCardA.resize(170, 370)
+//        hawkCardB.resize(170, 370)
+//        salmonCardA.resize(170, 370)
+//        salmonCardB.resize(170, 370)
+//        foxCardA.resize(170, 370)
+//        foxCardB.resize(170, 370)
+//        bearCardA.resize(194, 370)
+//        bearCardB.resize(194, 370)
+//    }
 }
 
 

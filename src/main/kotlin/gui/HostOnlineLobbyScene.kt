@@ -82,48 +82,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         text = "↓",font = Font(size = 28),
         visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
     ).apply{
-
         onMouseClicked ={
-//                if((p1Input.posY.toInt() == nameY) &&
-//                    (p2Input.posY.toInt() == nameY + nameHeight + nameDistance)) {
-//                    buttonsDown(p1Input,p2Input)
-//                }
-//                else if ((p2Input.posY.toInt() == nameY) &&
-//                    (p1Input.posY.toInt() == nameY + nameHeight + nameDistance)){
-//                    buttonsDown(p2Input,p1Input)
-//                }
-//               else if ()
-
             switchNames(1)
-
-//            if (p1Input.posY.toInt() == nameY){
-//                when (posYDownP1){
-//                    p2Input.posY.toInt() -> {buttonsDown(p1Input,p2Input)}
-//                    p3Input.posY.toInt() -> {buttonsDown(p1Input,p3Input)}
-//                    p4Input.posY.toInt() -> {buttonsDown(p1Input,p4Input)}
-//                }
-//            }
-//            else if (p2Input.posY.toInt() == nameY){
-//                when (posYDownP1){
-//                    p1Input.posY.toInt() -> {buttonsDown(p2Input,p1Input)}
-//                    p3Input.posY.toInt() -> {buttonsDown(p2Input,p3Input)}
-//                    p4Input.posY.toInt() -> {buttonsDown(p2Input,p4Input)}
-//                }
-//            }
-//            else if (p3Input.posY.toInt() == nameY){
-//                when (posYDownP1){
-//                    p1Input.posY.toInt() -> {buttonsDown(p3Input,p1Input)}
-//                    p2Input.posY.toInt() -> {buttonsDown(p3Input,p2Input)}
-//                    p4Input.posY.toInt() -> {buttonsDown(p3Input,p4Input)}
-//                }
-//            }
-//            else if (p4Input.posY.toInt() == nameY){
-//                when (posYDownP1){
-//                    p1Input.posY.toInt() -> {buttonsDown(p4Input,p1Input)}
-//                    p2Input.posY.toInt() -> {buttonsDown(p4Input,p2Input)}
-//                    p3Input.posY.toInt() -> {buttonsDown(p4Input,p3Input)}
-//                }
-//            }
         }
     }
 
@@ -135,34 +95,6 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
         onMouseClicked ={
             switchNames(2)
-//            if (p1Input.posY.toInt() == posYDownP1){
-//                when (posYDownP2){
-//                    p2Input.posY.toInt() -> {buttonsDown(p1Input,p2Input)}
-//                    p3Input.posY.toInt() -> {buttonsDown(p1Input,p3Input)}
-//                    p4Input.posY.toInt() -> {buttonsDown(p1Input,p4Input)}
-//                }
-//            }
-//            else if (p2Input.posY.toInt() == posYDownP1 ){
-//                when (posYDownP2){
-//                    p1Input.posY.toInt() -> {buttonsDown(p2Input,p1Input)}
-//                    p3Input.posY.toInt() -> {buttonsDown(p2Input,p3Input)}
-//                    p4Input.posY.toInt() -> {buttonsDown(p2Input,p4Input)}
-//                }
-//            }
-//            else if (p3Input.posY.toInt() == posYDownP1){
-//                when (posYDownP2){
-//                    p1Input.posY.toInt() -> {buttonsDown(p3Input,p1Input)}
-//                    p2Input.posY.toInt() -> {buttonsDown(p3Input,p2Input)}
-//                    p4Input.posY.toInt() -> {buttonsDown(p3Input,p4Input)}
-//                }
-//            }
-//            else if (p4Input.posY.toInt() == posYDownP1){
-//                when (posYDownP2){
-//                    p1Input.posY.toInt() -> {buttonsDown(p4Input,p1Input)}
-//                    p2Input.posY.toInt() -> {buttonsDown(p4Input,p2Input)}
-//                    p3Input.posY.toInt() -> {buttonsDown(p4Input,p3Input)}
-//                }
-//            }
         }
     }
 
@@ -174,86 +106,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
         onMouseClicked ={
             switchNames(3)
-//            if (p1Input.posY.toInt() == posYDownP2){
-//                when (posYDownP3){
-//                    p2Input.posY.toInt() -> {buttonsDown(p1Input,p2Input)}
-//                    p3Input.posY.toInt() -> {buttonsDown(p1Input,p3Input)}
-//                    p4Input.posY.toInt() -> {buttonsDown(p1Input,p4Input)}
-//                }
-//            }
-//            else if (p2Input.posY.toInt() == posYDownP2 ){
-//                when (posYDownP3){
-//                    p1Input.posY.toInt() -> {buttonsDown(p2Input,p1Input)}
-//                    p3Input.posY.toInt() -> {buttonsDown(p2Input,p3Input)}
-//                    p4Input.posY.toInt() -> {buttonsDown(p2Input,p4Input)}
-//                }
-//            }
-//            else if (p3Input.posY.toInt() == posYDownP2){
-//                when (posYDownP3){
-//                    p1Input.posY.toInt() -> {buttonsDown(p3Input,p1Input)}
-//                    p2Input.posY.toInt() -> {buttonsDown(p3Input,p2Input)}
-//                    p4Input.posY.toInt() -> {buttonsDown(p3Input,p4Input)}
-//                }
-//            }
-//            else if (p4Input.posY.toInt() == posYDownP2){
-//                when (posYDownP3){
-//                    p1Input.posY.toInt() -> {buttonsDown(p4Input,p1Input)}
-//                    p2Input.posY.toInt() -> {buttonsDown(p4Input,p2Input)}
-//                    p3Input.posY.toInt() -> {buttonsDown(p4Input,p3Input)}
-//                }
-//            }
         }
     }
-
-//    private val downButtonP4 = Button(
-//        width = buttonWidth, height = buttonHeight,
-//        posX = (paneWidth+nameWidth)/2 + downUpButtonDistance ,posY = nameY + 3*nameHeight + 3*nameDistance,
-//        text = "↓",font = Font(size = 28)
-//    ).apply{
-//        visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
-//
-//    }
-
-
-//    private val upButtonP1 = Button(
-//        width = buttonWidth, height = buttonHeight,
-//        posX = (paneWidth+nameWidth)/2 + 2*downUpButtonDistance + buttonWidth  ,posY = nameY,
-//        text = "↑",font = Font(size = 28)
-//    ).apply{
-//        visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
-//
-//    }
-
-//    private val upButtonP2 = Button(
-//        width = buttonWidth, height = buttonHeight,
-//        posX = (paneWidth+nameWidth)/2 +  2*downUpButtonDistance + buttonWidth ,
-//        posY = nameY + nameHeight + nameDistance,
-//        text = "↑",font = Font(size = 28)
-//    ).apply{
-//        visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
-//
-//    }
-
-//    private val upButtonP3 = Button(
-//        width = buttonWidth, height = buttonHeight,
-//        posX = (paneWidth+nameWidth)/2 + 2*downUpButtonDistance + buttonWidth ,
-//        posY = nameY + 2*nameHeight + 2*nameDistance,
-//        text = "↑",font = Font(size = 28)
-//    ).apply{
-//        visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
-//
-//    }
-
-//    private val upButtonP4 = Button(
-//        width = buttonWidth, height = buttonHeight,
-//        posX = (paneWidth+nameWidth)/2 +  2*downUpButtonDistance + buttonWidth  ,
-//        posY = nameY + 3*nameHeight + 3*nameDistance,
-//        text = "↑",font = Font(size = 28)
-//    ).apply{
-//        visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(8) }
-//
-//    }
-
 
     private val shuffleButton = Button(
         width = shuffleButtonWidth, height = shuffleButtonHeight,
@@ -265,7 +119,6 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
             shuffleNames()
         }
     }
-
 
     private val p1Input = Label(
         width = nameWidth, height = nameHeight,
@@ -634,7 +487,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
-            app.showMenuScene(HostOnlineScene(app,rootService))
+            app.showMenuScene(MainMenuScene(app,rootService))
         }
     }
 
@@ -809,28 +662,6 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
             )
         )
     }
-
-//    private fun buttonsDown (label1 : Label, label2 : Label){
-//        val l1 = label1.posY
-//        val l2 = label2.posY
-//
-//        playAnimation(
-//            ParallelAnimation(
-//                MovementAnimation(
-//                    componentView = label1,
-//                    fromY = l1,
-//                    toY = l2,
-//                    duration = 500 // dauer
-//                ),
-//                MovementAnimation(
-//                    componentView = label2,
-//                    fromY = l2,
-//                    toY = l1,
-//                    duration = 500 // dauer
-//                )
-//            )
-//        )
-//    }
 
     private fun showScoreCards(cardA: Label, cardB: Label) {
         val cards = listOf(salmonCardA, salmonCardB, hawkCardA, hawkCardB, foxCardA, foxCardB,
