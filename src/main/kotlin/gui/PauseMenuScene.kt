@@ -6,8 +6,11 @@ import tools.aqua.bgw.components.StaticComponentView
 import tools.aqua.bgw.components.layoutviews.Pane
 import tools.aqua.bgw.components.uicomponents.Button
 import tools.aqua.bgw.components.uicomponents.CheckBox
+import tools.aqua.bgw.core.Alignment
+import tools.aqua.bgw.core.Color
 import tools.aqua.bgw.core.MenuScene
 import tools.aqua.bgw.style.BorderRadius
+import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 
@@ -30,9 +33,11 @@ class PauseMenuScene (private val app: SopraApplication, private val rootService
     private val animationsEnabled = CheckBox(
         posX = 70,
         posY = 115,
-        width = 45,
-        height = 45,
+        width = 300,
+        height = 20,
         text = "Animations Enabled",
+        alignment = Alignment.CENTER_LEFT,
+        font = Font(20.0),
         isChecked = true
     )
 
@@ -42,12 +47,14 @@ class PauseMenuScene (private val app: SopraApplication, private val rootService
         width = paneWidth - 140,
         height = 100,
         text = "Main Menu",
+        font = Font(30.0,Color.WHITE,fontWeight = Font.FontWeight.BOLD,family = "Poppins"),
         visual = ColorVisual(236, 142, 14).apply {
             style.borderRadius = BorderRadius(31)
         }
     )
 
     init {
+        backgroundOpacity = 0.0
         addComponents(
             menuPane,
             mainMenuButton,
