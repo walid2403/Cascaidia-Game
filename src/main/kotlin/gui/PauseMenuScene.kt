@@ -53,12 +53,38 @@ class PauseMenuScene (private val app: SopraApplication, private val rootService
         }
     )
 
+    private val saveAndExitButton = Button(
+        posX = 70,
+        posY = 310,
+        width = paneWidth - 140,
+        height = 100,
+        text = "Save and Exit",
+        font = Font(30.0,Color.WHITE,fontWeight = Font.FontWeight.BOLD,family = "Poppins"),
+        visual = ColorVisual(236, 142, 14).apply {
+            style.borderRadius = BorderRadius(31)
+        }
+    )
+
+    private val exitButton = Button(
+        posX = 70,
+        posY = 440,
+        width = paneWidth - 140,
+        height = 100,
+        text = "Exit",
+        font = Font(30.0,Color.WHITE,fontWeight = Font.FontWeight.BOLD,family = "Poppins"),
+        visual = ColorVisual(196, 75, 0).apply {
+            style.borderRadius = BorderRadius(31)
+        }
+    )
+
     init {
         backgroundOpacity = 0.0
         addComponents(
             menuPane,
             mainMenuButton,
             animationsEnabled,
+            saveAndExitButton,
+            exitButton
         )
     }
 

@@ -37,7 +37,6 @@ import tools.aqua.bgw.visual.Visual
  *  @property player ein Objekt des Typs [Int], speichert den aktullen Spieler Index (0 = Rundenanfang)
  */
 class GameScene(private val app: SopraApplication,private val rootService: RootService) : BoardGameScene(1920, 1080), Refreshable {
-
     private var selectAnimal = 0
     private var selectTile = 0
     private var customChoiceActive = false
