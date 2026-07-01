@@ -104,10 +104,49 @@ class MainMenuScene(private val app: SopraApplication,private val rootService: R
             }
     }
 
+    //
+    // these labels will not ever be visible but having them in the main menu scene will preload the images
+    // this will make the user experience in the following menu scenes smoother, because the blip between images
+    // loading is eliminated
+    //
+
+    private val easyBotIcon = Label(
+        posX = sceneWidth/2,
+        posY = sceneHeight/2,
+        height = 63,
+        width = 63,
+        visual = ImageVisual("EasyBotIcon.png")
+    )
+    private val hardBotIcon = Label(
+        posX = sceneWidth/2,
+        posY = sceneHeight/2,
+        height = 62,
+        width = 63,
+        visual = ImageVisual("HardBotIcon.png")
+    )
+
+    private val easyBotIcon2 = Label(
+        posX = sceneWidth/2,
+        posY = sceneHeight/2,
+        height = 70,
+        width = 110,
+        visual = ImageVisual("EasyBotIcon2.png")
+    )
+    private val hardBotIcon2 = Label(
+        posX = sceneWidth/2,
+        posY = sceneHeight/2,
+        height = 70,
+        width = 110,
+        visual = ImageVisual("HardBotIcon2.png")
+    )
 
     init {
         backgroundOpacity = .5
         addComponents(
+            easyBotIcon,
+            hardBotIcon,
+            easyBotIcon2,
+            hardBotIcon2,
             logo,
             menuBackground,
             exitButton

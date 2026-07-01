@@ -102,7 +102,7 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
     private val nameInput: TextField = TextField(
         width = 400, height = 50,
         posX = 1920/2 - 180, posY = 450,
-        prompt = "",
+        prompt = "Enter Name",
         font = Font(size = 28)
     ).apply {
         visual = ColorVisual(204, 212, 209).apply {
@@ -121,7 +121,7 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
     private val lobbyInput: TextField = TextField(
         width = 400, height = 50,
         posX = 1920/2 - 180, posY = 600,
-        prompt = "",
+        prompt = "(optional)",
         font = Font(size = 28)
     ).apply {
         visual = ColorVisual(204, 212, 209).apply {
@@ -165,38 +165,6 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
     )
 
 
-//    private val infoButton : Label  = Label(
-//        posX =1920/2 - 230 , posY = 540,
-//        width = 50, height = 50,
-//        text = "!",
-//        font = Font(size = 30),
-//        visual = ColorVisual(color = Color(0xFFFFFF))
-//    ).apply {
-//        visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(360) }
-//        onMouseEntered ={
-//            infoBox.isVisible = true
-//        }
-//        onMouseExited = { infoBox.isVisible = false }
-//    }
-
-//    private val infoBox : Label  = Label(
-//        posX =1920/2 - 280 , posY = 550,
-//        width = 50, height = 80,
-//        text = "the Lobby-Code is optional." +
-//                "\n If you don't enter on a random one" +
-//                "\n will be assigned to you",
-//        visual = ColorVisual(color = Color(0xFFFFFF))
-//            .apply {
-//                transparency = 0.7
-//            }
-//    ).apply {
-//        isVisible = false
-//    }
-
-
-
-
-
     init {
         backgroundOpacity = .5
         addComponents(
@@ -206,8 +174,6 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
             nameInput,
             lobbyInput,
             name,
-//            infoButton,
-//            infoBox,
             lobbyCode,
             joinButton,
             playerTypeIcon,
