@@ -634,7 +634,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
-            app.showMenuScene(MainMenuScene(app,rootService))
+            app.showMenuScene(HostOnlineScene(app,rootService))
         }
     }
 
@@ -810,27 +810,27 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         )
     }
 
-    private fun buttonsDown (label1 : Label, label2 : Label){
-        val l1 = label1.posY
-        val l2 = label2.posY
-
-        playAnimation(
-            ParallelAnimation(
-                MovementAnimation(
-                    componentView = label1,
-                    fromY = l1,
-                    toY = l2,
-                    duration = 500 // dauer
-                ),
-                MovementAnimation(
-                    componentView = label2,
-                    fromY = l2,
-                    toY = l1,
-                    duration = 500 // dauer
-                )
-            )
-        )
-    }
+//    private fun buttonsDown (label1 : Label, label2 : Label){
+//        val l1 = label1.posY
+//        val l2 = label2.posY
+//
+//        playAnimation(
+//            ParallelAnimation(
+//                MovementAnimation(
+//                    componentView = label1,
+//                    fromY = l1,
+//                    toY = l2,
+//                    duration = 500 // dauer
+//                ),
+//                MovementAnimation(
+//                    componentView = label2,
+//                    fromY = l2,
+//                    toY = l1,
+//                    duration = 500 // dauer
+//                )
+//            )
+//        )
+//    }
 
     private fun showScoreCards(cardA: Label, cardB: Label) {
         val cards = listOf(salmonCardA, salmonCardB, hawkCardA, hawkCardB, foxCardA, foxCardB,

@@ -18,7 +18,7 @@ class SopraApplication : BoardGameApplication("SoPra Game") {
     /**
      * The main game scene displayed in the application.
      */
-    private val helloScene = GameScene(rootService)
+    private val helloScene = GameScene(this@SopraApplication,rootService)
 
 
     private val mainMenuScene = MainMenuScene(this@SopraApplication,rootService)

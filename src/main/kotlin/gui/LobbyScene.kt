@@ -704,8 +704,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
         listOf(
             p1Input, p2Input, p3Input, p4Input,
-            //p1InputHuman, p2InputHuman, p3InputHuman, p4InputHuman,
-            //easyBot,human,hardBot,emptySlot,barOne,barTwo,barThree,barFour,player,
             shuffleButton, exitButton, p1TypeButtonLeft, p2TypeButtonLeft, p3TypeButtonLeft, p4TypeButtonLeft,
             p1TypeButtonRight, p2TypeButtonRight, p3TypeButtonRight, p4TypeButtonRight,
             noP1, noP2, noP3, noP4, p1Icon, p2Icon, p3Icon, p4Icon,
@@ -725,7 +723,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
             logo,
             sidePanel,
             tabLabel,
-            //arrowButton,
             hostPanel,
         )
     }

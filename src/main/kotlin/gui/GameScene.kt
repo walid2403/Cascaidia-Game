@@ -36,7 +36,7 @@ import tools.aqua.bgw.visual.Visual
  *  @property changeAnimalsArray ein Objekt des Typs [booleanArrayOf], speichert für jedes Tier, ob es getauscht wird
  *  @property player ein Objekt des Typs [Int], speichert den aktullen Spieler Index (0 = Rundenanfang)
  */
-class GameScene(private val rootService: RootService) : BoardGameScene(1920, 1080), Refreshable {
+class GameScene(private val app: SopraApplication,private val rootService: RootService) : BoardGameScene(1920, 1080), Refreshable {
 
     private var selectAnimal = 0
     private var selectTile = 0
@@ -447,6 +447,10 @@ class GameScene(private val rootService: RootService) : BoardGameScene(1920, 108
     private val pause = Button(width = 60, height = 60, posX = 1825, posY = 35, text = "||",
         font = Font(size = 16, color = Color(255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
+    }.apply {
+        onMouseClicked = {
+            app.showMenuScene(PauseMenuScene(app,rootService))
+        }
     }
 
     //Silder
