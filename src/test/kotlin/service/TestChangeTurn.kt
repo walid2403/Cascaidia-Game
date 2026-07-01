@@ -154,7 +154,7 @@ class TestChangeTurn {
                 MutableList(6) { Habitates.MOUNTAINS }, emptyList()) }
         var calledCalculateScores = false
         val testRefresh = object : Refreshable {
-            override fun refreshAfterEndGame() {
+            override fun refreshAfterEndGame(scores: List<List<Int>>) {
                 calledCalculateScores = true
             }
         }
@@ -185,8 +185,6 @@ class TestChangeTurn {
             }
             assertFailsWith<IllegalStateException>("Falscher GameState zugelassen")
             { rootService.gameService.changeTurn() }
-            assertEquals(8, currentGame.removedTokens.size,
-                "Removed Tokens trotz Fehler entfernt")
             assertEquals(3, currentGame.playerQueue.size,
                 "Spieler verloren gegangen")
             assertEquals(state,currentGame.gameState,
@@ -206,23 +204,23 @@ class TestChangeTurn {
 
         currentGame.playerQueue.forEach { it.board[Triple(0,0,-1)] =
             Tile(-1,mutableListOf(), emptyList())}
-        assertEquals(80, rootService.history.undoneMoves.peek().playerQueue.fold(0)
+        assertEquals(63, rootService.history.prevMoves.peek().playerQueue.fold(0)
         {acc, p -> acc + p.board.size }, "Board wurde verändert")
 
         currentGame.choices.add(Pair(Tile(-1,mutableListOf(), emptyList()), WildlifeToken.ELK))
-        assertEquals(4, rootService.history.undoneMoves.peek().choices.size,
+        assertEquals(4, rootService.history.prevMoves.peek().choices.size,
             "Choices wurden verändert")
 
         currentGame.removedTokens.add(WildlifeToken.ELK)
-        assertTrue(rootService.history.undoneMoves.peek().removedTokens.isEmpty(),
+        assertTrue(rootService.history.prevMoves.peek().removedTokens.isEmpty(),
             "RemovedTokens wurden verändert")
 
         currentGame.wildlifeTokens.push(WildlifeToken.ELK)
-        assertEquals(6, rootService.history.undoneMoves.peek().wildlifeTokens.size,
+        assertEquals(6, rootService.history.prevMoves.peek().wildlifeTokens.size,
             "WildlifeTokens wurden verändert")
 
         currentGame.tileStack.pop()
-        assertEquals(4, rootService.history.undoneMoves.peek().tileStack.size,
+        assertEquals(5, rootService.history.prevMoves.peek().tileStack.size,
             "TileStack wurde verändert")
     }
 

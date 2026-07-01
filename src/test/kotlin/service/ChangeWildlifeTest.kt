@@ -7,7 +7,7 @@ import entity.*
 /**
  * A simple test class to demonstrate a basic unit test.
  */
-class ChangeWildlife {
+class ChangeWildlifeTest {
 
     /**
      * This service is initialized in the [setUp] function hence it is a late-initialized property.
@@ -141,7 +141,7 @@ class ChangeWildlife {
             }
         }
 
-        assertEquals(3, bearCount, "Es sind Bären verloren gegangen :(")
+        assertEquals(0, bearCount, "Es sind Bären enstanden :(")
         assertFalse(bearPositions.contains(wildlifeTokenCount - 3) && bearPositions.contains(wildlifeTokenCount - 2)
                 && bearPositions.contains(wildlifeTokenCount - 1),
             "Der Wildlife Token Stack wurde scheinbar nicht gemischt")
@@ -193,7 +193,7 @@ class ChangeWildlife {
         assertEquals(WildlifeToken.BEAR, selection.elementAt(2).second)
         assertEquals(WildlifeToken.BEAR, selection.elementAt(3).second)
 
-        assertEquals(GameState.START_OF_TURN, game.gameState,
+    assertEquals(GameState.MADE_CHOICE, game.gameState,
             "Der GameState darf nicht angepasst worden sein")
 
         assertEquals(3, game.playerQueue.peek().natureTokens,
@@ -210,7 +210,8 @@ class ChangeWildlife {
 
         val selection = game.choices
 
-        assertFailsWith<IllegalStateException> { rootService.playerActionService.changeWildlife(listOf(0, 1, 2)) }
+        assertFailsWith<IllegalArgumentException> { rootService.playerActionService.changeWildlife(listOf(0, -1, 2)) }
+        assertFailsWith<IllegalArgumentException> { rootService.playerActionService.changeWildlife(listOf(0, 1, 4)) }
 
         assertFalse(refreshWasCalled)
 

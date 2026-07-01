@@ -46,7 +46,10 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         require(indices.all { it in 0..3 }) { "Die angegebenen Plätze müssen zwischen 0 und 3 liegen!" }
         require(indices.distinct().size == indices.size) {"Ein Index darf nicht doppelt in der Liste vorkommen"}
         //Sind genug Tiere zum Tauschen da?
-        require(currentGame.wildlifeTokens.size >= indices.size) { "Nicht genug Token im Beutel zum Tauschen!" }
+        if(currentGame.wildlifeTokens.size < indices.size) {
+            rootService.gameService.calculateScores()
+            return
+        }
 
         val alteTierToken: MutableList<WildlifeToken> = mutableListOf()
 
@@ -97,11 +100,6 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
                 currentGame.gameState == GameState.HAS_EXTERMINATED) {
             "Spieler darf Aktuell kein Combination auswählen"
         }
-        //wirft automatisch ein IllegalStateException
-        check(currentPlayer.natureTokens > 0) {
-            "Spieler besitzt Kein NatureToken"
-        }
-
         //wirft automatisch ein IllegalArgumentException
         require (tileIndex in 0..3){
             "Zug ungültig: tileIndex $tileIndex außerhalb des Markts"
@@ -111,9 +109,17 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             "Zug ungültig: wildlifeIndex $wildlifeIndex außerhalb des Markts"
         }
 
+        //wirft automatisch ein IllegalStateException.
+        // NUR WENN es eine echte freie Auswahl ist, muss er einen Token haben.
+        check(currentPlayer.natureTokens > 0) {
+            "Spieler besitzt Kein NatureToken, um ungleiche Paare zu wählen"
+        }
+
+
         currentPlayer.natureTokens--
         currentGame.selectedChoice = Pair(tileIndex,wildlifeIndex)
         currentGame.gameState = GameState.MADE_CHOICE
+
 
         onAllRefreshables { refreshAfterFreeSelection() }
 
@@ -139,7 +145,8 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             "Spieler darf Aktuell kein Combination auswählen"
         }
         //wirft automatisch ein IllegalArgumentException
-        require (index in 0..3){
+        require (index in 0..3){ //war require
+
             "Zug ungültig: Index $index außerhalb des Markts"
 
         }
