@@ -14,6 +14,7 @@ class RootService {
 
     val gameService = GameService(this)
     val playerActionService = PlayerActionService(this)
+    val bot = Bot(this)
 
     var currentGame : CascadiaGame ?= null
     val history = CascadiaGames()
