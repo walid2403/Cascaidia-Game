@@ -185,17 +185,20 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
             val second = entry.key.second
             val third = entry.key.third
             for (i in listOf(-1,1)) {
-                val xAxis = board[Triple(first,second-i,third+i)]
+                val xAxis = board[Triple(first,second+i,third-i)]
                 val yAxis = board[Triple(first+i,second,third-i)]
                 val zAxis = board[Triple(first+i,second-i,third)]
                 if (xAxis in seen) {
-                    node.neighbours[(1.5 - (i*1.5)).toInt()] = nodes.first { it.tile == xAxis }
+                    node.neighbours[(1.5 + (i*1.5)).toInt()] = nodes.single { it.tile == xAxis }
+                    nodes.single { it.tile == xAxis }.neighbours[((1.5 + (i*1.5)).toInt()+3)%6] = node
                 }
                 if (yAxis in seen) {
-                    node.neighbours[(2.5 - (i*1.5)).toInt()] = nodes.first { it.tile == yAxis }
+                    node.neighbours[(2.5 + (i*1.5)).toInt()] = nodes.single { it.tile == yAxis }
+                    nodes.single { it.tile == yAxis }.neighbours[((2.5 + (i*1.5)).toInt()+3)%6] = node
                 }
                 if (zAxis in seen) {
-                    node.neighbours[(3.5 - (i*1.5)).toInt()] = nodes.first { it.tile == zAxis }
+                    node.neighbours[(3.5 + (i*1.5)).toInt()] = nodes.single { it.tile == zAxis }
+                    nodes.single { it.tile == zAxis }.neighbours[((3.5 + (i*1.5)).toInt()+3)%6] = node
                 }
             }
             nodes.add(node)//this is needed
@@ -261,12 +264,12 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
                     localeScores.add(playerScore.second[habitat])
                 }
                 val largest = localeScores.max()
-                val secondLargest = localeScores.toList().filter { it != largest }.max()
                 val largestCount = localeScores.count { it == largest }
-                val secondLargestCount = localeScores.count { it == secondLargest }
                 when (largestCount) {
                     1 -> {
                         for (index in scores.indices) {
+                            val secondLargest = localeScores.toList().filter { it != largest }.max()
+                            val secondLargestCount = localeScores.count { it == secondLargest }
                             if (localeScores[index] == largest) scores[index].second.add(3)
                             else if (secondLargestCount == 1 && localeScores[index] == secondLargest)
                                 scores[index].second.add(1)
@@ -349,7 +352,9 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         nodes.forEach { node -> node.marked = false }
         return 10 * count
     }
-
+    //TODO andere Richtungen auch beachten
+    //TODO Möglichkeit von Vorkommen in mehreren Gruppen beachten
+    //TODO
     private fun elkScoringA(nodes : List<Node>) : Int {
         var sum = 0
         for (node in nodes) {
@@ -380,7 +385,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         nodes.forEach { node -> node.marked = false }
         return sum
     }
-
+    //TODO Dürfen sich Formationen berühren?
     private fun elkScoringB(nodes : List<Node>) : Int {
         var sum = 0
         loop@ for (node in nodes) {
@@ -631,7 +636,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
             node.marked = true
             val types = node.neighbours.filterNotNull().map { it.tile.occupant }.filter { it != WildlifeToken.FOX }
             val doubles = types.filter {type -> types.filter{ it == type }.size == 2}
-            sum += when (doubles.size) {
+            sum += when (doubles.size/2) {
                 0 -> 0
                 1 -> 3
                 2 -> 5

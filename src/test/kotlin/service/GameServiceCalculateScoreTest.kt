@@ -35,9 +35,6 @@ class GameServiceCalculateScoreTest {
     private fun connectedTile(id: Int, hab: Habitates, occupant: WildlifeToken? = null): Tile =
         Tile(id, MutableList(6) { hab }, emptyList()).apply { this.occupant = occupant }
 
-    private fun tile(id: Int, habs: List<Habitates>, occupant: WildlifeToken? = null): Tile =
-        Tile(id, habs.toMutableList(), emptyList()).apply { this.occupant = occupant }
-
     private fun runGame(
         players: List<Player>,
         scoringCards: List<Boolean> = listOf(true, true, true, true, true)
@@ -542,7 +539,7 @@ class GameServiceCalculateScoreTest {
     fun bearBSingle() {
         val player = Player("P", PlayerType.HUMAN)
         player.board[Triple(0, 0, 0)] = connectedTile(1, Habitates.FORESTS, WildlifeToken.BEAR)
-        assertEquals(10, scoreOf(player, listOf(false, true,true,true,true))[5])
+        assertEquals(0, scoreOf(player, listOf(false, true,true,true,true))[5])
     }
 
     /**
@@ -553,7 +550,7 @@ class GameServiceCalculateScoreTest {
         val player = Player("P", PlayerType.HUMAN)
         player.board[Triple(0, 0, 0)]  = connectedTile(1, Habitates.FORESTS, WildlifeToken.BEAR)
         player.board[Triple(1, -1, 0)] = connectedTile(2, Habitates.FORESTS, WildlifeToken.BEAR)
-        assertEquals(10, scoreOf(player, listOf(false,true,true, true , true))[5])
+        assertEquals(0, scoreOf(player, listOf(false,true,true, true , true))[5])
     }
 
     /**
@@ -564,7 +561,7 @@ class GameServiceCalculateScoreTest {
         val player = Player("P", PlayerType.HUMAN)
         player.board[Triple(0,0,0)]= connectedTile(1, Habitates.FORESTS, WildlifeToken.BEAR)
         player.board[Triple(10,-10,0)]=connectedTile(2, Habitates.FORESTS, WildlifeToken.BEAR)
-        assertEquals(20, scoreOf(player, listOf(false,true,true,true,true))[5])
+        assertEquals(0, scoreOf(player, listOf(false,true,true,true,true))[5])
     }
 
     /**
