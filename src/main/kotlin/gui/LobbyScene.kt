@@ -1,5 +1,6 @@
 package gui
 
+import entity.PlayerType
 import service.Refreshable
 import service.RootService
 import tools.aqua.bgw.animation.*
@@ -19,6 +20,8 @@ import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 import tools.aqua.bgw.visual.Visual
 import gui.HostOnlineLobbyScene
+import kotlin.Pair
+import kotlin.String
 
 class LobbyScene(private val app: SopraApplication, private val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
 
@@ -52,6 +55,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     private val cardY = 230
     private val cardAX = 245
     private val cardBX = 505
+    private val orderNames = mutableListOf<Pair<String,Int>>(Pair("",0),Pair("",0),Pair("",3),Pair("",3))
 
 
     private val logo = Label(
@@ -96,6 +100,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
             if (this.text.isBlank()) {
                 this.prompt = "Player 1"
             }
+            orderNames[0] = Pair(this.text,p1Type)
         }
     }
 
@@ -114,6 +119,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
             if (this.text.isBlank()) {
                 this.prompt = "Player 2"
             }
+            orderNames[1] = Pair(this.text,p2Type)
         }
     }
 
@@ -132,6 +138,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
             if (this.text.isBlank()) {
                 this.prompt = "Player3"
             }
+            orderNames[2] = Pair(this.text,p3Type)
         }
         isDisabled = true
         isVisible = false
@@ -151,6 +158,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
             if (this.text.isBlank()) {
                 this.prompt = "Player4"
             }
+            orderNames[3] = Pair(this.text,p4Type)
         }
         isDisabled = true
         isVisible = false
@@ -170,7 +178,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
-            p1Type = changePlayerType(1, true, p1Type)
+            p1Type = changePlayerType(1, true, p1Type,true)
+            orderNames[0] = Pair(p1Input.text, p1Type)
         }
     }
 
@@ -182,7 +191,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     ).apply {
         onMouseClicked = {
-            p2Type = changePlayerType(2, true, p2Type)
+            p2Type = changePlayerType(2, true, p2Type,true)
+            orderNames[1] = Pair(p2Input.text, p2Type)
         }
     }
 
@@ -194,7 +204,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     ).apply {
         onMouseClicked = {
-            p3Type = changePlayerType(3, true, p3Type)
+            p3Type = changePlayerType(3, true, p3Type,true)
+            orderNames[2] = Pair(p3Input.text, p3Type)
         }
     }
 
@@ -206,7 +217,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     ).apply {
         onMouseClicked = {
-            p4Type = changePlayerType(4, true, p4Type)
+            p4Type = changePlayerType(4, true, p4Type,true)
+            orderNames[3] = Pair(p4Input.text, p4Type)
         }
     }
 
@@ -217,7 +229,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
-            p1Type = changePlayerType(1, false, p1Type)
+            p1Type = changePlayerType(1, false, p1Type,true)
+            orderNames[0] = Pair(p1Input.text, p1Type)
         }
     }
 
@@ -228,7 +241,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
-            p2Type = changePlayerType(2, false, p2Type)
+            p2Type = changePlayerType(2, false, p2Type,true)
+            orderNames[1] = Pair(p2Input.text, p2Type)
         }
     }
 
@@ -239,7 +253,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
-            p3Type = changePlayerType(3, false, p3Type)
+            p3Type = changePlayerType(3, false, p3Type,true)
+            orderNames[2] = Pair(p3Input.text, p3Type)
         }
     }
 
@@ -250,7 +265,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
-            p4Type = changePlayerType(4, false, p4Type)
+            p4Type = changePlayerType(4, false, p4Type,true)
+            orderNames[3] = Pair(p4Input.text, p4Type)
         }
     }
 
@@ -747,6 +763,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
                             }
                             onMouseClicked = {
                                 TODO("Start game muss hier aufgerufen werden")
+//                                rootService.gameService.startNewGame()
                             }
                         }
                     }
@@ -755,25 +772,68 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         )
     }
 
-    private fun names(): List<String> {
-        return listOf(p1Input.text.trim(), p2Input.text.trim(), p3Input.text.trim(), p4Input.text.trim())
-    }
+
+
+
+
 
     private fun shuffleNames() {
         // ich filter die Liste nach allem die nicht leer sind und dann shuffle ich diese und packe sie in eine
         // Liste
-        val player = names().filter { it != "" }.shuffled().toMutableList()
-        // fügt bei allem leeren "" hinzu
-        repeat(4 - player.size) {
-            player.add("")
-        }
-        // wird wieder ins Feld geschieben
-        p1Input.text = player[0]
-        p2Input.text = player[1]
-        p3Input.text = player[2]
-        p4Input.text = player[3]
+        println(orderNames.toString())
+        orderNames.shuffle()
+        println(orderNames.toString())
 
+        // wird wieder ins Feld geschieben
+        p1Input.text = orderNames[0].first
+        println(orderNames[0].second)
+        println(orderNames[0].first)
+        p2Input.text = orderNames[1].first
+        p3Input.text = orderNames[2].first
+        p4Input.text = orderNames[3].first
+
+        changePlayerType(1,false,orderNames[0].second,false)
+        changePlayerType(2,false,orderNames[1].second,false)
+        changePlayerType(3,false,orderNames[2].second,false)
+        changePlayerType(4,false,orderNames[3].second,false)
     }
+
+
+
+//    private fun shuffleTypes(typePlayer: Int,typeNum: Int){
+//        val newVisual = when (typeNum) {
+//            0 -> ImageVisual("HumanIcon.png")
+//
+//            1 -> ImageVisual("EasyBotIcon.png")
+//
+//            2 -> ImageVisual("HardBotIcon.png")
+//
+//            3 -> ImageVisual("NotPlayingIcon.png")
+//
+//            else -> throw IllegalArgumentException("Only 4 possible visuals, $typeNum is invalid")
+//        }
+//
+//
+//        val leftLabel = when (typePlayer) {
+//            1 -> p1Icon
+//            2 -> p2Icon
+//            3 -> p3Icon
+//            4 -> p4Icon
+//            else -> throw IllegalArgumentException("Player $typePlayer is not valid")
+//        }
+//
+//        val rightLabel = when (typePlayer) {
+//            1 -> noP1
+//            2 -> noP2
+//            3 -> noP3
+//            4 -> noP4
+//            else -> throw IllegalArgumentException("Player $typePlayer is not valid")
+//        }
+//
+//        nameEntryDisabled(typeNum == 3, typePlayer)
+//        adjustIcons(leftLabel, rightLabel, newVisual, typeNum != 3)
+//
+//    }
 
     private fun checkBox(checkBox: String) {
         //uncheckBox.isChecked = false
@@ -800,13 +860,18 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         uncheckBox.isChecked = false
     }
 
-    private fun changePlayerType(playerNum: Int, left: Boolean, playerType: Int): Int {
-
-        val newType = if (left) {
-            (playerType + 3) % 4
+    private fun changePlayerType(playerNum: Int, left: Boolean, playerType: Int, changeType: Boolean): Int {
+        val newType: Int
+        if(changeType) {
+            newType = if (left) {
+                (playerType + 3) % 4
+            } else {
+                (playerType + 1)%4
+            }
         } else {
-            (playerType + 1)%4
+            newType = playerType
         }
+
 
         val newVisual = when (newType) {
             0 -> ImageVisual("HumanIcon.png")
