@@ -13,6 +13,10 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 
 class PlayerActionService(private val rootService: RootService) : AbstractRefreshingService() {
 
+    /**
+     * A Jackson object mapper configured with a custom `SimpleModule` to handle
+     * specific key deserialization needs for JSON Maps.
+     */
     private val mapper = jacksonObjectMapper().apply {
         val module = SimpleModule()
         module.addKeyDeserializer(Triple::class.java, TripleKeyDeserializer())
