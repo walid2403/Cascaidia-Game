@@ -1,6 +1,7 @@
-package service
+package service.bot
 
 import entity.*
+import service.*
 import kotlin.random.Random
 
 /**
