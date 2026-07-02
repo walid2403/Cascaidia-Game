@@ -35,7 +35,6 @@ dependencies {
     implementation(group = "tools.aqua", name = "bgw-gui", version = bgwVersion)
     implementation(group = "tools.aqua", name = "bgw-net-common", version = bgwVersion)
     implementation(group = "tools.aqua", name = "bgw-net-client", version = bgwVersion)
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.8")
 }
 
 /* This is how you can add the HowToPlay.pdf to the distribution zip file */
