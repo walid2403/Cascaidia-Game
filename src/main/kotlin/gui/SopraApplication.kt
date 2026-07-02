@@ -23,6 +23,8 @@ class SopraApplication : BoardGameApplication("SoPra Game") {
 
     private val mainMenuScene = MainMenuScene(this@SopraApplication,rootService)
 
+    private val pauseMenu = PauseMenuScene(this@SopraApplication,rootService)
+
     private val scoreScene = ScoreScene(this@SopraApplication, rootService)
 
     val joinOnlineLobbyScene = JoinOnlineLobbyScene(this@SopraApplication, rootService)
@@ -36,6 +38,7 @@ class SopraApplication : BoardGameApplication("SoPra Game") {
         this.showGameScene(helloScene)
 //        this.showMenuScene(mainMenuScene )
         //this.showMenuScene(scoreScene)
+        this.showMenuScene(pauseMenu)
     }
 }
 

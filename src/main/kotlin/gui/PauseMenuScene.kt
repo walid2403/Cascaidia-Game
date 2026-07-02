@@ -33,11 +33,11 @@ class PauseMenuScene (private val app: SopraApplication, private val rootService
     private val animationsEnabled = CheckBox(
         posX = 70,
         posY = 130,
-        width = 300,
+        width = paneWidth - 140,
         height = 20,
         text = "Animations Enabled",
         alignment = Alignment.CENTER_LEFT,
-        font = Font(40.0),
+        font = Font(38.0),
         isChecked = true
     )
 
