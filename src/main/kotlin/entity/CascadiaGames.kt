@@ -1,7 +1,6 @@
 package entity
 
 import tools.aqua.bgw.util.Stack
-import java.io.Serializable
 
 /**
  * Diese Entity-Klasse speichert mehrere [CascadiaGame] Instanzen

@@ -1,7 +1,4 @@
 package entity
-
-import java.io.Serializable
-
 /**
  * Diese Entity-Klasse stellt einen Spieler des Spiels Cascadia dar.
  *

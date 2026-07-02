@@ -1,7 +1,6 @@
 package entity
 
 import tools.aqua.bgw.util.Stack
-import java.io.Serializable
 import java.util.Queue
 import java.util.ArrayDeque
 
