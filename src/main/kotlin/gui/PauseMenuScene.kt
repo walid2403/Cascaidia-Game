@@ -39,7 +39,11 @@ class PauseMenuScene (private val app: SopraApplication, private val rootService
         alignment = Alignment.CENTER_LEFT,
         font = Font(38.0),
         isChecked = true
-    )
+    ).apply {
+        onCheckedChanged = {
+            app.gameScene.animationsEnabled = isChecked
+        }
+    }
 
     private val mainMenuButton = Button(
         posX = 70,

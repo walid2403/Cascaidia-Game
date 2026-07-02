@@ -45,6 +45,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private var player = 0
 
     private var allButtonsAllowed = true
+    var animationsEnabled = true
 
 
     //Hintergrundbild
