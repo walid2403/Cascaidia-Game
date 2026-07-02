@@ -37,7 +37,6 @@ class SopraApplication : BoardGameApplication("SoPra Game") {
         this.showGameScene(gameScene)
         this.showMenuScene(mainMenuScene )
         //this.showMenuScene(scoreScene)
-//        this.showMenuScene(pauseMenu)
     }
 }
 
