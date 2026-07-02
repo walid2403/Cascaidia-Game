@@ -87,5 +87,5 @@ interface Refreshable {
     /**
      * Perform refreshes necessary after the game has ended
      */
-    fun refreshAfterEndGame(scores: List<Pair<String, List<Int>>>) {}
+    fun refreshAfterEndGame(scores: List<List<Int>>) {}
 }
