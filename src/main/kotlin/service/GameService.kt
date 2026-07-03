@@ -506,7 +506,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
     private fun markElks(node : Node, elkList : MutableList<Node>) : MutableList<Node> {
         var elkList = elkList
         node.neighbours.filterNotNull().forEach {
-            if (!it.marked) {
+            if (!it.marked && it.tile.occupant == WildlifeToken.ELK) {
                 elkList.add(it)
                 it.marked = true
                 elkList = markElks(it, elkList)
