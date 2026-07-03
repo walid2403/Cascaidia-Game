@@ -155,10 +155,8 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
 
             /*if (currentGame.scoringCards[1]) playerScore.add(elkScoringA(nodes))
             else playerScore.add(elkScoringB(nodes))*/
-            if (currentGame.scoringCards[1]) {
-                val elkGroupList = sortElks(nodes)
-                playerScore.add(elkScoreA(elkGroupList))
-            }
+            val elkGroupList = sortElks(nodes)
+            playerScore.add(elkScore(elkGroupList,currentGame.scoringCards[1]))
             nodes.forEach { it.marked = false }
 
             playerScore.add(salmonScoring(nodes, currentGame.scoringCards[2]))
