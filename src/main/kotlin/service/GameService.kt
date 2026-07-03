@@ -515,7 +515,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         return elkList
     }
 
-    private fun elkScoreA(elkGroupList : MutableList<MutableList<Node>>) {
+    private fun elkScoreA(elkGroupList : List<MutableList<Node>>) {
         val elkScores = mutableListOf<Int>()
 
         for (elkGroup in elkGroupList) {
@@ -563,6 +563,13 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
     }
 
     private fun scoreElkGroup(elkGroup: List<Node>) : Int {
+        elkGroup.forEach {elk ->
+            if (elk.marked) {
+                elk.marked2 = true
+                elk.marked = false
+            }
+        }
+
         val scores = mutableListOf<Int>()
         for (node in elkGroup) {
             if (node.marked2) continue
