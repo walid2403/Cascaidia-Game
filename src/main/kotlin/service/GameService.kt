@@ -491,6 +491,120 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         return sum
     }
 
+    private fun sortElks(nodes : List<Node>) : List<List<Node>> {
+        val elkGroupList = mutableListOf<MutableList<Node>>()
+        for (node in nodes) {
+            if (node.tile.occupant != WildlifeToken.ELK) continue
+            if (node.marked) continue
+
+            elkGroupList.add(markElks(node, mutableListOf(node)))
+        }
+        nodes.forEach { node -> node.marked = false }
+        return elkGroupList
+    }
+
+    private fun markElks(node : Node, elkList : MutableList<Node>) : MutableList<Node> {
+        var elkList = elkList
+        node.neighbours.filterNotNull().forEach {
+            if (!it.marked) {
+                elkList.add(it)
+                it.marked = true
+                elkList = markElks(it, elkList)
+            }
+        }
+        return elkList
+    }
+
+    private fun elkScoreA(elkGroupList : MutableList<MutableList<Node>>) {
+        val elkScores = mutableListOf<Int>()
+
+        for (elkGroup in elkGroupList) {
+            if (elkGroup.size < 3) {
+                elkScores.add(scoreElk(elkGroup.size))
+                continue
+            }
+            else {
+                val neighborElks = mutableListOf<Int>()
+                var straight = true
+                elkGroup.elementAt(0).neighbours.forEachIndexed { index, node ->
+                    if (node == null) return@forEachIndexed
+                    if (node.tile.occupant == WildlifeToken.ELK) neighborElks.add(index)
+                }
+                if (neighborElks.size == 1) {
+                    if (neighborElks.elementAt(0) < 3) neighborElks.elementAt(0) + 3
+                    neighborElks.add(neighborElks.elementAt(0) - 3)
+                } else if (neighborElks.size == 2) {
+                    neighborElks.sort()
+                    if (neighborElks.elementAt(1) - 3 != neighborElks.elementAt(0)) straight = false
+                }
+
+                if (straight) {
+                    for (node in elkGroup) {
+                        val neighborElks2 = mutableListOf<Int>()
+                        node.neighbours.forEachIndexed { index, node ->
+                            if (node == null) return@forEachIndexed
+                            if (node.tile.occupant == WildlifeToken.ELK) neighborElks2.add(index)
+                        }
+
+                        straight = neighborElks2.all { it in neighborElks }
+                    }
+                }
+
+                if (straight) {
+                    val longStraigths = elkGroup.size / 4
+                    val shortStraightLength = elkGroup.size % 4
+                    elkScores.add(scoreElk(4) * longStraigths + scoreElk(shortStraightLength))
+                } else {
+                    elkScores.add(scoreElkGroup(elkGroup))
+                }
+
+            }
+        }
+    }
+
+    private fun scoreElkGroup(elkGroup: List<Node>) : Int {
+        val scores = mutableListOf<Int>()
+        for (node in elkGroup) {
+            if (node.marked2) continue
+            var neighborElks = mutableListOf<Int>()
+            node.neighbours.forEachIndexed { index, node ->
+                if (node == null) return@forEachIndexed
+                if (node.tile.occupant == WildlifeToken.ELK) neighborElks.add(index)
+            }
+            neighborElks = neighborElks.filter({ (it - 3) !in neighborElks }).toMutableList()
+            neighborElks.replaceAll {
+                if (it < 3) it + 3 else it
+            }
+            neighborElks.forEach {
+                markStraightLine(node, it)
+                markStraightLine(node, it - 3)
+                val tmpScore = elkGroup.count {elk -> elk.marked }
+                if (elkGroup.any{ elk -> !elk.marked2 || !elk.marked }) scores.add(tmpScore + scoreElkGroup(elkGroup))
+                else scores.add(tmpScore)
+                elkGroup.forEach { elk -> elk.marked = false }
+            }
+        }
+        return scores.max()
+    }
+
+    private fun markStraightLine(node: Node, direction: Int) {
+        if (node.marked2) return
+        node.marked = true
+        val neighbour = node.neighbours.elementAt(direction) ?: return
+        if (neighbour.tile.occupant != WildlifeToken.ELK) return
+        markStraightLine(neighbour, direction)
+    }
+
+    private fun scoreElk(length: Int) : Int {
+        return  when(length) {
+            1 -> 2
+            2 -> 5
+            3 -> 9
+            4 -> 13
+            else -> 0
+        }
+    }
+
     private fun salmonScoring(nodes : List<Node>, isA : Boolean) : Int {
         var sum = 0
         val breakPointList = mutableListOf<Node>()  //Diese Knoten werden ignoriert für Wege
@@ -702,6 +816,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
     private class Node(val tile: Tile) {
         val neighbours = Array<Node?>(6) { null }
         var marked = false
+        var marked2 = false
     }
 
     /**
