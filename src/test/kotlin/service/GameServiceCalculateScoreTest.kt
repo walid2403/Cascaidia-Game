@@ -590,6 +590,28 @@ class GameServiceCalculateScoreTest {
         }
         rootService.gameService.calculateScores()
         println(refreshable.receivedScores!!.first().second)
+        assertEquals(18, refreshable.receivedScores!!.first().second[6],
+            "Falscher Score für Shape 1")
+
+        val shape2 = listOf(
+            Triple(0,0,0),
+            Triple(1,-2,1),
+            Triple(2,-3,1),
+            Triple(0,-1,1),
+            Triple(-1,0,1),
+            Triple(-2,0,2),
+            Triple(-3,0,3)
+        )
+        player.board.clear()
+        for (t in shape2) {
+            player.board[t] =
+                Tile(-1,MutableList(6){ Habitates.MOUNTAINS }, emptyList()).
+                apply { occupant = WildlifeToken.ELK }
+        }
+        rootService.gameService.calculateScores()
+        println(refreshable.receivedScores!!.first().second)
+        assertEquals(22, refreshable.receivedScores!!.first().second[6],
+            "Falscher Score für Shape 2")
     }
 
     /**

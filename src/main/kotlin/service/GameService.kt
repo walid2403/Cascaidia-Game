@@ -612,6 +612,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
 
     private fun scoreElk(length: Int) : Int {
         return  when(length) {
+            0 -> 0
             1 -> 2
             2 -> 5
             3 -> 9
