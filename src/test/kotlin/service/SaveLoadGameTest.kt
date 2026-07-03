@@ -4,6 +4,11 @@ import entity.*
 import kotlin.test.*
 import java.io.File
 
+/**
+ * Unit test class for verifying the save and load functionality of the game, including constraints
+ * and recovery of game states and history. This test suite ensures that the save and load operations
+ * behave as expected under various conditions and handle exceptions appropriately.
+ */
 class SaveLoadGameTest {
 
     private val testSaveName = "SopraTestSpielstand"
@@ -68,7 +73,7 @@ class SaveLoadGameTest {
      * - Deletes the game and history in memory to simulate application restart.
      * - Reloads the previously saved game and verifies:
      *    - The game object is successfully restored.
-     *    - The correct number of players exist in the restored game queue.
+     *    - The correct number of players exists in the restored game queue.
      *    - The undo history of the game is reconstructed successfully.
      *
      * Validation steps include assertions to ensure logical and physical consistency during save/load operations.

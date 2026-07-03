@@ -267,12 +267,10 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             throw IllegalArgumentException("Netzwerkspiele können nicht gespeichert werden.")
         }
 
-        // Ordnerstruktur vorbereiten unter Nutzung deiner RootService-Konstanten
         val folder = File(RootService.SAVE_DIRECTORY)
         if (!folder.exists()) folder.mkdirs()
         val file = File(folder, "$name${RootService.SAVE_EXTENSION}")
 
-        // Gesamtzustand inklusive Historie abbilden
         val state = SaveState(
             currentGame = createSnapshot(game),
             prevMovesList = rootService.history.prevMoves.peekAll().map { createSnapshot(it) },
