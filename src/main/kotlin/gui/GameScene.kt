@@ -46,6 +46,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     private var allButtonsAllowed = true
     var animationsEnabled = true
+    private var isPlayerHuman = true
 
 
     //Hintergrundbild
@@ -265,19 +266,37 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
-    //Temp. test variable für Undo funktion Add Hex
-    var row = -2
+    private val confirm = Button(width = 120, height = 60, posX = 1410, posY = 985, text = "Confirm",
+        font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
+        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(10) }
+        isVisible = false
+        onMouseClicked = {
+
+        }
+    }
+
+    private val rotateTileLeft = Button(width = 60, height = 60, posX = 1325, posY = 985, text = "->",
+        font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
+        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
+        isVisible = false
+        onMouseClicked = {
+
+        }
+    }
+
+    private val rotateTileRight = Button(width = 60, height = 60, posX = 1240, posY = 985, text = "<-",
+        font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
+        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
+        isVisible = false
+        onMouseClicked = {
+
+        }
+    }
 
     //Buttons unten links
     private val undo = Button(width = 130, height = 60, posX = 35, posY = 985, text = "Undo",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(10) }
-        onMouseClicked = {
-            val area = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(player-1)
-            area[0,row]=hex
-            row = --row
-            adjustTileSize(player)
-        }
     }
     private val redo = Button(width = 130, height = 60, posX = 190, posY = 985, text = "Redo",
         font = Font(size = 16, color = Color(255, 255, 255, 127))).apply {
@@ -504,7 +523,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             animalChoice1, animalChoice2, animalChoice3, animalChoice4,
             rotateOneCW, rotateOneCCW, rotateTwoCW, rotateTwoCCW,
             rotateThreeCW, rotateThreeCCW, rotateFourCW, rotateFourCCW,
-            endTurn, undo, redo, viewPanel, pause,
+            endTurn, undo, redo, viewPanel, pause, confirm, rotateTileLeft, rotateTileRight,
             grayBoxScoringAnimals, bear, elk, salmon, hawk, fox,
             barOne, barTwo, barThree, nameOneSide, nameTwoSide, nameThreeSide, nameFourSide,
             natureTokenOneSide, natureTokenTwoSide, natureTokenThreeSide, natureTokenFourSide,
@@ -829,15 +848,57 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 createAnimalView(animal)
         }
 
-        //loadStartTiles()
+        loadStartTiles()
 
     }
 
+    private fun loadStartTiles() {
+        val game = rootService.currentGame
+        checkNotNull(game)
 
+        listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).forEachIndexed { index, grid ->
+            if(index < game.playerQueue.size) {
+                var tile = game.playerQueue.elementAt(index).board.get(Triple(0,0,0))
+                checkNotNull(tile)
+                grid[0,0] = tileMap.forward(tile)
 
+                tile = game.playerQueue.elementAt(index).board.get(Triple(1,0,-1))
+                checkNotNull(tile)
+                grid[1,0] = tileMap.forward(tile)
 
+                tile = game.playerQueue.elementAt(index).board.get(Triple(0,1,-1))
+                checkNotNull(tile)
+                grid[0,1] = tileMap.forward(tile)
+            }
+        }
+    }
 
+    private fun placeChoosenTile(x: Int, y: Int) {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(player-1)
 
+        if(!animationsEnabled) {
+            currentArea[x,y] = tileMap.forward(game.choices.elementAt(selectTile-1).first)
+        }
+
+        activatesTileButtons()
+    }
+
+    private fun activatesTileButtons() {
+        if(isPlayerHuman) {
+            listOf(confirm, rotateTileLeft, rotateTileRight).forEach { it.isVisible = true }
+        }
+    }
+
+    private fun deactivatesTileButtons() {
+        listOf(confirm, rotateTileLeft, rotateTileRight).forEach { it.isVisible = false }
+    }
+
+    override fun refreshAfterChangeTurn(lastTurn: Boolean) {
+
+        deactivatesTileButtons()
+    }
 
 
 
