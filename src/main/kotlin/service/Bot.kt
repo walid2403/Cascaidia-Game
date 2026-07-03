@@ -41,7 +41,7 @@ class Bot (private val rootService: RootService) {
                 TurnOptions.PLACE_WILDLIFE_TOKEN -> randomBotPlaceWildlifeToken(player)
                 TurnOptions.DISCARD_WILDLIFE_TOKEN -> randomBotDiscardWildlifeToken(currentGame)
             }
-            legalTurns.clear()
+            legalTurns.clear() //liste wird komplet radiert und neu beschrieben
             when (currentGame.gameState) {
                 GameState.START_OF_TURN -> {
                     legalTurns += TurnOptions.MAKE_SELECTION
@@ -120,7 +120,22 @@ class Bot (private val rootService: RootService) {
     }
 
     private fun randomBotPlaceWildlifeToken(player: Player) {
-        val possiblePositions = player.board.entries.filter { it.value.occupant == null}.map { it.key }
+        val currentGame = rootService.currentGame
+        checkNotNull(currentGame)
+
+        //welche Tiere besitzt der Bot gerade
+        val selectedWildlife = currentGame.choices[currentGame.selectedChoice.second].second
+
+        val possiblePositions = player.board.entries
+            .filter { it.value.occupant == null && selectedWildlife in it.value.possibles}
+            .map { it.key } //freie plätze
+
+        // falls die Liste leer ist, müssen wir das Tier wegwerfen
+        if(possiblePositions.isEmpty()){
+            randomBotDiscardWildlifeToken(currentGame)
+            return
+        }
+
         val position = Random.nextInt(possiblePositions.size)
         rootService.playerActionService.placeWildlife(possiblePositions[position])
     }
