@@ -502,6 +502,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
             if (node.tile.occupant != WildlifeToken.ELK) continue
             if (node.marked) continue
 
+            node.marked = true
             elkGroupList.add(markElks(node, mutableListOf(node)))
         }
         nodes.forEach { node -> node.marked = false }
@@ -520,7 +521,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         return elkList
     }
 
-    private fun elkScoreA(elkGroupList : List<List<Node>>) : Int{
+    private fun elkScoreA(elkGroupList : List<List<Node>>) : Int {
         val elkScores = mutableListOf<Int>()
 
         for (elkGroup in elkGroupList) {
@@ -593,8 +594,8 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
                 markStraightLine(node, it)
                 markStraightLine(node, it - 3)
                 val tmpScore = elkGroup.count {elk -> elk.marked }
-                if (elkGroup.any{ elk -> !elk.marked2 || !elk.marked }) scores.add(tmpScore + scoreElkGroup(elkGroup))
-                else scores.add(tmpScore)
+                if (elkGroup.any{ elk -> !elk.marked2 || !elk.marked }) scores.add(scoreElk(tmpScore) + scoreElkGroup(elkGroup))
+                else scores.add(scoreElk(tmpScore))
                 elkGroup.forEach { elk -> elk.marked = false }
             }
         }
@@ -615,7 +616,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
             2 -> 5
             3 -> 9
             4 -> 13
-            else -> 0
+            else -> scoreElk(4) * (length / 4) + scoreElk(length % 4)
         }
     }
 
