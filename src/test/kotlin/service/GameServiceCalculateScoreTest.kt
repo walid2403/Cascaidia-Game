@@ -581,7 +581,8 @@ class GameServiceCalculateScoreTest {
             Triple(2,-2,0),
             Triple(-1,0,1),
             Triple(-2,0,2),
-            Triple(-3,0,3)
+            Triple(-3,0,3),
+            Triple(0,-1,1)
         )
         for (t in shape1) {
             player.board[t] =
@@ -589,8 +590,8 @@ class GameServiceCalculateScoreTest {
                 apply { occupant = WildlifeToken.ELK }
         }
         rootService.gameService.calculateScores()
-        println(refreshable.receivedScores!!.first().second)
-        assertEquals(18, refreshable.receivedScores!!.first().second[6],
+        println(refreshable.receivedScores!!.first().second.elementAt(6))
+        assertEquals(20, refreshable.receivedScores!!.first().second[6],
             "Falscher Score für Shape 1")
 
         val shape2 = listOf(
@@ -609,7 +610,7 @@ class GameServiceCalculateScoreTest {
                 apply { occupant = WildlifeToken.ELK }
         }
         rootService.gameService.calculateScores()
-        println(refreshable.receivedScores!!.first().second)
+        println(refreshable.receivedScores!!.first().second[6])
         assertEquals(22, refreshable.receivedScores!!.first().second[6],
             "Falscher Score für Shape 2")
     }
