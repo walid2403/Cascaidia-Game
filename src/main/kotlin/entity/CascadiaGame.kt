@@ -42,4 +42,25 @@ class CascadiaGame(val scoringCards: List<Boolean>, val isLocal: Boolean) {
 
     val removedTokens: MutableList<WildlifeToken> = mutableListOf()
     val wildlifeTokens: Stack<WildlifeToken> = Stack()
+
+    constructor(other: CascadiaGame) : this(
+        scoringCards = other.scoringCards.toList(),
+        isLocal = other.isLocal
+    ) {
+        natureTokens = other.natureTokens
+        selectedChoice = other.selectedChoice
+        gameState = other.gameState
+
+        tileStack.pushAll(other.tileStack.peekAll().map { Tile(it) })
+
+        choices.addAll(
+            other.choices.map { Pair(Tile(it.first), it.second) }
+        )
+
+        playerQueue.addAll(other.playerQueue.map { Player(it) })
+
+        removedTokens.addAll(other.removedTokens)
+
+        wildlifeTokens.pushAll(other.wildlifeTokens.peekAll())
+    }
 }

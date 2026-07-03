@@ -25,4 +25,13 @@ import java.io.Serializable
 class Tile(val id: Int, val habs: MutableList<Habitates>, val possibles: List<WildlifeToken>) {
     var rotation: Int = 0
     var occupant: WildlifeToken? = null
+
+    constructor(other: Tile) : this(
+        id = other.id,
+        habs = other.habs.toMutableList(),
+        possibles = other.possibles.toList()
+    ) {
+        rotation = other.rotation
+        occupant = other.occupant
+    }
 }

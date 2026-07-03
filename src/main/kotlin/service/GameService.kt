@@ -131,7 +131,67 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
      * if there are 3 and the current gameState is not [GameState.START_OF_TURN]
      */
     fun exterminate( playerTrigger: Boolean) {
+        val game = rootService.currentGame ?: error("No current game")
+        check(
+            game.gameState == GameState.START_OF_TURN ||
+                    game.gameState == GameState.HAS_EXTERMINATED
+        ) { "Extermination is not allowed in the current game state" }
+        if (playerTrigger && game.gameState != GameState.START_OF_TURN) {
+            throw IllegalStateException("Player can only exterminate at the START_OF_TURN.")
+        }
+        //counting the wildlife tokens
+        val wildlifeTokens = game.choices.map { it.second }
+        var duplicatedToken: WildlifeToken? = null
+        var highestCount = 0
+        for (token in WildlifeToken.entries) {
+            val count = wildlifeTokens.count { it == token }
+            if (count > highestCount) {
+                highestCount = count
+                duplicatedToken = token
+            }
+        }
+        check(highestCount >= 3) {
+            "There are not at least three identical wildlife tokens"
+        }
+        if (playerTrigger) {
+            if (highestCount != 3) {
+                throw IllegalStateException("Player extermination requires exactly three identical wildlife tokens")
+            }
+        } else {
+            if (highestCount < 4) return
+        }
+        val affectedIndices = mutableListOf<Int>()
+        for (i in game.choices.indices) {
+            if (game.choices[i].second == duplicatedToken) {
+                affectedIndices.add(i)
+            }
+        }
+        if (game.wildlifeTokens.size < affectedIndices.size) {
+            calculateScores()
+            return
+        }
+        //executing extermination
+        for (j in affectedIndices) {
+            game.removedTokens.add(game.choices[j].second)
+            val tile = game.choices[j].first
+            val newToken = game.wildlifeTokens.pop()
+            game.choices[j] = Pair(tile, newToken)
+        }
+        if (playerTrigger) {
+            game.gameState = GameState.HAS_EXTERMINATED
+        }
+        val remainingTokens = game.choices.map { it.second }
+        if (remainingTokens.distinct().size == 1) {
+            exterminate(false)
+            return
+        }else {
+            //refreshing only at the final resolved state
+            onAllRefreshables {
+                refreshAfterExterminate()
+            }
 
+
+        }
     }
 
     /**
@@ -147,20 +207,42 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
      *                               if not every player has 20 habitat tiles
      */
     fun calculateScores() {
-
+        onAllRefreshables {refreshAfterEndGame(emptyList())}
     }
 
     /**
-     * the function changes the current Player by rotating the [CascadiaGame.playerQueue]
-     * and setting the [CascadiaGame.gameState] to [GameState.START_OF_TURN]
-     *
-     * it also checks if the [CascadiaGame.tileStack] is empty
-     * if the condition is true, [calculateScores] is executed
+     * This function changes the currentPlayer by rotating the [CascadiaGame.playerQueue]. It also changes all other
+     * relevant variables, like the [CascadiaGame.gameState]. If all players have played their 20 rounds this function
+     * ends the game by calling [calculateScores] and sending the game-end Refresh with the scores to the GUI
      *
      *@throws IllegalStateException if Game is not in [GameState.END_OF_TURN]
      *@throws IllegalArgumentException if the [CascadiaGame.playerQueue] is empty
      */
     fun changeTurn() {
+        val game = rootService.currentGame
+        checkNotNull(game) {"No current game"}
 
+        val checkCondition = game.gameState == GameState.PLAYED_TILE || game.gameState == GameState.END_OF_TURN
+        check(checkCondition) {"Current Turn can not be ended"}
+
+        val currentPlayer = game.playerQueue.poll()
+        game.playerQueue.add(currentPlayer)
+
+        game.gameState = GameState.START_OF_TURN
+
+        game.selectedChoice = Pair(-1, -1)
+
+        val nextPlayer = game.playerQueue.peek()
+
+        if (nextPlayer.board.size == 23) {
+            calculateScores()
+            return
+        }
+
+        if (nextPlayer.type == PlayerType.HUMAN && game.isLocal) {
+            rootService.history.prevMoves.push(CascadiaGame(game))
+        }
+
+        onAllRefreshables { refreshAfterChangeTurn(nextPlayer.board.size == 22) }
     }
 }

@@ -16,4 +16,15 @@ class Player(val name: String, val type: PlayerType) {
     var natureTokens: Int = 0
 
     val board: MutableMap<Triple<Int, Int, Int>, Tile> = mutableMapOf()
+
+    constructor(other: Player) : this(
+        name = other.name,
+        type = other.type
+    ) {
+        natureTokens = other.natureTokens
+
+        other.board.forEach { (key, value) ->
+            board[key] = Tile(value)
+        }
+    }
 }
