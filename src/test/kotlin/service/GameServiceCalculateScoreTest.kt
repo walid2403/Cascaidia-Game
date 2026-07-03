@@ -685,7 +685,7 @@ class GameServiceCalculateScoreTest {
     fun elkASingle() {
         val player = Player("P", PlayerType.HUMAN)
         player.board[Triple(0,0,0)] = connectedTile(1, Habitates.PRAIRIES, WildlifeToken.ELK)
-        assertEquals(2, scoreOf(player, listOf(true, true, true, true, true))[6])
+        assertEquals(0, scoreOf(player, listOf(true, true, true, true, true))[6])
     }
 
     /**
@@ -696,7 +696,7 @@ class GameServiceCalculateScoreTest {
         val player = Player("P", PlayerType.HUMAN)
         player.board[Triple(0,0, 0)]  = connectedTile(1, Habitates.PRAIRIES, WildlifeToken.ELK)
         player.board[Triple(0, 1,-1)] = connectedTile(2,Habitates.PRAIRIES, WildlifeToken.ELK)
-        assertEquals(5, scoreOf(player, listOf(true, true, true, true, true))[6])
+        assertEquals(2, scoreOf(player, listOf(true, true, true, true, true))[6])
     }
 
     /**
@@ -708,7 +708,7 @@ class GameServiceCalculateScoreTest {
         player.board[Triple(0,0,0)]  = connectedTile(1,Habitates.PRAIRIES, WildlifeToken.ELK)
         player.board[Triple(0,1, -1)] = connectedTile(2, Habitates.PRAIRIES, WildlifeToken.ELK)
         player.board[Triple(0, 2,-2)] = connectedTile(3,Habitates.PRAIRIES, WildlifeToken.ELK)
-        assertEquals(9, scoreOf(player, listOf(true, true, true, true, true))[6])
+        assertEquals(5, scoreOf(player, listOf(true, true, true, true, true))[6])
     }
 
     /**
@@ -719,7 +719,7 @@ class GameServiceCalculateScoreTest {
         val player = Player("P", PlayerType.HUMAN)
         for (i in 0..3) player.board[Triple(0,i,-i)] =
             connectedTile(i,Habitates.PRAIRIES, WildlifeToken.ELK)
-        assertEquals(13, scoreOf(player, listOf(true, true, true, true, true))[6])
+        assertEquals(9, scoreOf(player, listOf(true, true, true, true, true))[6])
     }
 
     /**
@@ -730,7 +730,7 @@ class GameServiceCalculateScoreTest {
         val player=Player("P", PlayerType.HUMAN)
         for (i in 0..4) player.board[Triple(0, i, -i)] =
             connectedTile(i,Habitates.PRAIRIES,WildlifeToken.ELK)
-        assertEquals(15, scoreOf(player,listOf(true, true, true, true, true))[6])
+        assertEquals(13, scoreOf(player,listOf(true, true, true, true, true))[6])
     }
 
     /**

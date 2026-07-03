@@ -521,7 +521,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         return elkList
     }
 
-    private fun elkScoreA(elkGroupList : List<List<Node>>) : Int {
+    private fun elkScore(elkGroupList : List<List<Node>>, scoringCardA : Boolean) : Int {
         val elkScores = mutableListOf<Int>()
 
         for (elkGroup in elkGroupList) {
@@ -530,57 +530,63 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
                 continue
             }
             else {
-                val neighborElks = mutableListOf<Int>()
-                var straight = true
-                elkGroup.elementAt(0).neighbours.forEachIndexed { index, node ->
-                    if (node == null) return@forEachIndexed
-                    if (node.tile.occupant == WildlifeToken.ELK) neighborElks.add(index)
-                }
-                if (neighborElks.size == 1) {
-                    if (neighborElks.elementAt(0) < 3) neighborElks.elementAt(0) + 3
-                    neighborElks.add(neighborElks.elementAt(0) - 3)
-                } else if (neighborElks.size == 2) {
-                    neighborElks.sort()
-                    if (neighborElks.elementAt(1) - 3 != neighborElks.elementAt(0)) straight = false
-                }
+                if (scoringCardA) {
+                    val neighborElks = mutableListOf<Int>()
+                    var straight = true
+                    elkGroup.elementAt(0).neighbours.forEachIndexed { index, node ->
+                        if (node == null) return@forEachIndexed
+                        if (node.tile.occupant == WildlifeToken.ELK) neighborElks.add(index)
+                    }
+                    if (neighborElks.size == 1) {
+                        if (neighborElks.elementAt(0) < 3) neighborElks.elementAt(0) + 3
+                        neighborElks.add(neighborElks.elementAt(0) - 3)
+                    } else if (neighborElks.size == 2) {
+                        neighborElks.sort()
+                        if (neighborElks.elementAt(1) - 3 != neighborElks.elementAt(0)) straight = false
+                    }
 
-                if (straight) {
-                    for (node in elkGroup) {
-                        val neighborElks2 = mutableListOf<Int>()
-                        node.neighbours.forEachIndexed { index, node ->
-                            if (node == null) return@forEachIndexed
-                            if (node.tile.occupant == WildlifeToken.ELK) neighborElks2.add(index)
+                    if (straight) {
+                        for (node in elkGroup) {
+                            val neighborElks2 = mutableListOf<Int>()
+                            node.neighbours.forEachIndexed { index, node ->
+                                if (node == null) return@forEachIndexed
+                                if (node.tile.occupant == WildlifeToken.ELK) neighborElks2.add(index)
+                            }
+
+                            straight = neighborElks2.all { it in neighborElks }
                         }
+                    }
 
-                        straight = neighborElks2.all { it in neighborElks }
+                    if (straight) {
+                        val longStraigths = elkGroup.size / 4
+                        val shortStraightLength = elkGroup.size % 4
+                        elkScores.add(scoreElk(4) * longStraigths + scoreElk(shortStraightLength))
+                    } else {
+                        elkScores.add(scoreElkGroup(elkGroup, scoringCardA, 0))
                     }
                 }
-
-                if (straight) {
-                    val longStraigths = elkGroup.size / 4
-                    val shortStraightLength = elkGroup.size % 4
-                    elkScores.add(scoreElk(4) * longStraigths + scoreElk(shortStraightLength))
-                } else {
-                    elkScores.add(scoreElkGroup(elkGroup))
+                else {
+                    elkScores.add(scoreElkGroup(elkGroup, scoringCardA, 0))
                 }
-
             }
         }
 
         return elkScores.sum()
     }
 
-    private fun scoreElkGroup(elkGroup: List<Node>) : Int {
+    private fun scoreElkGroup(elkGroup: List<Node>, scoringCardA: Boolean, depth: Int = 0) : Int {
         elkGroup.forEach {elk ->
             if (elk.marked) {
-                elk.marked2 = true
+                elk.marked2 = depth
                 elk.marked = false
             }
         }
 
         val scores = mutableListOf<Int>()
         for (node in elkGroup) {
-            if (node.marked2) continue
+            if (node.marked2 != 0) {
+                if (node.marked2 <= depth) continue
+            }
             var neighborElks = mutableListOf<Int>()
             node.neighbours.forEachIndexed { index, node ->
                 if (node == null) return@forEachIndexed
@@ -594,16 +600,19 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
                 markStraightLine(node, it)
                 markStraightLine(node, it - 3)
                 val tmpScore = elkGroup.count {elk -> elk.marked }
-                if (elkGroup.any{ elk -> !elk.marked2 || !elk.marked }) scores.add(scoreElk(tmpScore) + scoreElkGroup(elkGroup))
+                if (elkGroup.any{ elk -> (elk.marked2 == 0) || !elk.marked }) scores.add(scoreElk(tmpScore) + scoreElkGroup(elkGroup, scoringCardA, depth + 1))
                 else scores.add(scoreElk(tmpScore))
                 elkGroup.forEach { elk -> elk.marked = false }
+                elkGroup.forEach { elk ->
+                    if (elk.marked2 > depth) elk.marked2 = 0
+                }
             }
         }
         return scores.maxOrNull() ?: 0
     }
 
     private fun markStraightLine(node: Node, direction: Int) {
-        if (node.marked2) return
+        if (node.marked2 != 0) return
         node.marked = true
         val neighbour = node.neighbours.elementAt(direction) ?: return
         if (neighbour.tile.occupant != WildlifeToken.ELK) return
@@ -832,7 +841,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
     private class Node(val tile: Tile) {
         val neighbours = Array<Node?>(6) { null }
         var marked = false
-        var marked2 = false
+        var marked2 = 0
     }
 
     /**
