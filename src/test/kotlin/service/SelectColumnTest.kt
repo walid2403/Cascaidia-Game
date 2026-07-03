@@ -144,8 +144,8 @@ class SelectColumnTest {
         val game = rootService.currentGame
         assertNotNull(game)
 
-        assertFailsWith<IllegalStateException> { rootService.playerActionService.selectColumn(-1) }
-        assertFailsWith<IllegalStateException> { rootService.playerActionService.selectColumn(4) }
+        assertFailsWith<IllegalArgumentException> { rootService.playerActionService.selectColumn(-1) }
+        assertFailsWith<IllegalArgumentException> { rootService.playerActionService.selectColumn(4) }
 
         assertFalse(refreshWasCalled)
 
