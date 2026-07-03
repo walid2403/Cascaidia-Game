@@ -565,6 +565,34 @@ class GameServiceCalculateScoreTest {
     }
 
     /**
+     * Ein Test für manche Extremfälle bei elkAScore
+     */
+    @Test
+    fun elkAExtreme() {
+        val currentGame = CascadiaGame(List(5){true}, true)
+        rootService.currentGame = currentGame
+        val player = Player("player", PlayerType.HUMAN)
+        val player2 = Player("player2", PlayerType.HUMAN)
+        currentGame.playerQueue.add(player)
+        currentGame.playerQueue.add(player2)
+        val shape1 = listOf(
+            Triple(0,0,0),
+            Triple(1,-1,0),
+            Triple(2,-2,0),
+            Triple(-1,0,1),
+            Triple(-2,0,2),
+            Triple(-3,0,3)
+        )
+        for (t in shape1) {
+            player.board[t] =
+                Tile(-1,MutableList(6){ Habitates.MOUNTAINS }, emptyList()).
+                apply { occupant = WildlifeToken.ELK }
+        }
+        rootService.gameService.calculateScores()
+        println(refreshable.receivedScores!!.first().second)
+    }
+
+    /**
      * Single elk with no elk neighbors give 0 points.
      */
     @Test

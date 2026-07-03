@@ -153,8 +153,13 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
             if (currentGame.scoringCards[0]) playerScore.add(bearScoringA(nodes))
             else playerScore.add(bearScoringB(nodes))
 
-            if (currentGame.scoringCards[1]) playerScore.add(elkScoringA(nodes))
-            else playerScore.add(elkScoringB(nodes))
+            /*if (currentGame.scoringCards[1]) playerScore.add(elkScoringA(nodes))
+            else playerScore.add(elkScoringB(nodes))*/
+            if (currentGame.scoringCards[1]) {
+                val elkGroupList = sortElks(nodes)
+                playerScore.add(elkScoreA(elkGroupList))
+            }
+            nodes.forEach { it.marked = false }
 
             playerScore.add(salmonScoring(nodes, currentGame.scoringCards[2]))
 
@@ -515,7 +520,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         return elkList
     }
 
-    private fun elkScoreA(elkGroupList : List<MutableList<Node>>) {
+    private fun elkScoreA(elkGroupList : List<List<Node>>) : Int{
         val elkScores = mutableListOf<Int>()
 
         for (elkGroup in elkGroupList) {
@@ -560,6 +565,8 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
 
             }
         }
+
+        return elkScores.sum()
     }
 
     private fun scoreElkGroup(elkGroup: List<Node>) : Int {
@@ -591,7 +598,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
                 elkGroup.forEach { elk -> elk.marked = false }
             }
         }
-        return scores.max()
+        return scores.maxOrNull() ?: 0
     }
 
     private fun markStraightLine(node: Node, direction: Int) {
