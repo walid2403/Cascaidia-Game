@@ -352,6 +352,57 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         nodes.forEach { node -> node.marked = false }
         return 10 * count
     }
+
+    private fun elkAScore(size: Int) : Int {
+        return when (size) {
+            0 -> 0
+            1 -> 2
+            2 -> 5
+            3 -> 9
+            else -> 13
+        }
+    }
+
+    //TODO es klappt nicht, dass alle kombinationen abgefragt werden
+    //TODO stattdessen umstellen, dass jede Richtung abgefragt wird und jede Position
+    //TODO Methode überlegen, um doppelte Aufrufe zu verhindern
+    private fun recursiveTest(unused: MutableList<Node>, sizes: MutableList<Int>) : Int {
+        if (unused.isEmpty()) {
+            return sizes.fold(0) { acc,size -> acc + elkAScore(size) }
+        }
+        val currentStart = unused.first()
+        val removed = mutableListOf<Node>()
+        val scoreOptions = mutableListOf<Int>()
+        if (!currentStart.marked) {
+            currentStart.marked = true
+            scoreOptions.add(recursiveTest(unused, sizes))
+        }
+        unused.remove(currentStart)
+        sizes.add(1)
+        scoreOptions.add(recursiveTest(unused, sizes))
+        sizes.removeLast()
+        for (i in 0..2) {
+            var jNeighbour = currentStart
+            for (j in 1..3) {
+                jNeighbour = jNeighbour.neighbours[i] ?: break
+                if (jNeighbour !in unused) break
+                unused.remove(jNeighbour)
+                sizes.add(j+1)
+                removed.add(jNeighbour)
+                scoreOptions.add(recursiveTest(unused, sizes))
+                sizes.removeLast()
+            }
+            unused.addAll(removed)
+            removed.clear()
+        }
+        unused.add(currentStart)
+        return scoreOptions.max()
+    }
+
+    private fun elkScoringATest(nodes : List<Node>) : Int {
+        val elkNodes = nodes.filter { it.tile.occupant == WildlifeToken.ELK }
+        return 0
+    }
     //TODO andere Richtungen auch beachten
     //TODO Möglichkeit von Vorkommen in mehreren Gruppen beachten
     //TODO
@@ -386,6 +437,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         return sum
     }
     //TODO Dürfen sich Formationen berühren?
+    //TODO funktioniert nur, wenn sich nichts berührt
     private fun elkScoringB(nodes : List<Node>) : Int {
         var sum = 0
         loop@ for (node in nodes) {
