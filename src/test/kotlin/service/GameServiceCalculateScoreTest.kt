@@ -53,6 +53,21 @@ class GameServiceCalculateScoreTest {
         otherPlayer.board[Triple(99,-99,0)] = connectedTile(666, Habitates.MOUNTAINS)
         return runGame(listOf(player, otherPlayer), scoringCards).first().second
     }
+    private fun extremeTest(shape: List<Triple<Int,Int,Int>>, type: WildlifeToken) {
+        val currentGame = CascadiaGame(List(5){true}, true)
+        rootService.currentGame = currentGame
+        val player = Player("player", PlayerType.HUMAN)
+        val player2 = Player("player2", PlayerType.HUMAN)
+        currentGame.playerQueue.add(player)
+        currentGame.playerQueue.add(player2)
+        for (t in shape) {
+            player.board[t] =
+                Tile(-1,MutableList(6){ Habitates.MOUNTAINS }, emptyList()).
+                apply { occupant = type }
+        }
+        rootService.gameService.calculateScores()
+        println(refreshable.receivedScores!!.first().second)
+    }
 
     /**
      * without a current game, calculateScores should throw an exception
@@ -565,17 +580,11 @@ class GameServiceCalculateScoreTest {
     }
 
     /**
-     * Ein Test für manche Extremfälle bei elkAScore
+     * Ein Test für einen Extremfall bei elkAScore
      */
     @Test
-    fun elkAExtreme() {
-        val currentGame = CascadiaGame(List(5){true}, true)
-        rootService.currentGame = currentGame
-        val player = Player("player", PlayerType.HUMAN)
-        val player2 = Player("player2", PlayerType.HUMAN)
-        currentGame.playerQueue.add(player)
-        currentGame.playerQueue.add(player2)
-        val shape1 = listOf(
+    fun elkAExtreme1() {
+        val shape = listOf(
             Triple(0,0,0),
             Triple(1,-1,0),
             Triple(2,-2,0),
@@ -583,17 +592,17 @@ class GameServiceCalculateScoreTest {
             Triple(-2,0,2),
             Triple(-3,0,3)
         )
-        for (t in shape1) {
-            player.board[t] =
-                Tile(-1,MutableList(6){ Habitates.MOUNTAINS }, emptyList()).
-                apply { occupant = WildlifeToken.ELK }
-        }
-        rootService.gameService.calculateScores()
-        println(refreshable.receivedScores!!.first().second)
+        extremeTest(shape, WildlifeToken.ELK)
         assertEquals(18, refreshable.receivedScores!!.first().second[6],
-            "Falscher Score für Shape 1")
+            "Falscher Score")
+    }
 
-        val shape2 = listOf(
+    /**
+     * Ein Test für einen Extremfall bei elkAScore
+     */
+    @Test
+    fun elkAExtreme2() {
+        val shape = listOf(
             Triple(0,0,0),
             Triple(1,-2,1),
             Triple(2,-3,1),
@@ -602,16 +611,71 @@ class GameServiceCalculateScoreTest {
             Triple(-2,0,2),
             Triple(-3,0,3)
         )
-        player.board.clear()
-        for (t in shape2) {
-            player.board[t] =
-                Tile(-1,MutableList(6){ Habitates.MOUNTAINS }, emptyList()).
-                apply { occupant = WildlifeToken.ELK }
-        }
-        rootService.gameService.calculateScores()
-        println(refreshable.receivedScores!!.first().second)
+        extremeTest(shape, WildlifeToken.ELK)
+
         assertEquals(22, refreshable.receivedScores!!.first().second[6],
-            "Falscher Score für Shape 2")
+            "Falscher Score")
+    }
+
+    /**
+     * Ein Test für einen Extremfall bei elkAScore
+     */
+    @Test
+    fun elkAExtreme3() {
+        val shape = listOf(
+            Triple(0,0,0),
+            Triple(-1,0,1),
+            Triple(-2,0,2),
+            Triple(1,-2,1),
+            Triple(0,-2,2),
+            Triple(-1,-2,3),
+            Triple(0,-1,1),
+            Triple(1,-1,0),
+            Triple(-1,-1,2),
+            Triple(-2,-1,3),
+        )
+        extremeTest(shape, WildlifeToken.ELK)
+
+        assertEquals(31, refreshable.receivedScores!!.first().second[6],
+            "Falscher Score")
+    }
+
+    /**
+     * Ein Test für einen Extremfall bei elkAScore
+     */
+    @Test
+    fun elkAExtreme4() {
+        val shape = listOf(
+            Triple(0,0,0),
+            Triple(-1,0,1),
+            Triple(-2,0,2),
+            Triple(-3,0,3),
+            Triple(-1,1,0),
+            Triple(1,-1,0)
+        )
+        extremeTest(shape, WildlifeToken.ELK)
+
+        assertEquals(18, refreshable.receivedScores!!.first().second[6],
+            "Falscher Score")
+    }
+
+    /**
+     * Ein Test für einen Extremfall bei elkAScore
+     */
+    @Test
+    fun elkAExtreme5() {
+        val shape = listOf(
+            Triple(0,0,0),
+            Triple(-1,0,1),
+            Triple(-2,0,2),
+            Triple(-3,0,3),
+            Triple(-2,-1,3),
+            Triple(-2,1,1)
+        )
+        extremeTest(shape, WildlifeToken.ELK)
+
+        assertEquals(17, refreshable.receivedScores!!.first().second[6],
+            "Falscher Score")
     }
 
     /**
@@ -621,7 +685,7 @@ class GameServiceCalculateScoreTest {
     fun elkASingle() {
         val player = Player("P", PlayerType.HUMAN)
         player.board[Triple(0,0,0)] = connectedTile(1, Habitates.PRAIRIES, WildlifeToken.ELK)
-        assertEquals(0, scoreOf(player, listOf(true, true, true, true, true))[6])
+        assertEquals(2, scoreOf(player, listOf(true, true, true, true, true))[6])
     }
 
     /**
@@ -632,7 +696,7 @@ class GameServiceCalculateScoreTest {
         val player = Player("P", PlayerType.HUMAN)
         player.board[Triple(0,0, 0)]  = connectedTile(1, Habitates.PRAIRIES, WildlifeToken.ELK)
         player.board[Triple(0, 1,-1)] = connectedTile(2,Habitates.PRAIRIES, WildlifeToken.ELK)
-        assertEquals(2, scoreOf(player, listOf(true, true, true, true, true))[6])
+        assertEquals(5, scoreOf(player, listOf(true, true, true, true, true))[6])
     }
 
     /**
@@ -644,7 +708,7 @@ class GameServiceCalculateScoreTest {
         player.board[Triple(0,0,0)]  = connectedTile(1,Habitates.PRAIRIES, WildlifeToken.ELK)
         player.board[Triple(0,1, -1)] = connectedTile(2, Habitates.PRAIRIES, WildlifeToken.ELK)
         player.board[Triple(0, 2,-2)] = connectedTile(3,Habitates.PRAIRIES, WildlifeToken.ELK)
-        assertEquals(5, scoreOf(player, listOf(true, true, true, true, true))[6])
+        assertEquals(9, scoreOf(player, listOf(true, true, true, true, true))[6])
     }
 
     /**
@@ -655,7 +719,7 @@ class GameServiceCalculateScoreTest {
         val player = Player("P", PlayerType.HUMAN)
         for (i in 0..3) player.board[Triple(0,i,-i)] =
             connectedTile(i,Habitates.PRAIRIES, WildlifeToken.ELK)
-        assertEquals(9, scoreOf(player, listOf(true, true, true, true, true))[6])
+        assertEquals(13, scoreOf(player, listOf(true, true, true, true, true))[6])
     }
 
     /**
@@ -666,7 +730,7 @@ class GameServiceCalculateScoreTest {
         val player=Player("P", PlayerType.HUMAN)
         for (i in 0..4) player.board[Triple(0, i, -i)] =
             connectedTile(i,Habitates.PRAIRIES,WildlifeToken.ELK)
-        assertEquals(13, scoreOf(player,listOf(true, true, true, true, true))[6])
+        assertEquals(15, scoreOf(player,listOf(true, true, true, true, true))[6])
     }
 
     /**
