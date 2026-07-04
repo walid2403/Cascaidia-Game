@@ -1,6 +1,7 @@
 package service
 
 import entity.*
+import java.util.Vector
 import kotlin.math.max
 
 /**
@@ -183,7 +184,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         val seen = mutableListOf<Tile>()
         for (entry in board){
             seen.add(entry.value)
-            val node = Node(entry.value)
+            val node = Node(entry.value, entry.key)
             val first = entry.key.first
             val second = entry.key.second
             val third = entry.key.third
@@ -355,7 +356,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         nodes.forEach { node -> node.marked = false }
         return 10 * count
     }
-
+/*
     private fun elkAScore(size: Int) : Int {
         return when (size) {
             0 -> 0
@@ -366,9 +367,6 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         }
     }
 
-    //TODO es klappt nicht, dass alle kombinationen abgefragt werden
-    //TODO stattdessen umstellen, dass jede Richtung abgefragt wird und jede Position
-    //TODO Methode überlegen, um doppelte Aufrufe zu verhindern
     private fun recursiveTest(unused: MutableList<Node>, sizes: MutableList<Int>) : Int {
         if (unused.isEmpty()) {
             return sizes.fold(0) { acc,size -> acc + elkAScore(size) }
@@ -406,9 +404,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         val elkNodes = nodes.filter { it.tile.occupant == WildlifeToken.ELK }
         return 0
     }
-    //TODO andere Richtungen auch beachten
-    //TODO Möglichkeit von Vorkommen in mehreren Gruppen beachten
-    //TODO
+
     private fun elkScoringA(nodes : List<Node>) : Int {
         var sum = 0
         for (node in nodes) {
@@ -439,8 +435,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         nodes.forEach { node -> node.marked = false }
         return sum
     }
-    //TODO Dürfen sich Formationen berühren?
-    //TODO funktioniert nur, wenn sich nichts berührt
+
     private fun elkScoringB(nodes : List<Node>) : Int {
         var sum = 0
         loop@ for (node in nodes) {
@@ -492,7 +487,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         }
         nodes.forEach { node -> node.marked = false }
         return sum
-    }
+    }*/
 
     private fun sortElks(nodes : List<Node>) : List<List<Node>> {
         val elkGroupList = mutableListOf<MutableList<Node>>()
@@ -631,6 +626,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
 
             //Sonst kannst du auch 2 Variablen einfach nehmen jeweils mit dem Typ
             //Oder eine normale for Schleife, damit man den duplicate code nicht hat
+            //TODO ändern um Warning zu entfernen
             if (scoringCardA) {
                 (neighborElks2 as MutableList<Int>).forEach {
                     markStraightLine(node, it)
@@ -848,25 +844,34 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         for (node in nodes) {
             if (node.marked) continue
             node.marked = true
-            if (node.tile.occupant == WildlifeToken.HAWK) {
-                node.neighbours.filterNotNull().forEach { it.marked = true }
-                val neighbours = node.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.HAWK }
-                if (neighbours.isNotEmpty()) continue
-                var found = false
-                for (i in 0..5) {
-                    var cur = node
-                    while (true) {
-                        val next = cur.neighbours[i] ?: break
-                        if (next.tile.occupant == WildlifeToken.HAWK) {
-                            found = true
-                            break
-                        }
-                        cur = next
+            if (node.tile.occupant != WildlifeToken.HAWK) continue
+            node.neighbours.filterNotNull().forEach { it.marked = true }
+            val neighbours = node.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.HAWK }
+            if (neighbours.isNotEmpty()) continue
+            var found = false
+            val directions = listOf(
+                Triple(0,-1,1),
+                Triple(-1,0,1),
+                Triple(-1,1,0),
+                Triple(0,1,-1),
+                Triple(1,0,-1),
+                Triple(1,-1,0)
+            )
+            val start = node.coords
+            val coordList = nodes.filter { it.tile.occupant == WildlifeToken.HAWK }.map { it.coords }
+            for (distance in 1..15) {
+                for (direction in directions) {
+                    val first = start.first + direction.first * distance
+                    val second = start.second + direction.second * distance
+                    val third = start.third + direction.third * distance
+                    if (coordList.contains(Triple(first,second,third))) {
+                        found = true
+                        break
                     }
-                    if (found) break
                 }
-                if (found) count++
+                if (found) break
             }
+            if (found) count++
         }
         nodes.forEach { node -> node.marked = false }
         return when(count) {
@@ -919,7 +924,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         return sum
     }
 
-    private class Node(val tile: Tile) {
+    private class Node(val tile: Tile, val coords: Triple<Int, Int, Int>) {
         val neighbours = Array<Node?>(6) { null }
         var marked = false
         var marked2 = 0

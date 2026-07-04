@@ -678,6 +678,106 @@ class GameServiceCalculateScoreTest {
             "Falscher Score")
     }
 
+    /**
+     * Ein Test für einen Extremfall bei elkAScore
+     */
+    @Test
+    fun elkBExtreme1() {
+        val shape = listOf(
+            Triple(0,0,0),
+            Triple(1,-1,0),
+            Triple(2,-2,0),
+            Triple(-1,0,1),
+            Triple(-2,0,2),
+            Triple(-3,0,3)
+        )
+        extremeTest(shape, WildlifeToken.ELK)
+
+        assertEquals(15, refreshable.receivedScores!!.first().second[6],
+            "Falscher Score")
+    }
+
+    /**
+     * Ein Test für einen Extremfall bei elkAScore
+     */
+    @Test
+    fun elkBExtreme2() {
+        val shape = listOf(
+            Triple(0,0,0),
+            Triple(1,-2,1),
+            Triple(2,-3,1),
+            Triple(0,-1,1),
+            Triple(-1,0,1),
+            Triple(-2,0,2),
+            Triple(-3,0,3)
+        )
+        extremeTest(shape, WildlifeToken.ELK)
+
+        assertEquals(19, refreshable.receivedScores!!.first().second[6],
+            "Falscher Score")
+    }
+
+    /**
+     * Ein Test für einen Extremfall bei elkAScore
+     */
+    @Test
+    fun elkBExtreme3() {
+        val shape = listOf(
+            Triple(0,0,0),
+            Triple(-1,0,1),
+            Triple(-2,0,2),
+            Triple(1,-2,1),
+            Triple(0,-2,2),
+            Triple(-1,-2,3),
+            Triple(0,-1,1),
+            Triple(1,-1,0),
+            Triple(-1,-1,2),
+            Triple(-2,-1,3),
+        )
+        extremeTest(shape, WildlifeToken.ELK)
+
+        assertEquals(30, refreshable.receivedScores!!.first().second[6],
+            "Falscher Score")
+    }
+
+    /**
+     * Ein Test für einen Extremfall bei elkAScore
+     */
+    @Test
+    fun elkBExtreme4() {
+        val shape = listOf(
+            Triple(0,0,0),
+            Triple(-1,0,1),
+            Triple(-2,0,2),
+            Triple(-3,0,3),
+            Triple(-1,1,0),
+            Triple(1,-1,0)
+        )
+        extremeTest(shape, WildlifeToken.ELK)
+
+        assertEquals(16, refreshable.receivedScores!!.first().second[6],
+            "Falscher Score")
+    }
+
+    /**
+     * Ein Test für einen Extremfall bei elkAScore
+     */
+    @Test
+    fun elkBExtreme5() {
+        val shape = listOf(
+            Triple(0,0,0),
+            Triple(-1,0,1),
+            Triple(-2,0,2),
+            Triple(-3,0,3),
+            Triple(-2,-1,3),
+            Triple(-2,1,1)
+        )
+        extremeTest(shape, WildlifeToken.ELK)
+
+        assertEquals(16, refreshable.receivedScores!!.first().second[6],
+            "Falscher Score")
+    }
+
     @Test
     fun falconBExtra1() {
         val player = Player("P", PlayerType.HUMAN)
