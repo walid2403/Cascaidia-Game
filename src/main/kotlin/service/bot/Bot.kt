@@ -49,35 +49,44 @@ class Bot (private val rootService: RootService) {
                 TurnOptions.DISCARD_WILDLIFE_TOKEN -> randomBotDiscardWildlifeToken(currentGame)
                 TurnOptions.ROTATE -> randomBotRotate()
             }
-            legalTurns.clear()
-            when (currentGame.gameState) {
-                GameState.START_OF_TURN -> {
-                    legalTurns += TurnOptions.MAKE_SELECTION
-                    if (currentGame.choices.map { it.second }.groupBy { it }.entries.maxOfOrNull { it.value.size } == 3) {
-                        legalTurns += TurnOptions.CLEAR_SEMIPOPULATION
-                    }
-                    if (player.natureTokens > 0) {
-                        legalTurns += TurnOptions.NATURE_TOKEN_FREE_SELECTION
-                        legalTurns += TurnOptions.NATURE_TOKEN_CHANGE_WILDLIFE
-                    }
-                }
-                GameState.HAS_EXTERMINATED -> {
-                    legalTurns += TurnOptions.MAKE_SELECTION
-                    if (player.natureTokens > 0) {
-                        legalTurns += TurnOptions.NATURE_TOKEN_FREE_SELECTION
-                        legalTurns += TurnOptions.NATURE_TOKEN_CHANGE_WILDLIFE
-                    }
-                }
-                GameState.MADE_CHOICE -> {
-                    legalTurns += TurnOptions.PLACE_HABITAT_TILE
-                    legalTurns += TurnOptions.ROTATE
-                }
-                GameState.PLAYED_TILE -> {
-                    legalTurns += mutableListOf(TurnOptions.PLACE_WILDLIFE_TOKEN, TurnOptions.DISCARD_WILDLIFE_TOKEN)
-                }
-                GameState.END_OF_TURN -> {
+            newLegalTurns(legalTurns)
+        }
+    }
 
+    private fun newLegalTurns(legalTurns: MutableList<TurnOptions>) {
+        val currentGame = rootService.currentGame
+        checkNotNull(currentGame) { "Es existiert kein Spiel" }
+        val player = currentGame.playerQueue.peek()
+        checkNotNull(player) { "Es existiert kein Spiel" }
+
+        legalTurns.clear()
+        when (currentGame.gameState) {
+            GameState.START_OF_TURN -> {
+                legalTurns += TurnOptions.MAKE_SELECTION
+                if (currentGame.choices.map{ it.second }.groupBy{ it }.entries.maxOfOrNull{ it.value.size } == 3) {
+                    legalTurns += TurnOptions.CLEAR_SEMIPOPULATION
                 }
+                if (player.natureTokens > 0) {
+                    legalTurns += TurnOptions.NATURE_TOKEN_FREE_SELECTION
+                    legalTurns += TurnOptions.NATURE_TOKEN_CHANGE_WILDLIFE
+                }
+            }
+            GameState.HAS_EXTERMINATED -> {
+                legalTurns += TurnOptions.MAKE_SELECTION
+                if (player.natureTokens > 0) {
+                    legalTurns += TurnOptions.NATURE_TOKEN_FREE_SELECTION
+                    legalTurns += TurnOptions.NATURE_TOKEN_CHANGE_WILDLIFE
+                }
+            }
+            GameState.MADE_CHOICE -> {
+                legalTurns += TurnOptions.PLACE_HABITAT_TILE
+                legalTurns += TurnOptions.ROTATE
+            }
+            GameState.PLAYED_TILE -> {
+                legalTurns += mutableListOf(TurnOptions.PLACE_WILDLIFE_TOKEN, TurnOptions.DISCARD_WILDLIFE_TOKEN)
+            }
+            GameState.END_OF_TURN -> {
+
             }
         }
     }
