@@ -852,16 +852,18 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
                 node.neighbours.filterNotNull().forEach { it.marked = true }
                 val neighbours = node.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.HAWK }
                 if (neighbours.isNotEmpty()) continue
-                var cur = node
-                var next : Node
                 var found = false
                 for (i in 0..5) {
-                    next = cur.neighbours[i] ?: continue
-                    if (next.tile.occupant == WildlifeToken.HAWK) {
-                        found = true
-                        break
+                    var cur = node
+                    while (true) {
+                        val next = cur.neighbours[i] ?: break
+                        if (next.tile.occupant == WildlifeToken.HAWK) {
+                            found = true
+                            break
+                        }
+                        cur = next
                     }
-                    cur = next
+                    if (found) break
                 }
                 if (found) count++
             }
