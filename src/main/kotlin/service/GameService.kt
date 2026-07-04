@@ -155,16 +155,25 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         val currentPlayer = game.playerQueue.poll()
         game.playerQueue.add(currentPlayer)
 
-        game.gameState = GameState.START_OF_TURN
-
-        game.selectedChoice = Pair(-1, -1)
-
         val nextPlayer = game.playerQueue.peek()
 
         if (nextPlayer.board.size == 23) {
             calculateScores()
             return
         }
+
+        game.gameState = GameState.START_OF_TURN
+
+        val newTile = game.tileStack.pop()  //hier kann davon ausgegangen werden, dass immer ein Tile da ist
+        val newWildlifeToken = game.wildlifeTokens.pop()
+
+        val tileChoice = game.choices[game.selectedChoice.first]
+        game.choices[game.selectedChoice.first] = Pair(newTile,tileChoice.second)
+        val tokenChoice = game.choices[game.selectedChoice.second]
+        game.choices[game.selectedChoice.second] = Pair(tokenChoice.first, newWildlifeToken)
+
+        game.selectedChoice = Pair(-1, -1)
+
 
         if (nextPlayer.type == PlayerType.HUMAN && game.isLocal) {
             rootService.history.prevMoves.push(CascadiaGame(game))
