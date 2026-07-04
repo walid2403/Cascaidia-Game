@@ -629,7 +629,33 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
                 }
             }
 
-            neighborElks2.forEach {
+            //Sonst kannst du auch 2 Variablen einfach nehmen jeweils mit dem Typ
+            //Oder eine normale for Schleife, damit man den duplicate code nicht hat
+            if (scoringCardA) {
+                (neighborElks2 as MutableList<Int>).forEach {
+                    markStraightLine(node, it)
+                    markStraightLine(node, it - 3)
+                    val tmpScore = elkGroup.count {elk -> elk.marked }
+                    if (elkGroup.any{ elk -> (elk.marked2 == 0) || !elk.marked }) scores.add(scoreElk(tmpScore) + scoreElkGroup(elkGroup, scoringCardA, depth + 1))
+                    else scores.add(scoreElk(tmpScore))
+                    elkGroup.forEach { elk -> elk.marked = false }
+                    elkGroup.forEach { elk ->
+                        if (elk.marked2 > depth) elk.marked2 = 0
+                    }
+                }
+            } else {
+                (neighborElks2 as MutableList<List<Int>>).forEach {
+                    markElkGroup(node, it)
+                    val tmpScore = elkGroup.count {elk -> elk.marked }
+                    if (elkGroup.any{ elk -> (elk.marked2 == 0) || !elk.marked }) scores.add(scoreElk(tmpScore) + scoreElkGroup(elkGroup, scoringCardA, depth + 1))
+                    else scores.add(scoreElk(tmpScore))
+                    elkGroup.forEach { elk -> elk.marked = false }
+                    elkGroup.forEach { elk ->
+                        if (elk.marked2 > depth) elk.marked2 = 0
+                    }
+                }
+            }
+            /*neighborElks2.forEach {
                 if (scoringCardA) {
                     markStraightLine(node, it)
                     markStraightLine(node, it - 3)
@@ -643,7 +669,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
                 elkGroup.forEach { elk ->
                     if (elk.marked2 > depth) elk.marked2 = 0
                 }
-            }
+            }*/
         }
         return scores.maxOrNull() ?: 0
     }
