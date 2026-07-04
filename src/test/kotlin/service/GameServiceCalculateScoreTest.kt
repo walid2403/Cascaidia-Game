@@ -53,8 +53,8 @@ class GameServiceCalculateScoreTest {
         otherPlayer.board[Triple(99,-99,0)] = connectedTile(666, Habitates.MOUNTAINS)
         return runGame(listOf(player, otherPlayer), scoringCards).first().second
     }
-    private fun extremeTest(shape: List<Triple<Int,Int,Int>>, type: WildlifeToken) {
-        val currentGame = CascadiaGame(List(5){true}, true)
+    private fun extremeTest(shape: List<Triple<Int,Int,Int>>, type: WildlifeToken, isA: Boolean) {
+        val currentGame = CascadiaGame(List(5){isA}, true)
         rootService.currentGame = currentGame
         val player = Player("player", PlayerType.HUMAN)
         val player2 = Player("player2", PlayerType.HUMAN)
@@ -592,7 +592,7 @@ class GameServiceCalculateScoreTest {
             Triple(-2,0,2),
             Triple(-3,0,3)
         )
-        extremeTest(shape, WildlifeToken.ELK)
+        extremeTest(shape, WildlifeToken.ELK, true)
         assertEquals(18, refreshable.receivedScores!!.first().second[6],
             "Falscher Score")
     }
@@ -611,7 +611,7 @@ class GameServiceCalculateScoreTest {
             Triple(-2,0,2),
             Triple(-3,0,3)
         )
-        extremeTest(shape, WildlifeToken.ELK)
+        extremeTest(shape, WildlifeToken.ELK, true)
 
         assertEquals(22, refreshable.receivedScores!!.first().second[6],
             "Falscher Score")
@@ -634,7 +634,7 @@ class GameServiceCalculateScoreTest {
             Triple(-1,-1,2),
             Triple(-2,-1,3),
         )
-        extremeTest(shape, WildlifeToken.ELK)
+        extremeTest(shape, WildlifeToken.ELK, true)
 
         assertEquals(31, refreshable.receivedScores!!.first().second[6],
             "Falscher Score")
@@ -653,7 +653,7 @@ class GameServiceCalculateScoreTest {
             Triple(-1,1,0),
             Triple(1,-1,0)
         )
-        extremeTest(shape, WildlifeToken.ELK)
+        extremeTest(shape, WildlifeToken.ELK, true)
 
         assertEquals(18, refreshable.receivedScores!!.first().second[6],
             "Falscher Score")
@@ -672,7 +672,7 @@ class GameServiceCalculateScoreTest {
             Triple(-2,-1,3),
             Triple(-2,1,1)
         )
-        extremeTest(shape, WildlifeToken.ELK)
+        extremeTest(shape, WildlifeToken.ELK, true)
 
         assertEquals(17, refreshable.receivedScores!!.first().second[6],
             "Falscher Score")
@@ -691,7 +691,7 @@ class GameServiceCalculateScoreTest {
             Triple(-2,0,2),
             Triple(-3,0,3)
         )
-        extremeTest(shape, WildlifeToken.ELK)
+        extremeTest(shape, WildlifeToken.ELK, false)
 
         assertEquals(15, refreshable.receivedScores!!.first().second[6],
             "Falscher Score")
@@ -711,7 +711,7 @@ class GameServiceCalculateScoreTest {
             Triple(-2,0,2),
             Triple(-3,0,3)
         )
-        extremeTest(shape, WildlifeToken.ELK)
+        extremeTest(shape, WildlifeToken.ELK, false)
 
         assertEquals(19, refreshable.receivedScores!!.first().second[6],
             "Falscher Score")
@@ -734,7 +734,7 @@ class GameServiceCalculateScoreTest {
             Triple(-1,-1,2),
             Triple(-2,-1,3),
         )
-        extremeTest(shape, WildlifeToken.ELK)
+        extremeTest(shape, WildlifeToken.ELK, false)
 
         assertEquals(30, refreshable.receivedScores!!.first().second[6],
             "Falscher Score")
@@ -753,7 +753,7 @@ class GameServiceCalculateScoreTest {
             Triple(-1,1,0),
             Triple(1,-1,0)
         )
-        extremeTest(shape, WildlifeToken.ELK)
+        extremeTest(shape, WildlifeToken.ELK, false)
 
         assertEquals(16, refreshable.receivedScores!!.first().second[6],
             "Falscher Score")
@@ -772,7 +772,7 @@ class GameServiceCalculateScoreTest {
             Triple(-2,-1,3),
             Triple(-2,1,1)
         )
-        extremeTest(shape, WildlifeToken.ELK)
+        extremeTest(shape, WildlifeToken.ELK, false)
 
         assertEquals(16, refreshable.receivedScores!!.first().second[6],
             "Falscher Score")
