@@ -47,6 +47,7 @@ class Bot (private val rootService: RootService) {
                 TurnOptions.PLACE_HABITAT_TILE -> randomBotPlaceHabitatTile(player)
                 TurnOptions.PLACE_WILDLIFE_TOKEN -> randomBotPlaceWildlifeToken(player)
                 TurnOptions.DISCARD_WILDLIFE_TOKEN -> randomBotDiscardWildlifeToken(currentGame)
+                TurnOptions.ROTATE -> randomBotRotate()
             }
             legalTurns.clear()
             when (currentGame.gameState) {
@@ -69,6 +70,7 @@ class Bot (private val rootService: RootService) {
                 }
                 GameState.MADE_CHOICE -> {
                     legalTurns += TurnOptions.PLACE_HABITAT_TILE
+                    legalTurns += TurnOptions.ROTATE
                 }
                 GameState.PLAYED_TILE -> {
                     legalTurns += mutableListOf(TurnOptions.PLACE_WILDLIFE_TOKEN, TurnOptions.DISCARD_WILDLIFE_TOKEN)
@@ -134,5 +136,10 @@ class Bot (private val rootService: RootService) {
 
     private fun randomBotDiscardWildlifeToken(currentGame: CascadiaGame) {
         currentGame.gameState = GameState.END_OF_TURN
+    }
+
+    private fun randomBotRotate() {
+        val rotation = Random.nextBoolean()
+        rootService.playerActionService.rotateTile(rotation)
     }
 }
