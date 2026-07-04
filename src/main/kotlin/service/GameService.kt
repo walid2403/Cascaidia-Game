@@ -590,13 +590,52 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
                 if (node == null) return@forEachIndexed
                 if (node.tile.occupant == WildlifeToken.ELK) neighborElks.add(index)
             }
-            neighborElks = neighborElks.filter({ (it - 3) !in neighborElks }).toMutableList()
-            neighborElks.replaceAll {
-                if (it < 3) it + 3 else it
+            var neighborElks2: Any
+            if (scoringCardA) {
+                neighborElks2 = neighborElks.filter({ (it - 3) !in neighborElks }).toMutableList()
+                neighborElks2.replaceAll {
+                    if (it < 3) it + 3 else it
+                }
+            } else {
+                val neighborElksT = neighborElks.toMutableList()
+                neighborElksT.sort()
+
+                neighborElksT.filter { node.neighbours[it]?.marked2 == 0 }
+
+                neighborElks2 = mutableListOf<MutableList<Int>>()
+
+                while (neighborElksT.isNotEmpty()) {
+                    val tempList = mutableListOf<Int>()
+
+                    var currIdx = neighborElksT[0]
+                    while (getNeighbors(currIdx).first in neighborElksT) {
+                        currIdx = getNeighbors(currIdx).first
+                    }
+                    tempList.add(currIdx)
+                    neighborElksT.remove(currIdx)
+                    while (getNeighbors(currIdx).second in neighborElksT) {
+                        currIdx = getNeighbors(currIdx).second
+                        tempList.add(currIdx)
+                        neighborElksT.remove(currIdx)
+                    }
+
+                    if (tempList.size < 3) {
+                        neighborElks2.add(tempList)
+                    } else {
+                        for (i in 0..(tempList.size - 3)) {
+                            neighborElks2.add(tempList.subList(i, i + 3))
+                        }
+                    }
+                }
             }
-            neighborElks.forEach {
-                markStraightLine(node, it)
-                markStraightLine(node, it - 3)
+
+            neighborElks2.forEach {
+                if (scoringCardA) {
+                    markStraightLine(node, it)
+                    markStraightLine(node, it - 3)
+                } else {
+                    markElkGroup(node, it)
+                }
                 val tmpScore = elkGroup.count {elk -> elk.marked }
                 if (elkGroup.any{ elk -> (elk.marked2 == 0) || !elk.marked }) scores.add(scoreElk(tmpScore) + scoreElkGroup(elkGroup, scoringCardA, depth + 1))
                 else scores.add(scoreElk(tmpScore))
@@ -607,6 +646,22 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
             }
         }
         return scores.maxOrNull() ?: 0
+    }
+
+    private fun getNeighbors(index : Int) : Pair<Int, Int> {
+        return when(index) {
+            1 -> Pair(6, 2)
+            6 -> Pair(5, 1)
+            else -> Pair(index - 1, index + 1)
+        }
+    }
+
+    private fun markElkGroup(node: Node, directions: List<Int>) {
+        if (node.marked2 != 0) return
+        node.marked = true
+        for (direction in directions) {
+            node.neighbours[direction]?.marked = true
+        }
     }
 
     private fun markStraightLine(node: Node, direction: Int) {
