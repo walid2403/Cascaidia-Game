@@ -93,7 +93,7 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
         visual = ColorVisual(color = Color(0x99acff)).apply { style.borderRadius = BorderRadius(8) }
         isDisabled = true
         onMouseClicked = {
-            app.showMenuScene(HostOnlineLobbyScene(app,rootService))
+            app.showMenuScene(HostOnlineLobbyScene(app,rootService, nameInput.text, playerType))
         }
     }
 

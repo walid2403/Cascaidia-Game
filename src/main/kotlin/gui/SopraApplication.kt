@@ -26,9 +26,9 @@ class SopraApplication : BoardGameApplication("SoPra Game") {
 
     private val scoreScene = ScoreScene(this@SopraApplication, rootService)
 
-    val joinOnlineLobbyScene = JoinOnlineLobbyScene(this@SopraApplication, rootService)
+    val joinOnlineLobbyScene = JoinOnlineLobbyScene(this@SopraApplication, rootService, "name", 0)
 
-    val hostOnlineLobbyScene = HostOnlineLobbyScene(this@SopraApplication, rootService)
+    val hostOnlineLobbyScene = HostOnlineLobbyScene(this@SopraApplication, rootService, "Name", 0)
 
     /**
      * Initializes the application by displaying the [MainMenuScene].
@@ -38,5 +38,9 @@ class SopraApplication : BoardGameApplication("SoPra Game") {
         this.showMenuScene(mainMenuScene )
         //this.showMenuScene(scoreScene)
     }
+
+//    override fun refreshAfterStartGame() {
+//        this.hideMenuScene()
+//    }
 }
 

@@ -268,6 +268,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         }
     }
 
+    //the pXIcons are the active player Icons displayed in the text entry box to the left of the player name
     private val p1Icon = Label(
         width = iconSize, height = iconSize,
         posX = 155,
@@ -298,6 +299,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         isVisible = false
     }
 
+    //the noPX Icons are the Icons used for not participating/disabled player spots. The icons are displayed in the
+    //middle of the text entry box
     private val noP1 = Label(
         width = iconSize, height = iconSize,
         posX = 343, posY = p1Input.posY - (iconSize - nameHeight) / 2,
@@ -440,9 +443,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val hawkCardB = Label(
         width = 229, height = 497,
-        posX = cardBX, posY = cardY,
-
-        ).apply {
+        posX = cardBX, posY = cardY
+    ).apply {
         visual = ImageVisual("Scoring_Hawk_B.png")
         isVisible = false
     }
@@ -463,7 +465,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         isVisible = false
     }
 
-    val checkBoxSalmonA = CheckBox(
+    private val checkBoxSalmonA = CheckBox(
         posX = salmon.posX + 10,
         posY = 100,
         width = 30,
@@ -479,7 +481,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         }
     }
 
-    val checkBoxSalmonB = CheckBox(
+    private val checkBoxSalmonB = CheckBox(
         posX = salmon.posX + 10,
         posY = 140,
         width = 30,
@@ -496,7 +498,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     }
 
 
-    val checkBoxHawkA = CheckBox(
+    private val checkBoxHawkA = CheckBox(
         posX = hawk.posX + 10,
         posY = 100,
         width = 30,
@@ -512,7 +514,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         }
     }
 
-    val checkBoxHawkB = CheckBox(
+    private val checkBoxHawkB = CheckBox(
         posX = hawk.posX + 10,
         posY = 140,
         width = 30,
@@ -593,7 +595,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
                 checkBox("checkBoxFoxB")
             }
         }
-
     }
 
 
@@ -678,7 +679,9 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     ).apply {
         onMouseClicked = {
             expandPanel()
-            app.hostOnlineLobbyScene.resizeScoreCards()
+            resizeScoreCards()
+            hawkCardA.isVisible = true
+            hawkCardB.isVisible = true
         }
     }
 
@@ -731,6 +734,11 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         )
     }
 
+    /**
+     * This function moves the side panel containing the scorecard selection and images to the right and
+     * the main panel to the left. The onClick action for the Tab [tabLabel] is changed to startGame
+     */
+
     private fun expandPanel() {
 
         playAnimation(
@@ -752,10 +760,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
             ).apply {
                 onFinished = {
                     runOnGUIThread {
-                        //arrowButton.isVisible = false
-                        //arrowLabel.isVisible = false
-                        //startLabel.isVisible = true
-                        //startButton.isVisible = true
                         tabLabel.apply {
                             visual = ImageVisual("StartGameTab.png").apply {
                                 style.borderRadius = BorderRadius(15)
@@ -771,10 +775,10 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         )
     }
 
-
-
-
-
+    /**
+     * This function shuffles the entered names along with their playerType Icons. Slots currently set to "not playing"
+     * will be sorted to the bottom slots.
+     */
 
     private fun shuffleNames() {
         // shuffle all entries and save in a separate list
@@ -815,9 +819,12 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         changePlayerType(4,false,sortedNames[3].second,false)
     }
 
-
+    /**
+     * This function unchecks the complimentary checkbox to the one given as a String. The checkbox cannot be given as
+     * a parameter directly because of issues with recursive function calls.
+     * @param checkBox a [String] of the name of the [CheckBox] that is now checked. Its complement will be unchecked.
+     */
     private fun checkBox(checkBox: String) {
-        //uncheckBox.isChecked = false
 
         when (checkBox) {
             "checkBoxHawkA" -> checkBoxHawkB.isChecked = false
@@ -837,14 +844,18 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         }
     }
 
-    private fun uncheckBox(uncheckBox: CheckBox) {
-        uncheckBox.isChecked = false
-    }
+    /**
+     * This function updates a player's player type and player type icon according to the input parameters.
+     * @param playerNum [Int] specifying which player's icon will be updated. 1 = first player slot, 2 = second...
+     * @param leftButton [Boolean] indicating whether the left Button was pressed to initiate the icon change
+     * @param playerType [Int] of the player's previous player Type
+     * @param changeType [Boolean] indicating if the player type will be adjusted as well or only the player type icon
+     */
 
-    private fun changePlayerType(playerNum: Int, left: Boolean, playerType: Int, changeType: Boolean): Int {
+    private fun changePlayerType(playerNum: Int, leftButton: Boolean, playerType: Int, changeType: Boolean): Int {
 
         val newType: Int = if(changeType) {
-            if (left) {
+            if (leftButton) {
                 (playerType + 3) % 4
             } else {
                 (playerType + 1)%4
@@ -888,6 +899,15 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         return newType
     }
 
+    /**
+     * This function assigns the [newVisual] into the left or right Label depending on the [leftIconVisible] value
+     * @param leftLabel the player's left [Label], used for the human, easy and hard bot icons
+     * @param rightLabel the player's right [Label], used for the "not playing"/slot disabled icon
+     * @param newVisual the [ImageVisual] that will be assigned to one of the [Label]s
+     * @param leftIconVisible [Boolean] if true, newVisual will be saved in the leftLabel, if false in the rightLabel.
+     * The other Label will be made invisible
+     */
+
     private fun adjustIcons(leftLabel: Label, rightLabel: Label, newVisual: ImageVisual, leftIconVisible: Boolean) {
         if(leftIconVisible) {
             leftLabel.isVisible = true
@@ -899,6 +919,12 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
             rightLabel.visual = newVisual
         }
     }
+
+    /**
+     * This function adjusts whether a player's text entry field is visible and entry is enabled.
+     * @param disableEntry [Boolean], if true entry will be disabled and the field will be set to not visible
+     * @param playerNum [Int] number of the player who's text entry field will be adjusted
+     */
 
     private fun nameEntryDisabled(disableEntry: Boolean, playerNum: Int) {
         when (playerNum) {
@@ -922,6 +948,10 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         }
     }
 
+    /**
+     * This function makes the given [Label]s visible and all other scoring card labels invisible
+     */
+
     private fun showScoreCards(cardA: Label, cardB: Label) {
         val cards = listOf(salmonCardA, salmonCardB, hawkCardA, hawkCardB, foxCardA, foxCardB,
             bearCardA, bearCardB, elkCardA, elkCardB)
@@ -930,6 +960,10 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
             else card.isVisible = false
         }
     }
+
+    /**
+     * This function randomly selects A or B for each pair of scoring cards
+     */
 
     private fun randomizeScoreCards() {
         val randomizerList = mutableListOf(true, false)
@@ -940,6 +974,23 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
             pair.first.isChecked = randomizerList[0]
             pair.second.isChecked = randomizerList[1]
         }
+    }
+
+    /**
+     * This function resizes all scoring cards to a height of 370 pixels, the width is respectively resized proportionally
+     */
+
+    private fun resizeScoreCards() {
+        elkCardA.resize(192, 370)
+        elkCardB.resize(192, 370)
+        hawkCardA.resize(170, 370)
+        hawkCardB.resize(170, 370)
+        salmonCardA.resize(170, 370)
+        salmonCardB.resize(170, 370)
+        foxCardA.resize(170, 370)
+        foxCardB.resize(170, 370)
+        bearCardA.resize(194, 370)
+        bearCardB.resize(194, 370)
     }
 
 }

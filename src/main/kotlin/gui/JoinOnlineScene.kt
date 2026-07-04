@@ -129,7 +129,7 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
         visual = ColorVisual(color = Color(0x99acff)).apply { style.borderRadius = BorderRadius(8) }
         isDisabled = true
         onMouseClicked = {
-            app.showMenuScene(JoinOnlineLobbyScene(app,rootService))
+            app.showMenuScene(JoinOnlineLobbyScene(app,rootService, nameInput.text, playerType))
         }
     }
 
