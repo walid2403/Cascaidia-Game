@@ -11,4 +11,5 @@ enum class TurnOptions {
     PLACE_HABITAT_TILE,
     PLACE_WILDLIFE_TOKEN,
     DISCARD_WILDLIFE_TOKEN,
+    ROTATE
 }
