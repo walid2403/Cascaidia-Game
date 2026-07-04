@@ -3,7 +3,6 @@ package gui
 import tools.aqua.bgw.core.BoardGameApplication
 import service.RootService
 
-
 /**
  * Represents the main application for the SoPra board game.
  * The application initializes the [RootService] and displays the scenes.
@@ -38,9 +37,5 @@ class SopraApplication : BoardGameApplication("SoPra Game") {
         this.showMenuScene(mainMenuScene )
         //this.showMenuScene(scoreScene)
     }
-
-//    override fun refreshAfterStartGame() {
-//        this.hideMenuScene()
-//    }
 }
 

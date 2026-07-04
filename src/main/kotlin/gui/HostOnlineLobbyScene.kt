@@ -1,5 +1,6 @@
 package gui
 
+import entity.PlayerType
 import service.Refreshable
 import service.RootService
 import tools.aqua.bgw.animation.MovementAnimation
@@ -54,11 +55,6 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     private val cardY = 230
     private val cardAX = 245
     private val cardBX = 505
-
-    /**
-     * Int to track the current number of players
-     */
-    private var currentNumPlayers = 1
 
 
     private val logo = Label(
@@ -581,11 +577,20 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         }
     }
 
+    private val lobbyCode = Label(
+        posX = 35,
+        posY = paneHeight - 70,
+        width = 500,
+        height = 40,
+        alignment = Alignment.TOP_LEFT,
+        font = Font(24.0, family = "Canva Sans"),
+        text = "Lobby Code: ",
+    )
 
     init {
 
         listOf(p1Input,p2Input,p3Input,p4Input, downButtonP1, downButtonP2, downButtonP3, shuffleButton,
-            exitButton, p1Icon, p2Icon, p3Icon, p4Icon).forEach { hostPanel.add(it) }
+            exitButton, p1Icon, p2Icon, p3Icon, p4Icon, lobbyCode).forEach { hostPanel.add(it) }
 
         listOf(bear,elk,hawk,salmon,fox,
             bearCardA,bearCardB,elkCardA,elkCardB,foxCardA,foxCardB,
@@ -616,24 +621,27 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
             ParallelAnimation(
                 MovementAnimation( // bewegt das hostPanel
                     componentView = hostPanel,
-                    fromX = hostPanel.actualPosX,
-                    toX = hostPanel.actualPosX - (hostPanel.width/2)+90,
+//                    fromX = hostPanel.actualPosX,
+//                    toX = hostPanel.actualPosX - (hostPanel.width/2)+90,
+                    byX = -movementDistance,
                     duration = 1000 // dauer
                 ),
                 MovementAnimation( // bewegt das sidePanel
                     componentView = sidePanel,
-                    fromX = sidePanel.actualPosX,
-                    toX = sidePanel.actualPosX + (sidePanel.width/2)-90,
+//                    fromX = sidePanel.actualPosX,
+//                    toX = sidePanel.actualPosX + (sidePanel.width/2)-90,
+                    byX = movementDistance,
                     duration = 1000 // dauer
                 ),
                 MovementAnimation( // bewegt das Tab
                     componentView = tabLabel,
-                    fromX = sidePanel.actualPosX,
-                    toX = sidePanel.actualPosX + (sidePanel.width/2)-90,
+//                    fromX = sidePanel.actualPosX,
+//                    toX = sidePanel.actualPosX + (sidePanel.width/2)-90,
+                    byX = movementDistance,
                     duration = 1000 // dauer
                 )
 
-                ).apply {
+            ).apply {
                 onFinished = {
                     runOnGUIThread {
                         //arrowButton.isVisible = false
@@ -642,7 +650,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
                                 style.borderRadius = BorderRadius(15)
                             }
                             onMouseClicked = {
-                                TODO("startGame muss aufgerufen werden")
+                                rootService.gameService.startNewGame(getFinalPlayerList(), getFinalScoreCards())
                             }
                         }
                     }
@@ -651,8 +659,66 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         )
     }
 
-    private fun names() : List<String> {
-        return listOf(p1Input.text.trim(),p2Input.text.trim(),p3Input.text.trim(),p4Input.text.trim())
+    /**
+     * This function returns a [List] of [Pair]s of [String] and [PlayerType] containing the name and type of all
+     * occupied player slots.
+     */
+
+    private fun getFinalPlayerList(): List<Pair<String, PlayerType>> {
+        val list: MutableList<Pair<String, PlayerType>> = mutableListOf()
+        var type = PlayerType.HUMAN
+        var name = ""
+        for(i in 0..3) {
+            when (i) {
+                0 -> {
+                    type = getPlayerType(p1Icon)
+                    name = p1Input.text
+                }
+                1 -> {
+                    type = getPlayerType(p2Icon)
+                    name = p2Input.text
+                }
+                2 -> {
+                    type = getPlayerType(p3Icon)
+                    name = p3Input.text
+                }
+                3 -> {
+                    type = getPlayerType(p4Icon)
+                    name = p4Input.text
+                }
+            }
+            if(name != "") list.add(Pair(name,type))
+        }
+        return list.toList()
+    }
+
+    /**
+     * This function returns the [PlayerType] corresponding to the [ImageVisual] saved in the given [Label] [icon]
+     */
+
+    private fun getPlayerType(icon: Label): PlayerType {
+        return when(icon.visual) {
+            ImageVisual("HumanIcon3.png") -> PlayerType.HUMAN
+            ImageVisual("EasyBotIcon3.png") -> PlayerType.EASY_BOT
+            ImageVisual("HardBotIcon3.png") -> PlayerType.HARD_BOT
+            ImageVisual("NetworkIcon.png") -> PlayerType.NETWORK
+            else -> throw IllegalArgumentException("Unknown player type")
+        }
+    }
+
+    /**
+     * This function returns a [List] of [Boolean], one for each animal type. When true, scorecard A was selected for
+     * this animal, otherwise card B. Order of animals: bear, elk, salmon, hawk, fox
+     */
+
+    private fun getFinalScoreCards(): List<Boolean> {
+        val list: MutableList<Boolean> = mutableListOf()
+        list.add(0, checkBoxBearA.isChecked)
+        list.add(1, checkBoxElkA.isChecked)
+        list.add(2, checkBoxSalmonA.isChecked)
+        list.add(3, checkBoxHawkA.isChecked)
+        list.add(4, checkBoxFoxA.isChecked)
+        return list.toList()
     }
 
     /**
@@ -665,7 +731,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         val nameAndType = getNameAndTypePairs()
 
         //shuffle the list
-        val shuffledList = nameAndType.shuffled()
+        val shuffledList = nameAndType.shuffled(
+        )
 
         //sort list so that unused/empty player slots are at the end of the list. fill the list with temporary values
         //to start and then overwrite with the correct ones
@@ -881,10 +948,30 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 //        updatePlayers(players)
 //    }
 
+    //TODO("refresh anpassen wenn Netzwerk steht")
+
+//    override fun refreshAfterLobbyOpened(lobbyCode: String) {
+//        this.lobbyCode.text = "Lobby Code: $lobbyCode"
+//    }
+
+    /**
+     * Closes the MenuScene when called.
+     */
+    override fun refreshAfterStartGame() {
+        app.hideMenuScene()
+    }
+
+    /**
+     * This function returns true when the given [List] [players] is duplicate free, false otherwise
+     */
     private fun duplicateFree(players: List<String>): Boolean {
         return players.size == players.distinct().size
     }
 
+    /**
+     * This function updates the player name slots with the entries in [players] and the player icons with the
+     * corresponding icons/visuals. Unused name slots, icons and downButtons are set to be invisible.
+     */
     private fun updatePlayers(players: List<String>) {
         if(players.isEmpty() || players.size > 4) {
             throw IllegalArgumentException("Invalid number of players: ${players.size}")
@@ -937,6 +1024,11 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
             }
         }
     }
+
+    /**
+     * This function returns the [ImageVisual] for [playerType] if [name] is the [playerName] and
+     * the NetworkIcon otherwise
+     */
 
     private fun getVisual(name: String): ImageVisual {
         return if (name == playerName) {

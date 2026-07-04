@@ -478,13 +478,6 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         isVisible = false
     }
 
-    private val duplicateNameWarning = Label(
-        width = 229,
-        height = 497,
-        posX = 230,
-        posY = 200,
-    )
-
     init {
         addComponents(
             backgroundImage,
@@ -607,13 +600,13 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         }
     }
 
-    /**
-     * This function updates the games configurations (players, their order, and the selected scorecards) after a
-     * GameConfigMessage
-     * @param players [List] [String] containing the players' names in the order they are set to play in
-     * @param scoreCards [List] [Boolean] contains a Boolean for each animal type, if true card A is selected,
-     * card B otherwise. Order of Booleans: hawk, salmon, elk, fox, bear
-     */
+//    /**
+//     * This function updates the games configurations (players, their order, and the selected scorecards) after a
+//     * GameConfigMessage
+//     * @param players [List] [String] containing the players' names in the order they are set to play in
+//     * @param scoreCards [List] [Boolean] contains a Boolean for each animal type, if true card A is selected,
+//     * card B otherwise. Order of Booleans: hawk, salmon, elk, fox, bear
+//     */
 //    override fun refreshAfterGameConfigMessage(players: List<String>, scoreCards: List<Boolean>) {
 //        updatePlayers(players)
 //        updateScoreCards(scoreCards)
@@ -827,5 +820,9 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         hawkCardB.resize(183, 397)
         elkCardA.resize(209, 403)
         elkCardB.resize(209, 403)
+    }
+
+    override fun refreshAfterStartGame() {
+        app.hideMenuScene()
     }
 }

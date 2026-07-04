@@ -93,7 +93,7 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
         visual = ColorVisual(color = Color(0x99acff)).apply { style.borderRadius = BorderRadius(8) }
         isDisabled = true
         onMouseClicked = {
-            app.showMenuScene(HostOnlineLobbyScene(app,rootService, nameInput.text, playerType))
+            TODO("über Network die Lobby eröffnen")
         }
     }
 
@@ -182,6 +182,9 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
         )
     }
 
+    /**
+     * This function adjusts the playerType and the players icon according to if the left or right button was pressed
+     */
     private fun changePlayerType(leftButton: Boolean, playerType: Int): Int {
         val newType = if (leftButton) {
             (playerType + 2) % 3
@@ -203,4 +206,12 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
 
         return newType
     }
+
+
+    private fun deleteThis() {
+        TODO("refresh anpassen wenn Network Refreshes final definiert sind")
+    }
+//    override fun refreshAfterLobbyOpened(lobbyCode: String) {
+//        app.showMenuScene(HostOnlineLobbyScene(app,rootService, nameInput.text, playerType))
+//    }
 }
