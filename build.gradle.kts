@@ -7,7 +7,7 @@ import org.gradle.kotlin.dsl.application
 plugins {
     kotlin("jvm") version "2.3.0"
     application
-    id("edu.udo.cs.sopra") version "1.0.3"
+    id("edu.udo.cs.sopra") version "1.0.4"
 }
 
 group = "edu.udo.cs.sopra"
