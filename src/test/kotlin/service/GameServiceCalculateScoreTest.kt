@@ -678,6 +678,40 @@ class GameServiceCalculateScoreTest {
             "Falscher Score")
     }
 
+    @Test
+    fun falconBExtra1() {
+        val player = Player("P", PlayerType.HUMAN)
+        player.board[Triple(0,-1,1)]  = connectedTile(0,Habitates.PRAIRIES, WildlifeToken.ELK)
+        player.board[Triple(-1,0,1)]  = connectedTile(1,Habitates.PRAIRIES, WildlifeToken.HAWK)
+        player.board[Triple(2,-3,1)] = connectedTile(4, Habitates.PRAIRIES, WildlifeToken.HAWK)
+        player.board[Triple(1,-2,1)] = connectedTile(5,Habitates.PRAIRIES, WildlifeToken.ELK)
+        assertEquals(5, scoreOf(player, listOf(true, true, true, false, true))[8])
+    }
+
+    @Test
+    fun falconBExtra2() {
+        val player = Player("P", PlayerType.HUMAN)
+        player.board[Triple(0,0,0)]  = connectedTile(0,Habitates.PRAIRIES, WildlifeToken.ELK)
+        player.board[Triple(-1,0,1)]  = connectedTile(1,Habitates.PRAIRIES, WildlifeToken.HAWK)
+        player.board[Triple(1,0,-1)] = connectedTile(2, Habitates.PRAIRIES, WildlifeToken.HAWK)
+        player.board[Triple(2,-1,-1)] = connectedTile(3,Habitates.PRAIRIES, WildlifeToken.HAWK)
+        player.board[Triple(2,1,-3)] = connectedTile(4, Habitates.PRAIRIES, WildlifeToken.HAWK)
+        player.board[Triple(2,0,-2)] = connectedTile(5,Habitates.PRAIRIES, WildlifeToken.ELK)
+        player.board[Triple(-2,0,2)] = connectedTile(5,Habitates.PRAIRIES, WildlifeToken.ELK)
+        player.board[Triple(-3,0,3)] = connectedTile(5,Habitates.PRAIRIES, WildlifeToken.HAWK)
+        assertEquals(9, scoreOf(player, listOf(true, true, true, false, true))[8])
+    }
+
+    @Test
+    fun falconBExtra3() {
+        val player = Player("P", PlayerType.HUMAN)
+        player.board[Triple(1,0,-1)]  = connectedTile(0,Habitates.PRAIRIES, WildlifeToken.HAWK)
+        player.board[Triple(1,-1,0)]  = connectedTile(2,Habitates.PRAIRIES, WildlifeToken.ELK)
+        player.board[Triple(0,-1,1)]  = connectedTile(3,Habitates.PRAIRIES, WildlifeToken.ELK)
+        player.board[Triple(-1,0,1)]  = connectedTile(1,Habitates.PRAIRIES, WildlifeToken.HAWK)
+        assertEquals(5, scoreOf(player, listOf(true, true, true, false, true))[8])
+    }
+
     /**
      * Single elk with no elk neighbors give 0 points.
      */
