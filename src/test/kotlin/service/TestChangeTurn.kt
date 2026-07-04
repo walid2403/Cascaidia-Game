@@ -102,6 +102,16 @@ class TestChangeTurn {
             "Rückgängig gemachte Züge nicht gelöscht")
         assertEquals(2, rootService.history.prevMoves.size,
             "Game nicht auf dem Stack abgelegt")
+        assertEquals(4, currentGame.tileStack.size,
+            "Tile wurde nicht nachgelegt")
+        assertEquals(4, currentGame.choices[0].first.id,
+            "Tile wurde nicht an richtige Stelle nachgelegt")
+        assertEquals(5, currentGame.wildlifeTokens.size,
+            "Token wurde nicht nachgelegt")
+        assertEquals(WildlifeToken.SALMON, currentGame.choices[1].second,
+            "Token wurde nicht richtig ausgetauscht")
+        assertEquals(Pair(-1,-1), currentGame.selectedChoice,
+            "Auswahl wurde nicht zurückgesetzt")
     }
 
     /**
@@ -139,6 +149,16 @@ class TestChangeTurn {
             "Rückgängig gemachte Züge nicht gelöscht")
         assertEquals(2, rootService.history.prevMoves.size,
             "Game nicht auf dem Stack abgelegt")
+        assertEquals(4, currentGame.tileStack.size,
+            "Tile wurde nicht nachgelegt")
+        assertEquals(4, currentGame.choices[0].first.id,
+            "Tile wurde nicht an richtige Stelle nachgelegt")
+        assertEquals(5, currentGame.wildlifeTokens.size,
+            "Token wurde nicht nachgelegt")
+        assertEquals(WildlifeToken.SALMON, currentGame.choices[1].second,
+            "Token wurde nicht richtig ausgetauscht")
+        assertEquals(Pair(-1,-1), currentGame.selectedChoice,
+            "Auswahl wurde nicht zurückgesetzt")
     }
 
     /**
@@ -216,11 +236,11 @@ class TestChangeTurn {
             "RemovedTokens wurden verändert")
 
         currentGame.wildlifeTokens.push(WildlifeToken.ELK)
-        assertEquals(6, rootService.history.prevMoves.peek().wildlifeTokens.size,
+        assertEquals(5, rootService.history.prevMoves.peek().wildlifeTokens.size,
             "WildlifeTokens wurden verändert")
 
         currentGame.tileStack.pop()
-        assertEquals(5, rootService.history.prevMoves.peek().tileStack.size,
+        assertEquals(4, rootService.history.prevMoves.peek().tileStack.size,
             "TileStack wurde verändert")
     }
 
