@@ -1,5 +1,8 @@
 package entity
 
+/**
+ * Enum Klasse mit allen möglichen Zügen
+ */
 enum class TurnOptions {
     NATURE_TOKEN_FREE_SELECTION,
     NATURE_TOKEN_CHANGE_WILDLIFE,
