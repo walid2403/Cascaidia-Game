@@ -10,7 +10,7 @@ class Bot (private val rootService: RootService) {
         require(playerType != PlayerType.NETWORK) { "Die Methode sollte nur für Bot Züge aufgerufen werden" }
         when (playerType) {
             PlayerType.EASY_BOT -> { randomBotTurn() }
-            PlayerType.HARD_BOT -> {}
+            PlayerType.HARD_BOT -> { rootService.heuristicBot.makeTurn() }
         }
     }
 
