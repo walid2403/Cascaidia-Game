@@ -14,7 +14,8 @@ import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 
-class PauseMenuScene (private val app: SopraApplication, private val rootService: RootService): MenuScene(530, 590),
+class PauseMenuScene (private val app: SopraApplication, private val rootService: RootService):
+    MenuScene(530, 590),
     Refreshable {
 
     private val paneWidth = 530

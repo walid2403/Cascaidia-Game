@@ -13,7 +13,8 @@ import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.*
 
 
-class MainMenuScene(private val app: SopraApplication,private val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
+class MainMenuScene(private val app: SopraApplication,private val rootService: RootService) :
+    MenuScene(1920, 1080), Refreshable {
 
     private val sceneWidth = 1920
     private val sceneHeight = 1080

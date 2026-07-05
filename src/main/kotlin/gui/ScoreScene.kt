@@ -13,7 +13,8 @@ import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 import tools.aqua.bgw.components.layoutviews.GridPane
 
-class ScoreScene(private val app: SopraApplication,private val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
+class ScoreScene(private val app: SopraApplication,private val rootService: RootService) :
+    MenuScene(1920, 1080), Refreshable {
 
     private val sceneWidth = 1920
     private val sceneHeight = 1080
@@ -423,8 +424,8 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
     }
 
     override fun refreshAfterStartGame() {
-        //clear all information that may still be saved from a previous round. Name and Score labes will be made visible
-        //and rewritten as needed
+        //clear all information that may still be saved from a previous round.
+        // Name and Score labes will be made visible and overwritten as needed
         habitatTableTopHalf.clear()
         habitatTableBottomHalf.clear()
         wildlifeTableTopHalf.clear()
@@ -715,13 +716,15 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
                     2 -> ImageVisual("elk.png", entryWidth, entryHeight, offsetX = -15)
                     3 -> ImageVisual("salmon.png", entryWidth, entryHeight, offsetX = -15)
                     4 -> ImageVisual("hawk.png", entryWidth, entryHeight, offsetX = -15)
-                    else -> throw IllegalArgumentException("index $index in table ${table.name} does not contain an image" )
+                    else -> throw IllegalArgumentException("index $index in table ${table.name} " +
+                            "does not contain an image" )
                 }
             }
             wildlifeTableBottomHalf -> {
                 when(index) {
                     0 -> ImageVisual("fox.png", entryWidth, entryHeight, offsetX = -15)
-                    else -> throw IllegalArgumentException("index $index in table ${table.name} does not contain an image" )
+                    else -> throw IllegalArgumentException("index $index in table ${table.name} " +
+                            "does not contain an image" )
                 }
             }
             habitatTableTopHalf -> {
@@ -731,14 +734,16 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
                     2 -> ImageVisual("tile1.png", entryWidth, entryHeight)
                     3 -> ImageVisual("tile1.png", entryWidth, entryHeight)
                     4 -> ImageVisual("tile1.png", entryWidth, entryHeight)
-                    else -> throw IllegalArgumentException("index $index in table ${table.name} does not contain an image" )
+                    else -> throw IllegalArgumentException("index $index in table ${table.name} " +
+                            "does not contain an image" )
                 }
             }
             habitatTableBottomHalf -> {
                 when(index) {
                     0 -> ImageVisual("tile1.png", entryWidth, entryHeight)
                     2 -> ImageVisual("pinecone.png", entryWidth, entryHeight, offsetX = -15)
-                    else -> throw IllegalArgumentException("index $index in table ${table.name} does not contain an image" )
+                    else -> throw IllegalArgumentException("index $index in table ${table.name} " +
+                            "does not contain an image" )
                 }
             }
             else -> throw IllegalArgumentException("invalid table given: ${table.name}" )

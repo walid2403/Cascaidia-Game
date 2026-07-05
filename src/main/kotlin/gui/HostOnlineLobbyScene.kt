@@ -671,20 +671,20 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         for(i in 0..3) {
             when (i) {
                 0 -> {
-                    type = getPlayerType(p1Icon)
-                    name = p1Input.text
+                    type = getPlayerType(orderOfTypes[0])
+                    name = orderOfNames[0].text
                 }
                 1 -> {
-                    type = getPlayerType(p2Icon)
-                    name = p2Input.text
+                    type = getPlayerType(orderOfTypes[1])
+                    name = orderOfNames[1].text
                 }
                 2 -> {
-                    type = getPlayerType(p3Icon)
-                    name = p3Input.text
+                    type = getPlayerType(orderOfTypes[2])
+                    name = orderOfNames[2].text
                 }
                 3 -> {
-                    type = getPlayerType(p4Icon)
-                    name = p4Input.text
+                    type = getPlayerType(orderOfTypes[3])
+                    name = orderOfNames[3].text
                 }
             }
             if(name != "") list.add(Pair(name,type))
@@ -822,8 +822,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     /**
      * This function switches the position of two [Label]s containing player names and the corresponding player type
      * icons via Movement Animations.
-     * @param button [Int] number of the button that initiated this function call, determines which labels get switched.
-     * Button 1 -> the first two labels/players get switched; Button 2 -> players 2 and 3 get switched...
+     * @param button [Int] number of the button that initiated this function call, determines which labels get
+     * switched. Button 1 -> the first two labels/players get switched; Button 2 -> players 2 and 3 get switched...
      */
 
     private fun switchNames(button: Int){
@@ -928,7 +928,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     }
 
     /**
-     * This function resizes all scoring cards to a height of 370 pixels, the width is respectively resized proportionally
+     * This function resizes all scoring cards to a height of 370 pixels, the width is respectively
+     * resized proportionally
      */
 
     private fun resizeScoreCards() {

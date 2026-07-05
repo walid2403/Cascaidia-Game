@@ -22,7 +22,8 @@ import tools.aqua.bgw.visual.Visual
 import kotlin.Pair
 import kotlin.String
 
-class LobbyScene(private val app: SopraApplication, private val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
+class LobbyScene(private val app: SopraApplication, private val rootService: RootService) :
+    MenuScene(1920, 1080), Refreshable {
 
     private val sceneWidth = 1920
     private val sceneHeight = 1080
@@ -1025,7 +1026,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     }
 
     /**
-     * This function resizes all scoring cards to a height of 370 pixels, the width is respectively resized proportionally
+     * This function resizes all scoring cards to a height of 370 pixels, the width is respectively
+     * resized proportionally
      */
 
     private fun resizeScoreCards() {
