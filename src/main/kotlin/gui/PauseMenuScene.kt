@@ -14,6 +14,12 @@ import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 
+/**
+ * This scene is the in-game pause scene. The player can turn on or off the animations from here, save and exit the
+ * game, exit to the main menu without saving or exit the application entirely from here.
+ * @param app The [SopraApplication] of this game
+ * @param rootService The [RootService] instance to access the other service methods and entity layer
+ */
 class PauseMenuScene (private val app: SopraApplication, private val rootService: RootService):
     MenuScene(530, 590),
     Refreshable {

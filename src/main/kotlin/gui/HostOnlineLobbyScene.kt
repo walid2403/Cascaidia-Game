@@ -3,6 +3,7 @@ package gui
 import entity.PlayerType
 import service.Refreshable
 import service.RootService
+import tools.aqua.bgw.animation.DelayAnimation
 import tools.aqua.bgw.animation.MovementAnimation
 import tools.aqua.bgw.animation.ParallelAnimation
 import tools.aqua.bgw.components.layoutviews.Pane
@@ -20,6 +21,20 @@ import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 import tools.aqua.bgw.visual.Visual
 
+
+/**
+ * This scene shows the Host Lobby of the game. All players joining the Lobby will be shown with their name and a
+ * Network Player Icon, the Host will be shown with the name [playerName] he entered in the [HostOnlineScene] and the
+ * PlayerIcon for the [PlayerType] he selected, [playerType].
+ * The Host can manually reorder the players or shuffle them. The Host can manually select the scoringcards used for
+ * each animal type or chose a random selection. When there are 2-4 players in the Lobby and scorecards were selected,
+ * the Host can start the game.
+ *
+ * @param app The [SopraApplication] of the game
+ * @param [rootService] The [RootService] instance to access the other service methods and entity layer
+ * @param playerName The [String] that was entered in the [HostOnlineScene]
+ * @param playerType The [Int] corresponding to the [PlayerType] selected in [HostOnlineScene]
+ */
 class HostOnlineLobbyScene(private val app: SopraApplication, private val rootService: RootService,
                            private val playerName: String, private val playerType: Int
 ) : MenuScene(1920, 1080), Refreshable  {
@@ -587,6 +602,21 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         text = "Lobby Code: ",
     )
 
+    private val warning = Label(
+        width = paneWidth - 180,
+        height = 100,
+        posX = paneX + 210 + movementDistance,
+        posY = paneY + paneHeight + 45,
+        visual = ColorVisual(204, 78, 0).apply {
+            style.borderRadius = BorderRadius(15)
+        },
+        font = Font(size = 25, color = Color.WHITE, family = "Canva Sans", fontWeight = Font.FontWeight.BOLD),
+        alignment = Alignment.CENTER,
+        isWrapText = true
+    ).apply {
+        isVisible = false
+    }
+
     init {
 
         listOf(p1Input,p2Input,p3Input,p4Input, downButtonP1, downButtonP2, downButtonP3, shuffleButton,
@@ -607,6 +637,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
             sidePanel,
             tabLabel,
             hostPanel,
+            warning,
             )
     }
 
@@ -643,20 +674,89 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
             ).apply {
                 onFinished = {
-                    runOnGUIThread {
-                        //arrowButton.isVisible = false
-                        tabLabel.apply {
-                            visual = ImageVisual("StartGameTab.png").apply {
-                                style.borderRadius = BorderRadius(15)
-                            }
-                            onMouseClicked = {
-                                rootService.gameService.startNewGame(getFinalPlayerList(), getFinalScoreCards())
-                            }
-                        }
-                    }
+                    updateTab()
+//                    runOnGUIThread {
+//                        tabLabel.apply {
+//                            visual = ImageVisual("StartGameTab.png").apply {
+//                                style.borderRadius = BorderRadius(15)
+//                            }
+//                            onMouseClicked = {
+//                                if(allScoreCardsSelected() && enoughPlayers()) {
+//                                    rootService.gameService.startNewGame(getFinalPlayerList(), getFinalScoreCards())
+//                                } else {
+//                                    val delay = DelayAnimation(5000)
+//                                    playAnimation(delay).apply {
+//                                        onFinished = {
+//                                            warning.isVisible = false
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
                 }
             }
         )
+    }
+
+    /**
+     * This function updates the [Visual] and onMouseClicked functionality of the [tabLabel].
+     */
+    private fun updateTab() {
+        runOnGUIThread {
+            tabLabel.apply {
+                visual = ImageVisual("StartGameTab.png").apply {
+                    style.borderRadius = BorderRadius(15)
+                }
+                onMouseClicked = {
+                    if(allScoreCardsSelected() && enoughPlayers()) {
+                        rootService.gameService.startNewGame(getFinalPlayerList(), getFinalScoreCards())
+                    } else {
+                        warning.isVisible = true
+                        playAnimation(
+                            DelayAnimation(3000).apply {
+                            onFinished = {
+                                warning.isVisible = false
+                            }
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * This function returns true if a [CheckBox] is checked for each animal type, false otherwise. If false, a player
+     * warning becomes visible.
+     */
+    private fun allScoreCardsSelected(): Boolean {
+        val bear = (checkBoxBearA.isChecked || checkBoxBearB.isChecked)
+        val hawk = (checkBoxHawkA.isChecked || checkBoxHawkB.isChecked)
+        val fox = (checkBoxFoxA.isChecked || checkBoxFoxB.isChecked)
+        val salmon = (checkBoxSalmonA.isChecked || checkBoxSalmonB.isChecked)
+        val elk = (checkBoxElkA.isChecked || checkBoxElkB.isChecked)
+        if(!(bear && hawk && fox && salmon && elk)) {
+            //warning.isVisible = true
+            warning.text = "You need to select a Score Card for each animal type to play."
+            return false
+        } else {
+            return true
+        }
+    }
+
+    /**
+     * This function returns true if there is a second player in the Lobby, false otherwise. If false, a player warning
+     * becomes visible.
+     */
+    private fun enoughPlayers(): Boolean {
+        if(p2Input.isVisible) {
+            return true
+        } else {
+            //warning.isVisible = true
+            warning.text = "You need at least 2 players to play."
+            return false
+        }
     }
 
     /**

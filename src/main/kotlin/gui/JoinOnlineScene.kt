@@ -14,6 +14,12 @@ import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 import tools.aqua.bgw.visual.Visual
 
+/**
+ * In this scene a player can enter a name, select a [entity.PlayerType] and enter a Lobby Code before joining
+ * a Lobby as a participant.
+ * @param app The [SopraApplication] of this game
+ * @param rootService The [RootService] instance to access the other service methods and entity layer
+ */
 class JoinOnlineScene(private val app: SopraApplication,private val rootService: RootService) :
     MenuScene(1920, 1080), Refreshable  {
 

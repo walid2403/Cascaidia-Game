@@ -22,6 +22,14 @@ import tools.aqua.bgw.visual.Visual
 import kotlin.Pair
 import kotlin.String
 
+/**
+ * This scene is the Lobby scene for a local game in the HotSeat mode. The number of players, their names and
+ * [PlayerType] can be configured here. The player order can be shuffled randomly. The scorecards used in the game can
+ * be selected manually or randomly. The game can be started when 2-4 players are set to play with names and types
+ * entered and a scorecard has been selected for each animal type.
+ * @param app The [SopraApplication] of this game
+ * @param rootService The [RootService] instance to access the other service methods and entity layer
+ */
 class LobbyScene(private val app: SopraApplication, private val rootService: RootService) :
     MenuScene(1920, 1080), Refreshable {
 
