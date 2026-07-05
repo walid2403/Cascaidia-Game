@@ -16,7 +16,10 @@ class Bot (private val rootService: RootService) {
         require(playerType != PlayerType.HUMAN) { "Die Methode sollte nur für Bot Züge aufgerufen werden" }
         require(playerType != PlayerType.NETWORK) { "Die Methode sollte nur für Bot Züge aufgerufen werden" }
         when (playerType) {
-            PlayerType.EASY_BOT -> { randomBotTurn() }
+            PlayerType.EASY_BOT -> {
+                randomBotTurn()
+            }
+
             PlayerType.HARD_BOT -> {}
         }
     }
@@ -63,7 +66,7 @@ class Bot (private val rootService: RootService) {
         when (currentGame.gameState) {
             GameState.START_OF_TURN -> {
                 legalTurns += TurnOptions.MAKE_SELECTION
-                if (currentGame.choices.map{ it.second }.groupBy{ it }.entries.maxOfOrNull{ it.value.size } == 3) {
+                if (currentGame.choices.map { it.second }.groupBy { it }.entries.maxOfOrNull { it.value.size } == 3) {
                     legalTurns += TurnOptions.CLEAR_SEMIPOPULATION
                 }
                 if (player.natureTokens > 0) {
@@ -71,6 +74,7 @@ class Bot (private val rootService: RootService) {
                     legalTurns += TurnOptions.NATURE_TOKEN_CHANGE_WILDLIFE
                 }
             }
+
             GameState.HAS_EXTERMINATED -> {
                 legalTurns += TurnOptions.MAKE_SELECTION
                 if (player.natureTokens > 0) {
@@ -78,13 +82,16 @@ class Bot (private val rootService: RootService) {
                     legalTurns += TurnOptions.NATURE_TOKEN_CHANGE_WILDLIFE
                 }
             }
+
             GameState.MADE_CHOICE -> {
                 legalTurns += TurnOptions.PLACE_HABITAT_TILE
                 legalTurns += TurnOptions.ROTATE
             }
+
             GameState.PLAYED_TILE -> {
                 legalTurns += mutableListOf(TurnOptions.PLACE_WILDLIFE_TOKEN, TurnOptions.DISCARD_WILDLIFE_TOKEN)
             }
+
             GameState.END_OF_TURN -> {
 
             }
@@ -124,12 +131,12 @@ class Bot (private val rootService: RootService) {
     private fun randomBotPlaceHabitatTile(player: Player) {
         val possiblePositions = mutableListOf<Triple<Int, Int, Int>>()
         for (entry in player.board) {
-            for (i in listOf(-1,1)) {   //Geht alle Nachbarn durch und fügt neue leere Nachbarn zur Liste hinzu
-                var option = Triple(entry.key.first,entry.key.second+i,entry.key.third-i)
+            for (i in listOf(-1, 1)) {   //Geht alle Nachbarn durch und fügt neue leere Nachbarn zur Liste hinzu
+                var option = Triple(entry.key.first, entry.key.second + i, entry.key.third - i)
                 if (option !in possiblePositions && player.board[option] == null) possiblePositions += option
-                option = Triple(entry.key.first+i,entry.key.second,entry.key.third-i)
+                option = Triple(entry.key.first + i, entry.key.second, entry.key.third - i)
                 if (option !in possiblePositions && player.board[option] == null) possiblePositions += option
-                option = Triple(entry.key.first+i,entry.key.second-i,entry.key.third)
+                option = Triple(entry.key.first + i, entry.key.second - i, entry.key.third)
                 if (option !in possiblePositions && player.board[option] == null) possiblePositions += option
             }
         }
@@ -138,7 +145,18 @@ class Bot (private val rootService: RootService) {
     }
 
     private fun randomBotPlaceWildlifeToken(player: Player) {
-        val possiblePositions = player.board.entries.filter { it.value.occupant == null}.map { it.key }
+        val currentGame = rootService.currentGame
+        checkNotNull(currentGame)
+        //welche Tiere besitzt der Bot gerade
+        val selectedWildlife = currentGame.choices[currentGame.selectedChoice.second].second
+        val possiblePositions = player.board.entries
+            .filter { it.value.occupant == null && selectedWildlife in it.value.possibles }
+            .map { it.key } //freie plätze
+        // falls die Liste leer ist, müssen wir das Tier wegwerfen
+        if (possiblePositions.isEmpty()) {
+            randomBotDiscardWildlifeToken(currentGame)
+            return
+        }
         val position = Random.nextInt(possiblePositions.size)
         rootService.playerActionService.placeWildlife(possiblePositions[position])
     }
@@ -152,3 +170,5 @@ class Bot (private val rootService: RootService) {
         rootService.playerActionService.rotateTile(rotation)
     }
 }
+
+
