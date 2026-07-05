@@ -575,7 +575,10 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
             }
         }
 
+        val maxScore = scoreElk(elkGroup.count {!it.marked})
+
         val scores = mutableListOf<Int>()
+        val combinations = mutableListOf<MutableList<Int>>()
         for (node in elkGroup) {
             if (node.marked2 != 0) {
                 if (node.marked2 <= depth) continue
@@ -631,9 +634,27 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
                 (neighborElks2 as MutableList<Int>).forEach {
                     markStraightLine(node, it)
                     markStraightLine(node, it - 3)
+
+                    val combination = elkGroup.filter{elk -> elk.marked}.map{elk -> elk.tile.id}.toMutableList()
+
+                    if (combination in combinations) {
+                        elkGroup.forEach { elk -> elk.marked = false }
+                        elkGroup.forEach { elk ->
+                            if (elk.marked2 > depth) elk.marked2 = 0
+                        }
+
+                        return@forEach
+                    } else combinations.add(combination)
+
                     val tmpScore = elkGroup.count {elk -> elk.marked }
-                    if (elkGroup.any{ elk -> (elk.marked2 == 0) && !elk.marked }) scores.add(scoreElk(tmpScore) + scoreElkGroup(elkGroup, scoringCardA, depth + 1))
-                    else scores.add(scoreElk(tmpScore))
+//                    println("tmpScore: $tmpScore, depth: $depth, size: ${elkGroup.size}, scores: $scores, it: $it, combination: $combination")
+
+                    val score = if (elkGroup.any{ elk -> (elk.marked2 == 0) && !elk.marked }) scoreElk(tmpScore) + scoreElkGroup(elkGroup, scoringCardA, depth + 1)
+                    else scoreElk(tmpScore)
+
+                    if (score == maxScore) return score
+                    else scores.add(score)
+
                     elkGroup.forEach { elk -> elk.marked = false }
                     elkGroup.forEach { elk ->
                         if (elk.marked2 > depth) elk.marked2 = 0
@@ -642,31 +663,33 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
             } else {
                 (neighborElks2 as MutableList<List<Int>>).forEach {
                     markElkGroup(node, it)
+
+                    val combination = elkGroup.filter{elk -> elk.marked}.map{elk -> elk.tile.id}.toMutableList()
+
+                    if (combination in combinations) {
+                        elkGroup.forEach { elk -> elk.marked = false }
+                        elkGroup.forEach { elk ->
+                            if (elk.marked2 > depth) elk.marked2 = 0
+                        }
+
+                        return@forEach
+                    } else combinations.add(combination)
+
                     val tmpScore = elkGroup.count {elk -> elk.marked }
 //                    println("tmpScore: $tmpScore, depth: $depth, size: ${elkGroup.size}, scores: $scores, it: $it")
-                    if (elkGroup.any{ elk -> (elk.marked2 == 0) && !elk.marked }) scores.add(scoreElk(tmpScore) + scoreElkGroup(elkGroup, scoringCardA, depth + 1))
-                    else scores.add(scoreElk(tmpScore))
+
+                    val score = if (elkGroup.any{ elk -> (elk.marked2 == 0) && !elk.marked }) scoreElk(tmpScore) + scoreElkGroup(elkGroup, scoringCardA, depth + 1)
+                    else scoreElk(tmpScore)
+
+                    if (score == maxScore) return score
+                    else scores.add(score)
+
                     elkGroup.forEach { elk -> elk.marked = false }
                     elkGroup.forEach { elk ->
                         if (elk.marked2 > depth) elk.marked2 = 0
                     }
                 }
             }
-            /*neighborElks2.forEach {
-                if (scoringCardA) {
-                    markStraightLine(node, it)
-                    markStraightLine(node, it - 3)
-                } else {
-                    markElkGroup(node, it)
-                }
-                val tmpScore = elkGroup.count {elk -> elk.marked }
-                if (elkGroup.any{ elk -> (elk.marked2 == 0) || !elk.marked }) scores.add(scoreElk(tmpScore) + scoreElkGroup(elkGroup, scoringCardA, depth + 1))
-                else scores.add(scoreElk(tmpScore))
-                elkGroup.forEach { elk -> elk.marked = false }
-                elkGroup.forEach { elk ->
-                    if (elk.marked2 > depth) elk.marked2 = 0
-                }
-            }*/
         }
         return scores.maxOrNull() ?: 0
     }
