@@ -154,7 +154,7 @@ class TestChangeTurn {
                 MutableList(6) { Habitates.MOUNTAINS }, emptyList()) }
         var calledCalculateScores = false
         val testRefresh = object : Refreshable {
-            override fun refreshAfterEndGame(scores: List<List<Int>>) {
+            override fun refreshAfterEndGame(scores: List<Pair<String, List<Int>>>) {
                 calledCalculateScores = true
             }
         }
