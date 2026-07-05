@@ -636,6 +636,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
                     markStraightLine(node, it - 3)
 
                     val combination = elkGroup.filter{elk -> elk.marked}.map{elk -> elk.tile.id}.toMutableList()
+                    combination.sort()
 
                     if (combination in combinations) {
                         elkGroup.forEach { elk -> elk.marked = false }
@@ -665,6 +666,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
                     markElkGroup(node, it)
 
                     val combination = elkGroup.filter{elk -> elk.marked}.map{elk -> elk.tile.id}.toMutableList()
+                    combination.sort()
 
                     if (combination in combinations) {
                         elkGroup.forEach { elk -> elk.marked = false }
