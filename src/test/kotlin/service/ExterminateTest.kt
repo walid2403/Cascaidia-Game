@@ -107,8 +107,9 @@ class ExterminateTest {
      * Tests a correct player-triggered extermination.
      *
      * Three identical Salmon tokens should be replaced. The Fox token should
-     * stay unchanged. The removed Salmon tokens should be stored in
-     * [CascadiaGame.removedTokens].
+     * stay unchanged.Since the remaining tokens after the placement are not all identical,
+     * the removed Salmon tokens are shuffled back into [CascadiaGame.wildlifeTokens] and
+     * [CascadiaGame.removedTokens] is cleared again.
      */
     @Test
     fun `player extermination replaces exactly three same wildlife tokens`() {
@@ -130,10 +131,8 @@ class ExterminateTest {
         assertEquals(WildlifeToken.FOX, currentGame.choices[3].second,
             "The fourth token should not be replaced")
 
-        assertEquals(3, currentGame.removedTokens.size,
-            "Wrong number of removed tokens")
-        assertTrue(currentGame.removedTokens.all { it == WildlifeToken.SALMON },
-            "Removed tokens should all be Salmon")
+        assertTrue(currentGame.removedTokens.isEmpty())
+        assertEquals(3, currentGame.wildlifeTokens.size)
     }
 
     /**
@@ -183,10 +182,7 @@ class ExterminateTest {
         assertEquals(WildlifeToken.FOX, currentGame.choices[3].second,
             "Fourth Bear token was not replaced correctly")
 
-        assertEquals(4, currentGame.removedTokens.size,
-            "Wrong number of removed tokens")
-        assertTrue(currentGame.removedTokens.all { it == WildlifeToken.BEAR },
-            "Removed tokens should all be Bear")
+        assertTrue(currentGame.removedTokens.isEmpty())
     }
 
     /**
@@ -248,4 +244,168 @@ class ExterminateTest {
         assertEquals(0, currentGame.removedTokens.size,
             "No token should be removed after an invalid extermination")
     }
+    /**
+     * tests that with only three identical wildlife no automatic extrmination is allowed
+     *
+     */
+    @Test
+    fun failedExterminationWithThreeIdWildlifeTokens() {
+        val currentGame = rootService.currentGame
+        assertNotNull(currentGame)
+        setChoices(
+            currentGame,
+            listOf(
+                WildlifeToken.SALMON,
+                WildlifeToken.SALMON,
+                WildlifeToken.SALMON,
+                WildlifeToken.ELK,
+            )
+        )
+        assertFailsWith<IllegalStateException> {
+            rootService.gameService.exterminate(false)
+        }
+        assertEquals(GameState.START_OF_TURN, currentGame.gameState,)
+        assertTrue(currentGame.removedTokens.isEmpty())
+        assertFalse(refreshWasCalled,)
+    }
+    /**
+     * here testing automatic extermination: four identical wildlife tokens appearing after
+     * another set of four identical wildlife tokens so a second extermination is performed
+     * automatically
+     */
+    @Test
+    fun automaticRecursiveExtermination(){
+        val currentGame = rootService.currentGame
+        assertNotNull(currentGame)
+        setChoices(
+            currentGame,
+            listOf(
+                WildlifeToken.BEAR,
+                WildlifeToken.BEAR,
+                WildlifeToken.BEAR,
+                WildlifeToken.BEAR
+            )
+        )
+        fillWildlifeTokens(
+            currentGame,
+            listOf(
+                WildlifeToken.SALMON,
+                WildlifeToken.SALMON,
+                WildlifeToken.SALMON,
+                WildlifeToken.SALMON,
+                WildlifeToken.FOX,
+                WildlifeToken.ELK,
+                WildlifeToken.HAWK,
+                WildlifeToken.BEAR
+            )
+        )
+        rootService.gameService.exterminate(false)
+        assertEquals(WildlifeToken.FOX, currentGame.choices[0].second,)
+        assertEquals(WildlifeToken.ELK, currentGame.choices[1].second,)
+        assertEquals(WildlifeToken.HAWK, currentGame.choices[2].second,)
+        assertEquals(WildlifeToken.BEAR, currentGame.choices[3].second,)
+        assertTrue(refreshWasCalled)
+        assertTrue(currentGame.removedTokens.isEmpty())
+
+    }
+    /**
+     * testing that recursive automatic extermination is done until there are
+     * not enough wildlife tokens left
+     */
+    @Test
+    fun wildlifeTokensNotEnough(){
+        val currentGame = rootService.currentGame
+        assertNotNull(currentGame)
+        setChoices(
+            currentGame,
+            listOf(
+                WildlifeToken.BEAR,
+                WildlifeToken.BEAR,
+                WildlifeToken.BEAR,
+                WildlifeToken.BEAR
+            )
+        )
+        fillWildlifeTokens(
+            currentGame,
+            listOf(
+                WildlifeToken.SALMON,
+                WildlifeToken.SALMON,
+                WildlifeToken.SALMON,
+                WildlifeToken.SALMON
+            )
+        )
+        rootService.gameService.exterminate(false)
+        assertTrue(currentGame.removedTokens.isEmpty())
+        assertTrue(refreshWasCalled)
+    }
+    /**
+     * here we are testing that the removed tokens is empty after the end
+     * of exterminate
+     *
+     */
+    @Test
+    fun removedTokensCleared(){
+        val currentGame = rootService.currentGame
+        assertNotNull(currentGame)
+        rootService.gameService.exterminate(true)
+        assertTrue(currentGame.removedTokens.isEmpty(),
+            "removedTokens should be empty after an extermination")
+    }
+    /**
+     * tests that a player cannot exterminate with four identical tokens
+     */
+    @Test
+    fun playerCannotExterminateFourId(){
+        val currentGame = rootService.currentGame
+        assertNotNull(currentGame)
+        setChoices(
+            currentGame,
+            listOf(
+                WildlifeToken.BEAR,
+                WildlifeToken.BEAR,
+                WildlifeToken.BEAR,
+                WildlifeToken.BEAR
+            )
+        )
+        assertFailsWith<IllegalStateException> {
+            rootService.gameService.exterminate(true)
+        }
+        assertEquals(GameState.START_OF_TURN, currentGame.gameState)
+        assertTrue(currentGame.removedTokens.isEmpty())
+    }
+    /**
+     * tests that the player cannot exterminate twice
+     */
+    @Test
+    fun playerCannotExterminateTwice(){
+        val currentGame = rootService.currentGame
+        assertNotNull(currentGame)
+        currentGame.gameState= GameState.HAS_EXTERMINATED
+        assertFailsWith<IllegalStateException> {
+            rootService.gameService.exterminate(true)
+        }
+        assertTrue(currentGame.removedTokens.isEmpty())
+    }
+    /**
+     * tests that the extermination succeeds when exactly enough
+     * wildlife tokens are available
+     */
+    @Test
+    fun exterminateWithExactWildlife(){
+        val currentGame = rootService.currentGame
+        assertNotNull(currentGame)
+        fillWildlifeTokens(
+            currentGame,
+            listOf(
+                WildlifeToken.BEAR,
+                WildlifeToken.ELK,
+                WildlifeToken.HAWK,
+            )
+        )
+        rootService.gameService.exterminate(true)
+        assertEquals(3, currentGame.wildlifeTokens.size)
+        assertTrue(currentGame.removedTokens.isEmpty())
+    }
+
+
 }
