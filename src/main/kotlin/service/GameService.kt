@@ -155,15 +155,6 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         val currentPlayer = game.playerQueue.poll()
         game.playerQueue.add(currentPlayer)
 
-        game.gameState = GameState.START_OF_TURN
-
-        game.choices[game.selectedChoice.first] = Pair(game.tileStack.pop(),
-            game.choices[game.selectedChoice.first].second)
-        game.choices[game.selectedChoice.second] = Pair(game.choices[game.selectedChoice.second].first,
-            game.wildlifeTokens.pop())
-
-        game.selectedChoice = Pair(-1, -1)
-
         val nextPlayer = game.playerQueue.peek()
 
         if (nextPlayer.board.size == 23) {
