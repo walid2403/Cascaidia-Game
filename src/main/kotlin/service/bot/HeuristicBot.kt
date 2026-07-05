@@ -1,6 +1,13 @@
-package service
+package service.bot
 
-import entity.*
+import entity.GameState
+import entity.Player
+import entity.Tile
+import entity.TurnOptions
+import entity.WildlifeToken
+import service.RootService
+import kotlin.collections.iterator
+import kotlin.collections.plusAssign
 
 class HeuristicBot(private val rootService: RootService) {
 
