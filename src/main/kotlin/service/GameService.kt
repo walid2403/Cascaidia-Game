@@ -632,7 +632,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
                     markStraightLine(node, it)
                     markStraightLine(node, it - 3)
                     val tmpScore = elkGroup.count {elk -> elk.marked }
-                    if (elkGroup.any{ elk -> (elk.marked2 == 0) || !elk.marked }) scores.add(scoreElk(tmpScore) + scoreElkGroup(elkGroup, scoringCardA, depth + 1))
+                    if (elkGroup.any{ elk -> (elk.marked2 == 0) && !elk.marked }) scores.add(scoreElk(tmpScore) + scoreElkGroup(elkGroup, scoringCardA, depth + 1))
                     else scores.add(scoreElk(tmpScore))
                     elkGroup.forEach { elk -> elk.marked = false }
                     elkGroup.forEach { elk ->
@@ -643,7 +643,8 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
                 (neighborElks2 as MutableList<List<Int>>).forEach {
                     markElkGroup(node, it)
                     val tmpScore = elkGroup.count {elk -> elk.marked }
-                    if (elkGroup.any{ elk -> (elk.marked2 == 0) || !elk.marked }) scores.add(scoreElk(tmpScore) + scoreElkGroup(elkGroup, scoringCardA, depth + 1))
+//                    println("tmpScore: $tmpScore, depth: $depth, size: ${elkGroup.size}, scores: $scores, it: $it")
+                    if (elkGroup.any{ elk -> (elk.marked2 == 0) && !elk.marked }) scores.add(scoreElk(tmpScore) + scoreElkGroup(elkGroup, scoringCardA, depth + 1))
                     else scores.add(scoreElk(tmpScore))
                     elkGroup.forEach { elk -> elk.marked = false }
                     elkGroup.forEach { elk ->
@@ -672,8 +673,8 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
 
     private fun getNeighbors(index : Int) : Pair<Int, Int> {
         return when(index) {
-            1 -> Pair(6, 2)
-            6 -> Pair(5, 1)
+            0 -> Pair(5, 1)
+            5 -> Pair(4, 0)
             else -> Pair(index - 1, index + 1)
         }
     }
@@ -682,7 +683,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         if (node.marked2 != 0) return
         node.marked = true
         for (direction in directions) {
-            node.neighbours[direction]?.marked = true
+            if (node.neighbours[direction]?.marked2 == 0) node.neighbours[direction]?.marked = true
         }
     }
 

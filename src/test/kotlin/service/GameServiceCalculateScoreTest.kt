@@ -1,6 +1,7 @@
 package service
 
 import entity.*
+import kotlin.Triple
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -694,6 +695,38 @@ class GameServiceCalculateScoreTest {
         extremeTest(shape, WildlifeToken.ELK, false)
 
         assertEquals(15, refreshable.receivedScores!!.first().second[6],
+            "Falscher Score")
+    }
+
+    /**
+     * Ein Test für einen Normalfall bei elkAScore
+     */
+    @Test
+    fun elkBNormal1() {
+        val shape = listOf(
+            Triple(0,0,0),
+            Triple(1,-1,0),
+        )
+        extremeTest(shape, WildlifeToken.ELK, false)
+
+        assertEquals(5, refreshable.receivedScores!!.first().second[6],
+            "Falscher Score")
+    }
+
+    /**
+     * Ein Test für einen Normalfall bei elkAScore
+     */
+    @Test
+    fun elkBNormal2() {
+        val shape = listOf(
+            Triple(0,0,0),
+            Triple(1,-1,0),
+            Triple(1,0,-1),
+            Triple(0,1,-1)
+        )
+        extremeTest(shape, WildlifeToken.ELK, false)
+
+        assertEquals(13, refreshable.receivedScores!!.first().second[6],
             "Falscher Score")
     }
 
