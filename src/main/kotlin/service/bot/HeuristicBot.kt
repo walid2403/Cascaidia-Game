@@ -3,11 +3,8 @@ package service.bot
 import entity.GameState
 import entity.Player
 import entity.Tile
-import entity.TurnOptions
 import entity.WildlifeToken
 import service.RootService
-import kotlin.collections.iterator
-import kotlin.collections.plusAssign
 
 class HeuristicBot(private val rootService: RootService) {
 
@@ -17,26 +14,43 @@ class HeuristicBot(private val rootService: RootService) {
         val player = currentGame.playerQueue.peek()
         checkNotNull(player) { "Es existiert kein Spiel" }
 
-        val legalTurns = mutableListOf(TurnOptions.MAKE_SELECTION)
-        if (player.natureTokens > 0) {
-            legalTurns += TurnOptions.NATURE_TOKEN_FREE_SELECTION
-            legalTurns += TurnOptions.NATURE_TOKEN_CHANGE_WILDLIFE
+        // Überpopulation prüfen (vor jedem regulären Zug)
+        val animalsCounts = currentGame.choices.map { it.second }.groupBy { it }
+        // groupBy erzeugt eine Map,
+        // in der gleiche WildlifeTokens als Schlüssel gruppiert und in Listen gespeichert werden
+        // Elvis Operator, da mir nicht sicher bin, ob die Liste leer sein Kann
+        val maxCount = animalsCounts.values.maxOfOrNull { it.size } ?:0
+
+        if(maxCount == 4){
+            //exterminate ist automatisch vom Spiel
+            rootService.gameService.exterminate(false)
+            return // Wir beenden makeTurn() hier. Das Spiel ruft den Bot danach automatisch neu auf.
+        } else if (maxCount == 3) {
+            //Bei 3 KANN getauscht werden. (Lassen wir vorerst ignorieren, der Bot spielt einfach weiter)
         }
-        if (currentGame.choices.map { it.second }.groupBy { it }.entries.maxOfOrNull { it.value.size } == 3) {
-            legalTurns += TurnOptions.CLEAR_SEMIPOPULATION
-        }
 
-        while (legalTurns.isNotEmpty()) {
-            val turn = legalTurns.first() // Später wählen wir hier schlauer aus
+        //Die richtige Action ausführen
+        //wir schauen einfach, in welchem Status das Spiel gerade ist
+        when(currentGame.gameState){
 
-            when (turn) {
-                // Aktuell lassen wir die unfertigen Züge leer oder brechen ab, damit nichts abstürzt
-                TurnOptions.PLACE_HABITAT_TILE -> heuristicBotPlaceHabitatTile(player)
-                TurnOptions.PLACE_WILDLIFE_TOKEN -> heuristicBotPlaceWildlifeToken(player)
-                TurnOptions.MAKE_SELECTION -> heuristicBotChooseMarketPair(player)
+            GameState.START_OF_TURN, GameState.HAS_EXTERMINATED-> {
+                // Am Anfang des Zuges wählen wir aus dem Markt
+                heuristicBotChooseMarketPair(player)
+            }
 
+            GameState.MADE_CHOICE -> {
+                // Wenn das Spiel auf das Plättchen wartet
+                heuristicBotPlaceHabitatTile(player)
+            }
 
-                else -> { legalTurns.clear(); currentGame.gameState = GameState.END_OF_TURN }
+            GameState.PLAYED_TILE -> {
+                // Wenn das Spiel auf das Tier wartet
+                heuristicBotPlaceWildlifeToken(player)
+            }
+
+            else -> {
+                // Falls das Spiel auf etwas anderes wartet (z.B. Zug-Ende), leiten wir das Ende ein
+                currentGame.gameState = GameState.END_OF_TURN
             }
         }
     }
@@ -149,7 +163,7 @@ class HeuristicBot(private val rootService: RootService) {
         }
     }
 
-    private fun evaluateWildlifePosition(position: Triple<Int, Int, Int>, wildlife: WildlifeToken, player: Player): Int {
+    private fun evaluateWildlifePosition(position: Triple<Int, Int, Int>, wildlife: WildlifeToken, player: Player): Int{
         var score = 0
 
         // Da fast alle Tiere auf ihre Nachbarn achten, berechnen wir die hier einmal zentral
@@ -321,20 +335,20 @@ class HeuristicBot(private val rootService: RootService) {
         var bestScore = -1000 /// Ein sehr niedriger Startwert
         var bestIndex = 0 //Hier merken wir uns, welches der 4 Paare gewinnt
 
+        // === Bester Score für das Landschaftsplättchen ===
+        // (Wir suchen alle leeren Nachbarfelder auf dem Board)
+        val possibleHabitatPositions = getPossibleTilePositions(player)
+
         // Wir gehen die 4 ausliegenden Paare im Markt durch (Index 0 bis 3)
         for (i in currentGame.choices.indices){
             val marketTile = currentGame.choices[i].first
             val marketAnimal = currentGame.choices[i].second
 
-            // === 1. Bester Score für das Landschaftsplättchen ===
-            // (Wir suchen alle leeren Nachbarfelder auf dem Board)
-            val possibleHabitatPositions = getPossibleTilePositions(player)
-
             // maxOfOrNull gibt uns direkt den HÖCHSTEN Score zurück, den dieses Plättchen erzielen kann
             val maxHabitatScore = possibleHabitatPositions.maxOfOrNull{ pos ->
                 evaluateHabitatPosition(pos,marketTile,player)} ?: 0
 
-            // === 2. Bester Score für das Tier ===
+            // === Bester Score für das Tier ===
             // (Wir suchen alle Plätze, wo dieses Tier legal liegen darf)
             val possibleAnimalPositions = player.board.entries
                 .filter { it.value.occupant == null && marketAnimal in it.value.possibles }
@@ -344,7 +358,7 @@ class HeuristicBot(private val rootService: RootService) {
                 evaluateWildlifePosition(pos, marketAnimal, player)
             } ?: 0
 
-            // === 3. Gesamtpunkte vergleichen ===
+            // ===  Gesamtpunkte vergleichen ===
             val totalScore = maxHabitatScore + maxAnimalScore
 
             // Wenn dieses Paar besser ist als unser bisheriges bestes, merken wir es uns!
@@ -353,7 +367,56 @@ class HeuristicBot(private val rootService: RootService) {
                 bestIndex = i
             }
         }
-        // === 4. Dem Spiel unsere Entscheidung mitteilen ===
+
+        //Nature Token Logik.
+        //wenn der beste normale Zug schlecht ist (< 30 Punkte) und wir Zapfen haben (FreeSelection)
+        if(bestScore < 30 && player.natureTokens > 0){
+
+            var bestFreeScore = -1000
+            var bestTileIndex = 0
+            var bestAnimalIndex = 0
+
+            //wir testen alle 16 Kombinationen (4 Plättchen * 4 Tiere)
+            for(x in currentGame.choices.indices){
+                for (y in currentGame.choices.indices){
+                    val tile = currentGame.choices[x].first
+                    val animal = currentGame.choices[y].second
+
+                    val maxHabScore = possibleHabitatPositions.maxOfOrNull{ pos ->
+                        evaluateHabitatPosition(pos,tile,player)} ?: 0
+
+                    val possibleAnimPos = player.board.entries.filter{it.value.occupant == null &&
+                            animal in it.value.possibles}.map{it.key}
+
+                    val maxAnimScore = possibleAnimPos.maxOfOrNull{ pos ->
+                        evaluateWildlifePosition(pos,animal,player)} ?: 0
+
+                    val totalFreeScore = maxHabScore + maxAnimScore
+
+                    if(totalFreeScore > bestFreeScore){
+                        bestFreeScore = totalFreeScore
+                        bestTileIndex = x
+                        bestAnimalIndex = y
+                    }
+                }
+            }
+
+            // Lohnt sich der Zapfen? Ein Zapfen bringt am Ende 1 Punkt, aber taktisch ist er wertvoll.
+            // Wir nutzen Free Selection nur, wenn es uns mindestens 5 Punkte MEHR bringt als der normale Zug.
+            if(bestFreeScore > bestScore + 5){
+                rootService.playerActionService.freeSelection(bestTileIndex,bestAnimalIndex)
+                return // zig beendet, Bot wartet auf den nächsten State
+            }
+            else{ //im schlimmsten fall werden alle Tiere getauscht! (geht nun mit Glück).
+                // Wenn auch mischen (Free Selection) nichts bringt, sind wohl die Tiere im Markt unbrauchbar.
+                // Wir opfern den Zapfen und tauschen ALLE 4 Tiere im Markt aus!
+                val indicesToChange = mutableListOf(0, 1, 2, 3)
+                rootService.playerActionService.changeWildlife(indicesToChange)
+                return // Zug beendet, nach dem Tausch ist der Bot nochmal dran und sieht einen frischen Markt
+            }
+        }
+
+        // ===  STANDARD ZUG (Wenn kein Zapfen genutzt wird) ===
         rootService.playerActionService.selectColumn(bestIndex)
 
     }
