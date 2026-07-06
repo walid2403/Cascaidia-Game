@@ -557,7 +557,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         listOf(lableAboveCamOne, lableAboveCamTwo, lableAboveCamThree, lableAboveCamFour).forEach {
             it.isDisabled = false
         }
-        lableAboveCamOne.isDisabled = false
     }
 
     private fun initializeCamerasOnSide() {
@@ -822,7 +821,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 val inShop = false
                 val isPlaced = false
                 onMouseClicked = {
-                    if (inShop) {
+                    if(inShop) {
                         chooseTile(shop.indexOf(this) + 1, this)
                     } else if (isPlaced) {
                         //Onclick für Tiere platzieren
@@ -909,11 +908,21 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private fun placeChoosenTile(x: Int, y: Int) {
         val game = rootService.currentGame
         checkNotNull(game)
-        val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(player-1)
+        val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(player)
+        val selectTile = shop[selectTile]
+        checkNotNull(selectTile)
 
-        if(!animationsEnabled) {
-            currentArea[x,y] = tileMap.forward(game.choices.elementAt(selectTile-1).first)
+        if(animationsEnabled) {
+            playAnimation(
+                MovementAnimation(
+                    componentView = selectTile as ComponentView,
+                    toX = currentArea[x,y]?.actualPosX?:0,
+                    toY = currentArea[x,y]?.actualPosY?:0,
+                    duration = 500
+                )
+            )
         }
+        currentArea[x,y] = selectTile
 
         activatesTileButtons()
     }
@@ -940,7 +949,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         checkNotNull(game)
 
         for(i in 0..3) {
-            shop[i] = tileMap.forward(game.tileStack.pop())
+            shop[i] = tileMap.forward(game.choices.elementAt(i).first)
         }
     }
 
@@ -1003,7 +1012,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     override fun refreshAfterRotate(right: Boolean) {}
 
 
-    override fun refreshAfterPlaceTile(index: Triple<Int, Int, Int>) {}
+    override fun refreshAfterPlaceTile(index: Triple<Int, Int, Int>) {
+        placeChoosenTile(index.first, index.second)
+    }
 
 
     override fun refreshAfterPlaceWildlife(index: Triple<Int, Int, Int>) {}
