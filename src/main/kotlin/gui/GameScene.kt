@@ -115,7 +115,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 //Alle Tiere wieder runterskalieren und Tiles-OnClick wieder aktivieren und Tierauswahl entfernen
                 selectionTileClick(true)
                 scaleDownOtherAnimals(0)
-                //TODO("über service schicht Methode aufrufen, GUI aufruf in refreshAfter verschieben")
+                rootService.playerActionService.changeWildlife(listOf(0, 1, 2, 3).filter {changeAnimalsArray[it]})
                 removeChosenWildlife()
             }
             changeWildlifeActive = !changeWildlifeActive
@@ -132,7 +132,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         onMouseClicked = {
             //Button kann nur angeklickt werden, wenn 3 gleiche existieren
             //Nach onClick werden die Tiere entfernt und der Button wieder durchsichtig
-            //TODO("hier Methode der Service Schicht aufrufen, GUI action in den refreshAfter verschieben")
+            rootService.gameService.exterminate(true)
             clearOverPopulation()
             this.visual = ColorVisual(0, 0, 0, 127).apply {
                 style.borderRadius = BorderRadius(10)
@@ -265,7 +265,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         onMouseClicked = {
             if(player == 4) player = 1
             else player++
-            //TODO("changeTurn in Service Schicht aufrufen, GUI actions in den refreshAfter verschieben")
+            rootService.gameService.changeTurn()
             showPlayer(player, false)
             initializeCamerasOnSide()
         }
@@ -276,7 +276,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(10) }
         isVisible = false
         onMouseClicked = {
-            //TODO("freeSelection/selectCollumn in Service Schicht aufrufen")
+            if(customChoiceActive){
+                rootService.playerActionService.freeSelection(selectTile -1, selectAnimal -1)
+            }
+            else{
+                rootService.playerActionService.selectColumn(selectTile -1)
+            }
         }
     }
 
@@ -286,6 +291,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         isVisible = false
         onMouseClicked = {
             //TODO("rotateTile in Service Schicht aufrufen, in refreshAfter rotateAnimation von selected tile")
+//            rootService.playerActionService.rotateTile(false)
         }
     }
 
@@ -295,6 +301,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         isVisible = false
         onMouseClicked = {
             //TODO("rotateTile in Service Schicht aufrufen, in refreshAfter rotateAnimation von selected tile")
+//            rootService.playerActionService.rotateTile(true)
         }
     }
 
@@ -323,7 +330,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private val cameraPaneFourSide = CameraPane(posX = 55, posY = 755, width = 245, height = 130, target = world)
 
     //Labels über den Kameras an der Seite für die Hover Funktion
-    //TODO("playerName.text abhängig von Spieler Namen (nameXSide) ändern")
     private val lableAboveCamOne = Label(posX = 55, posY = 65, width = 245, height = 130).apply {
         isDisabled = true
         onMouseEntered = {
@@ -970,6 +976,45 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
         deactivateRotateButtons()
     }
+
+    override fun refreshAfterSelectColumn(index: Int) {}
+
+
+
+    override fun refreshAfterChangeWildlife(indices: List<Int>) {}
+
+
+
+    override fun refreshAfterExterminate() {}
+
+
+    override fun refreshAfterUndo() {}
+
+
+    override fun refreshAfterRedo() {}
+
+
+    override fun refreshAfterFreeSelection() {}
+
+
+    override fun refreshAfterLoadGame() {}
+
+
+    override fun refreshAfterRotate(right: Boolean) {}
+
+
+    override fun refreshAfterPlaceTile(index: Triple<Int, Int, Int>) {}
+
+
+    override fun refreshAfterPlaceWildlife(index: Triple<Int, Int, Int>) {}
+
+
+    override fun refreshAfterConnectionError(errorMessage: String) {}
+
+
+    override fun refreshAfterChatMessage(messageSender: String, message: String) {}
+
+    override fun refreshAfterUseNatureToken() {}
 
 
 
