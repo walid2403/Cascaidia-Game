@@ -8,7 +8,6 @@ import tools.aqua.bgw.animation.RotationAnimation
 import tools.aqua.bgw.animation.ScaleAnimation
 import tools.aqua.bgw.components.ComponentView
 import tools.aqua.bgw.components.container.HexagonGrid
-import tools.aqua.bgw.components.gamecomponentviews.HexagonView
 import tools.aqua.bgw.components.layoutviews.CameraPane
 import tools.aqua.bgw.components.layoutviews.Pane
 import tools.aqua.bgw.components.uicomponents.Button
@@ -51,7 +50,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private var isPlayerHuman = true
 
     //Neuerungen 06.07
-    private val shop = arrayOfNulls<HexagonView>(4)
+    private val shop = arrayOfNulls<HexagonViewExtended>(4)
+    private var selectedGridX: Int? = null
+    private var selectedGridY: Int? = null
 
 
 
@@ -147,16 +148,16 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private val pineCone2 = Label(posX = 525,posY = 110,width = 40,height = 40,visual = ImageVisual("pinecone.png"))
 
 //    //Auswahl Habitate
-//    private val tileChoice1 = HexagonView(posX = 820, posY = 30, size = 60, visual = ColorVisual(170,170,170)).apply {
+//    private val tileChoice1 = HexagonViewExtended(posX = 820, posY = 30, size = 60, visual = ColorVisual(170,170,170)).apply {
 //        onMouseClicked = { chooseTile(1, this) }
 //    }
-//    private val tileChoice2 = HexagonView(posX = 974, posY = 30, size = 60, visual = ColorVisual(170,170,170)).apply {
+//    private val tileChoice2 = HexagonViewExtended(posX = 974, posY = 30, size = 60, visual = ColorVisual(170,170,170)).apply {
 //        onMouseClicked = { chooseTile(2, this) }
 //    }
-//    private val tileChoice3 = HexagonView(posX = 1128, posY = 30, size = 60, visual = ColorVisual(170,170,170)).apply {
+//    private val tileChoice3 = HexagonViewExtended(posX = 1128, posY = 30, size = 60, visual = ColorVisual(170,170,170)).apply {
 //        onMouseClicked = { chooseTile(3, this) }
 //    }
-//    private val tileChoice4 = HexagonView(posX = 1282, posY = 30, size = 60, visual = ColorVisual(170,170,170)).apply {
+//    private val tileChoice4 = HexagonViewExtended(posX = 1282, posY = 30, size = 60, visual = ColorVisual(170,170,170)).apply {
 //        onMouseClicked = { chooseTile(4, this) }
 //    }
 
@@ -183,74 +184,74 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
         this.isVisible = false
-        onMouseClicked = { rotateInSelection(true, shop[0] as HexagonView) }
+        onMouseClicked = { rotateInSelection(true, shop[0] as HexagonViewExtended) }
     }
     private val rotateOneCCW = Button(width = 40, height = 40, posX = 922, posY = 155, text = ">",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
         this.isVisible = false
-        onMouseClicked = { rotateInSelection(false, shop[0] as HexagonView) }
+        onMouseClicked = { rotateInSelection(false, shop[0] as HexagonViewExtended) }
     }
     private val rotateTwoCW = Button(width = 40, height = 40, posX = 936, posY = 155, text = "<",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
         this.isVisible = false
-        onMouseClicked = { rotateInSelection(true, shop[1] as HexagonView) }
+        onMouseClicked = { rotateInSelection(true, shop[1] as HexagonViewExtended) }
     }
     private val rotateTwoCCW = Button(width = 40, height = 40, posX = 1076, posY = 155, text = ">",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
         this.isVisible = false
-        onMouseClicked = { rotateInSelection(false, shop[1] as HexagonView) }
+        onMouseClicked = { rotateInSelection(false, shop[1] as HexagonViewExtended) }
     }
     private val rotateThreeCW = Button(width = 40, height = 40, posX = 1090, posY = 155, text = "<",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
         this.isVisible = false
-        onMouseClicked = { rotateInSelection(true, shop[2] as HexagonView) }
+        onMouseClicked = { rotateInSelection(true, shop[2] as HexagonViewExtended) }
     }
     private val rotateThreeCCW = Button(width = 40, height = 40, posX = 1230, posY = 155, text = ">",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
         this.isVisible = false
-        onMouseClicked = { rotateInSelection(false, shop[2] as HexagonView) }
+        onMouseClicked = { rotateInSelection(false, shop[2] as HexagonViewExtended) }
     }
     private val rotateFourCW = Button(width = 40, height = 40, posX = 1244, posY = 155, text = "<",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
         this.isVisible = false
-        onMouseClicked = { rotateInSelection(true, shop[3] as HexagonView) }
+        onMouseClicked = { rotateInSelection(true, shop[3] as HexagonViewExtended) }
     }
     private val rotateFourCCW = Button(width = 40, height = 40, posX = 1384, posY = 155, text = ">",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
         this.isVisible = false
-        onMouseClicked = { rotateInSelection(false, shop[3] as HexagonView) }
+        onMouseClicked = { rotateInSelection(false, shop[3] as HexagonViewExtended) }
     }
 
     //Bereiche der Spieler
-    private val playerOneArea = HexagonGrid<HexagonView>(
+    private val playerOneArea = HexagonGrid<HexagonViewExtended>(
         width = 30, height = 30, posX = 1140, posY = 404,
         coordinateSystem = HexagonGrid.CoordinateSystem.AXIAL,
         orientation = HexOrientation.POINTY_TOP
     ).apply {
         //visual = ColorVisual(170,170, 170, 127).apply { style.borderRadius = BorderRadius(10) }
     }
-    private val playerTwoArea = HexagonGrid<HexagonView>(
+    private val playerTwoArea = HexagonGrid<HexagonViewExtended>(
         width = 30, height = 30, posX = 1550, posY = 729,
         coordinateSystem = HexagonGrid.CoordinateSystem.AXIAL,
         orientation = HexOrientation.POINTY_TOP
     ).apply {
         //visual = ColorVisual(170,170, 170, 127).apply { style.borderRadius = BorderRadius(10) }
     }
-    private val playerThreeArea = HexagonGrid<HexagonView>(
+    private val playerThreeArea = HexagonGrid<HexagonViewExtended>(
         width = 30, height = 30, posX = 1000, posY = 854,
         coordinateSystem = HexagonGrid.CoordinateSystem.AXIAL,
         orientation = HexOrientation.POINTY_TOP
     ).apply {
         //visual = ColorVisual(170,170, 170, 127).apply { style.borderRadius = BorderRadius(10) }
     }
-    private val playerFourArea = HexagonGrid<HexagonView>(
+    private val playerFourArea = HexagonGrid<HexagonViewExtended>(
         width = 30, height = 30, posX = 590, posY = 529,
         coordinateSystem = HexagonGrid.CoordinateSystem.AXIAL,
         orientation = HexOrientation.POINTY_TOP
@@ -502,8 +503,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
     //Testweise
-    private val hex = HexagonView(size = 14, visual = ImageVisual("tile2.png"))
-    private val greyHex = HexagonView(size = 20, visual = ColorVisual(170,170,170).apply { transparency = 1.0 })
+    private val hex = HexagonViewExtended(size = 14, visual = ImageVisual("tile2.png"))
+    private val greyHex = HexagonViewExtended(size = 20, visual = ColorVisual(170,170,170).apply { transparency = 1.0 })
     private val label1 = Label(width = 300, height = 158, posX = 990, posY = 325).apply {
         //visual= ColorVisual(170,170,170, 127)
     }
@@ -646,7 +647,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     /**
      * 
      */
-    private fun chooseTile(index: Int, tile: HexagonView) {
+    private fun chooseTile(index: Int, tile: HexagonViewExtended) {
         deactivateRotateButtons()
         if(selectTile == index) selectTile = 0
         else {
@@ -670,7 +671,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     private fun chooseAnimal(index: Int, animal: Label) {
         if(!customChoiceActive && !changeWildlifeActive) {
-            val tile = shop[index-1] as HexagonView
+            val tile = shop[index-1] as HexagonViewExtended
             chooseTile(index, tile)
         } else {
             if(!changeWildlifeActive) {
@@ -702,7 +703,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private fun scaleDownOtherTiles(select: Int) {
         shop.forEachIndexed { i, tile ->
             if(i != select-1) {
-                scaleTile(0, tile as HexagonView)
+                scaleTile(0, tile as HexagonViewExtended)
             }
         }
     }
@@ -716,7 +717,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
 
-    private fun scaleTile(select: Int, hexView: HexagonView) {
+    private fun scaleTile(select: Int, hexView: HexagonViewExtended) {
         val targetScale = if(select !=0) {100.0 / 80.0 } else { 1.0 }
         playAnimation(
             ScaleAnimation(
@@ -746,7 +747,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         )
     }
 
-    private fun rotateInSelection(clockwise: Boolean, tile: HexagonView) {
+    private fun rotateInSelection(clockwise: Boolean, tile: HexagonViewExtended) {
         val rotation = if(clockwise) 60.0 else -60.0
         if(animationsEnabled) {
             playAnimation(
@@ -806,7 +807,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     //Ab hier neu
 
-    private val tileMap = BidirectionalMap<Tile, HexagonView>()
+    private val tileMap = BidirectionalMap<Tile, HexagonViewExtended>()
 
     private fun createTileView() {
         val game = rootService.currentGame
@@ -820,10 +821,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
 
         for(tile in tileList) {
-            val hexagon = HexagonView(size = 60, visual = ImageVisual("tile_${tile.id}.png")).apply {
+            val hexagon = HexagonViewExtended(size = 60, visual = ImageVisual("tile_${tile.id}.png")).apply {
                 //Neuerung 06.07
-                val inShop = false
-                val isPlaced = false
+                var inShop = false
+                var isPlaced = false
                 onMouseClicked = {
                     if(inShop) {
                         chooseTile(shop.indexOf(this) + 1, this)
@@ -909,26 +910,49 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
-    private fun placeChoosenTile(x: Int, y: Int) {
+    private fun placeChoosenTile() {
         val game = rootService.currentGame
         checkNotNull(game)
         val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(player)
         val selectTile = shop[selectTile]
         checkNotNull(selectTile)
 
+        val x = selectedGridX
+        val y = selectedGridY
+        checkNotNull(x)
+        checkNotNull(y)
+
+        val xTemp = currentArea[x,y]?.actualPosX
+        val yTemp = currentArea[x,y]?.actualPosY
+        checkNotNull(xTemp)
+        checkNotNull(yTemp)
+
         if(animationsEnabled) {
             playAnimation(
                 MovementAnimation(
                     componentView = selectTile as ComponentView,
-                    toX = currentArea[x,y]?.actualPosX?:0,
-                    toY = currentArea[x,y]?.actualPosY?:0,
+                    toX = xTemp,
+                    toY = yTemp,
                     duration = 500
                 )
             )
+        } else {
+            selectTile.posX = xTemp
+            selectTile.posY = yTemp
         }
-        currentArea[x,y] = selectTile
 
         activatesTileButtons()
+    }
+
+    private fun putTileInGrid(x: Int, y: Int) {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(player)
+        val selectTile = shop[selectTile]
+        checkNotNull(selectTile)
+        currentArea[x,y] = selectTile
+        selectTile.isPlaced = true
+        selectTile.inShop = false
     }
 
     private fun activatesTileButtons() {
@@ -954,6 +978,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         for(i in 0..3) {
             shop[i] = tileMap.forward(game.choices.elementAt(i).first)
+            shop[i]?.inShop = true
         }
     }
 
@@ -961,7 +986,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         for(i in 0..3) {
             playAnimation(
                 MovementAnimation(
-                    componentView = shop[i] as ComponentView,   //Kp warum er da ComponentView haben will und sonst reicht HexagonView
+                    componentView = shop[i] as ComponentView,   //Kp warum er da ComponentView haben will und sonst reicht HexagonViewExtended
                     fromX = 1500.0,                             //Hinterher aus dem "TileStack"
                     fromY = 700.0,
                     toX = getShopTileCoordinateX(i),
@@ -990,8 +1015,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         deactivateRotateButtons()
     }
 
-    override fun refreshAfterSelectColumn(index: Int) {}
-
 
 
     override fun refreshAfterChangeWildlife(indices: List<Int>) {
@@ -1015,13 +1038,18 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         refreshAfterStartGame()
     }
 
+    override fun refreshAfterSelectColumn(index: Int) {
+        placeChoosenTile()
+    }
 
     override fun refreshAfterRedo() {
         refreshAfterStartGame()
     }
 
 
-    override fun refreshAfterFreeSelection() {}
+    override fun refreshAfterFreeSelection() {
+        placeChoosenTile()
+    }
 
 
     override fun refreshAfterLoadGame() {
@@ -1037,7 +1065,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
     override fun refreshAfterPlaceTile(index: Triple<Int, Int, Int>) {
-        placeChoosenTile(index.first, index.second)
+        putTileInGrid(index.first, index.second)
     }
 
 
