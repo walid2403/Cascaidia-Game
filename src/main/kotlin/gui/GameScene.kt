@@ -265,9 +265,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(10) }
         onMouseClicked = {
-            if(player == 3) player = 1
+            if(player == 3) player = 0
             else player++
-            rootService.gameService.changeTurn()
+            //rootService.gameService.changeTurn()
             showPlayer(player, false)
             initializeCamerasOnSide()
         }
@@ -330,44 +330,36 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         isDisabled = true
         onMouseEntered = {
             showPlayer(0, true)
-            playerName.text = "Luca"
         }
         onMouseExited = {
             showPlayer(player, true)
-            playerName.text = "Aktuell"
         }
     }
     private val lableAboveCamTwo = Label(posX = 55, posY = 295, width = 245, height = 130).apply {
         isDisabled = true
         onMouseEntered = {
             showPlayer(1, true)
-            playerName.text = "Theresa"
         }
         onMouseExited = {
             showPlayer(player, true)
-            playerName.text = "Aktuell"
         }
     }
     private val lableAboveCamThree = Label(posX = 55, posY = 525, width = 245, height = 130).apply {
         isDisabled = true
         onMouseEntered = {
             showPlayer(2, true)
-            playerName.text = "Philipp"
         }
         onMouseExited = {
             showPlayer(player, true)
-            playerName.text = "Aktuell"
         }
     }
     private val lableAboveCamFour = Label(posX = 55, posY = 755, width = 245, height = 130).apply {
         isDisabled = true
         onMouseEntered = {
             showPlayer(3, true)
-            playerName.text = "Nicolas"
         }
         onMouseExited = {
             showPlayer(player, true)
-            playerName.text = "Aktuell"
         }
     }
 
@@ -414,7 +406,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private val playerName = Label(width = 310, height = 60, posX = 845, posY = 985).apply {
         visual= ColorVisual(170,170,170, 170).apply { style.borderRadius = BorderRadius(30) }
         font = Font(size = 50)
-        isVisible = false
     }
 
     //Tiere für Scoring Cards
@@ -620,16 +611,19 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             }
         }
 
+
+        println("Before " + player.toString() + " " + fromMiniMap.toString())
+
         if(!fromMiniMap) {
             //Aus dem alten Spieler rauszoomen, eine Sekunde delay und in den aktuellen Spieler reinzoomen
             if (this.player != -1) {
-                playerName.isVisible = false
+                //playerName.isVisible = false
                 cameraPane.pan(x = 0, y = 0, zoom = 1.0, smooth = true)
                 playAnimation(
                     DelayAnimation(duration = 1000).apply {
                         onFinished = {
                             cameraPane.pan(x = x, y = y, zoom = 4.32, smooth = true)
-                            playerName.isVisible = true
+                            //playerName.isVisible = true
                         }
                     }
                 )
@@ -637,11 +631,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             //Wenn noch keiner dran war in den ersten Spieler rein zoomen
             else {
                 cameraPane.pan(x = x, y = y, zoom = 4.32, smooth = true)
-                playerName.isVisible = true
+                //playerName.isVisible = true
             }
         } else {
             cameraPane.pan(x = x, y = y, zoom = 4.32, smooth = true)
         }
+        playerName.text = listOf(nameOneSide, nameTwoSide, nameThreeSide, nameFourSide).elementAt(player).text
     }
 
     /**
@@ -864,12 +859,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         resetGame()
 
-        for(i in game.playerQueue.indices) {
-            listOf(nameOneSide, nameTwoSide, nameThreeSide, nameFourSide).forEach {
-                it.text = game.playerQueue.elementAt(i).name
-            }
-        }
-
         createTileView()
         initializeShop()
 
@@ -882,12 +871,23 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         loadStartTiles()
         initializeCamerasOnSide()
         disableAllButtons()
+        setNames()
 
         animateDealTile()
         changeGreyVisibility(true, 0)
         changeGreyVisibility(false, 1)
         changeGreyVisibility(false, 2)
         changeGreyVisibility(false, 3)
+    }
+
+    private fun setNames() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+
+        for(i in 0 until game.playerQueue.size) {
+            listOf(nameOneSide, nameTwoSide, nameThreeSide, nameFourSide).elementAt(i).text =
+                game.playerQueue.elementAt(i).name
+        }
     }
 
     private fun loadStartTiles() {
@@ -1005,6 +1005,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         for(i in 0..3) {
             shop[i] = tileMap.forward(game.choices.elementAt(i).first)
             shop[i]?.inShop = true
+            addComponents(shop[i] as ComponentView)
         }
     }
 
@@ -1020,6 +1021,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                     duration = 500
                 )
             )
+            println("Animation")
+            println(getShopTileCoordinateX(i))
+            println(shop[i].toString())
         }
     }
 
@@ -1034,7 +1038,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     private fun disableAllButtons() {
-        listOf(undo, redo, endTurn, customChoice, changeWildlife, clearOverpopulation,
+        listOf(undo, redo, customChoice, changeWildlife, clearOverpopulation,
             confirm, rotateTileLeft, rotateTileRight).forEach {
                 it.isDisabled = true
         }
@@ -1216,17 +1220,17 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         playerFourArea[-1,1]=hex
         playerFourArea[0,1]=hex
 
-        nameOneSide.text = "Luca"
-        nameTwoSide.text = "Theresa"
-        nameThreeSide.text = "Philipp"
-        nameFourSide.text = "Nicolas"
+//        nameOneSide.text = "Luca"
+//        nameTwoSide.text = "Theresa"
+//        nameThreeSide.text = "Philipp"
+//        nameFourSide.text = "Nicolas"
 
         natureTokenCountOneSide.text = "3"
         natureTokenCountTwoSide.text = "2"
         natureTokenCountThreeSide.text = "0"
         natureTokenCountFourSide.text = "4"
 
-        playerName.text = "Aktuell"
+//        playerName.text = "Aktuell"
 
         initializeCamerasOnSide()
         startFirstTurn()
