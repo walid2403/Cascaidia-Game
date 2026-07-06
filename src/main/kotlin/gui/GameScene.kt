@@ -812,10 +812,15 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         val game = rootService.currentGame
         checkNotNull(game)
 
-        val tileList = game.tileStack.peekAll()
+        val tileList = game.tileStack.peekAll().toMutableList()
+        tileList.addAll(game.choices.map { it.first })
+
+        for (player in game.playerQueue) {
+            tileList.addAll(player.board.values)
+        }
 
         for(tile in tileList) {
-            val hexagon = HexagonView(size = 60, visual = ImageVisual("tile_$tile.id.png")).apply {
+            val hexagon = HexagonView(size = 60, visual = ImageVisual("tile_${tile.id}.png")).apply {
                 //Neuerung 06.07
                 val inShop = false
                 val isPlaced = false
@@ -1019,7 +1024,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     override fun refreshAfterFreeSelection() {}
 
 
-    override fun refreshAfterLoadGame() {}
+    override fun refreshAfterLoadGame() {
+        refreshAfterStartGame()
+    }
 
 
     override fun refreshAfterRotate(right: Boolean) {
@@ -1038,7 +1045,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
 
-    override fun refreshAfterChatMessage(messageSender: String, message: String) {}
+    override fun refreshAfterChatMessage(messageSender: String, message: String) {
+
+    }
 
 
 
