@@ -77,6 +77,7 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
     ).apply {
         onMouseClicked = {
             playerType = changePlayerType(true, playerType)
+            warning.isVisible = false
         }
     }
 
@@ -89,6 +90,7 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
     ).apply {
         onMouseClicked = {
             playerType = changePlayerType(false, playerType)
+            warning.isVisible = false
         }
     }
 
@@ -100,7 +102,13 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
         visual = ColorVisual(color = Color(0x99acff)).apply { style.borderRadius = BorderRadius(8) }
         isDisabled = true
         onMouseClicked = {
-            TODO("über Network die Lobby eröffnen")
+            var name = nameInput.text
+            if(name.isBlank()) {
+                warning.text = "Enter a name before opening the lobby."
+                warning.isVisible = true
+            } else {
+                TODO("über Network die Lobby eröffnen")
+            }
         }
     }
 
@@ -116,12 +124,7 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
             style.borderRadius = BorderRadius(8)
         }
         onTextChanged = {
-            if (this.text.isBlank()) {
-                joinButton.isDisabled = true
-            } else{
-                joinButton.isDisabled = false
-            }
-
+            warning.isVisible = false
         }
     }
 
@@ -133,6 +136,9 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
     ).apply {
         visual = ColorVisual(204, 212, 209).apply {
             style.borderRadius = BorderRadius(8)
+        }
+        onTextChanged = {
+            warning.isVisible = false
         }
     }
 
@@ -171,6 +177,19 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
         }
     )
 
+    private val warning = Label(
+        width = 350,
+        height = 100,
+        posX = paneX + ((1920/2 + 230) - paneX)/2 - 175,
+        posY = (1080/2 + 215) - 40,
+        font = Font(size = 23, color = Color.WHITE, family = "Canva Sans"),
+        isWrapText = true,
+        visual = ColorVisual(204, 78, 0).apply {
+            style.borderRadius = BorderRadius(15)
+        }
+    ).apply {
+        isVisible = false
+    }
 
     init {
         backgroundOpacity = .5
@@ -186,6 +205,7 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
             playerTypeIcon,
             switchTypeLeftButton,
             switchTypeRightButton,
+            warning,
         )
     }
 
@@ -214,11 +234,11 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
         return newType
     }
 
-
-    private fun deleteThis() {
-        TODO("refresh anpassen wenn Network Refreshes final definiert sind")
+    override fun refreshAfterConnectionError(errorMessage: String) {
+        warning.text = errorMessage
+        warning.isVisible = true
     }
-//    override fun refreshAfterLobbyOpened(lobbyCode: String) {
-//        app.showMenuScene(HostOnlineLobbyScene(app,rootService, nameInput.text, playerType))
-//    }
+    override fun refreshAfterHostGame(lobbyCode: String) {
+        app.showMenuScene(HostOnlineLobbyScene(app,rootService, nameInput.text, playerType))
+    }
 }

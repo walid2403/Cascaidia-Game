@@ -1045,15 +1045,13 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         bearCardB.resize(194, 370)
     }
 
-//    override fun refreshAfterGameConfigMessage(players: List<String>, scoringCards: List<Boolean>) {
-//        updatePlayers(players)
-//    }
+    override fun refreshAfterGameConfigUpdate(playerList: List<String>, scoringCards: List<Boolean?>) {
+        updatePlayers(playerList)
+    }
 
-    //TODO("refresh anpassen wenn Netzwerk steht")
-
-//    override fun refreshAfterLobbyOpened(lobbyCode: String) {
-//        this.lobbyCode.text = "Lobby Code: $lobbyCode"
-//    }
+    override fun refreshAfterHostGame(lobbyCode: String) {
+        this.lobbyCode.text = "Lobby Code: $lobbyCode"
+    }
 
     /**
      * Closes the MenuScene when called.

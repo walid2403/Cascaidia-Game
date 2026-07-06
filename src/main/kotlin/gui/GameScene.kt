@@ -1114,6 +1114,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
 
+
     /** Zum Anzeigen lassen der globalen Variablen*/
 
 //    private val label1 = Label(posX = 500,posY = 500,width = 100,height = 30)

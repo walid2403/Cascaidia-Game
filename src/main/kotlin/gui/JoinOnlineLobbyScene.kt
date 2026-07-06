@@ -609,21 +609,17 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         }
     }
 
-//    /**
-//     * This function updates the games configurations (players, their order, and the selected scorecards) after a
-//     * GameConfigMessage
-//     * @param players [List] [String] containing the players' names in the order they are set to play in
-//     * @param scoreCards [List] [Boolean] contains a Boolean for each animal type, if true card A is selected,
-//     * card B otherwise. Order of Booleans: hawk, salmon, elk, fox, bear
-//     */
-//    override fun refreshAfterGameConfigMessage(players: List<String>, scoreCards: List<Boolean>) {
-//        updatePlayers(players)
-//        updateScoreCards(scoreCards)
-//    }
-
-//    override fun refreshAfterDuplicateName() {
-//
-//    }
+    /**
+     * This function updates the games configurations (players, their order, and the selected scorecards) after a
+     * GameConfigMessage
+     * @param playerList [List] [String] containing the players' names in the order they are set to play in
+     * @param scoringCards [List] [Boolean] contains a Boolean for each animal type, if true card A is selected,
+     * card B otherwise. Order of Booleans: hawk, salmon, elk, fox, bear
+     */
+    override fun refreshAfterGameConfigUpdate(playerList: List<String>, scoringCards: List<Boolean?>) {
+        updatePlayers(playerList)
+        updateScoreCards(scoringCards)
+    }
 
     /**
      * This function fills the [String]s in [players] into the corresponding player name [Label] and the player's
@@ -680,110 +676,44 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
      * @param [selection] [List] of [Boolean] with the new scorecard values: if true A is selected,
      * if false B is selected
      */
-    private fun updateScoreCards(selection: List<Boolean>) {
+    private fun updateScoreCards(selection: List<Boolean?>) {
         if(selection.size != 5) throw IllegalArgumentException("List scoreCards must have exactly one Boolean for " +
                 "every animal type, invalid List length: ${selection.size}")
 
-        //TODO("delete the unused order variant (alphabetical or GUI order) in updateScoreCards()")
-        //selection in alphabetical order version
         for ( i in selection.indices) {
+            var boxA = checkBoxFoxA
+            var boxB = checkBoxFoxB
             when (i) {
                 0 -> {
-                    if(selection[i]) {
-                        checkBoxBearA.isChecked = true
-                        checkBoxBearB.isChecked = false
-                    } else {
-                        checkBoxBearB.isChecked = true
-                        checkBoxBearA.isChecked = false
-                    }
+                    boxA = checkBoxHawkA
+                    boxB = checkBoxHawkB
                 }
                 1 -> {
-                    if(selection[i]) {
-                        checkBoxElkA.isChecked = true
-                        checkBoxElkB.isChecked = false
-                    } else {
-                        checkBoxElkB.isChecked = true
-                        checkBoxElkA.isChecked = false
-                    }
+                    boxA = checkBoxSalmonA
+                    boxB = checkBoxSalmonB
                 }
                 2 -> {
-                    if(selection[i]) {
-                        checkBoxFoxA.isChecked = true
-                        checkBoxFoxB.isChecked = false
-                    } else {
-                        checkBoxFoxB.isChecked = true
-                        checkBoxFoxA.isChecked = false
-                    }
+                    boxA = checkBoxElkA
+                    boxB = checkBoxElkB
                 }
                 3 -> {
-                    if(selection[i]) {
-                        checkBoxHawkA.isChecked = true
-                        checkBoxHawkB.isChecked = false
-                    } else {
-                        checkBoxHawkB.isChecked = true
-                        checkBoxHawkA.isChecked = false
-                    }
+                    boxA = checkBoxFoxA
+                    boxB = checkBoxFoxB
                 }
                 4 -> {
-                    if(selection[i]) {
-                        checkBoxSalmonA.isChecked = true
-                        checkBoxSalmonB.isChecked = false
-                    } else {
-                        checkBoxSalmonB.isChecked = true
-                        checkBoxSalmonA.isChecked = false
-                    }
+                    boxA = checkBoxBearA
+                    boxB = checkBoxBearB
                 }
             }
-        }
-
-        //selection values ordered like they are in the GUI version
-        for ( i in selection.indices) {
-            when (i) {
-                0 -> {
-                    if(selection[i]) {
-                        checkBoxHawkA.isChecked = true
-                        checkBoxHawkB.isChecked = false
-                    } else {
-                        checkBoxHawkB.isChecked = true
-                        checkBoxHawkA.isChecked = false
-                    }
-                }
-                1 -> {
-                    if(selection[i]) {
-                        checkBoxSalmonA.isChecked = true
-                        checkBoxSalmonB.isChecked = false
-                    } else {
-                        checkBoxSalmonB.isChecked = true
-                        checkBoxSalmonA.isChecked = false
-                    }
-                }
-                2 -> {
-                    if(selection[i]) {
-                        checkBoxElkA.isChecked = true
-                        checkBoxElkB.isChecked = false
-                    } else {
-                        checkBoxElkB.isChecked = true
-                        checkBoxElkA.isChecked = false
-                    }
-                }
-                3 -> {
-                    if(selection[i]) {
-                        checkBoxFoxA.isChecked = true
-                        checkBoxFoxB.isChecked = false
-                    } else {
-                        checkBoxFoxB.isChecked = true
-                        checkBoxFoxA.isChecked = false
-                    }
-                }
-                4 -> {
-                    if(selection[i]) {
-                        checkBoxBearA.isChecked = true
-                        checkBoxBearB.isChecked = false
-                    } else {
-                        checkBoxBearB.isChecked = true
-                        checkBoxBearA.isChecked = false
-                    }
-                }
+            if(selection[i] == true) {
+                boxA.isChecked = true
+                boxB.isChecked = false
+            } else if(selection[i] == false) {
+                boxB.isChecked = true
+                boxA.isChecked = false
+            } else {
+                boxB.isChecked = false
+                boxA.isChecked = false
             }
         }
     }
