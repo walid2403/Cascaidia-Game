@@ -911,7 +911,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 tile = game.playerQueue.elementAt(index).board[Triple(-1,1,0)]
                 checkNotNull(tile)
                 hexView = tileMap.forward(tile)
-                grid[1,0] = hexView
+                grid[-1,1] = hexView
                 addGreyHexagon(hexView, index)
             }
 
