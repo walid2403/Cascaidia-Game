@@ -1019,6 +1019,41 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         return ImageVisual("tile_${id}0.png")
     }
 
+    private fun addGreyHexagon(tileView: HexagonViewExtended) {
+        val game = rootService.currentGame
+        checkNotNull(game)
+
+        val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(player)
+
+        val nbhs = listOf(Pair(1, -1), Pair(1, 0), Pair(0, 1), Pair(-1, 1), Pair(-1, 0), Pair(0, -1))
+
+        val tile = tileMap.backward(tileView)
+        val tilePos = game.playerQueue.peek().board.entries.find { it.value == tile }?.key
+        checkNotNull(tilePos)
+        val tileViewPos = Pair(tilePos.first, tilePos.second)
+
+        nbhs.forEach { nbh ->
+            var nbhTileView = currentArea[tileViewPos.first + nbh.first, tileViewPos.second + nbh.second]
+            if (nbhTileView == null) {
+                nbhTileView = HexagonViewExtended(tileView.size, ColorVisual(170, 170, 170, 127))
+                nbhTileView.apply {
+                    onMouseClicked = {
+                        selectedGridX = tileViewPos.first + nbh.first
+                        selectedGridY = tileViewPos.second + nbh.second
+
+                        if (customChoiceActive) rootService.playerActionService.freeSelection(selectTile, selectAnimal)
+                        else rootService.playerActionService.selectColumn(selectTile)
+                    }
+                }
+
+                currentArea[tileViewPos.first + nbh.first, tileViewPos.second + nbh.second] = nbhTileView
+            }
+        }
+    }
+
+    private fun changeGreyVisibility(visible: Boolean) {
+        listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(player).components.filter { it.choiceHex }.forEach { it.isVisible = visible }
+    }
 
 
     override fun refreshAfterChangeWildlife(indices: List<Int>) {
