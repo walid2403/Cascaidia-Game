@@ -1080,7 +1080,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
                 ready = false
             }
         }
-        if(names.size != names.distinct().size) {
+
+        if(names.filter{it != ""}.size != names.filter{it != ""}.distinct().size) {
             warning.text = "All player names must be unique."
             warning.isVisible = true
             ready = false
