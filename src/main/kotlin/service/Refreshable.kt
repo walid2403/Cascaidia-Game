@@ -87,5 +87,26 @@ interface Refreshable {
     /**
      * Perform refreshes necessary after the game has ended
      */
-    fun refreshAfterEndGame(scores: List<Pair<String, List<Int>>>) {}
+    fun refreshAfterEndGame(scores: List<Pair<String,List<Int>>>) {}
+
+    // Network specific refreshes:
+    /**
+     * Perform refreshes necessary after the game config has been updated
+     */
+    fun refreshAfterGameConfigUpdate(playerList: List<String>, scoringCards: List<Boolean?>) {}
+
+    /**
+     * Perform refreshes necessary after a network game has been started
+     */
+    fun refreshAfterHostGame(lobbyCode: String) {}
+
+    /**
+     * Perform refreshes necessary after a chat message has been received
+     */
+    fun refreshAfterChatMessage(messageSender: String, message: String) {}
+
+    /**
+     * Perform refreshes necessary after a nature token has been used
+     */
+    fun refreshAfterUseNatureToken() {}
 }
