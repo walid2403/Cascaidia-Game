@@ -91,6 +91,11 @@ interface Refreshable {
 
     // Network specific refreshes:
     /**
+     * Perform refreshes necessary after a player couldn't join a game
+     */
+    fun refreshAfterConnectionError(errorMessage: String) {}
+
+    /**
      * Perform refreshes necessary after the game config has been updated
      */
     fun refreshAfterGameConfigUpdate(playerList: List<String>, scoringCards: List<Boolean?>) {}
