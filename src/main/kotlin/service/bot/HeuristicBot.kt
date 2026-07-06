@@ -416,7 +416,7 @@ class HeuristicBot(private val rootService: RootService) {
             }
         }
 
-        // ===  STANDARD ZUG (Wenn kein Zapfen genutzt wird) ===
+        // === STANDARD ZUG (Wenn kein Zapfen genutzt wird) ===
         rootService.playerActionService.selectColumn(bestIndex)
 
     }
