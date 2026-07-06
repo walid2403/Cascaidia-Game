@@ -1,8 +1,8 @@
 package gui
 
-import service.Refreshable
 import tools.aqua.bgw.core.BoardGameApplication
 import service.RootService
+import service.Refreshable
 
 /**
  * Represents the main application for the Cascadia board game.
@@ -45,13 +45,15 @@ class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
         )
         this.showGameScene(gameScene)
         this.showMenuScene(mainMenuScene )
+        //this.showGameScene(gameScene)
+        this.showMenuScene(mainMenuScene )
         //this.showMenuScene(scoreScene)
         //this.showMenuScene(testing(this@SopraApplication, rootService))
     }
 
     override fun refreshAfterStartGame() {
-        println("refresh aufgerufen")
         this.hideMenuScene()
+        this.showGameScene(gameScene)
     }
 }
 

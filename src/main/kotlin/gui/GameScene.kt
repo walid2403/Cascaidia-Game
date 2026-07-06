@@ -859,7 +859,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
     override fun refreshAfterStartGame() {
-        println("test")
         val game = rootService.currentGame
         checkNotNull(game)
 
@@ -889,11 +888,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         changeGreyVisibility(false, 1)
         changeGreyVisibility(false, 2)
         changeGreyVisibility(false, 3)
-
-        showPlayer(-1,false)
-        startFirstTurn()
-
-
     }
 
     private fun loadStartTiles() {
@@ -902,23 +896,23 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).forEachIndexed { index, grid ->
             if(index < game.playerQueue.size) {
-                var tile = game.playerQueue.elementAt(index).board.get(Triple(0,0,0))
+                var tile = game.playerQueue.elementAt(index).board[Triple(0,0,0)]
                 checkNotNull(tile)
                 var hexView = tileMap.forward(tile)
                 grid[0,0] = hexView
-                addGreyHexagon(hexView)
+                addGreyHexagon(hexView, index)
 
-                tile = game.playerQueue.elementAt(index).board.get(Triple(1,0,-1))
-                checkNotNull(tile)
-                hexView = tileMap.forward(tile)
-                grid[1,0] = hexView
-                addGreyHexagon(hexView)
-
-                tile = game.playerQueue.elementAt(index).board.get(Triple(0,1,-1))
+                tile = game.playerQueue.elementAt(index).board[Triple(0,1,-1)]
                 checkNotNull(tile)
                 hexView = tileMap.forward(tile)
                 grid[0,1] = hexView
-                addGreyHexagon(hexView)
+                addGreyHexagon(hexView, index)
+
+                tile = game.playerQueue.elementAt(index).board[Triple(-1,1,0)]
+                checkNotNull(tile)
+                hexView = tileMap.forward(tile)
+                grid[1,0] = hexView
+                addGreyHexagon(hexView, index)
             }
 
         }
@@ -1051,7 +1045,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         return ImageVisual("tile_${id}0.png")
     }
 
-    private fun addGreyHexagon(tileView: HexagonViewExtended) {
+    private fun addGreyHexagon(tileView: HexagonViewExtended, playerIndex: Int = 0) {
         val game = rootService.currentGame
         checkNotNull(game)
 
@@ -1060,7 +1054,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         val nbhs = listOf(Pair(1, -1), Pair(1, 0), Pair(0, 1), Pair(-1, 1), Pair(-1, 0), Pair(0, -1))
 
         val tile = tileMap.backward(tileView)
-        val tilePos = game.playerQueue.peek().board.entries.find { it.value == tile }?.key
+        val tilePos = game.playerQueue.elementAt(playerIndex).board.entries.find { it.value == tile }?.key
+        println(tile.id)
         checkNotNull(tilePos)
         val tileViewPos = Pair(tilePos.first, tilePos.second)
 
@@ -1234,6 +1229,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         playerName.text = "Aktuell"
 
         initializeCamerasOnSide()
+        startFirstTurn()
+        showPlayer(1,false)
     }
 
 
