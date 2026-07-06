@@ -287,8 +287,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
         isVisible = false
         onMouseClicked = {
-            //TODO("rotateTile in Service Schicht aufrufen, in refreshAfter rotateAnimation von selected tile")
-//            rootService.playerActionService.rotateTile(false)
+            rootService.playerActionService.rotateTile(false)
         }
     }
 
@@ -297,8 +296,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
         isVisible = false
         onMouseClicked = {
-            //TODO("rotateTile in Service Schicht aufrufen, in refreshAfter rotateAnimation von selected tile")
-//            rootService.playerActionService.rotateTile(true)
+            rootService.playerActionService.rotateTile(true)
         }
     }
 
@@ -1023,7 +1021,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
     override fun refreshAfterRotate(right: Boolean) {
-
+        val game = rootService.currentGame
+        checkNotNull(game)
+        rotateInSelection(right, tileMap.forward(game.choices.elementAt(game.selectedChoice.first).first))
     }
 
 
