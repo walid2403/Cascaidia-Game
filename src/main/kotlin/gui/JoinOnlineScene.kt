@@ -235,14 +235,11 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
         )
     }
 
-//    private fun deleteThis() {
-//        TODO("refreshes an finale Network Refreshes anpassen")
-//    }
-//    override fun refreshAfterGameConfigMessage(players: List<String>, scoreCards: List<Boolean>) {
-//        app.showMenuScene(JoinOnlineLobbyScene(app,rootService, nameInput.text, playerType))
-//    }
-//
-//    override fun refreshAfterDuplicateName() {
-//        showWarning("This name is already taken. Please enter a different name.")
-//    }
+    override fun refreshAfterGameConfigUpdate(playerList: List<String>, scoringCards: List<Boolean?>) {
+        app.showMenuScene(JoinOnlineLobbyScene(app,rootService, nameInput.text, playerType))
+    }
+
+    override fun refreshAfterConnectionError(errorMessage: String) {
+        showWarning(errorMessage)
+    }
 }
