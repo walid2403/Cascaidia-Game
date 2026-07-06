@@ -1127,10 +1127,10 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
      */
     private fun getFinalPlayerNames(): List<String> {
         val list = mutableListOf<String>()
-        if(p1Input.text != "") list.add(p1Input.text)
-        if(p2Input.text != "") list.add(p2Input.text)
-        if(p3Input.text != "") list.add(p3Input.text)
-        if(p4Input.text != "") list.add(p4Input.text)
+        if(p1Input.text != "" && p1Type != 3) list.add(p1Input.text)
+        if(p2Input.text != "" && p2Type != 3) list.add(p2Input.text)
+        if(p3Input.text != "" && p3Type != 3) list.add(p3Input.text)
+        if(p4Input.text != "" && p4Type != 3) list.add(p4Input.text)
         return list.toList()
     }
 
