@@ -1,5 +1,6 @@
 package gui
 
+import com.sun.tools.doclint.Entity
 import service.Refreshable
 import service.RootService
 import tools.aqua.bgw.animation.DelayAnimation
@@ -276,12 +277,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(10) }
         isVisible = false
         onMouseClicked = {
-            if(customChoiceActive){
-                rootService.playerActionService.freeSelection(selectTile -1, selectAnimal -1)
-            }
-            else{
-                rootService.playerActionService.selectColumn(selectTile -1)
-            }
+            //TODO ("position auf dem board angeben")
+//            rootService.playerActionService.placeTile()
         }
     }
 
@@ -990,17 +987,29 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
 
-    override fun refreshAfterChangeWildlife(indices: List<Int>) {}
+    override fun refreshAfterChangeWildlife(indices: List<Int>) {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        for (i in indices){
+            val image = createAnimalView(game.choices.elementAt(i).second)
+            listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(i).visual = image
+        }
+
+    }
 
 
 
     override fun refreshAfterExterminate() {}
 
 
-    override fun refreshAfterUndo() {}
+    override fun refreshAfterUndo() {
+        refreshAfterStartGame()
+    }
 
 
-    override fun refreshAfterRedo() {}
+    override fun refreshAfterRedo() {
+        refreshAfterStartGame()
+    }
 
 
     override fun refreshAfterFreeSelection() {}
@@ -1020,12 +1029,18 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     override fun refreshAfterPlaceWildlife(index: Triple<Int, Int, Int>) {}
 
 
-    override fun refreshAfterConnectionError(errorMessage: String) {}
-
 
     override fun refreshAfterChatMessage(messageSender: String, message: String) {}
 
-    override fun refreshAfterUseNatureToken() {}
+
+
+    override fun refreshAfterUseNatureToken() {
+        customChoice.visual = ColorVisual(256, 181, 0).apply {
+            style.borderRadius = BorderRadius(10)
+        }
+        customChoice.font = Font(size = 16, color = Color(0, 0, 0))
+        customChoiceActive = true
+    }
 
 
 
@@ -1115,6 +1130,16 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 //    label4.text = changeWildlifeActive.toString()
 //    label5.text = changeAnimalsArray[0].toString() + changeAnimalsArray[1].toString() +
 //                  changeAnimalsArray[2].toString() + changeAnimalsArray[3].toString()
+
+
+
+
+//    if(customChoiceActive){
+//        rootService.playerActionService.freeSelection(selectTile -1, selectAnimal -1)
+//    }
+//    else{
+//        rootService.playerActionService.selectColumn(selectTile -1)
+//    }
 
 
 }
