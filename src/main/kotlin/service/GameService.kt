@@ -4,6 +4,7 @@ import entity.*
 import java.util.Vector
 import kotlin.math.max
 
+
 /**
  * The game service class of the Cascadia Game. It includes all functions which work mostly on the system-logic side
  */
@@ -19,12 +20,242 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
      * @param scoringCards The scoring cards to be used in the game, as a [List] of [Boolean] objects,
      * see [CascadiaGame.scoringCards]
      *
-     * @throws IllegalArgumentException If the list-size is not 2 - 4, if there are duplicate names or if there are
-     * not exactly five scoringCards
+     * @throws IllegalArgumentException If the list-size is not 2 - 4, if there are duplicate/ blankspace names
+     * or if there are not exactly five scoringCards
      * @throws IllegalStateException If there is currently a game running
      */
     fun startNewGame(playerList: List<Pair<String, PlayerType>>, scoringCards: List<Boolean>) {
+        //prüfen ob bereits Spiel läuft
+        check(rootService.currentGame==null){"Spiel läuft bereits"}
+        //Gültigkeiten der Spieleranzahl und Spielernamen überprüfen
+        require(playerList.size in 2..4){"playerList size must be between 2 and 4"}
+        val playerNames = playerList.map { it.first.trim() }
+        require(!playerNames.contains("")){"ungültige Strings für die Namen"}
+        require(playerNames.distinct().size == playerNames.size){"Duplikate erhalten"}
 
+        //Gültigkeiten ScoringCard anzahl testen
+        require(scoringCards.size==5){"falsche Anzahl von Scoringcards"}
+        val playerTypes=playerList.map { it.second }
+        var local= true
+
+        //prüfen ob lokales Spiel
+        for(playerType in playerTypes){
+            if(playerType== PlayerType.NETWORK){
+                   local=false;
+                   break;
+            }
+        }
+        //Spiel initialisieren
+        val game= CascadiaGame(scoringCards,local)
+
+        //Spieler zur playerqueue hinzufügen
+        for(player in playerList){
+            game.playerQueue.add(Player(player.first.trim(),player.second))
+        }
+
+        //aktuelles Spiel auf das initialisierte Spiel setzen
+        rootService.currentGame=game
+
+        //Wildlife und Habitatbeutel, Startlandschaften, Shop und natureTokens erstellen
+        createWildlifes()
+        createStartingTiles()
+        createHabitatStack()
+        createChoices()
+        game.natureTokens=25
+       //deep copy des Spiels
+        rootService.history.prevMoves.push(CascadiaGame(game))
+
+        onAllRefreshables { refreshAfterStartGame() }
+
+    }
+
+    /**
+     * Funktion erstellt die Starterlandschaften
+     */
+    private fun createStartingTiles(){
+
+        val game=rootService.currentGame
+        checkNotNull(game){"Spiel nicht initialisiert"}
+
+        //start_tiles csv als input stream
+        val input=javaClass.getResourceAsStream("/start_tiles.csv")
+        checkNotNull(input){"Datei nicht gefunden"}
+
+        //Liste für die Zeilen aus der csv(konkreter nur die tile zeilen)
+        val lines = mutableListOf<String>()
+
+        //für jede Zeile in der csv:
+        for(line in input.bufferedReader().readLines()){
+            //ignoriere Leerzeilen, die startzeile, die kommentarzeilen
+            if(line.isBlank()){continue}
+            if(line.startsWith("id")){continue}
+            if(line.startsWith("-")){continue}
+            // füge rest in lines hinzu
+            lines.add(line)
+        }
+        //Liste für die 3er startingtiles
+        val startingTiles=mutableListOf<MutableList<Tile>>()
+
+        var i=0
+
+        while (i+2<lines.size){
+            //eine liste für einen 3er starter
+            val starter=mutableListOf<Tile>()
+            //die nächsten 3 zeilen werden zu tiles gemacht und in den starter hinzugefügt
+            starter.add(createHabitatTile(lines[i]))
+            starter.add(createHabitatTile(lines[i+1]))
+            starter.add(createHabitatTile(lines[i+2]))
+            //in die Liste aller startlandschaften hinzufügen
+            startingTiles.add(starter)
+            i+=3
+        }
+
+        //startlandschaften sollen zufällig verteilt werden
+        startingTiles.shuffle()
+
+        //die startlandschaften an die spielerboards übergeben
+        for(player in game.playerQueue){
+            val board=startingTiles.removeAt(0)
+            /**
+             * hier nach:       tile1
+             *              tile3  tile2
+             */
+            player.board[Triple(0,0,0)]=board[0]
+            player.board[Triple(-1,1,0)]=board[1]
+            player.board[Triple(0,1,-1)]=board[2]
+        }
+
+
+    }
+
+    /**
+     * Hilfsmethode um den Habitatstack zu erstellen
+     */
+    private fun createHabitatStack(){
+        val game=rootService.currentGame
+        checkNotNull(game){"Spiel nicht initialisiert"}
+
+        //csv als inputstream
+        val input=javaClass.getResourceAsStream("/tiles.csv")
+        checkNotNull(input){"Datei nicht gefunden"}
+
+        //Liste der tiles aus der csv
+        val lines = mutableListOf<String>()
+
+        //jede zeile der csv durchgehen
+        for(line in input.bufferedReader().readLines()){
+            //ignoriere Leerzeilen, startzeile und Kommentarzeile
+            if(line.isBlank()){continue}
+            if(line.startsWith("id")){continue}
+            if(line.startsWith("-")){continue}
+
+            //Rest(Tiles) in die liste
+            lines.add(line)
+        }
+
+        //Tiles mischen
+        lines.shuffle()
+
+        //stackgröße hangt von Spielergröße ab
+        val stackSize=game.playerQueue.size*20+3
+
+        //die zeilen in tiles umwandeln und in den stack hinzufügen
+        for(i in 0 until stackSize){
+            val tile=createHabitatTile(lines[i])
+            game.tileStack.push(tile)
+        }
+
+
+    }
+
+    /**
+     * Hilfsfunktion um den Tierbeutel zuerstellen
+     */
+
+    private fun createWildlifes(){
+        val game=rootService.currentGame
+        checkNotNull(game){"Spiel nicht initialisiert"}
+
+        //genau 20 pro Tier in den Beutel
+        repeat(20){game.wildlifeTokens.push(WildlifeToken.ELK)}
+        repeat(20){game.wildlifeTokens.push(WildlifeToken.FOX)}
+        repeat(20){game.wildlifeTokens.push(WildlifeToken.BEAR)}
+        repeat(20){game.wildlifeTokens.push(WildlifeToken.HAWK)}
+        repeat(20){game.wildlifeTokens.push(WildlifeToken.SALMON)}
+
+        //Beutel mischen
+        game.wildlifeTokens.shuffle()
+    }
+
+    /**
+     * Hilfsmethode um eingelesene Zeile in ein Habitat umzuwandeln
+     * @return Habitatstile
+     * @param line eine Zeile aus der csv datei die bereits ein String ist
+     */
+    private fun createHabitatTile(line:String):Tile{
+
+        //aus line eine liste machen die die 4 attribute der Bezeichner besitzt
+        val parts=line.split(";")
+
+
+        val id=parts[0].toInt()
+        val habitats=parts[1]
+        val wildlife=parts[2]
+
+
+        //HabitatString in Liste von Habitaten umwandeln
+        val habitatList:MutableList<Habitates> = mutableListOf()
+
+        for(i in 0..5){
+            val habitat= when(habitats[i]){
+                'M'-> Habitates.MOUNTAINS
+                'W'-> Habitates.WETLANDS
+                'F'-> Habitates.FORESTS
+                'R'-> Habitates.RIVERS
+                'P'-> Habitates.PRAIRIES
+                else-> throw IllegalArgumentException("Unexpected habitat")
+            }
+            habitatList.add(habitat)
+        }
+
+        //mögliche Tiere (String) in Liste von wildlifes umwandeln
+        val possibles: MutableList<WildlifeToken> = mutableListOf()
+
+        for (animal in wildlife) {
+            val possible = when (animal) {
+                'E'-> WildlifeToken.ELK
+                'F'-> WildlifeToken.FOX
+                'S'-> WildlifeToken.SALMON
+                'B'-> WildlifeToken.BEAR
+                'H'-> WildlifeToken.HAWK
+                else -> throw IllegalArgumentException("Unexpected wildlife")
+            }
+
+            possibles.add(possible)
+        }
+
+        //Tile erstellen und zurückgeben
+        return Tile(id,habitatList,possibles)
+    }
+
+
+    /**
+     * Hilfsfunktion für den shop
+     */
+    private fun createChoices(){
+        val game=rootService.currentGame
+        checkNotNull(game){"Spiel nicht initialisiert"}
+        //4 tile animal paare in den shop hinzufügen
+        repeat(4) {
+            val tile= game.tileStack.pop()
+            val animal= game.wildlifeTokens.pop()
+            game.choices.add(Pair(tile, animal))
+        }
+        //Überpopulation prüfen
+        val wildlifeChoices=game.choices.map{it.second}
+        if(wildlifeChoices.distinct().size==1){
+            exterminate(false)
+        }
     }
 
     /**
