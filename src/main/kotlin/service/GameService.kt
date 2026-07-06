@@ -26,7 +26,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
      */
     fun startNewGame(playerList: List<Pair<String, PlayerType>>, scoringCards: List<Boolean>) {
         //prüfen ob bereits Spiel läuft
-        check(rootService.currentGame==null){"Spiel läuft bereits"}
+        //check(rootService.currentGame==null){"Spiel läuft bereits"}
         //Gültigkeiten der Spieleranzahl und Spielernamen überprüfen
         require(playerList.size in 2..4){"playerList size must be between 2 and 4"}
         val playerNames = playerList.map { it.first.trim() }
@@ -65,6 +65,7 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
        //deep copy des Spiels
         rootService.history.prevMoves.push(CascadiaGame(game))
 
+        println("game service: start game refresh")
         onAllRefreshables { refreshAfterStartGame() }
 
     }

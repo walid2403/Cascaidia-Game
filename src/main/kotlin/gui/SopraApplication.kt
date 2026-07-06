@@ -1,5 +1,6 @@
 package gui
 
+import service.Refreshable
 import tools.aqua.bgw.core.BoardGameApplication
 import service.RootService
 
@@ -7,7 +8,7 @@ import service.RootService
  * Represents the main application for the Cascadia board game.
  * The application initializes the [RootService] and displays the scenes.
  */
-class SopraApplication : BoardGameApplication("SoPra Game") {
+class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
 
     /**
      * The root service instance. This is used to call service methods and access the entity layer.
@@ -29,14 +30,28 @@ class SopraApplication : BoardGameApplication("SoPra Game") {
 
     val hostOnlineLobbyScene = HostOnlineLobbyScene(this@SopraApplication, rootService, "Name", 0)
 
+    val hostOnlineScene = HostOnlineScene(this@SopraApplication, rootService)
+    val joinOnlineScene = JoinOnlineScene(this@SopraApplication, rootService)
+    val lobbyScene = LobbyScene(this@SopraApplication, rootService)
+
     /**
      * Initializes the application by displaying the [MainMenuScene].
      */
     init {
+        rootService.addRefreshables(
+            this,
+            gameScene,
+            mainMenuScene, pauseMenu, scoreScene, joinOnlineLobbyScene, hostOnlineLobbyScene, hostOnlineScene, joinOnlineScene, lobbyScene,
+        )
         this.showGameScene(gameScene)
-        //this.showMenuScene(mainMenuScene )
+        this.showMenuScene(mainMenuScene )
         //this.showMenuScene(scoreScene)
         //this.showMenuScene(testing(this@SopraApplication, rootService))
+    }
+
+    override fun refreshAfterStartGame() {
+        println("refresh aufgerufen")
+        this.hideMenuScene()
     }
 }
 
