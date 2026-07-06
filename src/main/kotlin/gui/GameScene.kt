@@ -750,14 +750,18 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     private fun rotateInSelection(clockwise: Boolean, tile: HexagonView) {
         val rotation = if(clockwise) 60.0 else -60.0
-        playAnimation(
-            RotationAnimation(
-                componentView = tile,
-                byAngle = rotation,
-                duration = 300,
-                persist = true
+        if(animationsEnabled) {
+            playAnimation(
+                RotationAnimation(
+                    componentView = tile,
+                    byAngle = rotation,
+                    duration = 300,
+                    persist = true
+                )
             )
-        )
+        } else {
+            tile.rotation += rotation
+        }
     }
 
     private fun selectionTileClick(onClick: Boolean) {
@@ -1018,7 +1022,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     override fun refreshAfterLoadGame() {}
 
 
-    override fun refreshAfterRotate(right: Boolean) {}
+    override fun refreshAfterRotate(right: Boolean) {
+
+    }
 
 
     override fun refreshAfterPlaceTile(index: Triple<Int, Int, Int>) {
