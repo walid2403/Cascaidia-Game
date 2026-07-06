@@ -57,7 +57,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         posY = 0,
         width = sceneWidth,
         height = sceneHeight,
-        visual = ImageVisual("GameConfigMenuBackground.png")
+        visual = ImageVisual("backgrounds/GameConfigMenuBackground.png")
     )
 
     private val playerViewPane = Pane<StaticComponentView<*>>(
@@ -65,7 +65,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         posY = paneY,
         width = paneWidth,
         height = paneHeight,
-        visual = ImageVisual("JoinMenuBackground.png").apply{
+        visual = ImageVisual("backgrounds/JoinMenuBackground.png").apply{
             style.borderRadius = BorderRadius(35)
         }
     )
@@ -75,7 +75,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         posY = paneY,
         width = paneWidth,
         height = paneHeight,
-        visual = ImageVisual("ScoreCardPaneBackground.png").apply{
+        visual = ImageVisual("assets/ScoreCardPaneBackground.png").apply{
             style.borderRadius = BorderRadius(35)
         }
     )
@@ -85,7 +85,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         posY = paneY + paneHeight - tabHeight,
         width = tabWidth,
         height = tabHeight,
-        visual = ImageVisual("FoldOutTab.png").apply {
+        visual = ImageVisual("assets/FoldOutTab.png").apply {
             style.borderRadius = BorderRadius(15.0)
         }
     ).apply {
@@ -138,7 +138,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         width = nameHeight,
         posX = p1Input.posX - nameHeight - 20,
         posY = p1Input.posY,
-        visual = ImageVisual("NetworkIcon.png").apply{
+        visual = ImageVisual("icons/NetworkIcon.png").apply{
             style.borderRadius = BorderRadius(8)
         }
     )
@@ -158,7 +158,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         width = nameHeight,
         posX = p2Input.posX - nameHeight - 20,
         posY = p2Input.posY,
-        visual = ImageVisual("NetworkIcon.png").apply {
+        visual = ImageVisual("icons/NetworkIcon.png").apply {
             style.borderRadius = BorderRadius(8)
         }
     )
@@ -180,7 +180,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         width = nameHeight,
         posX = p3Input.posX - nameHeight - 20,
         posY = p3Input.posY,
-        visual = ImageVisual("NetworkIcon.png").apply {
+        visual = ImageVisual("icons/NetworkIcon.png").apply {
             style.borderRadius = BorderRadius(8)
         }
     ).apply {
@@ -204,7 +204,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         width = nameHeight,
         posX = p4Input.posX - nameHeight - 20,
         posY = p4Input.posY,
-        visual = ImageVisual("NetworkIcon.png").apply {
+        visual = ImageVisual("icons/NetworkIcon.png").apply {
             style.borderRadius = BorderRadius(8)
         }
     ).apply {
@@ -228,9 +228,9 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         posY = 30,
         width = iconSize + 15,
         height = iconSize + 15,
-        visual = ImageVisual("elk.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/elk.png", iconSize, iconSize)
     ).apply {
-        visual = ImageVisual("elk.png")
+        visual = ImageVisual("tokens/elk.png")
         onMouseClicked = {
             showScoreCards(elkCardA, elkCardB)
         }
@@ -241,9 +241,9 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         posY = 30,
         width = iconSize + 15,
         height = iconSize + 15,
-        visual = ImageVisual("hawk.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/hawk.png", iconSize, iconSize)
     ).apply {
-        visual = ImageVisual("hawk.png")
+        visual = ImageVisual("tokens/hawk.png")
         onMouseClicked = {
             showScoreCards(hawkCardA, hawkCardB)
         }
@@ -254,7 +254,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         posY = 30,
         width = iconSize + 15,
         height = iconSize + 15,
-        visual = ImageVisual("salmon.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/salmon.png", iconSize, iconSize)
     ).apply {
         onMouseClicked = {
             showScoreCards(salmonCardA, salmonCardB)
@@ -266,9 +266,9 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         posY = 30,
         width = iconSize + 15,
         height = iconSize + 15,
-        visual = ImageVisual("fox.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/fox.png", iconSize, iconSize)
     ).apply {
-        visual = ImageVisual("fox.png")
+        visual = ImageVisual("tokens/fox.png")
         onMouseClicked = {
             showScoreCards(foxCardA, foxCardB)
         }
@@ -279,9 +279,9 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         posY = 30,
         width = iconSize + 15,
         height = iconSize + 15,
-        visual = ImageVisual("bear.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/bear.png", iconSize, iconSize)
     ).apply {
-        visual = ImageVisual("bear.png")
+        visual = ImageVisual("tokens/bear.png")
         onMouseClicked = {
             showScoreCards(bearCardA, bearCardB)
         }
@@ -393,7 +393,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         posX = 230,
         posY = 200,
     ).apply {
-        visual = ImageVisual("Scoring_Bear_A.png")
+        visual = ImageVisual("scoringCards/Scoring_Bear_A.png")
         isVisible = false
     }
 
@@ -403,7 +403,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         posX = 490,
         posY = 200,
         ).apply {
-        visual = ImageVisual("Scoring_Bear_B.png")
+        visual = ImageVisual("scoringCards/Scoring_Bear_B.png")
         isVisible = false
     }
 
@@ -413,7 +413,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         posX = 230,
         posY = 200,
     ).apply {
-        visual = ImageVisual("Scoring_Elk_A.png")
+        visual = ImageVisual("scoringCards/Scoring_Elk_A.png")
         isVisible = false
     }
 
@@ -423,7 +423,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         posX = 490,
         posY = 200,
         ).apply {
-        visual = ImageVisual("Scoring_Elk_B.png")
+        visual = ImageVisual("scoringCards/Scoring_Elk_B.png")
         isVisible = false
     }
 
@@ -433,7 +433,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         posX = 230,
         posY = 200,
     ).apply {
-        visual = ImageVisual("Scoring_Fox_A.png")
+        visual = ImageVisual("scoringCards/Scoring_Fox_A.png")
         isVisible = false
     }
 
@@ -443,7 +443,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         posX = 490,
         posY = 200,
         ).apply {
-        visual = ImageVisual("Scoring_Fox_B.png")
+        visual = ImageVisual("scoringCards/Scoring_Fox_B.png")
         isVisible = false
     }
 
@@ -453,7 +453,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         posX = 230,
         posY = 200,
     ).apply {
-        visual = ImageVisual("Scoring_Hawk_A.png")
+        visual = ImageVisual("scoringCards/Scoring_Hawk_A.png")
         isVisible = false
     }
 
@@ -463,7 +463,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         posX = 490,
         posY = 200
     ).apply {
-        visual = ImageVisual("Scoring_Hawk_B.png")
+        visual = ImageVisual("scoringCards/Scoring_Hawk_B.png")
         isVisible = false
     }
 
@@ -473,7 +473,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         posX = 230,
         posY = 200,
     ).apply {
-        visual = ImageVisual("Scoring_Salmon_A.png")
+        visual = ImageVisual("scoringCards/Scoring_Salmon_A.png")
         isVisible = false
     }
 
@@ -483,7 +483,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         posX = 490,
         posY = 200,
         ).apply {
-        visual = ImageVisual("Scoring_Salmon_B.png")
+        visual = ImageVisual("scoringCards/Scoring_Salmon_B.png")
         isVisible = false
     }
 
@@ -558,7 +558,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
                 )
             ).apply {
                 onFinished = {
-                    foldOutTab.visual = ImageVisual("FoldInTab.png").apply {
+                    foldOutTab.visual = ImageVisual("assets/FoldInTab.png").apply {
                         style.borderRadius = BorderRadius(15)
                     }
                 }
@@ -588,7 +588,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
                 )
             ).apply {
                 onFinished = {
-                    foldOutTab.visual = ImageVisual("FoldOutTab.png").apply {
+                    foldOutTab.visual = ImageVisual("assets/FoldOutTab.png").apply {
                         style.borderRadius = BorderRadius(15)
                     }
                 }
@@ -744,7 +744,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
                 else -> throw IllegalArgumentException("Invalid playerType: $playerType")
             }
         } else {
-            ImageVisual("NetworkIcon.png").apply {
+            ImageVisual("icons/NetworkIcon.png").apply {
                 style.borderRadius = BorderRadius(8)
             }
         }

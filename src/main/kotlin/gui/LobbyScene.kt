@@ -71,14 +71,14 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         posY = 0,
         width = sceneWidth,
         height = sceneHeight,
-        visual = ImageVisual("GameConfigMenuBackground.png")
+        visual = ImageVisual("backgrounds/GameConfigMenuBackground.png")
     )
 
     private val hostPanel = Pane<UIComponent>(
         posX = paneX, posY = paneY,
         width = paneWidth, height = paneHeight
     ).apply {
-        visual = ImageVisual("LocalLobbyMenuBackground.png").apply {
+        visual = ImageVisual("backgrounds/LocalLobbyMenuBackground.png").apply {
             style.borderRadius = BorderRadius(35)
         }
     }
@@ -87,7 +87,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         posX = paneX, posY = paneY,
         width = paneWidth, height = paneHeight
     ).apply {
-        visual = ImageVisual("ScoreCardPaneBackground.png").apply {
+        visual = ImageVisual("assets/ScoreCardPaneBackground.png").apply {
             style.borderRadius = BorderRadius(35)
         }
     }
@@ -294,14 +294,14 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = iconSize, height = iconSize,
         posX = 155,
         posY = 234,
-        visual = ImageVisual("HumanIcon.png")
+        visual = ImageVisual("icons/HumanIcon.png")
     )
 
     private val p2Icon = Label(
         width = iconSize, height = iconSize,
         posX = p4TypeButtonLeft.posX + buttonWidth + 5,
         posY = p2Input.posY - (iconSize - nameHeight) / 2,
-        visual = ImageVisual("HumanIcon.png")
+        visual = ImageVisual("icons/HumanIcon.png")
     )
 
     private val p3Icon = Label(
@@ -332,7 +332,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     private val noP2 = Label(
         width = iconSize, height = iconSize,
         posX = 343, posY = p2Input.posY - (iconSize - nameHeight) / 2,
-        visual = ImageVisual("NotPlayingIcon.png")
+        visual = ImageVisual("icons/NotPlayingIcon.png")
     ).apply {
         isVisible = false
     }
@@ -340,13 +340,13 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     private val noP3 = Label(
         width = iconSize, height = iconSize,
         posX = 343, posY = p3Input.posY - (iconSize - nameHeight) / 2,
-        visual = ImageVisual("NotPlayingIcon.png")
+        visual = ImageVisual("icons/NotPlayingIcon.png")
     )
 
     private val noP4 = Label(
         width = iconSize, height = iconSize,
         posX = 343, posY = p4Input.posY - (iconSize - nameHeight) / 2,
-        visual = ImageVisual("NotPlayingIcon.png")
+        visual = ImageVisual("icons/NotPlayingIcon.png")
     )
 
     private val elk = Label(
@@ -354,7 +354,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         posX = (paneWidth)/2 + 90 - (iconSize + 15)/2, posY = 30,
         font = Font(size = 40)
     ).apply {
-        visual = ImageVisual("elk.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/elk.png", iconSize, iconSize)
         onMouseClicked = {
             showScoreCards(elkCardA, elkCardB)
             warning.isVisible = false
@@ -366,7 +366,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         posX = elk.posX - 2*iconDistance - 2*(iconSize + 15), posY = 30,
         font = Font(size = 40)
     ).apply {
-        visual = ImageVisual("hawk.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/hawk.png", iconSize, iconSize)
         onMouseClicked = {
             showScoreCards(hawkCardA, hawkCardB)
             warning.isVisible = false
@@ -378,7 +378,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         posX = elk.posX - iconDistance - (iconSize + 15), posY = 30,
         font = Font(size = 40)
     ).apply {
-        visual = ImageVisual("salmon.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/salmon.png", iconSize, iconSize)
         onMouseClicked = {
             showScoreCards(salmonCardA, salmonCardB)
             warning.isVisible = false
@@ -389,7 +389,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = iconSize + 15, height = iconSize + 15,
         posX = elk.posX + iconDistance + iconSize + 15, posY = 30,        font = Font(size = 40)
     ).apply {
-        visual = ImageVisual("fox.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/fox.png", iconSize, iconSize)
 
         onMouseClicked = {
             showScoreCards(foxCardA, foxCardB)
@@ -402,7 +402,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         posX = elk.posX + 2*iconDistance + 2*(iconSize + 15), posY = 30,
         font = Font(size = 40)
     ).apply {
-        visual = ImageVisual("bear.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/bear.png", iconSize, iconSize)
         onMouseClicked = {
             showScoreCards(bearCardA, bearCardB)
             warning.isVisible = false
@@ -413,7 +413,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = 207, height = 394,
         posX = cardAX - 5, posY = cardY,
     ).apply {
-        visual = ImageVisual("Scoring_Bear_A.png")
+        visual = ImageVisual("scoringCards/Scoring_Bear_A.png")
         isVisible = false
     }
 
@@ -421,7 +421,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = 207, height = 394,
         posX = cardBX - 5, posY = cardY,
         ).apply {
-        visual = ImageVisual("Scoring_Bear_B.png")
+        visual = ImageVisual("scoringCards/Scoring_Bear_B.png")
         isVisible = false
     }
 
@@ -429,7 +429,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = 262, height = 504,
         posX = cardAX, posY = cardY,
     ).apply {
-        visual = ImageVisual("Scoring_Elk_A.png")
+        visual = ImageVisual("scoringCards/Scoring_Elk_A.png")
         isVisible = false
     }
 
@@ -438,7 +438,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         posX = cardBX - 5, posY = cardY,
 
         ).apply {
-        visual = ImageVisual("Scoring_Elk_B.png")
+        visual = ImageVisual("scoringCards/Scoring_Elk_B.png")
         isVisible = false
     }
 
@@ -446,7 +446,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = 229, height = 497,
         posX = cardAX, posY = cardY,
     ).apply {
-        visual = ImageVisual("Scoring_Fox_A.png")
+        visual = ImageVisual("scoringCards/Scoring_Fox_A.png")
         isVisible = false
     }
 
@@ -454,7 +454,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = 229, height = 497,
         posX = cardBX, posY = cardY,
         ).apply {
-        visual = ImageVisual("Scoring_Fox_B.png")
+        visual = ImageVisual("scoringCards/Scoring_Fox_B.png")
         isVisible = false
     }
 
@@ -463,7 +463,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = 229, height = 497,
         posX = cardAX, posY = cardY,
     ).apply {
-        visual = ImageVisual("Scoring_Hawk_A.png")
+        visual = ImageVisual("scoringCards/Scoring_Hawk_A.png")
         isVisible = false
     }
 
@@ -471,7 +471,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = 229, height = 497,
         posX = cardBX, posY = cardY
     ).apply {
-        visual = ImageVisual("Scoring_Hawk_B.png")
+        visual = ImageVisual("scoringCards/Scoring_Hawk_B.png")
         isVisible = false
     }
 
@@ -479,7 +479,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = 229, height = 497,
         posX = cardAX, posY = cardY,
     ).apply {
-        visual = ImageVisual("Scoring_Salmon_A.png")
+        visual = ImageVisual("scoringCards/Scoring_Salmon_A.png")
         isVisible = false
     }
 
@@ -487,7 +487,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = 229, height = 497,
         posX = cardBX, posY = cardY,
         ).apply {
-        visual = ImageVisual("Scoring_Salmon_B.png")
+        visual = ImageVisual("scoringCards/Scoring_Salmon_B.png")
         isVisible = false
     }
 
@@ -711,7 +711,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         posY = paneY + paneHeight - tabHeight,
         width = tabWidth,
         height = tabHeight,
-        visual = ImageVisual("FoldOutTab.png").apply {
+        visual = ImageVisual("assets/FoldOutTab.png").apply {
             style.borderRadius = BorderRadius(15.0)
         }
     ).apply {
@@ -817,7 +817,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
                 onFinished = {
                     runOnGUIThread {
                         tabLabel.apply {
-                            visual = ImageVisual("StartGameTab.png").apply {
+                            visual = ImageVisual("assets/StartGameTab.png").apply {
                                 style.borderRadius = BorderRadius(15)
                             }
                             onMouseClicked = {
@@ -924,13 +924,13 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
 
         val newVisual = when (newType) {
-            0 -> ImageVisual("HumanIcon.png")
+            0 -> ImageVisual("icons/HumanIcon.png")
 
-            1 -> ImageVisual("EasyBotIcon.png")
+            1 -> ImageVisual("icons/EasyBotIcon.png")
 
-            2 -> ImageVisual("HardBotIcon.png")
+            2 -> ImageVisual("icons/HardBotIcon.png")
 
-            3 -> ImageVisual("NotPlayingIcon.png")
+            3 -> ImageVisual("icons/NotPlayingIcon.png")
 
             else -> throw IllegalArgumentException("Only 4 possible visuals, $newType is invalid")
         }

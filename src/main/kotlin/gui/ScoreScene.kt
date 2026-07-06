@@ -51,7 +51,7 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
         posY = 0,
         width = sceneWidth,
         height = sceneHeight,
-        visual = ImageVisual("ScoreSceneBackground.png")
+        visual = ImageVisual("backgrounds/ScoreSceneBackground.png")
     )
 
     private val mainScorePane = Pane<StaticComponentView<*>>(
@@ -719,17 +719,17 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
         return when(table) {
             wildlifeTableTopHalf -> {
                 when(index) {
-                    1 -> ImageVisual("bear.png", entryWidth, entryHeight, offsetX = -15)
-                    2 -> ImageVisual("elk.png", entryWidth, entryHeight, offsetX = -15)
-                    3 -> ImageVisual("salmon.png", entryWidth, entryHeight, offsetX = -15)
-                    4 -> ImageVisual("hawk.png", entryWidth, entryHeight, offsetX = -15)
+                    1 -> ImageVisual("tokens/bear.png", entryWidth, entryHeight, offsetX = -15)
+                    2 -> ImageVisual("tokens/elk.png", entryWidth, entryHeight, offsetX = -15)
+                    3 -> ImageVisual("tokens/salmon.png", entryWidth, entryHeight, offsetX = -15)
+                    4 -> ImageVisual("tokens/hawk.png", entryWidth, entryHeight, offsetX = -15)
                     else -> throw IllegalArgumentException("index $index in table ${table.name} " +
                             "does not contain an image" )
                 }
             }
             wildlifeTableBottomHalf -> {
                 when(index) {
-                    0 -> ImageVisual("fox.png", entryWidth, entryHeight, offsetX = -15)
+                    0 -> ImageVisual("tokens/fox.png", entryWidth, entryHeight, offsetX = -15)
                     else -> throw IllegalArgumentException("index $index in table ${table.name} " +
                             "does not contain an image" )
                 }
@@ -748,7 +748,7 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
             habitatTableBottomHalf -> {
                 when(index) {
                     0 -> ImageVisual("tile1.png", entryWidth, entryHeight)
-                    2 -> ImageVisual("pinecone.png", entryWidth, entryHeight, offsetX = -15)
+                    2 -> ImageVisual("tokens/pinecone.png", entryWidth, entryHeight, offsetX = -15)
                     else -> throw IllegalArgumentException("index $index in table ${table.name} " +
                             "does not contain an image" )
                 }
