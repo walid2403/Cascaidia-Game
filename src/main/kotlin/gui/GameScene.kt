@@ -503,8 +503,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
     //Testweise
-    private val hex = HexagonViewExtended(size = 14, visual = ImageVisual("tile2.png"))
-    private val greyHex = HexagonViewExtended(size = 20, visual = ColorVisual(170,170,170).apply { transparency = 1.0 })
+    private val hex = HexagonViewExtended(size = 14.0, visual = ImageVisual("tile2.png"))
+    private val greyHex = HexagonViewExtended(size = 20.0, visual = ColorVisual(170,170,170).apply { transparency = 1.0 })
     private val label1 = Label(width = 300, height = 158, posX = 990, posY = 325).apply {
         //visual= ColorVisual(170,170,170, 127)
     }
@@ -821,7 +821,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
 
         for(tile in tileList) {
-            val hexagon = HexagonViewExtended(size = 60, visual = ImageVisual("tile_${tile.id}.png")).apply {
+            val hexagon = HexagonViewExtended(size = 60.0, visual = ImageVisual("tile_${tile.id}.png")).apply {
                 //Neuerung 06.07
                 var inShop = false
                 var isPlaced = false
@@ -1015,6 +1015,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         deactivateRotateButtons()
     }
 
+    private fun getTileWithAnimal(id: Int): ImageVisual {
+        return ImageVisual("tile_${id}0.png")
+    }
+
 
 
     override fun refreshAfterChangeWildlife(indices: List<Int>) {
@@ -1069,7 +1073,17 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
 
-    override fun refreshAfterPlaceWildlife(index: Triple<Int, Int, Int>) {}
+    override fun refreshAfterPlaceWildlife(index: Triple<Int, Int, Int>) {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(player)
+
+        val tile = currentArea[index.first, index.second]
+        checkNotNull(tile)
+        val image = getTileWithAnimal(tileMap.backward(tile).id)
+        currentArea[index.first, index.second]?.visual = image
+        currentArea[index.first, index.second]?.isDisabled = true
+    }
 
 
 
