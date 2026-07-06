@@ -815,7 +815,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
 
         for(tile in tileList) {
-            val hexagon = HexagonViewExtended(size = 60.0, visual = ImageVisual("tiles/choices/tile_${tile.id}.png")).apply {
+            val hexagon = HexagonViewExtended(size = 14.0, visual = ImageVisual("tiles/choices/tile_${tile.id}.png")).apply {
                 //Neuerung 06.07
                 var inShop = false
                 var isPlaced = false
