@@ -1001,7 +1001,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
 
-    override fun refreshAfterExterminate() {}
+    override fun refreshAfterExterminate() {
+        refreshAfterChangeWildlife(listOf(0,1,2,3))
+    }
 
 
     override fun refreshAfterUndo() {
