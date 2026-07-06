@@ -287,7 +287,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
         isVisible = false
         onMouseClicked = {
-            rootService.playerActionService.rotateTile(false)
+            //TODO("rotateTile in Service Schicht aufrufen, in refreshAfter rotateAnimation von selected tile")
+//            rootService.playerActionService.rotateTile(false)
         }
     }
 
@@ -296,7 +297,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
         isVisible = false
         onMouseClicked = {
-            rootService.playerActionService.rotateTile(true)
+            //TODO("rotateTile in Service Schicht aufrufen, in refreshAfter rotateAnimation von selected tile")
+//            rootService.playerActionService.rotateTile(true)
         }
     }
 
@@ -552,7 +554,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         listOf(lableAboveCamOne, lableAboveCamTwo, lableAboveCamThree, lableAboveCamFour).forEach {
             it.isDisabled = false
         }
-        lableAboveCamOne.isDisabled = false
     }
 
     private fun initializeCamerasOnSide() {
@@ -749,14 +750,18 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     private fun rotateInSelection(clockwise: Boolean, tile: HexagonView) {
         val rotation = if(clockwise) 60.0 else -60.0
-        playAnimation(
-            RotationAnimation(
-                componentView = tile,
-                byAngle = rotation,
-                duration = 300,
-                persist = true
+        if(animationsEnabled) {
+            playAnimation(
+                RotationAnimation(
+                    componentView = tile,
+                    byAngle = rotation,
+                    duration = 300,
+                    persist = true
+                )
             )
-        )
+        } else {
+            tile.rotation += rotation
+        }
     }
 
     private fun selectionTileClick(onClick: Boolean) {
@@ -817,7 +822,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 val inShop = false
                 val isPlaced = false
                 onMouseClicked = {
-                    if (inShop) {
+                    if(inShop) {
                         chooseTile(shop.indexOf(this) + 1, this)
                     } else if (isPlaced) {
                         //Onclick für Tiere platzieren
@@ -904,11 +909,21 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private fun placeChoosenTile(x: Int, y: Int) {
         val game = rootService.currentGame
         checkNotNull(game)
-        val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(player-1)
+        val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(player)
+        val selectTile = shop[selectTile]
+        checkNotNull(selectTile)
 
-        if(!animationsEnabled) {
-            currentArea[x,y] = tileMap.forward(game.choices.elementAt(selectTile-1).first)
+        if(animationsEnabled) {
+            playAnimation(
+                MovementAnimation(
+                    componentView = selectTile as ComponentView,
+                    toX = currentArea[x,y]?.actualPosX?:0,
+                    toY = currentArea[x,y]?.actualPosY?:0,
+                    duration = 500
+                )
+            )
         }
+        currentArea[x,y] = selectTile
 
         activatesTileButtons()
     }
@@ -935,7 +950,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         checkNotNull(game)
 
         for(i in 0..3) {
-            shop[i] = tileMap.forward(game.tileStack.pop())
+            shop[i] = tileMap.forward(game.choices.elementAt(i).first)
         }
     }
 
@@ -971,9 +986,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
         deactivateRotateButtons()
     }
-
-
-
 
     override fun refreshAfterSelectColumn(index: Int) {}
 
@@ -1011,9 +1023,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
     override fun refreshAfterRotate(right: Boolean) {
-        val game = rootService.currentGame
-        checkNotNull(game)
-        rotateInSelection(right, tileMap.forward(game.choices.elementAt(game.selectedChoice.first).first))
+
     }
 
 
@@ -1105,6 +1115,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         initializeCamerasOnSide()
     }
+
 
 
 
