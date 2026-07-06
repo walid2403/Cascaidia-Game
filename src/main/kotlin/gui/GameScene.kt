@@ -58,7 +58,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private val logo = Label(posX = 0,posY = 0,width = 1920,height = 1080,visual = ImageVisual("CascadiaHintergrund.png"))
 
     //Graue Box um Auswahl
-    private val grayBox = Label(width = 950, height = 260, posX = 485, posY = 0).apply {
+    private val grayBox = Label(width = 950, height = 300, posX = 485, posY = -40).apply {
         visual= ColorVisual(170,170,170, 170).apply { style.borderRadius = BorderRadius(20) }
     }
 
@@ -115,6 +115,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 //Alle Tiere wieder runterskalieren und Tiles-OnClick wieder aktivieren und Tierauswahl entfernen
                 selectionTileClick(true)
                 scaleDownOtherAnimals(0)
+                //TODO("über service schicht Methode aufrufen, GUI aufruf in refreshAfter verschieben")
                 removeChosenWildlife()
             }
             changeWildlifeActive = !changeWildlifeActive
@@ -131,6 +132,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         onMouseClicked = {
             //Button kann nur angeklickt werden, wenn 3 gleiche existieren
             //Nach onClick werden die Tiere entfernt und der Button wieder durchsichtig
+            //TODO("hier Methode der Service Schicht aufrufen, GUI action in den refreshAfter verschieben")
             clearOverPopulation()
             this.visual = ColorVisual(0, 0, 0, 127).apply {
                 style.borderRadius = BorderRadius(10)
@@ -256,12 +258,14 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     //Buttons unten rechts
+    //TODO("text vor erstem Spielzug zu start game o.ä. ändern")
     private val endTurn = Button(width = 185, height = 60, posX = 1700, posY = 985, text = "End Turn",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(10) }
         onMouseClicked = {
             if(player == 4) player = 1
             else player++
+            //TODO("changeTurn in Service Schicht aufrufen, GUI actions in den refreshAfter verschieben")
             showPlayer(player, false)
             initializeCamerasOnSide()
         }
@@ -272,7 +276,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(10) }
         isVisible = false
         onMouseClicked = {
-
+            //TODO("freeSelection/selectCollumn in Service Schicht aufrufen")
         }
     }
 
@@ -281,7 +285,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
         isVisible = false
         onMouseClicked = {
-
+            //TODO("rotateTile in Service Schicht aufrufen, in refreshAfter rotateAnimation von selected tile")
         }
     }
 
@@ -290,11 +294,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
         isVisible = false
         onMouseClicked = {
-
+            //TODO("rotateTile in Service Schicht aufrufen, in refreshAfter rotateAnimation von selected tile")
         }
     }
 
     //Buttons unten links
+    //TODO("visibility bei online spielen, aufrufe der Methoden der Service Schicht")
     private val undo = Button(width = 130, height = 60, posX = 35, posY = 985, text = "Undo",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(10) }
@@ -306,7 +311,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     //Panel an der Seite mit einzelnen Views
     private val viewPanel = Label(width = 285, height = 912, posX = 35, posY = 35).apply {
-        visual= ColorVisual(170,170,170, 170).apply { style.borderRadius = BorderRadius(40) }
+        visual= ColorVisual(170,170,170, 170).apply { style.borderRadius = BorderRadius(20) }
     }
 
     //Kameras
@@ -318,7 +323,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private val cameraPaneFourSide = CameraPane(posX = 55, posY = 755, width = 245, height = 130, target = world)
 
     //Labels über den Kameras an der Seite für die Hover Funktion
-    private val LableAboveCamOne = Label(posX = 55, posY = 65, width = 245, height = 130).apply {
+    //TODO("playerName.text abhängig von Spieler Namen (nameXSide) ändern")
+    private val lableAboveCamOne = Label(posX = 55, posY = 65, width = 245, height = 130).apply {
         isDisabled = true
         onMouseEntered = {
             showPlayer(1, true)
@@ -329,7 +335,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             playerName.text = "Aktuell"
         }
     }
-    private val LableAboveCamTwo = Label(posX = 55, posY = 295, width = 245, height = 130).apply {
+    private val lableAboveCamTwo = Label(posX = 55, posY = 295, width = 245, height = 130).apply {
         isDisabled = true
         onMouseEntered = {
             showPlayer(2, true)
@@ -340,7 +346,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             playerName.text = "Aktuell"
         }
     }
-    private val LableAboveCamThree = Label(posX = 55, posY = 525, width = 245, height = 130).apply {
+    private val lableAboveCamThree = Label(posX = 55, posY = 525, width = 245, height = 130).apply {
         isDisabled = true
         onMouseEntered = {
             showPlayer(3, true)
@@ -351,7 +357,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             playerName.text = "Aktuell"
         }
     }
-    private val LableAboveCamFour = Label(posX = 55, posY = 755, width = 245, height = 130).apply {
+    private val lableAboveCamFour = Label(posX = 55, posY = 755, width = 245, height = 130).apply {
         isDisabled = true
         onMouseEntered = {
             showPlayer(4, true)
@@ -437,8 +443,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     //Graue Box um Tiere
-    private val grayBoxScoringAnimals = Label(width = 90, height = 490, posX = 1810, posY = 160).apply {
-        visual= ColorVisual(170,170,170, 170).apply { style.borderRadius = BorderRadius(20) }
+    private val grayBoxScoringAnimals = Label(width = 90, height = 700, posX = 1810, posY = -40).apply {
+        visual= ColorVisual(170,170,170, 170).apply { style.borderRadius = BorderRadius(45) }
     }
 
     //Scoring Karten
@@ -473,7 +479,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
-    //Silder
+    //Slider
     private val sliderBar = Label(width = 200, height = 4, posX = 400, posY = 398).apply {
         visual = ColorVisual(170,170,170)
     }
@@ -524,13 +530,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             animalChoice1, animalChoice2, animalChoice3, animalChoice4,
             rotateOneCW, rotateOneCCW, rotateTwoCW, rotateTwoCCW,
             rotateThreeCW, rotateThreeCCW, rotateFourCW, rotateFourCCW,
-            endTurn, undo, redo, viewPanel, pause, confirm, rotateTileLeft, rotateTileRight,
-            grayBoxScoringAnimals, bear, elk, salmon, hawk, fox,
+            endTurn, undo, redo, viewPanel, confirm, rotateTileLeft, rotateTileRight,
+            grayBoxScoringAnimals, pause, bear, elk, salmon, hawk, fox,
             barOne, barTwo, barThree, nameOneSide, nameTwoSide, nameThreeSide, nameFourSide,
             natureTokenOneSide, natureTokenTwoSide, natureTokenThreeSide, natureTokenFourSide,
             natureTokenCountOneSide, natureTokenCountTwoSide, natureTokenCountThreeSide, natureTokenCountFourSide,
             cameraPaneOneSide, cameraPaneTwoSide, cameraPaneThreeSide, cameraPaneFourSide,
-            LableAboveCamOne, LableAboveCamTwo, LableAboveCamThree, LableAboveCamFour, playerName,
+            lableAboveCamOne, lableAboveCamTwo, lableAboveCamThree, lableAboveCamFour, playerName,
             bearScoringCard, elkScoringCard, salmonScoringCard, hawkScoringCard, foxScoringCard,
 
             sliderBar, sliderPoint
@@ -542,10 +548,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
     private fun startFirstTurn() {
-        listOf(LableAboveCamOne, LableAboveCamTwo, LableAboveCamThree, LableAboveCamFour).forEach {
+        listOf(lableAboveCamOne, lableAboveCamTwo, lableAboveCamThree, lableAboveCamFour).forEach {
             it.isDisabled = false
         }
-        LableAboveCamOne.isDisabled = false
+        lableAboveCamOne.isDisabled = false
     }
 
     private fun initializeCamerasOnSide() {

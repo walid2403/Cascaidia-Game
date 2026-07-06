@@ -34,8 +34,9 @@ class SopraApplication : BoardGameApplication("SoPra Game") {
      */
     init {
         this.showGameScene(gameScene)
-        this.showMenuScene(mainMenuScene )
+        //this.showMenuScene(mainMenuScene )
         //this.showMenuScene(scoreScene)
+        //this.showMenuScene(testing(this@SopraApplication, rootService))
     }
 }
 
