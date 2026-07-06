@@ -12,7 +12,13 @@ import tools.aqua.bgw.style.BorderRadius
 import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.*
 
-
+/**
+ * This is the Main Menu Scene of the game, the first thing that is shown when starting the application.
+ * A player can decide between loading a previously started game, starting a new local game, starting a game lobby as
+ * host or joining another players lobby from here.
+ * @param app The [SopraApplication] of this game
+ * @param rootService The [RootService] instance to access the other service methods and entity layer
+ */
 class MainMenuScene(private val app: SopraApplication,private val rootService: RootService) :
     MenuScene(1920, 1080), Refreshable {
 

@@ -2,6 +2,7 @@ package gui
 
 import service.Refreshable
 import service.RootService
+import tools.aqua.bgw.animation.DelayAnimation
 import tools.aqua.bgw.components.uicomponents.Button
 import tools.aqua.bgw.components.uicomponents.Label
 import tools.aqua.bgw.components.uicomponents.TextField
@@ -14,6 +15,12 @@ import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 import tools.aqua.bgw.visual.Visual
 
+/**
+ * In this scene a player can enter a name, select a [entity.PlayerType] and enter a Lobby Code before joining
+ * a Lobby as a participant.
+ * @param app The [SopraApplication] of this game
+ * @param rootService The [RootService] instance to access the other service methods and entity layer
+ */
 class JoinOnlineScene(private val app: SopraApplication,private val rootService: RootService) :
     MenuScene(1920, 1080), Refreshable  {
 
@@ -95,14 +102,6 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
         font = Font(size = 28)
     ).apply {
         visual = ColorVisual(204, 212, 209).apply { style.borderRadius = BorderRadius(8) }
-        onTextChanged = {
-            if (!this.text.isBlank() && !lobbyCodeInput.text.isBlank()) {
-                joinButton.isDisabled = false
-            } else {
-                joinButton.isDisabled = true
-            }
-            duplicateNameWarning.isVisible = false
-        }
     }
 
     private val lobbyCodeInput: TextField = TextField(
@@ -112,14 +111,6 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
         font = Font(size = 28)
     ).apply {
         visual = ColorVisual(204, 212, 209).apply { style.borderRadius = BorderRadius(8) }
-        onTextChanged = {
-
-            if (!this.text.isBlank() && !nameInput.text.isBlank()) {
-                joinButton.isDisabled = false
-            } else {
-                joinButton.isDisabled = true
-            }
-        }
     }
 
     private val joinButton = Button(
@@ -130,18 +121,22 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
         visual = ColorVisual(153, 172, 255).apply {
             style.borderRadius = BorderRadius(8)
         }
-        isDisabled = true
         onMouseClicked = {
-            TODO("über das Network der Lobby joinen")
+            if(nameInput.text.isBlank()) {
+                showWarning("You must enter a name before joining a lobby.")
+            } else if(lobbyCodeInput.text.isBlank()) {
+                showWarning("You must enter a lobby code to enter a lobby.")
+            } else {
+                //TODO("über das Network der Lobby joinen")
+            }
         }
     }
 
-    private val duplicateNameWarning = Label(
+    private val warning = Label(
         width = 350,
         height = 100,
         posX = paneX + (joinButton.posX - paneX)/2 - 175,
         posY = joinButton.posY - 40,
-        text = "This name is already taken. Please enter a different name.",
         font = Font(size = 23, color = Color.WHITE, family = "Canva Sans"),
         isWrapText = true,
         visual = ColorVisual(204, 78, 0).apply {
@@ -200,7 +195,7 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
             playerTypeIcon,
             switchTypeLeftButton,
             switchTypeRightButton,
-            duplicateNameWarning,
+            warning,
         )
     }
 
@@ -226,15 +221,28 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
         return newType
     }
 
-
-    private fun deleteThis() {
-        TODO("refreshes an finale Network Refreshes anpassen")
+    /**
+     * This function sets the text of [warning] to [text] and makes [warning] visible for 3 seconds
+     */
+    private fun showWarning(text: String) {
+        warning.text = text
+        warning.isVisible = true
+        playAnimation(DelayAnimation(3000).apply {
+            onFinished = {
+                warning.isVisible = false
+            }
+        }
+        )
     }
+
+//    private fun deleteThis() {
+//        TODO("refreshes an finale Network Refreshes anpassen")
+//    }
 //    override fun refreshAfterGameConfigMessage(players: List<String>, scoreCards: List<Boolean>) {
 //        app.showMenuScene(JoinOnlineLobbyScene(app,rootService, nameInput.text, playerType))
 //    }
 //
 //    override fun refreshAfterDuplicateName() {
-//        duplicateNameWarning.isVisible = true
+//        showWarning("This name is already taken. Please enter a different name.")
 //    }
 }

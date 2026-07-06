@@ -13,6 +13,13 @@ import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 import tools.aqua.bgw.components.layoutviews.GridPane
 
+/**
+ * This scene displays the players' scores at the end of the game. The player can flip between seeing the total score
+ * ranking, the habitat score table and the wildlife score table. The player can go back to the [MainMenuScene] to
+ * start a new game or exit the application entirely from here.
+ * @param app The [SopraApplication] of this game
+ * @param rootService The [RootService] instance to access the other service methods and entity layer
+ */
 class ScoreScene(private val app: SopraApplication,private val rootService: RootService) :
     MenuScene(1920, 1080), Refreshable {
 

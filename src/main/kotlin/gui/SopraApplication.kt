@@ -4,7 +4,7 @@ import tools.aqua.bgw.core.BoardGameApplication
 import service.RootService
 
 /**
- * Represents the main application for the SoPra board game.
+ * Represents the main application for the Cascadia board game.
  * The application initializes the [RootService] and displays the scenes.
  */
 class SopraApplication : BoardGameApplication("SoPra Game") {
@@ -34,8 +34,9 @@ class SopraApplication : BoardGameApplication("SoPra Game") {
      */
     init {
         this.showGameScene(gameScene)
-        this.showMenuScene(mainMenuScene )
+        //this.showMenuScene(mainMenuScene )
         //this.showMenuScene(scoreScene)
+        //this.showMenuScene(testing(this@SopraApplication, rootService))
     }
 }
 

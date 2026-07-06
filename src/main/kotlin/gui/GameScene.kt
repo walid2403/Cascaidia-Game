@@ -21,6 +21,7 @@ import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 import entity.*
+import tools.aqua.bgw.animation.MovementAnimation
 import tools.aqua.bgw.visual.Visual
 
 /**
@@ -48,12 +49,16 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     var animationsEnabled = true
     private var isPlayerHuman = true
 
+    //Neuerungen 06.07
+    private val shop = arrayOfNulls<HexagonView>(4)
+
+
 
     //Hintergrundbild
     private val logo = Label(posX = 0,posY = 0,width = 1920,height = 1080,visual = ImageVisual("CascadiaHintergrund.png"))
 
     //Graue Box um Auswahl
-    private val grayBox = Label(width = 950, height = 260, posX = 485, posY = 0).apply {
+    private val grayBox = Label(width = 950, height = 300, posX = 485, posY = -40).apply {
         visual= ColorVisual(170,170,170, 170).apply { style.borderRadius = BorderRadius(20) }
     }
 
@@ -110,6 +115,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 //Alle Tiere wieder runterskalieren und Tiles-OnClick wieder aktivieren und Tierauswahl entfernen
                 selectionTileClick(true)
                 scaleDownOtherAnimals(0)
+                //TODO("über service schicht Methode aufrufen, GUI aufruf in refreshAfter verschieben")
                 removeChosenWildlife()
             }
             changeWildlifeActive = !changeWildlifeActive
@@ -126,6 +132,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         onMouseClicked = {
             //Button kann nur angeklickt werden, wenn 3 gleiche existieren
             //Nach onClick werden die Tiere entfernt und der Button wieder durchsichtig
+            //TODO("hier Methode der Service Schicht aufrufen, GUI action in den refreshAfter verschieben")
             clearOverPopulation()
             this.visual = ColorVisual(0, 0, 0, 127).apply {
                 style.borderRadius = BorderRadius(10)
@@ -138,19 +145,19 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private val pineCone1 = Label(posX = 525,posY = 35,width = 40,height = 40,visual = ImageVisual("pinecone.png"))
     private val pineCone2 = Label(posX = 525,posY = 110,width = 40,height = 40,visual = ImageVisual("pinecone.png"))
 
-    //Auswahl Habitate
-    private val tileChoice1 = HexagonView(posX = 820, posY = 30, size = 60, visual = ColorVisual(170,170,170)).apply {
-        onMouseClicked = { chooseTile(1, this) }
-    }
-    private val tileChoice2 = HexagonView(posX = 974, posY = 30, size = 60, visual = ColorVisual(170,170,170)).apply {
-        onMouseClicked = { chooseTile(2, this) }
-    }
-    private val tileChoice3 = HexagonView(posX = 1128, posY = 30, size = 60, visual = ColorVisual(170,170,170)).apply {
-        onMouseClicked = { chooseTile(3, this) }
-    }
-    private val tileChoice4 = HexagonView(posX = 1282, posY = 30, size = 60, visual = ColorVisual(170,170,170)).apply {
-        onMouseClicked = { chooseTile(4, this) }
-    }
+//    //Auswahl Habitate
+//    private val tileChoice1 = HexagonView(posX = 820, posY = 30, size = 60, visual = ColorVisual(170,170,170)).apply {
+//        onMouseClicked = { chooseTile(1, this) }
+//    }
+//    private val tileChoice2 = HexagonView(posX = 974, posY = 30, size = 60, visual = ColorVisual(170,170,170)).apply {
+//        onMouseClicked = { chooseTile(2, this) }
+//    }
+//    private val tileChoice3 = HexagonView(posX = 1128, posY = 30, size = 60, visual = ColorVisual(170,170,170)).apply {
+//        onMouseClicked = { chooseTile(3, this) }
+//    }
+//    private val tileChoice4 = HexagonView(posX = 1282, posY = 30, size = 60, visual = ColorVisual(170,170,170)).apply {
+//        onMouseClicked = { chooseTile(4, this) }
+//    }
 
     //Auswahl Tiere
     private val animalChoice1 = Label(width = 60, height = 60, posX = 842, posY = 175).apply {
@@ -175,49 +182,49 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
         this.isVisible = false
-        onMouseClicked = { rotateInSelection(true, tileChoice1) }
+        onMouseClicked = { rotateInSelection(true, shop[0] as HexagonView) }
     }
     private val rotateOneCCW = Button(width = 40, height = 40, posX = 922, posY = 155, text = ">",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
         this.isVisible = false
-        onMouseClicked = { rotateInSelection(false, tileChoice1) }
+        onMouseClicked = { rotateInSelection(false, shop[0] as HexagonView) }
     }
     private val rotateTwoCW = Button(width = 40, height = 40, posX = 936, posY = 155, text = "<",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
         this.isVisible = false
-        onMouseClicked = { rotateInSelection(true, tileChoice2) }
+        onMouseClicked = { rotateInSelection(true, shop[1] as HexagonView) }
     }
     private val rotateTwoCCW = Button(width = 40, height = 40, posX = 1076, posY = 155, text = ">",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
         this.isVisible = false
-        onMouseClicked = { rotateInSelection(false, tileChoice2) }
+        onMouseClicked = { rotateInSelection(false, shop[1] as HexagonView) }
     }
     private val rotateThreeCW = Button(width = 40, height = 40, posX = 1090, posY = 155, text = "<",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
         this.isVisible = false
-        onMouseClicked = { rotateInSelection(true, tileChoice3) }
+        onMouseClicked = { rotateInSelection(true, shop[2] as HexagonView) }
     }
     private val rotateThreeCCW = Button(width = 40, height = 40, posX = 1230, posY = 155, text = ">",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
         this.isVisible = false
-        onMouseClicked = { rotateInSelection(false, tileChoice3) }
+        onMouseClicked = { rotateInSelection(false, shop[2] as HexagonView) }
     }
     private val rotateFourCW = Button(width = 40, height = 40, posX = 1244, posY = 155, text = "<",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
         this.isVisible = false
-        onMouseClicked = { rotateInSelection(true, tileChoice4) }
+        onMouseClicked = { rotateInSelection(true, shop[3] as HexagonView) }
     }
     private val rotateFourCCW = Button(width = 40, height = 40, posX = 1384, posY = 155, text = ">",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
         this.isVisible = false
-        onMouseClicked = { rotateInSelection(false, tileChoice4) }
+        onMouseClicked = { rotateInSelection(false, shop[3] as HexagonView) }
     }
 
     //Bereiche der Spieler
@@ -251,16 +258,14 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     //Buttons unten rechts
+    //TODO("text vor erstem Spielzug zu start game o.ä. ändern")
     private val endTurn = Button(width = 185, height = 60, posX = 1700, posY = 985, text = "End Turn",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(10) }
         onMouseClicked = {
-            if(player == 0) {
-                startFirstTurn()
-            }
-
             if(player == 4) player = 1
             else player++
+            //TODO("changeTurn in Service Schicht aufrufen, GUI actions in den refreshAfter verschieben")
             showPlayer(player, false)
             initializeCamerasOnSide()
         }
@@ -271,7 +276,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(10) }
         isVisible = false
         onMouseClicked = {
-
+            //TODO("freeSelection/selectCollumn in Service Schicht aufrufen")
         }
     }
 
@@ -280,7 +285,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
         isVisible = false
         onMouseClicked = {
-
+            //TODO("rotateTile in Service Schicht aufrufen, in refreshAfter rotateAnimation von selected tile")
         }
     }
 
@@ -289,11 +294,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
         isVisible = false
         onMouseClicked = {
-
+            //TODO("rotateTile in Service Schicht aufrufen, in refreshAfter rotateAnimation von selected tile")
         }
     }
 
     //Buttons unten links
+    //TODO("visibility bei online spielen, aufrufe der Methoden der Service Schicht")
     private val undo = Button(width = 130, height = 60, posX = 35, posY = 985, text = "Undo",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(10) }
@@ -305,7 +311,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     //Panel an der Seite mit einzelnen Views
     private val viewPanel = Label(width = 285, height = 912, posX = 35, posY = 35).apply {
-        visual= ColorVisual(170,170,170, 170).apply { style.borderRadius = BorderRadius(40) }
+        visual= ColorVisual(170,170,170, 170).apply { style.borderRadius = BorderRadius(20) }
     }
 
     //Kameras
@@ -317,7 +323,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private val cameraPaneFourSide = CameraPane(posX = 55, posY = 755, width = 245, height = 130, target = world)
 
     //Labels über den Kameras an der Seite für die Hover Funktion
-    private val LableAboveCamOne = Label(posX = 55, posY = 65, width = 245, height = 130).apply {
+    //TODO("playerName.text abhängig von Spieler Namen (nameXSide) ändern")
+    private val lableAboveCamOne = Label(posX = 55, posY = 65, width = 245, height = 130).apply {
         isDisabled = true
         onMouseEntered = {
             showPlayer(1, true)
@@ -328,7 +335,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             playerName.text = "Aktuell"
         }
     }
-    private val LableAboveCamTwo = Label(posX = 55, posY = 295, width = 245, height = 130).apply {
+    private val lableAboveCamTwo = Label(posX = 55, posY = 295, width = 245, height = 130).apply {
         isDisabled = true
         onMouseEntered = {
             showPlayer(2, true)
@@ -339,7 +346,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             playerName.text = "Aktuell"
         }
     }
-    private val LableAboveCamThree = Label(posX = 55, posY = 525, width = 245, height = 130).apply {
+    private val lableAboveCamThree = Label(posX = 55, posY = 525, width = 245, height = 130).apply {
         isDisabled = true
         onMouseEntered = {
             showPlayer(3, true)
@@ -350,7 +357,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             playerName.text = "Aktuell"
         }
     }
-    private val LableAboveCamFour = Label(posX = 55, posY = 755, width = 245, height = 130).apply {
+    private val lableAboveCamFour = Label(posX = 55, posY = 755, width = 245, height = 130).apply {
         isDisabled = true
         onMouseEntered = {
             showPlayer(4, true)
@@ -436,8 +443,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     //Graue Box um Tiere
-    private val grayBoxScoringAnimals = Label(width = 90, height = 490, posX = 1810, posY = 160).apply {
-        visual= ColorVisual(170,170,170, 170).apply { style.borderRadius = BorderRadius(20) }
+    private val grayBoxScoringAnimals = Label(width = 90, height = 700, posX = 1810, posY = -40).apply {
+        visual= ColorVisual(170,170,170, 170).apply { style.borderRadius = BorderRadius(45) }
     }
 
     //Scoring Karten
@@ -472,7 +479,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
-    //Silder
+    //Slider
     private val sliderBar = Label(width = 200, height = 4, posX = 400, posY = 398).apply {
         visual = ColorVisual(170,170,170)
     }
@@ -519,17 +526,17 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         addComponents(
             cameraPane,
             grayBox, customChoice, changeWildlife, clearOverpopulation, pineCone1, pineCone2,
-            tileChoice1, tileChoice2, tileChoice3, tileChoice4,
+            //tileChoice1, tileChoice2, tileChoice3, tileChoice4,
             animalChoice1, animalChoice2, animalChoice3, animalChoice4,
             rotateOneCW, rotateOneCCW, rotateTwoCW, rotateTwoCCW,
             rotateThreeCW, rotateThreeCCW, rotateFourCW, rotateFourCCW,
-            endTurn, undo, redo, viewPanel, pause, confirm, rotateTileLeft, rotateTileRight,
-            grayBoxScoringAnimals, bear, elk, salmon, hawk, fox,
+            endTurn, undo, redo, viewPanel, confirm, rotateTileLeft, rotateTileRight,
+            grayBoxScoringAnimals, pause, bear, elk, salmon, hawk, fox,
             barOne, barTwo, barThree, nameOneSide, nameTwoSide, nameThreeSide, nameFourSide,
             natureTokenOneSide, natureTokenTwoSide, natureTokenThreeSide, natureTokenFourSide,
             natureTokenCountOneSide, natureTokenCountTwoSide, natureTokenCountThreeSide, natureTokenCountFourSide,
             cameraPaneOneSide, cameraPaneTwoSide, cameraPaneThreeSide, cameraPaneFourSide,
-            LableAboveCamOne, LableAboveCamTwo, LableAboveCamThree, LableAboveCamFour, playerName,
+            lableAboveCamOne, lableAboveCamTwo, lableAboveCamThree, lableAboveCamFour, playerName,
             bearScoringCard, elkScoringCard, salmonScoringCard, hawkScoringCard, foxScoringCard,
 
             sliderBar, sliderPoint
@@ -541,10 +548,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
     private fun startFirstTurn() {
-        listOf(LableAboveCamOne, LableAboveCamTwo, LableAboveCamThree, LableAboveCamFour).forEach {
+        listOf(lableAboveCamOne, lableAboveCamTwo, lableAboveCamThree, lableAboveCamFour).forEach {
             it.isDisabled = false
         }
-        LableAboveCamOne.isDisabled = false
+        lableAboveCamOne.isDisabled = false
     }
 
     private fun initializeCamerasOnSide() {
@@ -663,7 +670,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     private fun chooseAnimal(index: Int, animal: Label) {
         if(!customChoiceActive && !changeWildlifeActive) {
-            val tile = listOf(tileChoice1, tileChoice2, tileChoice3, tileChoice4).elementAt(index-1)
+            val tile = shop[index-1] as HexagonView
             chooseTile(index, tile)
         } else {
             if(!changeWildlifeActive) {
@@ -693,9 +700,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     private fun scaleDownOtherTiles(select: Int) {
-        listOf(tileChoice1, tileChoice2, tileChoice3, tileChoice4).forEachIndexed { i, tile ->
+        shop.forEachIndexed { i, tile ->
             if(i != select-1) {
-                scaleTile(0, tile)
+                scaleTile(0, tile as HexagonView)
             }
         }
     }
@@ -752,7 +759,11 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     private fun selectionTileClick(onClick: Boolean) {
-        listOf(tileChoice1, tileChoice2, tileChoice3, tileChoice4).forEach { it.isDisabled = !onClick }
+        shop.forEach {
+            if (it != null) {
+                it.isDisabled = !onClick
+            }
+        }
     }
 
     private fun removeChosenWildlife() {
@@ -800,7 +811,18 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         val tileList = game.tileStack.peekAll()
 
         for(tile in tileList) {
-            val hexagon = HexagonView(size = 60, visual = ImageVisual("tile_$tile.id.png"))
+            val hexagon = HexagonView(size = 60, visual = ImageVisual("tile_$tile.id.png")).apply {
+                //Neuerung 06.07
+                val inShop = false
+                val isPlaced = false
+                onMouseClicked = {
+                    if (inShop) {
+                        chooseTile(shop.indexOf(this) + 1, this)
+                    } else if (isPlaced) {
+                        //Onclick für Tiere platzieren
+                    }
+                }
+            }
             tileMap.add(tile to hexagon)
         }
     }
@@ -839,16 +861,21 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
 
         createTileView()
+        initializeShop()
 
         for(i in 0..3) {
-            val hexagon = tileMap.forward(game.choices.elementAt(i).first)
-            listOf(tileChoice1, tileChoice2, tileChoice3, tileChoice4).elementAt(i).visual = hexagon.visual
             val animal = game.choices.elementAt(i).second
             listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(i).visual =
                 createAnimalView(animal)
         }
 
         loadStartTiles()
+        initializeCamerasOnSide()
+        disableAllButtons()
+
+        animateDealTile()
+        startFirstTurn()
+
 
     }
 
@@ -901,6 +928,50 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
 
+    //Neuerungen 06.07
+    private fun initializeShop() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+
+        for(i in 0..3) {
+            shop[i] = tileMap.forward(game.tileStack.pop())
+        }
+    }
+
+    private fun animateDealTile() {
+        for(i in 0..3) {
+            playAnimation(
+                MovementAnimation(
+                    componentView = shop[i] as ComponentView,   //Kp warum er da ComponentView haben will und sonst reicht HexagonView
+                    fromX = 1500.0,                             //Hinterher aus dem "TileStack"
+                    fromY = 700.0,
+                    toX = getShopTileCoordinateX(i),
+                    toY = 30.0,
+                    duration = 500
+                )
+            )
+        }
+    }
+
+    private fun getShopTileCoordinateX(index: Int): Double {
+        when(index) {
+            0 -> return 820.0
+            1 -> return 974.0
+            2 -> return 1128.0
+            3 -> return 1282.0
+        }
+        return 0.0
+    }
+
+    private fun disableAllButtons() {
+        listOf(undo, redo, endTurn, customChoice, changeWildlife, clearOverpopulation,
+            confirm, rotateTileLeft, rotateTileRight).forEach {
+                it.isDisabled = true
+        }
+        deactivateRotateButtons()
+    }
+
+
 
 
 
@@ -916,10 +987,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         animalChoice3.visual = ImageVisual("hawk.png")
         animalChoice4.visual = ImageVisual("fox.png")
 
-        tileChoice1.visual = ImageVisual("tile1.png")
-        tileChoice2.visual = ImageVisual("tile2.png")
-        tileChoice3.visual = ImageVisual("tile3.png")
-        tileChoice4.visual = ImageVisual("tile4.png")
+//        tileChoice1.visual = ImageVisual("tile1.png")
+//        tileChoice2.visual = ImageVisual("tile2.png")
+//        tileChoice3.visual = ImageVisual("tile3.png")
+//        tileChoice4.visual = ImageVisual("tile4.png")
 
         playerOneArea[0,0]=hex
         playerOneArea[-1,0]=hex

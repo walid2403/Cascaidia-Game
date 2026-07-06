@@ -1,5 +1,6 @@
 package gui
 
+import entity.PlayerType
 import service.Refreshable
 import service.RootService
 import tools.aqua.bgw.animation.MovementAnimation
@@ -18,6 +19,14 @@ import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 import tools.aqua.bgw.visual.Visual
 
+/**
+ * This scene shows the Join Lobby of the game. It shows all players in the Lobby with their name and playerType icon
+ * as well as the host's current scoreCard selection.
+ * @param app The [SopraApplication] of the game
+ * @param [rootService] The [RootService] instance to access the other service methods and entity layer
+ * @param playerName The [String] that was entered in the [JoinOnlineScene]
+ * @param playerType The [Int] corresponding to the [PlayerType] selected in [JoinOnlineScene]
+ */
 class JoinOnlineLobbyScene (private val app: SopraApplication,
                             private val rootService: RootService, private val playerName: String,
                             private val playerType: Int) : MenuScene(1920, 1080), Refreshable  {

@@ -14,6 +14,12 @@ import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 import tools.aqua.bgw.visual.Visual
 
+/**
+ * In this scene a player can enter a name, select a [entity.PlayerType] and chose a Lobby Code before opening
+ * a Lobby in the role of Host.
+ * @param app The [SopraApplication] of this game
+ * @param rootService The [RootService] instance to access the other service methods and entity layer
+ */
 class HostOnlineScene(private val app: SopraApplication,private val rootService: RootService) :
     MenuScene(1920, 1080), Refreshable  {
 
