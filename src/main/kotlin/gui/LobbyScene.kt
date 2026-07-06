@@ -823,6 +823,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
                             onMouseClicked = {
                                 if(checkStartReady()) {
                                     rootService.gameService.startNewGame(getFinalPlayers(), getFinalScoreCards())
+                                    //app.hideMenuScene()
                                 }
                             }
                         }
@@ -1174,9 +1175,9 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         return list.toList()
     }
 
-    override fun refreshAfterStartGame() {
-        app.hideMenuScene()
-    }
+//    override fun refreshAfterStartGame() {
+//        app.hideMenuScene()
+//    }
 }
 
 

@@ -859,12 +859,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
     override fun refreshAfterStartGame() {
+        println("test")
         val game = rootService.currentGame
         checkNotNull(game)
 
         resetGame()
 
-        for(i in 0 .. game.playerQueue.size) {
+        for(i in game.playerQueue.indices) {
             listOf(nameOneSide, nameTwoSide, nameThreeSide, nameFourSide).forEach {
                 it.text = game.playerQueue.elementAt(i).name
             }

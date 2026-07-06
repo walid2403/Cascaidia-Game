@@ -39,4 +39,13 @@ class RootService {
         gameService.addRefreshable(newRefreshable)
         playerActionService.addRefreshable(newRefreshable)
     }
+
+    /**
+     * Adds all provided [newRefreshables] to all services connected
+     *      * to this root service
+     */
+
+    fun addRefreshables(vararg newRefreshables: Refreshable) {
+        newRefreshables.forEach { addRefreshable(it) }
+    }
 }
