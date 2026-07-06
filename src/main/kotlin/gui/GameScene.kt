@@ -1051,6 +1051,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
+    private fun changeGreyVisibility(visible: Boolean) {
+        listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(player).components.filter { it.choiceHex }.forEach { it.isVisible = visible }
+    }
 
 
     override fun refreshAfterChangeWildlife(indices: List<Int>) {
