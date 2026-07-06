@@ -230,23 +230,64 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
     /**
      * this function allows the player to redo an action that has been undone
      *
-     * @throws IllegalStateException if there are no undone moves
+     * @throws IllegalStateException if there are no undone moves and current player is not human and current game
+     * is not local
      */
     fun redo() {
+        val game=rootService.currentGame
+        checkNotNull(game){"Spiel nicht initialisiert"}
+
+        val games=rootService.history
+
+        check(games.undoneMoves.isNotEmpty()){"keine zurückgenommenen Züge existieren "}
+        check(game.playerQueue.first().type== PlayerType.HUMAN)
+        {"Bots und Netzwerkspieler dürfen nicht redoen"}
+        check(game.isLocal){"im Netzwerkmodus ist die Funktion nicht erlaubt"}
+
+
+        val nextGame=games.undoneMoves.pop()
+
+        games.prevMoves.push(CascadiaGame(nextGame))
+
+        rootService.currentGame=nextGame
+
+        onAllRefreshables { refreshAfterRedo() }
+
+
+
 
     }
 
     /**
-     * this function reverts the last action
-     * it allows the current player to go back to their previous action
-     * or to the end of the previous players turn
+     * this function allows the player to redo an action that has been undone
      *
-     * stores current [CascadiaGame] in [CascadiaGames.undoneMoves]
-     * takes the previous Game from [entity.CascadiaGames.prevMoves]
-     * @throws IllegalStateException if [CascadiaGames.prevMoves] is empty
-     * (this would occur in the first Action of the first turn by a human)
+     * @throws IllegalStateException if there are no undone moves and current player is not human and current game
+     * is not local
      */
     fun undo() {
+        val  game=rootService.currentGame
+        checkNotNull(game)
 
+        val games=rootService.history
+
+        check(game.playerQueue.first().type== PlayerType.HUMAN){"nur Menschen dürfen zurückgehen"}
+        check(game.isLocal){"Funktion nur im lokalen Modus gestattet"}
+        if(game.gameState == GameState.START_OF_TURN) {
+            check(games.prevMoves.size > 1) {
+                "Am Anfang der ersten Runde gibt es keine vorherigen Züge"
+            }
+        }
+        if(game.gameState==GameState.START_OF_TURN) {
+            //wenn am Anfang der Runde: Spiel in undoneMoves speichern
+            val currentGame = games.prevMoves.pop()
+            games.undoneMoves.push(CascadiaGame(currentGame))
+        }
+        //letztes gespeichertes Spiel "laden"
+        val prevGame=games.prevMoves.peek()
+        rootService.currentGame= CascadiaGame(prevGame)
+
+
+
+        onAllRefreshables { refreshAfterUndo() }
     }
 }
