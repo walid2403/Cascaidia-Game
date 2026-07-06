@@ -14,7 +14,14 @@ import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 import tools.aqua.bgw.visual.Visual
 
-class JoinOnlineScene(private val app: SopraApplication,private val rootService: RootService) : MenuScene(1920, 1080), Refreshable  {
+/**
+ * In this scene a player can enter a name, select a [entity.PlayerType] and enter a Lobby Code before joining
+ * a Lobby as a participant.
+ * @param app The [SopraApplication] of this game
+ * @param rootService The [RootService] instance to access the other service methods and entity layer
+ */
+class JoinOnlineScene(private val app: SopraApplication,private val rootService: RootService) :
+    MenuScene(1920, 1080), Refreshable  {
 
     private val sceneWidth = 1920
     private val sceneHeight = 1080
@@ -100,7 +107,7 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
             } else {
                 joinButton.isDisabled = true
             }
-
+            duplicateNameWarning.isVisible = false
         }
     }
 
@@ -126,11 +133,28 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
         posX = 1920/2 + 230, posY = 1080/2 + 215,
         text = "Join",
         font = Font( size = 20,fontWeight = Font.FontWeight.BOLD)).apply {
-        visual = ColorVisual(color = Color(0x99acff)).apply { style.borderRadius = BorderRadius(8) }
+        visual = ColorVisual(153, 172, 255).apply {
+            style.borderRadius = BorderRadius(8)
+        }
         isDisabled = true
         onMouseClicked = {
-            app.showMenuScene(JoinOnlineLobbyScene(app,rootService))
+            TODO("über das Network der Lobby joinen")
         }
+    }
+
+    private val duplicateNameWarning = Label(
+        width = 350,
+        height = 100,
+        posX = paneX + (joinButton.posX - paneX)/2 - 175,
+        posY = joinButton.posY - 40,
+        text = "This name is already taken. Please enter a different name.",
+        font = Font(size = 23, color = Color.WHITE, family = "Canva Sans"),
+        isWrapText = true,
+        visual = ColorVisual(204, 78, 0).apply {
+            style.borderRadius = BorderRadius(15)
+        }
+    ).apply {
+        isVisible = false
     }
 
     private val name : Label  = Label(
@@ -182,6 +206,7 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
             playerTypeIcon,
             switchTypeLeftButton,
             switchTypeRightButton,
+            duplicateNameWarning,
         )
     }
 
@@ -206,4 +231,16 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
 
         return newType
     }
+
+
+    private fun deleteThis() {
+        TODO("refreshes an finale Network Refreshes anpassen")
+    }
+//    override fun refreshAfterGameConfigMessage(players: List<String>, scoreCards: List<Boolean>) {
+//        app.showMenuScene(JoinOnlineLobbyScene(app,rootService, nameInput.text, playerType))
+//    }
+//
+//    override fun refreshAfterDuplicateName() {
+//        duplicateNameWarning.isVisible = true
+//    }
 }

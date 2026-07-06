@@ -3,9 +3,8 @@ package gui
 import tools.aqua.bgw.core.BoardGameApplication
 import service.RootService
 
-
 /**
- * Represents the main application for the SoPra board game.
+ * Represents the main application for the Cascadia board game.
  * The application initializes the [RootService] and displays the scenes.
  */
 class SopraApplication : BoardGameApplication("SoPra Game") {
@@ -26,9 +25,9 @@ class SopraApplication : BoardGameApplication("SoPra Game") {
 
     private val scoreScene = ScoreScene(this@SopraApplication, rootService)
 
-    val joinOnlineLobbyScene = JoinOnlineLobbyScene(this@SopraApplication, rootService)
+    val joinOnlineLobbyScene = JoinOnlineLobbyScene(this@SopraApplication, rootService, "name", 0)
 
-    val hostOnlineLobbyScene = HostOnlineLobbyScene(this@SopraApplication, rootService)
+    val hostOnlineLobbyScene = HostOnlineLobbyScene(this@SopraApplication, rootService, "Name", 0)
 
     /**
      * Initializes the application by displaying the [MainMenuScene].

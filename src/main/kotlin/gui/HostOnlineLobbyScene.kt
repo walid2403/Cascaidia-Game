@@ -1,7 +1,9 @@
 package gui
 
+import entity.PlayerType
 import service.Refreshable
 import service.RootService
+import tools.aqua.bgw.animation.DelayAnimation
 import tools.aqua.bgw.animation.MovementAnimation
 import tools.aqua.bgw.animation.ParallelAnimation
 import tools.aqua.bgw.components.layoutviews.Pane
@@ -19,7 +21,23 @@ import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 import tools.aqua.bgw.visual.Visual
 
-class HostOnlineLobbyScene(private val app: SopraApplication, private val rootService: RootService) : MenuScene(1920, 1080), Refreshable  {
+
+/**
+ * This scene shows the Host Lobby of the game. All players joining the Lobby will be shown with their name and a
+ * Network Player Icon, the Host will be shown with the name [playerName] he entered in the [HostOnlineScene] and the
+ * PlayerIcon for the [PlayerType] he selected, [playerType].
+ * The Host can manually reorder the players or shuffle them. The Host can manually select the scoringcards used for
+ * each animal type or chose a random selection. When there are 2-4 players in the Lobby and scorecards were selected,
+ * the Host can start the game.
+ *
+ * @param app The [SopraApplication] of the game
+ * @param [rootService] The [RootService] instance to access the other service methods and entity layer
+ * @param playerName The [String] that was entered in the [HostOnlineScene]
+ * @param playerType The [Int] corresponding to the [PlayerType] selected in [HostOnlineScene]
+ */
+class HostOnlineLobbyScene(private val app: SopraApplication, private val rootService: RootService,
+                           private val playerName: String, private val playerType: Int
+) : MenuScene(1920, 1080), Refreshable  {
 
     private val sceneWidth = 1920
     private val sceneHeight = 1080
@@ -88,6 +106,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         onMouseClicked ={
             switchNames(1)
         }
+        isVisible = false
     }
 
     private val downButtonP2 = Button(
@@ -100,6 +119,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         onMouseClicked ={
             switchNames(2)
         }
+        isVisible = false
     }
 
     private val downButtonP3 = Button(
@@ -112,6 +132,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         onMouseClicked ={
             switchNames(3)
         }
+        isVisible = false
     }
 
     private val shuffleButton = Button(
@@ -128,7 +149,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     private val p1Input = Label(
         width = nameWidth, height = nameHeight,
         posX = (paneWidth-nameWidth)/2, posY = nameY,
-        text = "Player 1",
+        text = playerName,
         font = Font(size = 28)
 
     ).apply {
@@ -140,19 +161,30 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         width = nameHeight,
         posX = p1Input.posX - nameHeight - 20,
         posY = p1Input.posY,
-        visual = ImageVisual("HumanIcon3.png").apply {
-            style.borderRadius = BorderRadius(8)
+        visual = when(playerType) {
+            0 -> ImageVisual("HumanIcon3.png").apply {
+                style.borderRadius = BorderRadius(8)
+            }
+            1 -> ImageVisual("EasyBotIcon3.png").apply {
+                style.borderRadius = BorderRadius(8)
+            }
+            2 -> ImageVisual("HardBotIcon3.png").apply {
+                style.borderRadius = BorderRadius(8)
+            }
+            else -> throw IllegalArgumentException("Player type must be between 0 and 2, $playerType not supported")
         }
     )
 
     private val p2Input = Label(
         width = nameWidth, height = nameHeight,
         posX = (paneWidth - nameWidth)/2, posY = nameY + nameHeight + nameDistance,
-        text = " Player 2",
-        font = Font(size = 28)
+        text = "",
+        font = Font(size = 28),
+        visual = ColorVisual(204, 212, 209).apply {
+            style.borderRadius = BorderRadius(8)
+        }
     ).apply {
-        visual = ColorVisual(204, 212, 209).apply { style.borderRadius = BorderRadius(8) }
-
+        isVisible = false
     }
 
     private val p2Icon = Label(
@@ -160,18 +192,23 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         width = nameHeight,
         posX = p2Input.posX - nameHeight - 20,
         posY = p2Input.posY,
-        visual = ImageVisual("EasyBotIcon3.png").apply {
+        visual = ImageVisual("NetworkIcon.png").apply {
             style.borderRadius = BorderRadius(8)
         }
-    )
+    ).apply {
+        isVisible = false
+    }
 
     private val p3Input = Label(
         width = nameWidth, height = nameHeight,
         posX = (paneWidth - nameWidth)/2, posY = nameY + 2*nameHeight + 2*nameDistance,
-        text = "Player 3",
-        font = Font(size = 28)
+        text = "",
+        font = Font(size = 28),
+        visual = ColorVisual(204, 212, 209).apply {
+            style.borderRadius = BorderRadius(8)
+        }
     ).apply {
-        visual = ColorVisual(204, 212, 209).apply { style.borderRadius = BorderRadius(8) }
+        isVisible = false
     }
 
     private val p3Icon = Label(
@@ -179,41 +216,40 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         width = nameHeight,
         posX = p3Input.posX - nameHeight - 20,
         posY = p3Input.posY,
-        visual = ImageVisual("HardBotIcon3.png").apply {
+        visual = ImageVisual("NetworkIcon.png").apply {
             style.borderRadius = BorderRadius(8)
         }
-    )
+    ).apply {
+        isVisible = false
+    }
 
 
     private val p4Input = Label(
         width = nameWidth, height = nameHeight,
         posX = (paneWidth - nameWidth)/2, posY = nameY + 3*nameHeight + 3*nameDistance,
-        text = "Player 4",
-        font = Font(size = 28)
+        text = "",
+        font = Font(size = 28),
+        visual = ColorVisual(204, 212, 209).apply {
+            style.borderRadius = BorderRadius(8)
+        }
     ).apply {
-        visual = ColorVisual(204, 212, 209).apply { style.borderRadius = BorderRadius(8) }
+        isVisible = false
     }
 
     private val p4Icon = Label(
         height = nameHeight,
         width = nameHeight,
         posX = p4Input.posX - nameHeight - 20,
-        posY = p4Input.posY
-    ).apply {
+        posY = p4Input.posY,
         visual = ImageVisual("NetworkIcon.png").apply {
             style.borderRadius = BorderRadius(8)
         }
+    ).apply {
+        isVisible = false
     }
 
-//    private val waitingToStart = Label(
-//        height = 60,
-//        width = nameWidth + nameHeight + 10,
-//        posX = p4Icon.posX,
-//        posY = p4Icon.posY + nameHeight + 20,
-//        text = "Waiting "
-//    )
-
     private val orderOfNames = mutableListOf(p1Input, p2Input, p3Input, p4Input)
+    private val orderOfTypes = mutableListOf(p1Icon, p2Icon, p3Icon, p4Icon)
 
     private val elk = Label(
         width = iconSize + 15, height = iconSize + 15,
@@ -226,7 +262,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         }
     }
 
-    private val hawk = Label(
+     val hawk = Label(
         width = iconSize + 15, height = iconSize + 15,
         posX = elk.posX - 2*iconDistance - 2*(iconSize + 15), posY = 30,
         font = Font(size = 40)
@@ -331,9 +367,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
     private val hawkCardB = Label(
         width = 229, height = 497,
-        posX = cardBX, posY = cardY,
-
-        ).apply {
+        posX = cardBX, posY = cardY
+    ).apply {
         visual = ImageVisual("Scoring_Hawk_B.png")
         isVisible = false
     }
@@ -417,7 +452,6 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
                 checkBox("checkBoxHawkB")
             }
         }
-
     }
 
     val checkBoxBearA = CheckBox(
@@ -434,7 +468,6 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
                 checkBox("checkBoxBearA")
             }
         }
-
     }
 
     val checkBoxBearB = CheckBox(
@@ -538,11 +571,9 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
-            app.showMenuScene(MainMenuScene(app,rootService))
+            app.showMenuScene(HostOnlineScene(app,rootService))
         }
     }
-
-//    "◀──",
 
     private val tabLabel = Label(
         posX = paneX + paneWidth - tabWidth + 80,
@@ -556,15 +587,40 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         onMouseClicked = {
             expandPanel()
             resizeScoreCards()
+            hawkCardA.isVisible = true
+            hawkCardB.isVisible = true
         }
     }
 
+    private val lobbyCode = Label(
+        posX = 35,
+        posY = paneHeight - 70,
+        width = 500,
+        height = 40,
+        alignment = Alignment.TOP_LEFT,
+        font = Font(24.0, family = "Canva Sans"),
+        text = "Lobby Code: ",
+    )
+
+    private val warning = Label(
+        width = paneWidth - 180,
+        height = 100,
+        posX = paneX + 210 + movementDistance,
+        posY = paneY + paneHeight + 45,
+        visual = ColorVisual(204, 78, 0).apply {
+            style.borderRadius = BorderRadius(15)
+        },
+        font = Font(size = 25, color = Color.WHITE, family = "Canva Sans", fontWeight = Font.FontWeight.BOLD),
+        alignment = Alignment.CENTER,
+        isWrapText = true
+    ).apply {
+        isVisible = false
+    }
 
     init {
 
         listOf(p1Input,p2Input,p3Input,p4Input, downButtonP1, downButtonP2, downButtonP3, shuffleButton,
-//             upButtonP2, upButtonP3, upButtonP4,
-            exitButton, p1Icon, p2Icon, p3Icon, p4Icon).forEach { hostPanel.add(it) }
+            exitButton, p1Icon, p2Icon, p3Icon, p4Icon, lobbyCode).forEach { hostPanel.add(it) }
 
         listOf(bear,elk,hawk,salmon,fox,
             bearCardA,bearCardB,elkCardA,elkCardB,foxCardA,foxCardB,
@@ -581,8 +637,14 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
             sidePanel,
             tabLabel,
             hostPanel,
+            warning,
             )
     }
+
+    /**
+     * This function moves the side panel containing the scorecard selection and images to the right and
+     * the main panel to the left. The onClick action for the Tab [tabLabel] is changed to startGame
+     */
 
     private fun expandPanel() {
 
@@ -590,60 +652,252 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
             ParallelAnimation(
                 MovementAnimation( // bewegt das hostPanel
                     componentView = hostPanel,
-                    fromX = hostPanel.actualPosX,
-                    toX = hostPanel.actualPosX - (hostPanel.width/2)+90,
+//                    fromX = hostPanel.actualPosX,
+//                    toX = hostPanel.actualPosX - (hostPanel.width/2)+90,
+                    byX = -movementDistance,
                     duration = 1000 // dauer
                 ),
                 MovementAnimation( // bewegt das sidePanel
                     componentView = sidePanel,
-                    fromX = sidePanel.actualPosX,
-                    toX = sidePanel.actualPosX + (sidePanel.width/2)-90,
+//                    fromX = sidePanel.actualPosX,
+//                    toX = sidePanel.actualPosX + (sidePanel.width/2)-90,
+                    byX = movementDistance,
                     duration = 1000 // dauer
                 ),
                 MovementAnimation( // bewegt das Tab
                     componentView = tabLabel,
-                    fromX = sidePanel.actualPosX,
-                    toX = sidePanel.actualPosX + (sidePanel.width/2)-90,
+//                    fromX = sidePanel.actualPosX,
+//                    toX = sidePanel.actualPosX + (sidePanel.width/2)-90,
+                    byX = movementDistance,
                     duration = 1000 // dauer
                 )
 
-                ).apply {
+            ).apply {
                 onFinished = {
-                    runOnGUIThread {
-                        //arrowButton.isVisible = false
-                        tabLabel.apply {
-                            visual = ImageVisual("StartGameTab.png").apply {
-                                style.borderRadius = BorderRadius(15)
-                            }
-                            onMouseClicked = {
-                                TODO("startGame muss aufgerufen werden")
-                            }
-                        }
-                    }
+                    updateTab()
+//                    runOnGUIThread {
+//                        tabLabel.apply {
+//                            visual = ImageVisual("StartGameTab.png").apply {
+//                                style.borderRadius = BorderRadius(15)
+//                            }
+//                            onMouseClicked = {
+//                                if(allScoreCardsSelected() && enoughPlayers()) {
+//                                    rootService.gameService.startNewGame(getFinalPlayerList(), getFinalScoreCards())
+//                                } else {
+//                                    val delay = DelayAnimation(5000)
+//                                    playAnimation(delay).apply {
+//                                        onFinished = {
+//                                            warning.isVisible = false
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
                 }
             }
         )
     }
 
-    private fun names() : List<String> {
-        return listOf(p1Input.text.trim(),p2Input.text.trim(),p3Input.text.trim(),p4Input.text.trim())
-    }
-
-    private fun shuffleNames() {
-        // ich filter die Liste nach allem die nicht leer sind und dann shuffle ich diese und packe sie in eine
-        // Liste
-        val player = names().filter { it != "" }.shuffled().toMutableList()
-        // fügt bei allem leeren "" hinzu
-        repeat(4-player.size){
-            player.add("")
+    /**
+     * This function updates the [Visual] and onMouseClicked functionality of the [tabLabel].
+     */
+    private fun updateTab() {
+        runOnGUIThread {
+            tabLabel.apply {
+                visual = ImageVisual("StartGameTab.png").apply {
+                    style.borderRadius = BorderRadius(15)
+                }
+                onMouseClicked = {
+                    if(allScoreCardsSelected() && enoughPlayers()) {
+                        rootService.gameService.startNewGame(getFinalPlayerList(), getFinalScoreCards())
+                    } else {
+                        warning.isVisible = true
+                        playAnimation(
+                            DelayAnimation(3000).apply {
+                            onFinished = {
+                                warning.isVisible = false
+                            }
+                            }
+                        )
+                    }
+                }
+            }
         }
-        // wird wieder ins Feld geschieben
-        p1Input.text = player[0]
-        p2Input.text = player[1]
-        p3Input.text = player[2]
-        p4Input.text = player[3]
-
     }
+
+    /**
+     * This function returns true if a [CheckBox] is checked for each animal type, false otherwise. If false, a player
+     * warning becomes visible.
+     */
+    private fun allScoreCardsSelected(): Boolean {
+        val bear = (checkBoxBearA.isChecked || checkBoxBearB.isChecked)
+        val hawk = (checkBoxHawkA.isChecked || checkBoxHawkB.isChecked)
+        val fox = (checkBoxFoxA.isChecked || checkBoxFoxB.isChecked)
+        val salmon = (checkBoxSalmonA.isChecked || checkBoxSalmonB.isChecked)
+        val elk = (checkBoxElkA.isChecked || checkBoxElkB.isChecked)
+        if(!(bear && hawk && fox && salmon && elk)) {
+            //warning.isVisible = true
+            warning.text = "You need to select a Score Card for each animal type to play."
+            return false
+        } else {
+            return true
+        }
+    }
+
+    /**
+     * This function returns true if there is a second player in the Lobby, false otherwise. If false, a player warning
+     * becomes visible.
+     */
+    private fun enoughPlayers(): Boolean {
+        if(p2Input.isVisible) {
+            return true
+        } else {
+            //warning.isVisible = true
+            warning.text = "You need at least 2 players to play."
+            return false
+        }
+    }
+
+    /**
+     * This function returns a [List] of [Pair]s of [String] and [PlayerType] containing the name and type of all
+     * occupied player slots.
+     */
+
+    private fun getFinalPlayerList(): List<Pair<String, PlayerType>> {
+        val list: MutableList<Pair<String, PlayerType>> = mutableListOf()
+        var type = PlayerType.HUMAN
+        var name = ""
+        for(i in 0..3) {
+            when (i) {
+                0 -> {
+                    type = getPlayerType(orderOfTypes[0])
+                    name = orderOfNames[0].text
+                }
+                1 -> {
+                    type = getPlayerType(orderOfTypes[1])
+                    name = orderOfNames[1].text
+                }
+                2 -> {
+                    type = getPlayerType(orderOfTypes[2])
+                    name = orderOfNames[2].text
+                }
+                3 -> {
+                    type = getPlayerType(orderOfTypes[3])
+                    name = orderOfNames[3].text
+                }
+            }
+            if(name != "") list.add(Pair(name,type))
+        }
+        return list.toList()
+    }
+
+    /**
+     * This function returns the [PlayerType] corresponding to the [ImageVisual] saved in the given [Label] [icon]
+     */
+
+    private fun getPlayerType(icon: Label): PlayerType {
+        return when(icon.visual) {
+            ImageVisual("HumanIcon3.png") -> PlayerType.HUMAN
+            ImageVisual("EasyBotIcon3.png") -> PlayerType.EASY_BOT
+            ImageVisual("HardBotIcon3.png") -> PlayerType.HARD_BOT
+            ImageVisual("NetworkIcon.png") -> PlayerType.NETWORK
+            else -> throw IllegalArgumentException("Unknown player type")
+        }
+    }
+
+    /**
+     * This function returns a [List] of [Boolean], one for each animal type. When true, scorecard A was selected for
+     * this animal, otherwise card B. Order of animals: bear, elk, salmon, hawk, fox
+     */
+
+    private fun getFinalScoreCards(): List<Boolean> {
+        val list: MutableList<Boolean> = mutableListOf()
+        list.add(0, checkBoxBearA.isChecked)
+        list.add(1, checkBoxElkA.isChecked)
+        list.add(2, checkBoxSalmonA.isChecked)
+        list.add(3, checkBoxHawkA.isChecked)
+        list.add(4, checkBoxFoxA.isChecked)
+        return list.toList()
+    }
+
+    /**
+     * This function shuffles the [String] saved in the players' name slots and the corresponding [Visual] in the
+     * players' icon. Empty/unused slots will be sorted to the bottom slots.
+     */
+    private fun shuffleNames() {
+
+        //pair up the players' names and icons into a list
+        val nameAndType = getNameAndTypePairs()
+
+        //shuffle the list
+        val shuffledList = nameAndType.shuffled(
+        )
+
+        //sort list so that unused/empty player slots are at the end of the list. fill the list with temporary values
+        //to start and then overwrite with the correct ones
+        val sortedList: MutableList<Pair<String, Visual>> = mutableListOf(Pair("", ImageVisual("NetworkIcon.png")),
+            Pair("", ImageVisual("NetworkIcon.png")), Pair("", ImageVisual("NetworkIcon.png")),
+            Pair("", ImageVisual("NetworkIcon.png")))
+        var endOfList = 3
+        var startOfList = 0
+
+        for(i in 0..3) {
+            println("length of shuffledList: ${shuffledList.size} index i: $i")
+            if(shuffledList[i].first == "") {
+                sortedList[endOfList] = shuffledList[i]
+                endOfList -= 1
+            } else {
+                sortedList[startOfList] = shuffledList[i]
+                startOfList += 1
+            }
+        }
+
+        //update the lists orderOfNames and orderOfTypes according to the shuffle results
+        for (i in 0..3) {
+            orderOfNames[i].text = sortedList[i].first
+            orderOfTypes[i].visual = sortedList[i].second
+        }
+    }
+
+    /**
+     * This function pairs up the [String] and [Visual] of all player slots and returns them in a [List]
+     */
+    private fun getNameAndTypePairs(): List<Pair<String, Visual>> {
+        val list = mutableListOf<Pair<String, Visual>>()
+        var name = p1Input
+        var type = p1Icon.visual
+        for(i in 0..3) {
+            when(i) {
+                0 -> {
+                    name = p1Input
+                    type = p1Icon.visual
+
+                }
+                1 -> {
+                    name = p2Input
+                    type = p2Icon.visual
+                }
+                2 -> {
+                    name = p3Input
+                    type = p3Icon.visual
+                }
+                3 -> {
+                    name = p4Input
+                    type = p4Icon.visual
+                }
+            }
+
+            list.add(Pair(name.text, type))
+
+        }
+        return list.toList()
+    }
+    /**
+     * This function unchecks the complimentary checkbox to the one given as a String. The checkbox cannot be given as
+     * a parameter directly because of issues with recursive function calls.
+     * @param checkBox a [String] of the name of the [CheckBox] that is now checked. Its complement will be unchecked.
+     */
 
     private fun checkBox(checkBox : String){
 
@@ -665,35 +919,56 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         }
     }
 
+    /**
+     * This function switches the position of two [Label]s containing player names and the corresponding player type
+     * icons via Movement Animations.
+     * @param button [Int] number of the button that initiated this function call, determines which labels get
+     * switched. Button 1 -> the first two labels/players get switched; Button 2 -> players 2 and 3 get switched...
+     */
+
     private fun switchNames(button: Int){
         val name1 : Label
         val name2 : Label
+        val typeIcon1: Label
+        val typeIcon2: Label
         val pos1 : Double
         val pos2 : Double
         when(button) {
             1 -> {
                 name1 = orderOfNames[0]
                 name2 = orderOfNames[1]
+                typeIcon1 = orderOfTypes[0]
+                typeIcon2 = orderOfTypes[1]
                 pos1 = name1.posY
                 pos2 = name2.posY
                 orderOfNames[0] = name2
                 orderOfNames[1] = name1
+                orderOfTypes[0] = typeIcon2
+                orderOfTypes[1] = typeIcon1
             }
             2 -> {
                 name1 = orderOfNames[1]
                 name2 = orderOfNames[2]
+                typeIcon1 = orderOfTypes[1]
+                typeIcon2 = orderOfTypes[2]
                 pos1 = name1.posY
                 pos2 = name2.posY
                 orderOfNames[1] = name2
                 orderOfNames[2] = name1
+                orderOfTypes[1] = typeIcon2
+                orderOfTypes[2] = typeIcon1
             }
             3 -> {
                 name1 = orderOfNames[2]
                 name2 = orderOfNames[3]
+                typeIcon1 = orderOfTypes[2]
+                typeIcon2 = orderOfTypes[3]
                 pos1 = name1.posY
                 pos2 = name2.posY
                 orderOfNames[2] = name2
                 orderOfNames[3] = name1
+                orderOfTypes[2] = typeIcon2
+                orderOfTypes[3] = typeIcon1
             }
             else -> throw IllegalArgumentException("Invalid button for this function: $button")
         }
@@ -709,10 +984,24 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
                     componentView = name2,
                     toY = pos1,
                     duration = 500 // dauer
+                ),
+                MovementAnimation(
+                    componentView = typeIcon1,
+                    toY = pos2,
+                    duration = 500 // dauer
+                ),
+                MovementAnimation(
+                    componentView = typeIcon2,
+                    toY = pos1,
+                    duration = 500 // dauer
                 )
             )
         )
     }
+
+    /**
+     * This function makes the given [Label]s visible and all other scoring card labels invisible
+     */
 
     private fun showScoreCards(cardA: Label, cardB: Label) {
         val cards = listOf(salmonCardA, salmonCardB, hawkCardA, hawkCardB, foxCardA, foxCardB,
@@ -722,6 +1011,10 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
             else card.isVisible = false
         }
     }
+
+    /**
+     * This function randomly selects A or B for each pair of scoring cards
+     */
 
     private fun randomizeScoreCards() {
         val randomizerList = mutableListOf(true, false)
@@ -734,7 +1027,12 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         }
     }
 
-    fun resizeScoreCards() {
+    /**
+     * This function resizes all scoring cards to a height of 370 pixels, the width is respectively
+     * resized proportionally
+     */
+
+    private fun resizeScoreCards() {
         elkCardA.resize(192, 370)
         elkCardB.resize(192, 370)
         hawkCardA.resize(170, 370)
@@ -745,5 +1043,112 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         foxCardB.resize(170, 370)
         bearCardA.resize(194, 370)
         bearCardB.resize(194, 370)
+    }
+
+//    override fun refreshAfterGameConfigMessage(players: List<String>, scoringCards: List<Boolean>) {
+//        updatePlayers(players)
+//    }
+
+    //TODO("refresh anpassen wenn Netzwerk steht")
+
+//    override fun refreshAfterLobbyOpened(lobbyCode: String) {
+//        this.lobbyCode.text = "Lobby Code: $lobbyCode"
+//    }
+
+    /**
+     * Closes the MenuScene when called.
+     */
+    override fun refreshAfterStartGame() {
+        app.hideMenuScene()
+    }
+
+    /**
+     * This function returns true when the given [List] [players] is duplicate free, false otherwise
+     */
+    private fun duplicateFree(players: List<String>): Boolean {
+        return players.size == players.distinct().size
+    }
+
+    /**
+     * This function updates the player name slots with the entries in [players] and the player icons with the
+     * corresponding icons/visuals. Unused name slots, icons and downButtons are set to be invisible.
+     */
+    private fun updatePlayers(players: List<String>) {
+        if(players.isEmpty() || players.size > 4) {
+            throw IllegalArgumentException("Invalid number of players: ${players.size}")
+        }
+        if (!duplicateFree(players)) {
+            throw IllegalArgumentException("Duplicate names are not allowed")
+        }
+        for (i in 1..4) {
+            when (i) {
+                1 -> {
+                    p1Input.text = players[0]
+                    p1Icon.visual = getVisual(players[0])
+                }
+                2 -> {
+                    if (players.size > 1) {
+                        p2Input.text = players[1]
+                        p2Icon.visual = getVisual(players[1])
+                        downButtonP1.isVisible = true
+                    } else {
+                        p2Icon.isVisible = false
+                        p2Input.isVisible = false
+                        p2Input.text = ""
+                        downButtonP1.isVisible = false
+                    }
+                }
+                3 -> {
+                    if (players.size > 2) {
+                        p3Input.text = players[2]
+                        p3Icon.visual = getVisual(players[2])
+                        downButtonP2.isVisible = true
+                    } else {
+                        p3Icon.isVisible = false
+                        p3Input.isVisible = false
+                        p3Input.text  = ""
+                        downButtonP2.isVisible = false
+                    }
+                }
+                4 -> {
+                    if (players.size > 3) {
+                        p4Input.text = players[3]
+                        p4Icon.visual = getVisual(players[3])
+                        downButtonP3.isVisible = true
+                    } else {
+                        p4Icon.isVisible = false
+                        p4Input.isVisible = false
+                        p4Input.text = ""
+                        downButtonP3.isVisible = false
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * This function returns the [ImageVisual] for [playerType] if [name] is the [playerName] and
+     * the NetworkIcon otherwise
+     */
+
+    private fun getVisual(name: String): ImageVisual {
+        return if (name == playerName) {
+             when (playerType) {
+                0 -> ImageVisual("HumanIcon3.png").apply {
+                    style.borderRadius = BorderRadius(8)
+                }
+                1 -> ImageVisual("EasyBotIcon3.png").apply {
+                    style.borderRadius = BorderRadius(8)
+                }
+                2 -> ImageVisual("HardBotIcon3.png").apply {
+                    style.borderRadius = BorderRadius(8)
+                }
+                else -> throw IllegalArgumentException("Invalid playerType: $playerType")
+            }
+        } else {
+            ImageVisual("NetworkIcon.png").apply {
+                style.borderRadius = BorderRadius(8)
+            }
+        }
     }
 }
