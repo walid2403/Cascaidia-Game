@@ -823,6 +823,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
                             onMouseClicked = {
                                 if(checkStartReady()) {
                                     rootService.gameService.startNewGame(getFinalPlayers(), getFinalScoreCards())
+                                    //app.hideMenuScene()
                                 }
                             }
                         }
@@ -1080,7 +1081,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
                 ready = false
             }
         }
-        if(names.size != names.distinct().size) {
+
+        if(names.filter{it != ""}.size != names.filter{it != ""}.distinct().size) {
             warning.text = "All player names must be unique."
             warning.isVisible = true
             ready = false
@@ -1127,10 +1129,10 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
      */
     private fun getFinalPlayerNames(): List<String> {
         val list = mutableListOf<String>()
-        if(p1Input.text != "") list.add(p1Input.text)
-        if(p2Input.text != "") list.add(p2Input.text)
-        if(p3Input.text != "") list.add(p3Input.text)
-        if(p4Input.text != "") list.add(p4Input.text)
+        if(p1Input.text != "" && p1Type != 3) list.add(p1Input.text)
+        if(p2Input.text != "" && p2Type != 3) list.add(p2Input.text)
+        if(p3Input.text != "" && p3Type != 3) list.add(p3Input.text)
+        if(p4Input.text != "" && p4Type != 3) list.add(p4Input.text)
         return list.toList()
     }
 
@@ -1173,9 +1175,9 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         return list.toList()
     }
 
-    override fun refreshAfterStartGame() {
-        app.hideMenuScene()
-    }
+//    override fun refreshAfterStartGame() {
+//        app.hideMenuScene()
+//    }
 }
 
 
