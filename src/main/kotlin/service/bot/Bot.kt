@@ -54,6 +54,8 @@ class Bot (private val rootService: RootService) {
             }
             newLegalTurns(legalTurns)
         }
+
+        rootService.gameService.changeTurn()
     }
 
     private fun newLegalTurns(legalTurns: MutableList<TurnOptions>) {
