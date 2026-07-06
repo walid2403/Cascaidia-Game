@@ -23,7 +23,9 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
      * not exactly five scoringCards
      * @throws IllegalStateException If there is currently a game running
      */
-    fun startNewGame(playerList: List<Pair<String, PlayerType>>, scoringCards: List<Boolean>) {
+    fun startNewGame(
+        playerList: List<Pair<String, PlayerType>>, scoringCards: List<Boolean>,
+        startingTiles: List<Int>? = null, tileIDs: List<Int>? = null, wildlifeBag: List<WildlifeToken>? = null) {
 
     }
 
