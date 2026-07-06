@@ -265,7 +265,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(10) }
         onMouseClicked = {
-            if(player == 4) player = 1
+            if(player == 3) player = 1
             else player++
             rootService.gameService.changeTurn()
             showPlayer(player, false)
@@ -329,7 +329,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private val lableAboveCamOne = Label(posX = 55, posY = 65, width = 245, height = 130).apply {
         isDisabled = true
         onMouseEntered = {
-            showPlayer(1, true)
+            showPlayer(0, true)
             playerName.text = "Luca"
         }
         onMouseExited = {
@@ -340,7 +340,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private val lableAboveCamTwo = Label(posX = 55, posY = 295, width = 245, height = 130).apply {
         isDisabled = true
         onMouseEntered = {
-            showPlayer(2, true)
+            showPlayer(1, true)
             playerName.text = "Theresa"
         }
         onMouseExited = {
@@ -351,7 +351,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private val lableAboveCamThree = Label(posX = 55, posY = 525, width = 245, height = 130).apply {
         isDisabled = true
         onMouseEntered = {
-            showPlayer(3, true)
+            showPlayer(2, true)
             playerName.text = "Philipp"
         }
         onMouseExited = {
@@ -362,7 +362,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private val lableAboveCamFour = Label(posX = 55, posY = 755, width = 245, height = 130).apply {
         isDisabled = true
         onMouseEntered = {
-            showPlayer(4, true)
+            showPlayer(3, true)
             playerName.text = "Nicolas"
         }
         onMouseExited = {
@@ -602,19 +602,19 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         var x = 0.0
         var y = 0.0
         when(player) {
-            1 -> {
+            0 -> {
                 x = 1130.0
                 y = 384.0
             }
-            2 -> {
+            1 -> {
                 x = 1540.0
                 y = 709.0
             }
-            3 -> {
+            2 -> {
                 x = 990.0
                 y = 834.0
             }
-            4 -> {
+            3 -> {
                 x = 580.0
                 y = 509.0
             }
@@ -622,7 +622,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         if(!fromMiniMap) {
             //Aus dem alten Spieler rauszoomen, eine Sekunde delay und in den aktuellen Spieler reinzoomen
-            if (this.player != 0) {
+            if (this.player != -1) {
                 playerName.isVisible = false
                 cameraPane.pan(x = 0, y = 0, zoom = 1.0, smooth = true)
                 playAnimation(
@@ -885,6 +885,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         disableAllButtons()
 
         animateDealTile()
+        changeGreyVisibility(true, 0)
+        changeGreyVisibility(false, 1)
+        changeGreyVisibility(false, 2)
+        changeGreyVisibility(false, 3)
+
+        showPlayer(-1,false)
         startFirstTurn()
 
 
@@ -898,16 +904,23 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             if(index < game.playerQueue.size) {
                 var tile = game.playerQueue.elementAt(index).board.get(Triple(0,0,0))
                 checkNotNull(tile)
-                grid[0,0] = tileMap.forward(tile)
+                var hexView = tileMap.forward(tile)
+                grid[0,0] = hexView
+                addGreyHexagon(hexView)
 
                 tile = game.playerQueue.elementAt(index).board.get(Triple(1,0,-1))
                 checkNotNull(tile)
-                grid[1,0] = tileMap.forward(tile)
+                hexView = tileMap.forward(tile)
+                grid[1,0] = hexView
+                addGreyHexagon(hexView)
 
                 tile = game.playerQueue.elementAt(index).board.get(Triple(0,1,-1))
                 checkNotNull(tile)
-                grid[0,1] = tileMap.forward(tile)
+                hexView = tileMap.forward(tile)
+                grid[0,1] = hexView
+                addGreyHexagon(hexView)
             }
+
         }
     }
 
@@ -943,6 +956,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
 
         activatesTileButtons()
+        changeGreyVisibility(false, player)
     }
 
     private fun putTileInGrid(x: Int, y: Int) {
@@ -967,8 +981,25 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     override fun refreshAfterChangeTurn(lastTurn: Boolean) {
-
         deactivatesTileButtons()
+        player++
+        showPlayer(player, false)
+        changeGreyVisibility(true, player)
+
+        if(isHuman()) {
+            //activateButtons()
+        } else {
+            //deactivateAllButtons()
+        }
+
+        //refreshShop()       //Game Ende testen wenn TileStack leer ist oder zu wenig animal Tokens
+        //saveGameState()
+    }
+
+    private fun isHuman(): Boolean {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        return if(game.playerQueue.peek().type == PlayerType.HUMAN) true else false
     }
 
 
@@ -1052,7 +1083,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
-    private fun changeGreyVisibility(visible: Boolean) {
+    private fun changeGreyVisibility(visible: Boolean, player: Int) {
         listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(player).components.filter { it.choiceHex }.forEach { it.isVisible = visible }
     }
 
