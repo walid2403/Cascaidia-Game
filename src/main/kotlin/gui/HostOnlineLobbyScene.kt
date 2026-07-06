@@ -77,13 +77,13 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         posY = 0,
         width = 1920,
         height = 1080,
-        visual = ImageVisual("GameConfigMenuBackground.png")
+        visual = ImageVisual("backgrounds/GameConfigMenuBackground.png")
     )
     private val hostPanel = Pane<UIComponent>(
         posX = paneX, posY = paneY,
         width = paneWidth, height = paneHeight,
     ).apply {
-        visual = ImageVisual("HostMenuBackground.png").apply {
+        visual = ImageVisual("backgrounds/HostMenuBackground.png").apply {
             style.borderRadius = BorderRadius(35)
         }
     }
@@ -92,7 +92,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         posX = paneX, posY = paneY,
         width = paneWidth, height = paneHeight,
     ).apply {
-        visual = ImageVisual("ScoreCardPaneBackground.png").apply {
+        visual = ImageVisual("assets/ScoreCardPaneBackground.png").apply {
             style.borderRadius = BorderRadius(35)
         }
     }
@@ -162,13 +162,13 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         posX = p1Input.posX - nameHeight - 20,
         posY = p1Input.posY,
         visual = when(playerType) {
-            0 -> ImageVisual("HumanIcon3.png").apply {
+            0 -> ImageVisual("icons/HumanIcon3.png").apply {
                 style.borderRadius = BorderRadius(8)
             }
-            1 -> ImageVisual("EasyBotIcon3.png").apply {
+            1 -> ImageVisual("icons/EasyBotIcon3.png").apply {
                 style.borderRadius = BorderRadius(8)
             }
-            2 -> ImageVisual("HardBotIcon3.png").apply {
+            2 -> ImageVisual("icons/HardBotIcon3.png").apply {
                 style.borderRadius = BorderRadius(8)
             }
             else -> throw IllegalArgumentException("Player type must be between 0 and 2, $playerType not supported")
@@ -192,7 +192,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         width = nameHeight,
         posX = p2Input.posX - nameHeight - 20,
         posY = p2Input.posY,
-        visual = ImageVisual("NetworkIcon.png").apply {
+        visual = ImageVisual("icons/NetworkIcon.png").apply {
             style.borderRadius = BorderRadius(8)
         }
     ).apply {
@@ -216,7 +216,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         width = nameHeight,
         posX = p3Input.posX - nameHeight - 20,
         posY = p3Input.posY,
-        visual = ImageVisual("NetworkIcon.png").apply {
+        visual = ImageVisual("icons/NetworkIcon.png").apply {
             style.borderRadius = BorderRadius(8)
         }
     ).apply {
@@ -241,7 +241,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         width = nameHeight,
         posX = p4Input.posX - nameHeight - 20,
         posY = p4Input.posY,
-        visual = ImageVisual("NetworkIcon.png").apply {
+        visual = ImageVisual("icons/NetworkIcon.png").apply {
             style.borderRadius = BorderRadius(8)
         }
     ).apply {
@@ -256,7 +256,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         posX = (paneWidth)/2 + 90 - (iconSize + 15)/2, posY = 30,
         font = Font(size = 40)
     ).apply {
-        visual = ImageVisual("elk.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/elk.png", iconSize, iconSize)
         onMouseClicked = {
             showScoreCards(elkCardA, elkCardB)
         }
@@ -267,7 +267,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         posX = elk.posX - 2*iconDistance - 2*(iconSize + 15), posY = 30,
         font = Font(size = 40)
     ).apply {
-        visual = ImageVisual("hawk.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/hawk.png", iconSize, iconSize)
         onMouseClicked = {
             showScoreCards(hawkCardA, hawkCardB)
         }
@@ -278,7 +278,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         posX = elk.posX - iconDistance - (iconSize + 15), posY = 30,
         font = Font(size = 40)
     ).apply {
-        visual = ImageVisual("salmon.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/salmon.png", iconSize, iconSize)
         onMouseClicked = {
             showScoreCards(salmonCardA, salmonCardB)
         }
@@ -288,7 +288,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         width = iconSize + 15, height = iconSize + 15,
         posX = elk.posX + iconDistance + iconSize + 15, posY = 30,        font = Font(size = 40)
     ).apply {
-        visual = ImageVisual("fox.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/fox.png", iconSize, iconSize)
 
         onMouseClicked = {
             showScoreCards(foxCardA, foxCardB)
@@ -300,7 +300,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         posX = elk.posX + 2*iconDistance + 2*(iconSize + 15), posY = 30,
         font = Font(size = 40)
     ).apply {
-        visual = ImageVisual("bear.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/bear.png", iconSize, iconSize)
         onMouseClicked = {
             showScoreCards(bearCardA, bearCardB)
         }
@@ -310,7 +310,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         width = 207, height = 394,
         posX = cardAX - 5, posY = cardY,
     ).apply {
-        visual = ImageVisual("Scoring_Bear_A.png")
+        visual = ImageVisual("scoringCards/Scoring_Bear_A.png")
         isVisible = false
     }
 
@@ -319,7 +319,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         posX = cardBX - 5, posY = cardY,
 
     ).apply {
-        visual = ImageVisual("Scoring_Bear_B.png")
+        visual = ImageVisual("scoringCards/Scoring_Bear_B.png")
         isVisible = false
     }
 
@@ -327,7 +327,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         width = 262, height = 504,
         posX = cardAX, posY = cardY,
     ).apply {
-        visual = ImageVisual("Scoring_Elk_A.png")
+        visual = ImageVisual("scoringCards/Scoring_Elk_A.png")
         isVisible = false
     }
 
@@ -336,7 +336,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         posX = cardBX - 5, posY = cardY,
 
         ).apply {
-        visual = ImageVisual("Scoring_Elk_B.png")
+        visual = ImageVisual("scoringCards/Scoring_Elk_B.png")
         isVisible = false
     }
 
@@ -344,7 +344,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         width = 183, height = 383,
         posX = cardAX, posY = cardY,
     ).apply {
-        visual = ImageVisual(path = "Scoring_Fox_A.png")
+        visual = ImageVisual(path = "scoringCards/Scoring_Fox_A.png")
         isVisible = false
     }
 
@@ -353,7 +353,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         posX = cardBX, posY = cardY,
 
         ).apply {
-        visual = ImageVisual("Scoring_Fox_B.png")
+        visual = ImageVisual("scoringCards/Scoring_Fox_B.png")
         isVisible = false
     }
 
@@ -361,7 +361,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         width = 229, height = 497,
         posX = cardAX, posY = cardY,
     ).apply {
-        visual = ImageVisual("Scoring_Hawk_A.png")
+        visual = ImageVisual("scoringCards/Scoring_Hawk_A.png")
         isVisible = false
     }
 
@@ -369,7 +369,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         width = 229, height = 497,
         posX = cardBX, posY = cardY
     ).apply {
-        visual = ImageVisual("Scoring_Hawk_B.png")
+        visual = ImageVisual("scoringCards/Scoring_Hawk_B.png")
         isVisible = false
     }
 
@@ -377,7 +377,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         width = 229, height = 497,
         posX = cardAX, posY = cardY,
     ).apply {
-        visual = ImageVisual("Scoring_Salmon_A.png")
+        visual = ImageVisual("scoringCards/Scoring_Salmon_A.png")
         isVisible = false
     }
 
@@ -386,7 +386,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         posX = cardBX, posY = cardY,
 
         ).apply {
-        visual = ImageVisual("Scoring_Salmon_B.png")
+        visual = ImageVisual("scoringCards/Scoring_Salmon_B.png")
         isVisible = false
     }
 
@@ -580,7 +580,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         posY = paneY + paneHeight - tabHeight,
         width = tabWidth,
         height = tabHeight,
-        visual = ImageVisual("FoldOutTab.png").apply {
+        visual = ImageVisual("assets/FoldOutTab.png").apply {
             style.borderRadius = BorderRadius(15.0)
         }
     ).apply {
@@ -705,7 +705,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     private fun updateTab() {
         runOnGUIThread {
             tabLabel.apply {
-                visual = ImageVisual("StartGameTab.png").apply {
+                visual = ImageVisual("assets/StartGameTab.png").apply {
                     style.borderRadius = BorderRadius(15)
                 }
                 onMouseClicked = {
@@ -801,7 +801,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
             ImageVisual("HumanIcon3.png") -> PlayerType.HUMAN
             ImageVisual("EasyBotIcon3.png") -> PlayerType.EASY_BOT
             ImageVisual("HardBotIcon3.png") -> PlayerType.HARD_BOT
-            ImageVisual("NetworkIcon.png") -> PlayerType.NETWORK
+            ImageVisual("icons/NetworkIcon.png") -> PlayerType.NETWORK
             else -> throw IllegalArgumentException("Unknown player type")
         }
     }
@@ -836,14 +836,13 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
         //sort list so that unused/empty player slots are at the end of the list. fill the list with temporary values
         //to start and then overwrite with the correct ones
-        val sortedList: MutableList<Pair<String, Visual>> = mutableListOf(Pair("", ImageVisual("NetworkIcon.png")),
-            Pair("", ImageVisual("NetworkIcon.png")), Pair("", ImageVisual("NetworkIcon.png")),
-            Pair("", ImageVisual("NetworkIcon.png")))
+        val sortedList: MutableList<Pair<String, Visual>> = mutableListOf(Pair("", ImageVisual("icons/NetworkIcon.png")),
+            Pair("", ImageVisual("icons/NetworkIcon.png")), Pair("", ImageVisual("icons/NetworkIcon.png")),
+            Pair("", ImageVisual("icons/NetworkIcon.png")))
         var endOfList = 3
         var startOfList = 0
 
         for(i in 0..3) {
-            println("length of shuffledList: ${shuffledList.size} index i: $i")
             if(shuffledList[i].first == "") {
                 sortedList[endOfList] = shuffledList[i]
                 endOfList -= 1
@@ -1144,7 +1143,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
                 else -> throw IllegalArgumentException("Invalid playerType: $playerType")
             }
         } else {
-            ImageVisual("NetworkIcon.png").apply {
+            ImageVisual("icons/NetworkIcon.png").apply {
                 style.borderRadius = BorderRadius(8)
             }
         }

@@ -32,7 +32,7 @@ class PauseMenuScene (private val app: SopraApplication, private val rootService
         posY = 0,
         width = paneWidth,
         height = paneHeight,
-        visual = ImageVisual("PauseMenuBackground.png").apply {
+        visual = ImageVisual("backgrounds/PauseMenuBackground.png").apply {
             style.borderRadius = BorderRadius(51)
         }
     )

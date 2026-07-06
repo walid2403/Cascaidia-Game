@@ -34,14 +34,14 @@ class MainMenuScene(private val app: SopraApplication,private val rootService: R
         posY = 0,
         width = sceneWidth,
         height = sceneHeight,
-        visual = ImageVisual("ScoreSceneBackground.png")
+        visual = ImageVisual("backgrounds/ScoreSceneBackground.png")
     )
     private val menuBackground = Pane<StaticComponentView<*>>(
         posX = paneX,
         posY = paneY,
         width = paneWidth,
         height = paneHeight,
-        visual = ImageVisual("MainMenuPaneBackground.png").apply {
+        visual = ImageVisual("backgrounds/MainMenuPaneBackground.png").apply {
             style.borderRadius = BorderRadius(35)
         }
     )
@@ -122,14 +122,14 @@ class MainMenuScene(private val app: SopraApplication,private val rootService: R
         posY = sceneHeight/2,
         height = 63,
         width = 63,
-        visual = ImageVisual("EasyBotIcon.png")
+        visual = ImageVisual("icons/EasyBotIcon.png")
     )
     private val hardBotIcon = Label(
         posX = sceneWidth/2,
         posY = sceneHeight/2,
         height = 62,
         width = 63,
-        visual = ImageVisual("HardBotIcon.png")
+        visual = ImageVisual("icons/HardBotIcon.png")
     )
 
     private val easyBotIcon2 = Label(
@@ -137,14 +137,14 @@ class MainMenuScene(private val app: SopraApplication,private val rootService: R
         posY = sceneHeight/2,
         height = 70,
         width = 110,
-        visual = ImageVisual("EasyBotIcon2.png")
+        visual = ImageVisual("icons/EasyBotIcon2.png")
     )
     private val hardBotIcon2 = Label(
         posX = sceneWidth/2,
         posY = sceneHeight/2,
         height = 70,
         width = 110,
-        visual = ImageVisual("HardBotIcon2.png")
+        visual = ImageVisual("icons/HardBotIcon2.png")
     )
 
     init {

@@ -1,6 +1,5 @@
 package gui
 
-import com.sun.tools.doclint.Entity
 import service.Refreshable
 import service.RootService
 import tools.aqua.bgw.animation.DelayAnimation
@@ -57,7 +56,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
     //Hintergrundbild
-    private val logo = Label(posX = 0,posY = 0,width = 1920,height = 1080,visual = ImageVisual("CascadiaHintergrund.png"))
+    private val logo = Label(posX = 0,posY = 0,width = 1920,height = 1080,visual = ImageVisual("backgrounds/CascadiaHintergrund.png"))
 
     //Graue Box um Auswahl
     private val grayBox = Label(width = 950, height = 300, posX = 485, posY = -40).apply {
@@ -144,8 +143,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     //Tannenzapfen Symbole an Buttons
-    private val pineCone1 = Label(posX = 525,posY = 35,width = 40,height = 40,visual = ImageVisual("pinecone.png"))
-    private val pineCone2 = Label(posX = 525,posY = 110,width = 40,height = 40,visual = ImageVisual("pinecone.png"))
+    private val pineCone1 = Label(posX = 525,posY = 35,width = 40,height = 40,visual = ImageVisual("tokens/pinecone.png"))
+    private val pineCone2 = Label(posX = 525,posY = 110,width = 40,height = 40,visual = ImageVisual("tokens/pinecone.png"))
 
 //    //Auswahl Habitate
 //    private val tileChoice1 = HexagonViewExtended(posX = 820, posY = 30, size = 60, visual = ColorVisual(170,170,170)).apply {
@@ -384,16 +383,16 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     //NatureToken Symbole unter den kleinen Kameras
     private val natureTokenOneSide = Label(width = 30, height = 30, posX = 220, posY = 213).apply {
-        visual= ImageVisual("pinecone.png")
+        visual= ImageVisual("tokens/pinecone.png")
     }
     private val natureTokenTwoSide = Label(width = 30, height = 30, posX = 220, posY = 443).apply {
-        visual= ImageVisual("pinecone.png")
+        visual= ImageVisual("tokens/pinecone.png")
     }
     private val natureTokenThreeSide = Label(width = 30, height = 30, posX = 220, posY = 673).apply {
-        visual= ImageVisual("pinecone.png")
+        visual= ImageVisual("tokens/pinecone.png")
     }
     private val natureTokenFourSide = Label(width = 30, height = 30, posX = 220, posY = 903).apply {
-        visual= ImageVisual("pinecone.png")
+        visual= ImageVisual("tokens/pinecone.png")
     }
 
     //Anzahl NatureTokens unter den kleinen Kameras
@@ -419,27 +418,27 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     //Tiere für Scoring Cards
     private val bear = Label(width = 60, height = 60, posX = 1825, posY = 175).apply {
-        visual= ImageVisual("bear.png")
+        visual= ImageVisual("tokens/bear.png")
         onMouseEntered = { bearScoringCard.isVisible = true }
         onMouseExited = { bearScoringCard.isVisible = false }
     }
     private val elk = Label(width = 60, height = 60, posX = 1825, posY = 275).apply {
-        visual= ImageVisual("elk.png")
+        visual= ImageVisual("tokens/elk.png")
         onMouseEntered = { elkScoringCard.isVisible = true }
         onMouseExited = { elkScoringCard.isVisible = false }
     }
     private val fox = Label(width = 60, height = 60, posX = 1825, posY = 375).apply {
-        visual= ImageVisual("fox.png")
+        visual= ImageVisual("tokens/fox.png")
         onMouseEntered = { foxScoringCard.isVisible = true }
         onMouseExited = { foxScoringCard.isVisible = false }
     }
     private val salmon = Label(width = 60, height = 60, posX = 1825, posY = 475).apply {
-        visual= ImageVisual("salmon.png")
+        visual= ImageVisual("tokens/salmon.png")
         onMouseEntered = { salmonScoringCard.isVisible = true }
         onMouseExited = { salmonScoringCard.isVisible = false }
     }
     private val hawk = Label(width = 60, height = 60, posX = 1825, posY = 575).apply {
-        visual= ImageVisual("hawk.png")
+        visual= ImageVisual("tokens/hawk.png")
         onMouseEntered = { hawkScoringCard.isVisible = true }
         onMouseExited = { hawkScoringCard.isVisible = false }
     }
@@ -451,23 +450,23 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     //Scoring Karten
     private val bearScoringCard = Label(width = 229, height = 435, posX = 1556, posY = 160).apply {
-        visual= ImageVisual("Scoring_Bear_A.png")
+        visual= ImageVisual("scoringCards/Scoring_Bear_A.png")
         this.isVisible = false
     }
     private val elkScoringCard = Label(width = 229, height = 440, posX = 1556, posY = 160).apply {
-        visual= ImageVisual("Scoring_Elk_A.png")
+        visual= ImageVisual("scoringCards/Scoring_Elk_A.png")
         this.isVisible = false
     }
     private val foxScoringCard = Label(width = 229, height = 497, posX = 1556, posY = 160).apply {
-        visual= ImageVisual("Scoring_Fox_A.png")
+        visual= ImageVisual("scoringCards/Scoring_Fox_A.png")
         this.isVisible = false
     }
     private val salmonScoringCard = Label(width = 229, height = 497, posX = 1556, posY = 160).apply {
-        visual= ImageVisual("Scoring_Salmon_A.png")
+        visual= ImageVisual("scoringCards/Scoring_Salmon_A.png")
         this.isVisible = false
     }
     private val hawkScoringCard = Label(width = 229, height = 497, posX = 1556, posY = 160).apply {
-        visual= ImageVisual("Scoring_Hawk_A.png")
+        visual= ImageVisual("scoringCards/Scoring_Hawk_A.png")
         this.isVisible = false
     }
 
@@ -503,7 +502,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
     //Testweise
-    private val hex = HexagonViewExtended(size = 14.0, visual = ImageVisual("tile2.png"))
+    private val hex = HexagonViewExtended(size = 14.0, visual = ImageVisual("tiles/clear/tile2.png"))
     private val greyHex = HexagonViewExtended(size = 20.0, visual = ColorVisual(170,170,170).apply { transparency = 1.0 })
     private val label1 = Label(width = 300, height = 158, posX = 990, posY = 325).apply {
         //visual= ColorVisual(170,170,170, 127)
@@ -778,8 +777,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         //Nur zur visualisierung
         testNearOverpopulation()
-        animalChoice1.visual =  ImageVisual("fox.png")
-        animalChoice2.visual =  ImageVisual("fox.png")
+        animalChoice1.visual =  ImageVisual("tokens/fox.png")
+        animalChoice2.visual =  ImageVisual("tokens/fox.png")
     }
 
     private fun testNearOverpopulation() {
@@ -799,8 +798,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         selectAnimal = 0
 
         //Nur zur visualisierung
-        animalChoice1.visual = ImageVisual("bear.png")
-        animalChoice2.visual = ImageVisual("elk.png")
+        animalChoice1.visual = ImageVisual("tokens/bear.png")
+        animalChoice2.visual = ImageVisual("tokens/elk.png")
     }
 
 
@@ -821,7 +820,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
 
         for(tile in tileList) {
-            val hexagon = HexagonViewExtended(size = 60.0, visual = ImageVisual("tile_${tile.id}.png")).apply {
+            val hexagon = HexagonViewExtended(size = 60.0, visual = ImageVisual("tiles/choices/tile_${tile.id}.png")).apply {
                 //Neuerung 06.07
                 var inShop = false
                 var isPlaced = false
@@ -839,11 +838,11 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     private fun createAnimalView(wildlifeToken: WildlifeToken): ImageVisual {
         var image = when (wildlifeToken) {
-            WildlifeToken.FOX -> ImageVisual("fox.png")
-            WildlifeToken.HAWK -> ImageVisual("hawk.png")
-            WildlifeToken.ELK -> ImageVisual("elk.png")
-            WildlifeToken.BEAR -> ImageVisual("bear.png")
-            WildlifeToken.SALMON -> ImageVisual("salmon.png")
+            WildlifeToken.FOX -> ImageVisual("tokens/fox.png")
+            WildlifeToken.HAWK -> ImageVisual("tokens/hawk.png")
+            WildlifeToken.ELK -> ImageVisual("tokens/elk.png")
+            WildlifeToken.BEAR -> ImageVisual("tokens/bear.png")
+            WildlifeToken.SALMON -> ImageVisual("tokens/salmon.png")
         }
         return image
     }
@@ -1042,7 +1041,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     private fun getTileWithAnimal(id: Int): ImageVisual {
-        return ImageVisual("tile_${id}0.png")
+        return ImageVisual("tiles/choices/tile_${id}0.png")
     }
 
     private fun addGreyHexagon(tileView: HexagonViewExtended, playerIndex: Int = 0) {
@@ -1055,7 +1054,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         val tile = tileMap.backward(tileView)
         val tilePos = game.playerQueue.elementAt(playerIndex).board.entries.find { it.value == tile }?.key
-        println(tile.id)
         checkNotNull(tilePos)
         val tileViewPos = Pair(tilePos.first, tilePos.second)
 
@@ -1174,10 +1172,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     //Nur solange die Service Schicht noch nicht vorhanden ist um die Tiles etc. am Anfang zu laden
 
     private fun initializeTest() {
-        animalChoice1.visual = ImageVisual("bear.png")
-        animalChoice2.visual = ImageVisual("elk.png")
-        animalChoice3.visual = ImageVisual("hawk.png")
-        animalChoice4.visual = ImageVisual("fox.png")
+        animalChoice1.visual = ImageVisual("tokens/bear.png")
+        animalChoice2.visual = ImageVisual("tokens/elk.png")
+        animalChoice3.visual = ImageVisual("tokens/hawk.png")
+        animalChoice4.visual = ImageVisual("tokens/fox.png")
 
 //        tileChoice1.visual = ImageVisual("tile1.png")
 //        tileChoice2.visual = ImageVisual("tile2.png")

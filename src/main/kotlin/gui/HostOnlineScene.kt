@@ -35,7 +35,7 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
         posY = 0,
         width = 1920,
         height = 1080,
-        visual = ImageVisual("GameConfigMenuBackground.png")
+        visual = ImageVisual("backgrounds/GameConfigMenuBackground.png")
     )
 
     private val menuBackground = Label(
@@ -43,7 +43,7 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
         posY = paneY,
         width = paneWidth,
         height = paneHeight,
-        visual = ImageVisual("HostMenuBackground.png").apply {
+        visual = ImageVisual("backgrounds/HostMenuBackground.png").apply {
             style.borderRadius = BorderRadius(35)
         }
     )
@@ -65,7 +65,7 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
         posY = 440,
         width = 110,
         height = 70,
-        visual = ImageVisual("HumanIcon2.png")
+        visual = ImageVisual("icons/HumanIcon2.png")
     )
 
     private val switchTypeLeftButton = Button(
@@ -220,11 +220,11 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
         }
 
         val newVisual = when (newType) {
-            0 -> ImageVisual("HumanIcon2.png")
+            0 -> ImageVisual("icons/HumanIcon2.png")
 
-            1 -> ImageVisual("EasyBotIcon2.png")
+            1 -> ImageVisual("icons/EasyBotIcon2.png")
 
-            2 -> ImageVisual("HardBotIcon2.png")
+            2 -> ImageVisual("icons/HardBotIcon2.png")
 
             else -> throw IllegalArgumentException("Only possible visuals, $newType is invalid")
         }
