@@ -214,7 +214,48 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * it is not adjacent to any existing tile.
      */
     fun placeTile(index: Triple<Int, Int, Int>) {
+        val game = rootService.currentGame ?: error("No current game")
 
+        check(game.gameState == GameState.MADE_CHOICE) {
+            "Tile can only be placed after a choice was made."
+        }
+
+        val currentPlayer = game.playerQueue.peek()
+            ?: throw IllegalStateException("No current player found.")
+
+        val tileIndex = game.selectedChoice.first
+
+        require(tileIndex in game.choices.indices) {
+            "No valid tile was selected."
+        }
+
+        require(index.first + index.second + index.third == 0) {
+            "The coordinate must be a valid cube coordinate."
+        }
+
+        require(!currentPlayer.board.containsKey(index)) {
+            "There is already a tile at this coordinate."
+        }
+
+        val x = index.first
+        val y = index.second
+        val z = index.third
+
+        val neighbours = listOf(
+            Triple(x + 1, y - 1, z),
+            Triple(x + 1, y, z - 1),
+            Triple(x, y + 1, z - 1),
+            Triple(x - 1, y + 1, z),
+            Triple(x - 1, y, z + 1),
+            Triple(x, y - 1, z + 1)
+        )
+
+        require(neighbours.any { currentPlayer.board.containsKey(it) }) {
+            "The tile must be placed next to another tile."
+        }
+
+        val selectedTile = game.choices[tileIndex].first
+        currentPlayer.board[index] = selectedTile
     }
 
     /**
