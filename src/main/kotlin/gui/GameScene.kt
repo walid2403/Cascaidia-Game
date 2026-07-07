@@ -309,7 +309,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
         onMouseClicked = {
             zoomFactor += 0.3
-            changeZoom(true)
+            changeZoom()
         }
     }
 
@@ -318,7 +318,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
         onMouseClicked = {
             zoomFactor -= 0.3
-            changeZoom(false)
+            changeZoom()
         }
     }
 
@@ -701,14 +701,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         cameraPane.pan(x = coordinates.first, y = coordinates.second, zoom = 4.32, smooth = true)
     }
 
-    private fun changeZoom(zoomIn: Boolean) {
+    private fun changeZoom() {
         val currentplayerID = getPlayerId()
         val coordinates = getCameraCoordinates(currentplayerID)
-        if(zoomIn) {
-            cameraPane.pan(x = coordinates.first+5, y = coordinates.second, zoom = zoomFactor, smooth = true)
-        } else {
-            cameraPane.pan(x = coordinates.first+5, y = coordinates.second, zoom = zoomFactor, smooth = true)
-        }
+        cameraPane.pan(x = coordinates.first+5, y = coordinates.second, zoom = zoomFactor, smooth = true)
     }
 
     private fun getCameraCoordinates(playerID: Int): Pair<Double, Double> {
