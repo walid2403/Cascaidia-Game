@@ -6,6 +6,8 @@ import tools.aqua.bgw.components.StaticComponentView
 import tools.aqua.bgw.components.layoutviews.Pane
 import tools.aqua.bgw.components.uicomponents.Button
 import tools.aqua.bgw.components.uicomponents.CheckBox
+import tools.aqua.bgw.components.uicomponents.Label
+import tools.aqua.bgw.components.uicomponents.TextField
 import tools.aqua.bgw.core.Alignment
 import tools.aqua.bgw.core.Color
 import tools.aqua.bgw.core.MenuScene
@@ -13,6 +15,7 @@ import tools.aqua.bgw.style.BorderRadius
 import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
+
 
 /**
  * This scene is the in-game pause scene. The player can turn on or off the animations from here, save and exit the
@@ -26,6 +29,8 @@ class PauseMenuScene (private val app: SopraApplication, private val rootService
 
     private val paneWidth = 530
     private val paneHeight = 590
+    private val textHeight = 200
+    private val textWidth = paneWidth - 20
 
     private val menuPane = Pane<StaticComponentView<*>>(
         posX = 0,
@@ -54,7 +59,7 @@ class PauseMenuScene (private val app: SopraApplication, private val rootService
 
     private val mainMenuButton = Button(
         posX = 70,
-        posY = 180,
+        posY = 310,
         width = paneWidth - 140,
         height = 100,
         text = "Main Menu",
@@ -70,7 +75,7 @@ class PauseMenuScene (private val app: SopraApplication, private val rootService
 
     private val saveAndExitButton = Button(
         posX = 70,
-        posY = 310,
+        posY = 180,
         width = paneWidth - 140,
         height = 100,
         text = "Save and Exit",
@@ -80,7 +85,9 @@ class PauseMenuScene (private val app: SopraApplication, private val rootService
         }
     ).apply {
         onMouseClicked = {
-            rootService.playerActionService.saveGame("")
+            textPane.isVisible = true
+            listOf(exitButton, mainMenuButton, this).forEach { it.isDisabled = true}
+//            rootService.playerActionService.saveGame("")
         }
     }
 
@@ -99,6 +106,56 @@ class PauseMenuScene (private val app: SopraApplication, private val rootService
             app.exit()
         }
     }
+
+    private val textPane = Pane<StaticComponentView<*>>(
+        posX = 10,
+        posY = (paneHeight - textHeight)/2 + 100,
+        width = textWidth,
+        height = textHeight,
+        visual = ColorVisual(153, 172, 255).apply {
+            style.borderRadius = BorderRadius(20)
+        }
+    ).apply {
+        isVisible = false
+    }
+
+    private val saveButton = Button(
+        posX = textWidth - 100,
+        posY = textHeight - 50,
+        width = 80,
+        height = 40,
+        text = "Save",
+        font = Font(15.0,Color.WHITE,fontWeight = Font.FontWeight.BOLD,family = "Poppins"),
+        visual = ColorVisual(196, 75, 0).apply {
+            style.borderRadius = BorderRadius(15)
+        }
+    ).apply {
+        onMouseClicked = {
+            if(textField.text.isNotBlank()) {
+                rootService.playerActionService.saveGame(textField.text.trim())
+                app.showMenuScene(MainMenuScene(app,rootService))
+            }
+        }
+    }
+
+
+    private val textField: TextField = TextField(
+        width = textWidth - 40, height = 50,
+        posX = (textWidth - (textWidth - 40))/2 , posY = (textHeight - 50)/2,
+        prompt = "",
+        font = Font(size = 28)
+    ).apply {
+        visual = ColorVisual(204, 212, 209).apply { style.borderRadius = BorderRadius(8) }
+    }
+
+    private val fileNameLabel = Label(
+        width = textWidth - 40,
+        height = 50,
+        posX = (textWidth - (textWidth - 40))/2 ,
+        posY = (textHeight - 150)/2,
+        text = "File Name:",
+        font = Font(size = 28)
+    )
 
 
 
@@ -119,6 +176,8 @@ class PauseMenuScene (private val app: SopraApplication, private val rootService
     }
 
     init {
+
+        listOf(textField,saveButton, fileNameLabel).forEach {  textPane.add(it)  }
         backgroundOpacity = 0.0
         addComponents(
             menuPane,
@@ -126,7 +185,8 @@ class PauseMenuScene (private val app: SopraApplication, private val rootService
             animationsEnabled,
             saveAndExitButton,
             exitButton,
-            backButton
+            backButton,
+            textPane,
         )
     }
 
