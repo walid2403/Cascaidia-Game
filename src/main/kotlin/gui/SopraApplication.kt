@@ -18,7 +18,7 @@ class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
     /**
      * The main game scene displayed in the application.
      */
-    val gameScene = GameScene(this@SopraApplication,rootService)
+    val gameScene = GameSceneTest(this@SopraApplication,rootService)
 
     private val mainMenuScene = MainMenuScene(this@SopraApplication,rootService)
 
