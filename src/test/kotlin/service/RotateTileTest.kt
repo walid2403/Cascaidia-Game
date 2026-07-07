@@ -1,157 +1,176 @@
 package service
 
-import entity.GameState
-import entity.Habitates
-import entity.PlayerType
-import entity.Tile
-import entity.WildlifeToken
+import entity.*
 import kotlin.test.*
 
 /**
- * Klasse um Methode [PlayerActionService.rotateTile] zu testen
+ * Tests the method [PlayerActionService.rotateTile].
  */
 class RotateTileTest {
 
-        private lateinit var rootService: RootService
-        private lateinit var playerActionService: PlayerActionService
-        private lateinit var gameService: GameService
+    private lateinit var rootService: RootService
+    private lateinit var playerActionService: PlayerActionService
 
-        /**
-         * setUp
-         */
-        @BeforeTest
-        fun setUp() {
-            rootService = RootService()
-            playerActionService = rootService.playerActionService
-            gameService = rootService.gameService
+    /**
+     * Initializes the services before every test.
+     */
+    @BeforeTest
+    fun setUp() {
+        rootService = RootService()
+        playerActionService = rootService.playerActionService
+    }
 
-        }
+    /**
+     * Creates a tile with a fixed habitat order.
+     *
+     * Original order:
+     * PRAIRIES, PRAIRIES, PRAIRIES, FORESTS, FORESTS, FORESTS
+     */
+    private fun createTile(): Tile {
+        val habs = mutableListOf(
+            Habitates.PRAIRIES,
+            Habitates.PRAIRIES,
+            Habitates.PRAIRIES,
+            Habitates.FORESTS,
+            Habitates.FORESTS,
+            Habitates.FORESTS
+        )
 
-        /**
-         * damit Spielerliste für [GameService.startNewGame] direkt erstellt wird
-         */
-        private fun setUpPlayers():List<Pair<String, PlayerType>> {
-            return listOf(Pair("Mert",PlayerType.EASY_BOT),Pair("Lotfi", PlayerType.HUMAN))
-        }
-        /**
-         * damit Valueliste für [GameService.startNewGame] direkt erstellt wird
-         */
-        private fun setUpCards():List<Boolean> {
-            return listOf(true,true,true,true,true)
-        }
+        val possibles = listOf(
+            WildlifeToken.ELK,
+            WildlifeToken.BEAR
+        )
 
-        /**
-         * versichern dass Methode nur in madechoice funktioniert
-         */
-        @Test
-        fun `fails with false gameState`(){
-            gameService.startNewGame(setUpPlayers(),setUpCards())
-            val game=rootService.currentGame!!
+        return Tile(0, habs, possibles)
+    }
 
-            val gameStates= listOf<GameState>(
-                GameState.PLAYED_TILE,
-                GameState.START_OF_TURN,
-                GameState.END_OF_TURN,
-                GameState.HAS_EXTERMINATED
-            )
-            for(gameState in gameStates){
-                game.gameState=gameState
-                assertFailsWith<IllegalStateException> {
-                    playerActionService.rotateTile(right = true)
-                }
+    /**
+     * Creates a minimal game for testing [PlayerActionService.rotateTile].
+     *
+     * The game contains:
+     * - one selected tile in choices at index 0
+     * - selectedChoice = Pair(0, 0)
+     * - gameState = MADE_CHOICE
+     */
+    private fun createGame(): CascadiaGame {
+        val game = CascadiaGame(List(5) { true }, true)
+
+        game.choices.add(Pair(createTile(), WildlifeToken.FOX))
+        game.selectedChoice = Pair(0, 0)
+        game.gameState = GameState.MADE_CHOICE
+
+        rootService.currentGame = game
+        return game
+    }
+
+    /**
+     * Tests that [PlayerActionService.rotateTile] only works in [GameState.MADE_CHOICE].
+     */
+    @Test
+    fun `fails with false gameState`() {
+        val game = createGame()
+
+        val gameStates = listOf(
+            GameState.PLAYED_TILE,
+            GameState.START_OF_TURN,
+            GameState.END_OF_TURN,
+            GameState.HAS_EXTERMINATED
+        )
+
+        for (gameState in gameStates) {
+            game.gameState = gameState
+
+            assertFailsWith<IllegalStateException> {
+                playerActionService.rotateTile(right = true)
             }
-
         }
+    }
 
-        /**
-         * teste ob die rotation nach rechts korrekt
-         */
-        @Test
-        fun `rotation to the right correctly`(){
-            gameService.startNewGame(setUpPlayers(),setUpCards())
-            val game=rootService.currentGame!!
+    /**
+     * Tests that a rotation to the right changes the habitat order correctly.
+     */
+    @Test
+    fun `rotation to the right correctly`() {
+        val game = createGame()
 
+        playerActionService.rotateTile(right = true)
 
-            //0;PPPFFF;EB;no
-            val habs= mutableListOf<Habitates>(
-                Habitates.PRAIRIES,
-                Habitates.PRAIRIES,
-                Habitates.PRAIRIES,
-                Habitates.FORESTS,
-                Habitates.FORESTS,
-                Habitates.FORESTS
-            )
-            val possibles= listOf<WildlifeToken>(
-                WildlifeToken.ELK,
-                WildlifeToken.BEAR
-            )
+        val expectedRightRotation = mutableListOf(
+            Habitates.FORESTS,
+            Habitates.PRAIRIES,
+            Habitates.PRAIRIES,
+            Habitates.PRAIRIES,
+            Habitates.FORESTS,
+            Habitates.FORESTS
+        )
 
-            val tile= Tile(0,habs,possibles)
+        assertEquals(
+            expectedRightRotation,
+            game.choices[0].first.habs,
+            "The tile was not rotated correctly to the right."
+        )
 
-            game.gameState= GameState.MADE_CHOICE
-            game.choices.clear()
-            game.choices.add(Pair(tile, WildlifeToken.FOX))
+        assertEquals(
+            1,
+            game.choices[0].first.rotation,
+            "The rotation value should be increased to 1."
+        )
+    }
 
-            game.selectedChoice=Pair(0,0)
+    /**
+     * Tests that a rotation to the left changes the habitat order correctly.
+     */
+    @Test
+    fun `rotation to the left correctly`() {
+        val game = createGame()
 
+        playerActionService.rotateTile(right = false)
+
+        val expectedLeftRotation = mutableListOf(
+            Habitates.PRAIRIES,
+            Habitates.PRAIRIES,
+            Habitates.FORESTS,
+            Habitates.FORESTS,
+            Habitates.FORESTS,
+            Habitates.PRAIRIES
+        )
+
+        assertEquals(
+            expectedLeftRotation,
+            game.choices[0].first.habs,
+            "The tile was not rotated correctly to the left."
+        )
+
+        assertEquals(
+            5,
+            game.choices[0].first.rotation,
+            "The rotation value should become 5 after rotating left."
+        )
+    }
+
+    /**
+     * Tests that [PlayerActionService.rotateTile] fails if there is no current game.
+     */
+    @Test
+    fun `rotation fails if there is no current game`() {
+        rootService.currentGame = null
+
+        assertFailsWith<IllegalStateException> {
             playerActionService.rotateTile(right = true)
-
-            val expectedRightRotation=mutableListOf<Habitates>(
-                Habitates.FORESTS,
-                Habitates.PRAIRIES,
-                Habitates.PRAIRIES,
-                Habitates.PRAIRIES,
-                Habitates.FORESTS,
-                Habitates.FORESTS,
-            )
-
-            assertEquals(expectedRightRotation,game.choices[0].first.habs)
-
-
         }
+    }
 
-        /**
-         * teste ob die rotation nach links korrekt
-         */
-        @Test
-        fun `rotation to the left correctly`(){
-            gameService.startNewGame(setUpPlayers(),setUpCards())
-            val game=rootService.currentGame!!
+    /**
+     * Tests that [PlayerActionService.rotateTile] fails if no valid tile was selected.
+     */
+    @Test
+    fun `rotation fails if selected tile index is invalid`() {
+        val game = createGame()
 
+        game.selectedChoice = Pair(-1, 0)
 
-            //0;PPPFFF;EB;no
-            val habs= mutableListOf<Habitates>(
-                Habitates.PRAIRIES,
-                Habitates.PRAIRIES,
-                Habitates.PRAIRIES,
-                Habitates.FORESTS,
-                Habitates.FORESTS,
-                Habitates.FORESTS
-            )
-            val possibles= listOf<WildlifeToken>(
-                WildlifeToken.ELK,
-                WildlifeToken.BEAR
-            )
-
-            val tile= Tile(0,habs,possibles)
-
-            game.gameState= GameState.MADE_CHOICE
-            game.choices.clear()
-            game.choices.add(Pair(tile, WildlifeToken.FOX))
-
-            game.selectedChoice=Pair(0,0)
-
-            playerActionService.rotateTile(right = false)
-
-            val expectedLeftRotation=mutableListOf<Habitates>(
-                Habitates.PRAIRIES,
-                Habitates.PRAIRIES,
-                Habitates.FORESTS,
-                Habitates.FORESTS,
-                Habitates.FORESTS,
-                Habitates.PRAIRIES
-            )
-
-            assertEquals(expectedLeftRotation,game.choices[0].first.habs)
+        assertFailsWith<IllegalArgumentException> {
+            playerActionService.rotateTile(right = true)
         }
+    }
 }
