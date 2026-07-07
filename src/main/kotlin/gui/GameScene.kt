@@ -891,7 +891,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                     if(this.inShop) {
                         chooseTile(shop.indexOf(this) + 1, this)
                     } else if (isPlaced) {
-                        //Onclick für Tiere platzieren
+                        val s = ((selectedGridX!! + selectedGridY!!) * (-1))
+                        rootService.playerActionService.placeWildlife(Triple(selectedGridX!!, selectedGridY!!, s))
                     }
                 }
             }
@@ -1368,7 +1369,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     override fun refreshAfterPlaceWildlife(index: Triple<Int, Int, Int>) {
         val game = rootService.currentGame
         checkNotNull(game)
-        val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(player)
+        val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(getPlayerId())
 
         val tile = currentArea[index.first, index.second]
         checkNotNull(tile)
