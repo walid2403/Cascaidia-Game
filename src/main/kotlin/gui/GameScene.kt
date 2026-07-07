@@ -21,6 +21,7 @@ import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 import entity.*
 import tools.aqua.bgw.animation.MovementAnimation
+import tools.aqua.bgw.net.common.response.SpectatorJoinGameResponse
 import tools.aqua.bgw.visual.Visual
 
 /**
@@ -117,7 +118,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 selectionTileClick(true)
                 scaleDownOtherAnimals(0)
                 rootService.playerActionService.changeWildlife(listOf(0, 1, 2, 3).filter {changeAnimalsArray[it]})
-                removeChosenWildlife()
             }
             changeWildlifeActive = !changeWildlifeActive
         }
@@ -134,7 +134,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             //Button kann nur angeklickt werden, wenn 3 gleiche existieren
             //Nach onClick werden die Tiere entfernt und der Button wieder durchsichtig
             rootService.gameService.exterminate(true)
-            clearOverPopulation()
             this.visual = ColorVisual(0, 0, 0, 127).apply {
                 style.borderRadius = BorderRadius(10)
             }
@@ -863,38 +862,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
-    private fun removeChosenWildlife() {
-        for(i in 0..3) {
-            changeAnimalsArray[i] = false
-        }
-
-        //Nur zur visualisierung
-        testNearOverpopulation()
-        animalChoice1.visual =  ImageVisual("tokens/fox.png")
-        animalChoice2.visual =  ImageVisual("tokens/fox.png")
-    }
-
-    private fun testNearOverpopulation() {
-        //Nur zur visualisierung
-        clearOverpopulation.visual = ColorVisual(0,0,0,255).apply {
-            style.borderRadius = BorderRadius(10)
-        }
-        clearOverpopulation.font = Font(size = 16, color = Color(255, 255, 255, 255))
-        clearOverpopulation.isDisabled = false
-    }
-
-    private fun clearOverPopulation() {
-        deactivateRotateButtons()
-        scaleDownOtherTiles(0)
-        scaleDownOtherAnimals(0)
-        selectTile = 0
-        selectAnimal = 0
-
-        //Nur zur visualisierung
-        animalChoice1.visual = ImageVisual("tokens/bear.png")
-        animalChoice2.visual = ImageVisual("tokens/elk.png")
-    }
-
 
 
     //Ab hier neu
@@ -1261,11 +1228,58 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(i).visual = image
         }
 
+        checkRemoveWildlifeButton()
+        checkExterminateButton()
+    }
+
+    private fun checkRemoveWildlifeButton() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+
+        changeWildlife.isDisabled = true
+
+        if (game.gameState !in listOf(GameState.START_OF_TURN, GameState.HAS_EXTERMINATED)) return
+
+        if (game.playerQueue.peek().natureTokens < 1) return
+
+        changeWildlife.visual = ColorVisual(0,0,0,255).apply {
+            style.borderRadius = BorderRadius(10)
+        }
+        changeWildlife.font = Font(size = 16, color = Color(255, 255, 255, 255))
+
+        changeWildlife.isDisabled = false
+    }
+
+    private fun checkExterminateButton() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+
+        clearOverpopulation.isDisabled = true
+
+        if (game.gameState != GameState.START_OF_TURN) return
+
+        val choices = game.choices.map {it.second}
+
+        if (choices.distinct().size != 2) return
+
+        if (choices.count {it == choices[0]} != 3 && choices.count {it == choices[0]} != 3) return
+
+        clearOverpopulation.visual = ColorVisual(0,0,0,255).apply {
+            style.borderRadius = BorderRadius(10)
+        }
+        clearOverpopulation.font = Font(size = 16, color = Color(255, 255, 255, 255))
+
+        clearOverpopulation.isDisabled = false
     }
 
 
 
     override fun refreshAfterExterminate() {
+        deactivateRotateButtons()
+        scaleDownOtherTiles(0)
+        scaleDownOtherAnimals(0)
+        selectTile = 0
+        selectAnimal = 0
         refreshAfterChangeWildlife(listOf(0,1,2,3))
     }
 
