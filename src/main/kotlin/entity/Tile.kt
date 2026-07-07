@@ -1,7 +1,5 @@
 package entity
 
-import java.io.Serializable
-
 /**
  * Diese Entity-Klasse stellt ein Tile des Cascadia Spiels dar
  *

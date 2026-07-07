@@ -263,7 +263,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
     fun saveGame(name: String) {
         val game = rootService.currentGame ?: throw IllegalStateException("Kein aktives Spiel zum Speichern vorhanden.")
         if (name.isEmpty()) throw IllegalArgumentException("Der Name darf nicht leer sein.")
-        if (!game.isLocal || game.playerQueue.any { it.type == PlayerType.NETWORK }) {
+        if (!game.isLocal) {
             throw IllegalArgumentException("Netzwerkspiele können nicht gespeichert werden.")
         }
 

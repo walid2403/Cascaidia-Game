@@ -68,8 +68,8 @@ class GameService(private val rootService: RootService): AbstractRefreshingServi
         game.removedTokens.clear()
         game.removedTokens.addAll(snapshot.removedTokensList)
 
-        snapshot.tileStackList.forEach { game.tileStack.push(it) }
-        snapshot.wildlifeTokensList.forEach { game.wildlifeTokens.push(it) }
+        snapshot.tileStackList.reversed().forEach { game.tileStack.push(it) }
+        snapshot.wildlifeTokensList.reversed().forEach { game.wildlifeTokens.push(it) }
 
         game.playerQueue.clear()
         game.playerQueue.addAll(snapshot.playerQueue)
