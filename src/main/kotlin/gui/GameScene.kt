@@ -856,6 +856,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         val game = rootService.currentGame
         checkNotNull(game)
 
+        playerListAtStart = game.playerQueue.toMutableList()
+
         resetGame()
 
         createTileView()
@@ -1163,6 +1165,31 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
         customChoice.font = Font(size = 16, color = Color(0, 0, 0))
         customChoiceActive = true
+    }
+
+
+
+    //Liste wird bei refreshAfterStartGame mit der Startreihenfolge befüllt
+    private var playerListAtStart = mutableListOf<Player>()
+
+    /**
+     * Die Methode gibt den Index des aktuellen Spielers zurück, bezogen auf die Startreihenfolge.
+     * Sollte ein Spieler das Spiel verlassen wird dieser nicht weiter berücksichtigt.
+     * Es gibt eine Fehlermeldung, falls der Index nicht in der Range der Queue liegt.
+     * @return Gibt den Index des Spielers zurück
+     * */
+    private fun getPlayerId(): Int {
+        val game = rootService.currentGame
+        checkNotNull(game)
+
+        //Passt die Liste an, falls Spieler das Spiel verlassen haben
+        if(playerListAtStart.size != game.playerQueue.size) {
+            playerListAtStart.removeAll{ it !in game.playerQueue}
+        }
+
+        val index = playerListAtStart.indexOf(game.playerQueue.peek())
+        require(index >= 0 && index < game.playerQueue.size) { "Player-Index out of bounce (GUI)" }
+        return index
     }
 
 
