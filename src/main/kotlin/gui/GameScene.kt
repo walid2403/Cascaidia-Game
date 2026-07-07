@@ -267,8 +267,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             if(player == 3) player = 0
             else player++
             //rootService.gameService.changeTurn()
-            showPlayer(player, false, false)
-            initializeCamerasOnSide()
+            zoomOnNextPlayer()
         }
     }
 
@@ -309,8 +308,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
         onMouseClicked = {
-            zoomFactor += 0.2
-            showPlayer(player, false, true)
+            zoomFactor += 0.3
+            changeZoom(true)
         }
     }
 
@@ -318,8 +317,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
         onMouseClicked = {
-            zoomFactor -= 0.2
-            showPlayer(player, false, true)
+            zoomFactor -= 0.3
+            changeZoom(false)
         }
     }
 
@@ -353,39 +352,51 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     //Labels über den Kameras an der Seite für die Hover Funktion
     private val lableAboveCamOne = Label(posX = 55, posY = 65, width = 245, height = 130).apply {
-        isDisabled = true
         onMouseEntered = {
-            showPlayer(0, true, false)
+            zoomIn.isVisible = false
+            zoomOut.isVisible = false
+            showOtherPlayer(0)
         }
         onMouseExited = {
-            showPlayer(player, true, false)
+            zoomIn.isVisible = true
+            zoomOut.isVisible = true
+            showOtherPlayer(getPlayerId())
         }
     }
     private val lableAboveCamTwo = Label(posX = 55, posY = 295, width = 245, height = 130).apply {
-        isDisabled = true
         onMouseEntered = {
-            showPlayer(1, true, false)
+            zoomIn.isVisible = false
+            zoomOut.isVisible = false
+            showOtherPlayer(1)
         }
         onMouseExited = {
-            showPlayer(player, true, false)
+            zoomIn.isVisible = true
+            zoomOut.isVisible = true
+            showOtherPlayer(getPlayerId())
         }
     }
     private val lableAboveCamThree = Label(posX = 55, posY = 525, width = 245, height = 130).apply {
-        isDisabled = true
         onMouseEntered = {
-            showPlayer(2, true, false)
+            zoomIn.isVisible = false
+            zoomOut.isVisible = false
+            showOtherPlayer(2)
         }
         onMouseExited = {
-            showPlayer(player, true, false)
+            zoomIn.isVisible = true
+            zoomOut.isVisible = true
+            showOtherPlayer(getPlayerId())
         }
     }
     private val lableAboveCamFour = Label(posX = 55, posY = 755, width = 245, height = 130).apply {
-        isDisabled = true
         onMouseEntered = {
-            showPlayer(3, true, false)
+            zoomIn.isVisible = false
+            zoomOut.isVisible = false
+            showOtherPlayer(3)
         }
         onMouseExited = {
-            showPlayer(player, true, false)
+            zoomIn.isVisible = true
+            zoomOut.isVisible = true
+            showOtherPlayer(getPlayerId())
         }
     }
 
@@ -561,9 +572,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
             sliderBar, sliderPoint
         )
-
-        initializeTest()
-        adjustAreas()
     }
 
 
@@ -611,15 +619,102 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         adjustAreas()
     }
 
-    /**
-     * Zoomt mit dem CameraPane aus dem letzten Spieler heraus und auf den aktuellen
-     * Wenn noch kein Spieler dran war zoomt sie nur auf den ersten
-     */
-    private fun showPlayer(player: Int, fromMiniMap: Boolean, zoom: Boolean) {
-        //X und Y für den Zoom auswählen
+//    /**
+//     * Zoomt mit dem CameraPane aus dem letzten Spieler heraus und auf den aktuellen
+//     * Wenn noch kein Spieler dran war zoomt sie nur auf den ersten
+//     */
+//    private fun showPlayer(player: Int, fromMiniMap: Boolean, zoom: Boolean) {
+//        //X und Y für den Zoom auswählen
+//        var x = 0.0
+//        var y = 0.0
+//        when(player) {
+//            0 -> {
+//                x = 1130.0
+//                y = 384.0
+//            }
+//            1 -> {
+//                x = 1540.0
+//                y = 709.0
+//            }
+//            2 -> {
+//                x = 990.0
+//                y = 834.0
+//            }
+//            3 -> {
+//                x = 580.0
+//                y = 509.0
+//            }
+//        }
+//
+//
+//        if(zoom) {
+//            cameraPane.pan(x = x, y = y, zoom = zoomFactor, smooth = true)
+//        } else if(!fromMiniMap) {
+//            //Aus dem alten Spieler rauszoomen, eine Sekunde delay und in den aktuellen Spieler reinzoomen
+//            if (this.player != -1) {
+//                //playerName.isVisible = false
+//                cameraPane.pan(x = 0, y = 0, zoom = 1.0, smooth = true)
+//                playAnimation(
+//                    DelayAnimation(duration = 1000).apply {
+//                        onFinished = {
+//                            cameraPane.pan(x = x, y = y, zoom = 4.32, smooth = true)
+//                            //playerName.isVisible = true
+//                        }
+//                    }
+//                )
+//            }
+//            //Wenn noch keiner dran war in den ersten Spieler rein zoomen
+//            else {
+//                cameraPane.pan(x = x, y = y, zoom = 4.32, smooth = true)
+//                //playerName.isVisible = true
+//            }
+//        } else {
+//            cameraPane.pan(x = x, y = y, zoom = 4.32, smooth = true)
+//        }
+//        playerName.text = listOf(nameOneSide, nameTwoSide, nameThreeSide, nameFourSide).elementAt(player).text
+//    }
+
+
+    private fun zoomOnNextPlayer() {
+        val currentplayerID = getPlayerId()
+        val coordinates = getCameraCoordinates(currentplayerID)
+        cameraPane.pan(x = 0, y = 0, zoom = 1.0, smooth = true)
+        playAnimation(
+            DelayAnimation(duration = 1000).apply {
+                onFinished = {
+                    cameraPane.pan(x = coordinates.first, y = coordinates.second, zoom = 4.32, smooth = true)
+                }
+            }
+        )
+    }
+
+    private fun showOtherPlayer(playerID: Int) {
+        val coordinates = getCameraCoordinates(playerID)
+        println(playerID.toString())
+        println(coordinates.toString())
+        cameraPane.pan(x = coordinates.first, y = coordinates.second, zoom = 4.32, smooth = true)
+        zoomFactor = 4.32
+    }
+
+    private fun zoomOnFirstPlayer() {
+        val coordinates = getCameraCoordinates(0)
+        cameraPane.pan(x = coordinates.first, y = coordinates.second, zoom = 4.32, smooth = true)
+    }
+
+    private fun changeZoom(zoomIn: Boolean) {
+        val currentplayerID = getPlayerId()
+        val coordinates = getCameraCoordinates(currentplayerID)
+        if(zoomIn) {
+            cameraPane.pan(x = coordinates.first+5, y = coordinates.second, zoom = zoomFactor, smooth = true)
+        } else {
+            cameraPane.pan(x = coordinates.first+5, y = coordinates.second, zoom = zoomFactor, smooth = true)
+        }
+    }
+
+    private fun getCameraCoordinates(playerID: Int): Pair<Double, Double> {
         var x = 0.0
         var y = 0.0
-        when(player) {
+        when(playerID) {
             0 -> {
                 x = 1130.0
                 y = 384.0
@@ -637,34 +732,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 y = 509.0
             }
         }
-
-
-        if(zoom) {
-            cameraPane.pan(x = x, y = y, zoom = zoomFactor, smooth = true)
-        } else if(!fromMiniMap) {
-            //Aus dem alten Spieler rauszoomen, eine Sekunde delay und in den aktuellen Spieler reinzoomen
-            if (this.player != -1) {
-                //playerName.isVisible = false
-                cameraPane.pan(x = 0, y = 0, zoom = 1.0, smooth = true)
-                playAnimation(
-                    DelayAnimation(duration = 1000).apply {
-                        onFinished = {
-                            cameraPane.pan(x = x, y = y, zoom = 4.32, smooth = true)
-                            //playerName.isVisible = true
-                        }
-                    }
-                )
-            }
-            //Wenn noch keiner dran war in den ersten Spieler rein zoomen
-            else {
-                cameraPane.pan(x = x, y = y, zoom = 4.32, smooth = true)
-                //playerName.isVisible = true
-            }
-        } else {
-            cameraPane.pan(x = x, y = y, zoom = 4.32, smooth = true)
-        }
-        playerName.text = listOf(nameOneSide, nameTwoSide, nameThreeSide, nameFourSide).elementAt(player).text
+        return Pair(x, y)
     }
+
+
+
+
+
 
     /**
      * 
@@ -901,12 +975,15 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         initializeCamerasOnSide()
         disableAllButtons()
         setNames()
+        adjustAreas()
 
         animateDealTile()
         changeGreyVisibility(true, 0)
         changeGreyVisibility(false, 1)
         changeGreyVisibility(false, 2)
         changeGreyVisibility(false, 3)
+
+        zoomOnFirstPlayer()
     }
 
     private fun setNames() {
@@ -1006,7 +1083,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     override fun refreshAfterChangeTurn(lastTurn: Boolean) {
         deactivatesTileButtons()
         player++
-        showPlayer(player, false, false)
+        zoomOnNextPlayer()
         changeGreyVisibility(true, player)
 
         if(isHuman()) {
@@ -1353,7 +1430,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         initializeCamerasOnSide()
         startFirstTurn()
-        showPlayer(1,false, false)
+//        showPlayer(1,false, false)
     }
 
 
