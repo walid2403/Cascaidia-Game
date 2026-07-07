@@ -21,6 +21,7 @@ import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 import entity.*
 import tools.aqua.bgw.animation.MovementAnimation
+import tools.aqua.bgw.components.gamecomponentviews.HexagonView
 import tools.aqua.bgw.net.common.response.SpectatorJoinGameResponse
 import tools.aqua.bgw.visual.Visual
 
@@ -862,6 +863,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
+    private fun animalTileClick(onClick: Boolean) {
+        listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).forEach { it.isDisabled = !onClick }
+    }
+
 
 
     //Ab hier neu
@@ -882,10 +887,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         for(tile in tileList) {
             val hexagon = HexagonViewExtended(size = 14.0, visual = ImageVisual("tiles/choices/tile_${tile.id}.png")).apply {
                 //Neuerung 06.07
-                var inShop = false
-                var isPlaced = false
                 onMouseClicked = {
-                    if(inShop) {
+                    if(this.inShop) {
                         chooseTile(shop.indexOf(this) + 1, this)
                     } else if (isPlaced) {
                         //Onclick für Tiere platzieren
@@ -947,6 +950,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         changeGreyVisibility(false, 3)
 
         zoomOnFirstPlayer()
+
+        //Testblock
+//        shop[0]?.isVisible = true
+//        shop[0]?.posX = 500.0
+//        shop[0]?.posY = 500.0
+//        addComponents(shop[0] as HexagonView)
+
     }
 
     private fun setNames() {
@@ -990,36 +1000,55 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private fun placeChoosenTile() {
         val game = rootService.currentGame
         checkNotNull(game)
-        val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(player)
-        val selectTile = shop[selectTile]
-        checkNotNull(selectTile)
+        val playerID = getPlayerId()
+        val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(playerID)
+        val choosenTile = shop[selectTile-1]
+        checkNotNull(choosenTile)
 
         val x = selectedGridX
         val y = selectedGridY
         checkNotNull(x)
         checkNotNull(y)
+//
+//        val xTemp = currentArea[x,y]?.posX
+//        val yTemp = currentArea[x,y]?.posY
+//        checkNotNull(xTemp)
+//        checkNotNull(yTemp)
+//
+//        if(animationsEnabled) {
+//            playAnimation(
+//                MovementAnimation(
+//                    componentView = selectTile as HexagonViewExtended,
+//                    toX = xTemp,
+//                    toY = yTemp,
+//                    duration = 500
+//                )
+//            )
+//        } else {
+//            selectTile.posX = xTemp
+//            selectTile.posY = yTemp
+//        }
 
-        val xTemp = currentArea[x,y]?.actualPosX
-        val yTemp = currentArea[x,y]?.actualPosY
-        checkNotNull(xTemp)
-        checkNotNull(yTemp)
 
-        if(animationsEnabled) {
-            playAnimation(
-                MovementAnimation(
-                    componentView = selectTile as ComponentView,
-                    toX = xTemp,
-                    toY = yTemp,
-                    duration = 500
-                )
-            )
-        } else {
-            selectTile.posX = xTemp
-            selectTile.posY = yTemp
-        }
+        scaleTile( 0, choosenTile)
+        this.removeComponents(choosenTile)
+        choosenTile.size = 14.0
+
+        val greyTile = currentArea[x,y]
+        checkNotNull(greyTile)
+        choosenTile.posX = greyTile.posX
+        choosenTile.posY = greyTile.posY
+
+        currentArea.set(x,y,choosenTile)
+
+        selectionTileClick(false)
+        animalTileClick(false)
+        customChoice.isDisabled = true
+        changeWildlife.isDisabled = true
+        clearOverpopulation.isDisabled = true
 
         activatesTileButtons()
-        changeGreyVisibility(false, player)
+        changeGreyVisibility(false, playerID)
     }
 
     private fun putTileInGrid(x: Int, y: Int) {
@@ -1074,26 +1103,43 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         for(i in 0..3) {
             shop[i] = tileMap.forward(game.choices.elementAt(i).first)
             shop[i]?.inShop = true
-            addComponents(shop[i] as ComponentView)
+            shop[i]?.isVisible = true
+            addComponents(shop[i] as HexagonView)
+            println(shop[i]?.inShop.toString())
         }
     }
 
     private fun animateDealTile() {
-        for(i in 0..3) {
-            playAnimation(
-                MovementAnimation(
-                    componentView = shop[i] as ComponentView,   //Kp warum er da ComponentView haben will und sonst reicht HexagonViewExtended
-                    fromX = 1500.0,                             //Hinterher aus dem "TileStack"
-                    fromY = 700.0,
-                    toX = getShopTileCoordinateX(i),
-                    toY = 30.0,
-                    duration = 500
-                )
-            )
-            println("Animation")
-            println(getShopTileCoordinateX(i))
-            println(shop[i].toString())
-        }
+//        for(i in 0..3) {
+//            playAnimation(
+//                MovementAnimation(
+//                    componentView = shop[i] as HexagonView,   //Kp warum er da ComponentView haben will und sonst reicht HexagonViewExtended
+//                    fromX = 1500.0,                             //Hinterher aus dem "TileStack"
+//                    fromY = 700.0,
+//                    toX = getShopTileCoordinateX(i),
+//                    toY = 30.0,
+//                    duration = 500
+//                )
+//            )
+//            println("Animation")
+//            println(getShopTileCoordinateX(i))
+//            println(shop[i].toString())
+//        }
+
+        shop[0]?.posX = 820.0
+        shop[1]?.posX = 974.0
+        shop[2]?.posX = 1128.0
+        shop[3]?.posX = 1282.0
+
+        shop[0]?.posY = 30.0
+        shop[1]?.posY = 30.0
+        shop[2]?.posY = 30.0
+        shop[3]?.posY = 30.0
+
+        shop[0]?.size = 60.0
+        shop[1]?.size = 60.0
+        shop[2]?.size = 60.0
+        shop[3]?.size = 60.0
     }
 
     private fun getShopTileCoordinateX(index: Int): Double {
@@ -1107,7 +1153,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     private fun disableAllButtons() {
-        listOf(undo, redo, customChoice, changeWildlife, clearOverpopulation,
+        listOf(undo, redo,
             confirm, rotateTileLeft, rotateTileRight).forEach {
                 it.isDisabled = true
         }
