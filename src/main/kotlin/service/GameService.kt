@@ -360,8 +360,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         }
         if (game.wildlifeTokens.size < affectedIndices.size) {
             calculateScores()
-            game.removedTokens.clear()
-            onAllRefreshables { refreshAfterExterminate() }
             return
         }
         //executing extermination
@@ -373,8 +371,9 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         }
         if (playerTrigger) {
             game.gameState = GameState.HAS_EXTERMINATED
-            onAllRefreshables { refreshAfterExterminate() }
         }
+        onAllRefreshables { refreshAfterExterminate() }
+
         val remainingTokens = game.choices.map { it.second }
         if (remainingTokens.distinct().size == 1) {
             exterminate(false)
@@ -385,12 +384,11 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             }
             game.wildlifeTokens.shuffle()
             game.removedTokens.clear()
-            //refreshing only at the final resolved state
 
-            onAllRefreshables {
-                refreshAfterExterminate()
-            }
-
+//            refreshing only at the final resolved state
+//            onAllRefreshables {
+//                refreshAfterExterminate()
+//            }
 
         }
     }
