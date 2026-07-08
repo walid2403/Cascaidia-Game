@@ -758,14 +758,14 @@ class GameServiceCalculateScoreTest {
         val shape = listOf(
             Triple(0,0,0),
             Triple(-1,0,1),
-//            Triple(-2,0,2),
+            Triple(-2,0,2),
             Triple(1,-2,1),
             Triple(0,-2,2),
-//            Triple(-1,-2,3),
+            Triple(-1,-2,3),
             Triple(0,-1,1),
             Triple(1,-1,0),
             Triple(-1,-1,2),
-//            Triple(-2,-1,3),
+            Triple(-2,-1,3),
         )
         extremeTest(shape, WildlifeToken.ELK, false)
         print(refreshable.receivedScores!!.first().second[6])
