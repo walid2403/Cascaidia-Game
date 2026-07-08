@@ -944,7 +944,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         loadStartTiles()
         initializeCamerasOnSide()
-        disableAllButtons()
+//        disableAllButtons()
         setNames()
         adjustAreas()
 
@@ -1054,6 +1054,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         activatesTileButtons()
         changeGreyVisibility(false, playerID)
+        deactivateRotateButtons()
 
         confirm.isDisabled = false
     }
@@ -1071,7 +1072,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     private fun activatesTileButtons() {
         if(isPlayerHuman) {
-            listOf(confirm, rotateTileLeft, rotateTileRight).forEach { it.isVisible = true }
+            listOf(confirm, rotateTileLeft, rotateTileRight).forEach {
+                it.isVisible = true
+                it.isDisabled = false
+            }
         }
     }
 
@@ -1159,13 +1163,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         return 0.0
     }
 
-    private fun disableAllButtons() {
-        listOf(undo, redo,
-            confirm, rotateTileLeft, rotateTileRight).forEach {
-                it.isDisabled = true
-        }
-        deactivateRotateButtons()
-    }
+//    private fun disableAllButtons() {
+//        listOf(undo, redo,
+//            confirm, rotateTileLeft, rotateTileRight).forEach {
+//                it.isDisabled = true
+//        }
+//        deactivateRotateButtons()
+//    }
 
     private fun getTileWithAnimal(tile: Tile): ImageVisual {
         var path = "tilesWithWildlife/"
@@ -1364,12 +1368,16 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     override fun refreshAfterRotate(right: Boolean) {
         val game = rootService.currentGame
         checkNotNull(game)
+        println("Test")
         rotateInSelection(right, tileMap.forward(game.choices.elementAt(game.selectedChoice.first).first))
     }
 
 
     override fun refreshAfterPlaceTile(index: Triple<Int, Int, Int>) {
         println("place tile confirmation")
+        confirm.isVisible = false
+        rotateTileRight.isVisible = false
+        rotateTileLeft.isVisible = false
         //putTileInGrid(index.first, index.second)
     }
 
