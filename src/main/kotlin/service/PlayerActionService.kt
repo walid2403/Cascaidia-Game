@@ -183,7 +183,35 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * @throws IllegalStateException if the [GameState] is not `MADE_CHOICE`.
      */
     fun rotateTile(right: Boolean) {
+        val game = rootService.currentGame ?: error("No current game")
 
+        check(game.gameState == GameState.MADE_CHOICE) {
+            "Tile can only be rotated after a choice was made."
+        }
+
+        val tileIndex = game.selectedChoice.first
+
+        require(tileIndex in game.choices.indices) {
+            "No valid tile was selected."
+        }
+
+        val selectedTile = game.choices[tileIndex].first
+
+        if (right) {
+            selectedTile.rotation = (selectedTile.rotation + 1) % 6
+
+            if (selectedTile.habs.isNotEmpty()) {
+                val lastHabitat = selectedTile.habs.removeAt(selectedTile.habs.lastIndex)
+                selectedTile.habs.add(0, lastHabitat)
+            }
+        } else {
+            selectedTile.rotation = (selectedTile.rotation + 5) % 6
+
+            if (selectedTile.habs.isNotEmpty()) {
+                val firstHabitat = selectedTile.habs.removeAt(0)
+                selectedTile.habs.add(firstHabitat)
+            }
+        }
     }
 
     /**
@@ -201,7 +229,48 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * it is not adjacent to any existing tile.
      */
     fun placeTile(index: Triple<Int, Int, Int>) {
+        val game = rootService.currentGame ?: error("No current game")
 
+        check(game.gameState == GameState.MADE_CHOICE) {
+            "Tile can only be placed after a choice was made."
+        }
+
+        val currentPlayer = game.playerQueue.peek()
+            ?: throw IllegalStateException("No current player found.")
+
+        val tileIndex = game.selectedChoice.first
+
+        require(tileIndex in game.choices.indices) {
+            "No valid tile was selected."
+        }
+
+        require(index.first + index.second + index.third == 0) {
+            "The coordinate must be a valid cube coordinate."
+        }
+
+        require(!currentPlayer.board.containsKey(index)) {
+            "There is already a tile at this coordinate."
+        }
+
+        val x = index.first
+        val y = index.second
+        val z = index.third
+
+        val neighbours = listOf(
+            Triple(x + 1, y - 1, z),
+            Triple(x + 1, y, z - 1),
+            Triple(x, y + 1, z - 1),
+            Triple(x - 1, y + 1, z),
+            Triple(x - 1, y, z + 1),
+            Triple(x, y - 1, z + 1)
+        )
+
+        require(neighbours.any { currentPlayer.board.containsKey(it) }) {
+            "The tile must be placed next to another tile."
+        }
+
+        val selectedTile = game.choices[tileIndex].first
+        currentPlayer.board[index] = selectedTile
     }
 
     /**
@@ -284,23 +353,64 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
     /**
      * this function allows the player to redo an action that has been undone
      *
-     * @throws IllegalStateException if there are no undone moves
+     * @throws IllegalStateException if there are no undone moves and current player is not human and current game
+     * is not local
      */
     fun redo() {
+        val game=rootService.currentGame
+        checkNotNull(game){"Spiel nicht initialisiert"}
+
+        val games=rootService.history
+
+        check(games.undoneMoves.isNotEmpty()){"keine zurückgenommenen Züge existieren "}
+        check(game.playerQueue.first().type== PlayerType.HUMAN)
+        {"Bots und Netzwerkspieler dürfen nicht redoen"}
+        check(game.isLocal){"im Netzwerkmodus ist die Funktion nicht erlaubt"}
+
+
+        val nextGame=games.undoneMoves.pop()
+
+        games.prevMoves.push(CascadiaGame(nextGame))
+
+        rootService.currentGame=nextGame
+
+        onAllRefreshables { refreshAfterRedo() }
+
+
+
 
     }
 
     /**
-     * this function reverts the last action
-     * it allows the current player to go back to their previous action
-     * or to the end of the previous players turn
+     * this function allows the player to redo an action that has been undone
      *
-     * stores current [CascadiaGame] in [CascadiaGames.undoneMoves]
-     * takes the previous Game from [entity.CascadiaGames.prevMoves]
-     * @throws IllegalStateException if [CascadiaGames.prevMoves] is empty
-     * (this would occur in the first Action of the first turn by a human)
+     * @throws IllegalStateException if there are no undone moves and current player is not human and current game
+     * is not local
      */
     fun undo() {
+        val  game=rootService.currentGame
+        checkNotNull(game)
 
+        val games=rootService.history
+
+        check(game.playerQueue.first().type== PlayerType.HUMAN){"nur Menschen dürfen zurückgehen"}
+        check(game.isLocal){"Funktion nur im lokalen Modus gestattet"}
+        if(game.gameState == GameState.START_OF_TURN) {
+            check(games.prevMoves.size > 1) {
+                "Am Anfang der ersten Runde gibt es keine vorherigen Züge"
+            }
+        }
+        if(game.gameState==GameState.START_OF_TURN) {
+            //wenn am Anfang der Runde: Spiel in undoneMoves speichern
+            val currentGame = games.prevMoves.pop()
+            games.undoneMoves.push(CascadiaGame(currentGame))
+        }
+        //letztes gespeichertes Spiel "laden"
+        val prevGame=games.prevMoves.peek()
+        rootService.currentGame= CascadiaGame(prevGame)
+
+
+
+        onAllRefreshables { refreshAfterUndo() }
     }
 }
