@@ -225,13 +225,13 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @return Habitatstile
      * @param line eine Zeile aus der csv datei die bereits ein String ist
      */
-    private fun createHabitatTile(line: String): Tile {
+    private fun createHabitatTile(line: String, startingTile: Boolean = false): Tile {
 
-        //aus line eine liste machen die die 4 attribute der Bezeichner besitzt
+        // Aus line eine Liste machen, welche die 4 Attribute der Bezeichner besitzt
         val parts = line.split(";")
 
 
-        val id = parts[0].toInt()
+        val id = parts[0].toInt() * if (startingTile) 10 else 1
         val habitats = parts[1]
         val wildlife = parts[2]
 
@@ -729,26 +729,27 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                 if (node == null) return@forEachIndexed
                 if (node.tile.occupant == WildlifeToken.ELK) neighborElks.add(index)
             }
-            var neighborElks2: Any
+            val neighborElksA = mutableListOf<Int>()
+            val neighborElksB = mutableListOf<MutableList<Int>>()
             if (scoringCardA) {
-                neighborElks2 = neighborElks.filter({ (it - 3) !in neighborElks }).toMutableList()
-                neighborElks2.replaceAll {
+                neighborElksA.addAll(neighborElks.filter { (it - 3) !in neighborElks }.toMutableList())
+                neighborElksA.replaceAll {
                     if (it < 3) it + 3 else it
                 }
             } else {
-                val neighborElksT = neighborElks.toMutableList()
-                neighborElksT.sort()
+                val neighborElksT2 = neighborElks.toMutableList()
+                neighborElksT2.sort()
 
-                neighborElksT.filter { node.neighbours[it]?.marked2 == 0 }
-
-                neighborElks2 = mutableListOf<MutableList<Int>>()
+                val neighborElksT = neighborElksT2.filter { node.neighbours[it]?.marked2 == 0 }.toMutableList()
 
                 while (neighborElksT.isNotEmpty()) {
                     val tempList = mutableListOf<Int>()
 
                     var currIdx = neighborElksT[0]
+                    val currIdx2 = neighborElksT[0]
                     while (getNeighbors(currIdx).first in neighborElksT) {
                         currIdx = getNeighbors(currIdx).first
+                        if (currIdx == currIdx2) break
                     }
                     tempList.add(currIdx)
                     neighborElksT.remove(currIdx)
@@ -759,10 +760,10 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                     }
 
                     if (tempList.size < 3) {
-                        neighborElks2.add(tempList)
+                        neighborElksB.add(tempList)
                     } else {
                         for (i in 0..(tempList.size - 3)) {
-                            neighborElks2.add(tempList.subList(i, i + 3))
+                            neighborElksB.add(tempList.subList(i, i + 3))
                         }
                     }
                 }
@@ -772,7 +773,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             //Oder eine normale for Schleife, damit man den duplicate code nicht hat
             //TODO ändern um Warning zu entfernen
             if (scoringCardA) {
-                (neighborElks2 as MutableList<Int>).forEach {
+                neighborElksA.forEach {
                     markStraightLine(node, it)
                     markStraightLine(node, it - 3)
 
@@ -805,7 +806,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                     }
                 }
             } else {
-                (neighborElks2 as MutableList<List<Int>>).forEach {
+                neighborElksB.forEach {
                     markElkGroup(node, it)
 
                     val combination = elkGroup.filter { elk -> elk.marked }.map { elk -> elk.tile.id }.toMutableList()
