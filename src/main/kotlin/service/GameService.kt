@@ -423,7 +423,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                 throw IllegalStateException("Player extermination requires exactly three identical wildlife tokens")
             }
         } else {
-            if (highestCount < 4) return
+            if (highestCount < 4) throw IllegalStateException("Automatic extermination requires four identical wildlife tokens")
         }
         val affectedIndices = mutableListOf<Int>()
         for (i in game.choices.indices) {
@@ -445,6 +445,8 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         if (playerTrigger) {
             game.gameState = GameState.HAS_EXTERMINATED
         }
+        onAllRefreshables { refreshAfterExterminate() }
+
         val remainingTokens = game.choices.map { it.second }
         if (remainingTokens.distinct().size == 1) {
             exterminate(false)
@@ -455,12 +457,11 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             }
             game.wildlifeTokens.shuffle()
             game.removedTokens.clear()
-            //refreshing only at the final resolved state
 
-            onAllRefreshables {
-                refreshAfterExterminate()
-            }
-
+//            refreshing only at the final resolved state
+//            onAllRefreshables {
+//                refreshAfterExterminate()
+//            }
 
         }
     }
