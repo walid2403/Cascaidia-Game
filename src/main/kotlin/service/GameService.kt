@@ -84,7 +84,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         checkNotNull(game) { "Spiel nicht initialisiert" }
 
         //start_tiles csv als input stream
-        val input = javaClass.getResourceAsStream("start_tiles.csv")
+        val input = javaClass.getResourceAsStream("/start_tiles.csv")
         checkNotNull(input) { "Datei nicht gefunden" }
 
         //Liste für die Zeilen aus der csv(konkreter nur die tile zeilen)

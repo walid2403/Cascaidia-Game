@@ -266,8 +266,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         onMouseClicked = {
             if(player == 3) player = 0
             else player++
-            //rootService.gameService.changeTurn()
-            zoomOnNextPlayer()
+            rootService.gameService.changeTurn()
+//            zoomOnNextPlayer()
         }
     }
 
