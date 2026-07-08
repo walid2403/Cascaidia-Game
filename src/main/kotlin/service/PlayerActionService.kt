@@ -197,8 +197,6 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
                 selectedTile.habs.add(firstHabitat)
             }
         }
-
-        onAllRefreshables { refreshAfterRotate(right) }
     }
 
     /**
@@ -258,7 +256,10 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
         val selectedTile = game.choices[tileIndex].first
         currentPlayer.board[index] = selectedTile
-        onAllRefreshables { refreshAfterPlaceTile(index) }
+
+        game.gameState = GameState.PLAYED_TILE
+
+        onAllRefreshables { refreshAfterPlaceTile(Triple(x, y, z)) }
     }
 
     /**
@@ -279,35 +280,6 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * not adjacent to another position
      */
     fun placeWildlife(index: Triple<Int, Int, Int>) {
-        val game = rootService.currentGame ?: error("No current game")
-        val currentPlayer = game.playerQueue.peek()
-        check(game.gameState == GameState.PLAYED_TILE) {
-            "Wildlife can only be placed in PLAYED_TILE state"
-        }
-        val tile = currentPlayer.board[index]
-            ?: throw IllegalArgumentException(
-                "There is no tile at the selected position"
-            )
-        require(tile.occupant == null) {
-            "This tile already contains a wildlife token"
-        }
-        require(game.selectedChoice.second in game.choices.indices) {
-            "No wildlife token has been selected"
-        }
-        val selectedWildlife = game.choices[game.selectedChoice.second].second
-        require(selectedWildlife in tile.possibles) {
-            "This wildlife token is not allowed on the selected tile"
-        }
-        tile.occupant = selectedWildlife
-        if (tile.possibles.size == 1 && game.natureTokens > 0) {
-            currentPlayer.natureTokens++
-            game.natureTokens--
-        }
-        game.gameState = GameState.END_OF_TURN
-        onAllRefreshables {
-            refreshAfterPlaceWildlife(index)
-        }
-
 
     }
 
