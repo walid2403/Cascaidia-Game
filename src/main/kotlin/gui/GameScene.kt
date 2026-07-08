@@ -22,6 +22,7 @@ import tools.aqua.bgw.visual.ImageVisual
 import entity.*
 import tools.aqua.bgw.animation.MovementAnimation
 import tools.aqua.bgw.components.gamecomponentviews.HexagonView
+import tools.aqua.bgw.components.uicomponents.ComboBox
 import tools.aqua.bgw.net.common.response.SpectatorJoinGameResponse
 import tools.aqua.bgw.visual.Visual
 
@@ -49,6 +50,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private var allButtonsAllowed = true
     var animationsEnabled = true
     private var isPlayerHuman = true
+    private var animationSpeed = 1.0
 
     //Neuerungen 06.07
     private val shop = arrayOfNulls<HexagonViewExtended>(4)
@@ -337,6 +339,22 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         visual = ColorVisual(0,0, 0, 127).apply { style.borderRadius = BorderRadius(10) }
     }
 
+    private val animationSpeedControl = ComboBox<Double>(
+        posX = 354,
+        posY = 985,
+        width = 200,
+        height = 60,
+        items = listOf(1.0, 0.5, 2.0, 5.0, 10.0),
+        disallowUnselect = true,
+        formatFunction = { "Animation Speed: $it" },
+        font = Font(size = 16, color = Color.WHITE),
+        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(10) }
+    ).apply {
+        onItemSelected = {
+            newValue -> if(newValue != null) animationSpeed = newValue
+        }
+    }
+
     //Panel an der Seite mit einzelnen Views
     private val viewPanel = Label(width = 285, height = 912, posX = 35, posY = 35).apply {
         visual= ColorVisual(170,170,170, 170).apply { style.borderRadius = BorderRadius(20) }
@@ -508,25 +526,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             app.showMenuScene(PauseMenuScene(app,rootService))
         }
     }
-
-    //Slider
-    private val sliderBar = Label(width = 200, height = 4, posX = 400, posY = 398).apply {
-        visual = ColorVisual(170,170,170)
-    }
-    private val sliderPoint = Label(width = 50, height = 50, posX = 400, posY = 375).apply {
-        visual = ColorVisual(170,170,170)
-        onMousePressed = { event ->
-            if(event.posX.toDouble() >= 400.0 && event.posX.toDouble() <= 600) {
-                this.posX = event.posX.toDouble()
-            }
-        }
-    }
-
-
-
-
-
-
+    
 
 
 
@@ -570,7 +570,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             bearScoringCard, elkScoringCard, salmonScoringCard, hawkScoringCard, foxScoringCard,
             zoomIn, zoomOut,
 
-            sliderBar, sliderPoint
+            animationSpeedControl,
         )
     }
 
@@ -655,7 +655,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 //                //playerName.isVisible = false
 //                cameraPane.pan(x = 0, y = 0, zoom = 1.0, smooth = true)
 //                playAnimation(
-//                    DelayAnimation(duration = 1000).apply {
+//                    DelayAnimation(duration = (1000/animationSpeed).toInt()).apply {
 //                        onFinished = {
 //                            cameraPane.pan(x = x, y = y, zoom = 4.32, smooth = true)
 //                            //playerName.isVisible = true
@@ -680,7 +680,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         val coordinates = getCameraCoordinates(currentplayerID)
         cameraPane.pan(x = 0, y = 0, zoom = 1.0, smooth = true)
         playAnimation(
-            DelayAnimation(duration = 1000).apply {
+            DelayAnimation(duration = (1000/animationSpeed).toInt()).apply {
                 onFinished = {
                     cameraPane.pan(x = coordinates.first, y = coordinates.second, zoom = 4.32, smooth = true)
                 }
@@ -818,7 +818,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 fromScaleY = hexView.scaleY,
                 toScaleX = targetScale,
                 toScaleY = targetScale,
-                duration = 300,
+                duration = (300/animationSpeed).toInt(),
                 persist = true
             )
         )
@@ -833,7 +833,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 fromScaleY = animalView.scaleY,
                 toScaleX = targetScale,
                 toScaleY = targetScale,
-                duration = 300,
+                duration = (300/animationSpeed).toInt(),
                 persist = true
             )
         )
@@ -846,7 +846,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 RotationAnimation(
                     componentView = tile,
                     byAngle = rotation,
-                    duration = 300,
+                    duration = (300/animationSpeed).toInt(),
                     persist = true
                 )
             )
@@ -1022,7 +1022,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 //                    componentView = selectTile as HexagonViewExtended,
 //                    toX = xTemp,
 //                    toY = yTemp,
-//                    duration = 500
+//                    duration = (500/animationSpeed).toInt()
 //                )
 //            )
 //        } else {
@@ -1119,7 +1119,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 //                    fromY = 700.0,
 //                    toX = getShopTileCoordinateX(i),
 //                    toY = 30.0,
-//                    duration = 500
+//                    duration = (500/animationSpeed).toInt()
 //                )
 //            )
 //            println("Animation")
