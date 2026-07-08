@@ -1468,10 +1468,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             playerListAtStart.removeAll{ it !in game.playerQueue}
         }
 
-        //Philllip wird hier einen Rechtschreibfehler erwähnen
-        val index = playerListAtStart.indexOf(game.playerQueue.peek())
-        require(index >= 0 && index < game.playerQueue.size) { "Player-Index out of bounds (GUI)" }
-        return index
+        return playerListAtStart.indexOf(game.playerQueue.peek())
     }
 
     private fun loadScoreCards(selection: List<Boolean>) {
