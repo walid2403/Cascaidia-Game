@@ -256,6 +256,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
         val selectedTile = game.choices[tileIndex].first
         currentPlayer.board[index] = selectedTile
+        onAllRefreshables { refreshAfterPlaceTile(index) }
     }
 
     /**

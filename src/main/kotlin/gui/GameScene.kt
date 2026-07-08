@@ -274,12 +274,16 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     private val confirm = Button(width = 120, height = 60, posX = 1410, posY = 985, text = "Confirm",
-        font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
-        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(10) }
+        font = Font(size = 16, color = Color(255, 255, 255, 255)),
+        visual = ColorVisual(0,0, 0).apply {
+            style.borderRadius = BorderRadius(10)
+        }
+    ).apply {
         isVisible = false
         onMouseClicked = {
-            //TODO ("position auf dem board angeben")
-//            rootService.playerActionService.placeTile()
+            println("on Click Test ")
+            val s = ((selectedGridX!! + selectedGridY!!) * (-1))
+            rootService.playerActionService.placeTile(Triple(selectedGridX!!, selectedGridY!!, s))
         }
     }
 
@@ -901,7 +905,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     private fun createAnimalView(wildlifeToken: WildlifeToken): ImageVisual {
-        var image = when (wildlifeToken) {
+        val image = when (wildlifeToken) {
             WildlifeToken.FOX -> ImageVisual("tokens/fox.png")
             WildlifeToken.HAWK -> ImageVisual("tokens/hawk.png")
             WildlifeToken.ELK -> ImageVisual("tokens/elk.png")
@@ -998,13 +1002,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
-    private fun placeChoosenTile() {
+    private fun placeChosenTile() {
         val game = rootService.currentGame
         checkNotNull(game)
         val playerID = getPlayerId()
         val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(playerID)
-        val choosenTile = shop[selectTile-1]
-        checkNotNull(choosenTile)
+        val chosenTile = shop[selectTile-1]
+        checkNotNull(chosenTile)
 
         val x = selectedGridX
         val y = selectedGridY
@@ -1031,16 +1035,16 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 //        }
 
 
-        scaleTile( 0, choosenTile)
-        this.removeComponents(choosenTile)
-        choosenTile.size = 14.0
+        scaleTile( 0, chosenTile)
+        this.removeComponents(chosenTile)
+        chosenTile.size = 14.0
 
         val greyTile = currentArea[x,y]
         checkNotNull(greyTile)
-        choosenTile.posX = greyTile.posX
-        choosenTile.posY = greyTile.posY
+        chosenTile.posX = greyTile.posX
+        chosenTile.posY = greyTile.posY
 
-        currentArea.set(x,y,choosenTile)
+        currentArea.set(x,y,chosenTile)
 
         selectionTileClick(false)
         animalTileClick(false)
@@ -1050,6 +1054,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         activatesTileButtons()
         changeGreyVisibility(false, playerID)
+
+        confirm.isDisabled = false
     }
 
     private fun putTileInGrid(x: Int, y: Int) {
@@ -1257,6 +1263,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                     }
                 }
 
+                nbhTileView.choiceHex = true
                 currentArea[tileViewPos.first + nbh.first, tileViewPos.second + nbh.second] = nbhTileView
             }
         }
@@ -1336,7 +1343,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     override fun refreshAfterSelectColumn(index: Int) {
-        placeChoosenTile()
+        placeChosenTile()
     }
 
     override fun refreshAfterRedo() {
@@ -1345,7 +1352,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
     override fun refreshAfterFreeSelection() {
-        placeChoosenTile()
+        placeChosenTile()
     }
 
 
@@ -1362,7 +1369,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
     override fun refreshAfterPlaceTile(index: Triple<Int, Int, Int>) {
-        putTileInGrid(index.first, index.second)
+        println("place tile confirmation")
+        //putTileInGrid(index.first, index.second)
     }
 
 
