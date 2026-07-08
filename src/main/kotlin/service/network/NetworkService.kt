@@ -1,11 +1,13 @@
 package service.network
 
 import edu.udo.cs.sopra.ntf.*
+import entity.Player
 import entity.PlayerType
 import entity.WildlifeToken
 import service.AbstractRefreshingService
 import service.RootService
 import tools.aqua.bgw.examples.war.service.CascadiaNetworkClient
+import kotlin.collections.get
 
 class NetworkService(private val rootService: RootService) : AbstractRefreshingService() {
 
@@ -145,7 +147,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
         val message = GameInitMessage(
             tileList, reorderList.map { scoringCards[it] },
-            game.playerQueue.map { NetPlayer(it.name, it.startingTileID) }, wildlifeList
+            game.playerQueue.map { NetPlayer(it.name, it.board[Triple(0,0,0)]?.id ?: 0) }, wildlifeList
         )
 
         if (game.playerQueue.peek().type == PlayerType.NETWORK) updateConnectionState(ConnectionState.WAITING_FOR_PLAYER_TURN)

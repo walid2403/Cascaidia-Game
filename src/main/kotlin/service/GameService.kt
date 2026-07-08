@@ -225,13 +225,13 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @return Habitatstile
      * @param line eine Zeile aus der csv datei die bereits ein String ist
      */
-    private fun createHabitatTile(line: String): Tile {
+    private fun createHabitatTile(line: String, startingTile: Boolean = false): Tile {
 
-        //aus line eine liste machen die die 4 attribute der Bezeichner besitzt
+        // Aus line eine Liste machen, welche die 4 Attribute der Bezeichner besitzt
         val parts = line.split(";")
 
 
-        val id = parts[0].toInt()
+        val id = parts[0].toInt() * if (startingTile) 10 else 1
         val habitats = parts[1]
         val wildlife = parts[2]
 
