@@ -106,7 +106,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         checkNotNull(game) { "Spiel nicht initialisiert" }
 
         //start_tiles csv als input stream
-        val input = javaClass.getResourceAsStream("start_tiles.csv")
+        val input = javaClass.getResourceAsStream("/start_tiles.csv")
         checkNotNull(input) { "Datei nicht gefunden" }
 
         //Liste für die Zeilen aus der csv(konkreter nur die tile zeilen)
@@ -841,11 +841,27 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                         }
                     }
                 }
+
+                if (neighborElksB.isEmpty()) {
+                    node.marked = true
+
+                    val score =
+                        if (elkGroup.any { elk -> (elk.marked2 == 0) && !elk.marked }) {
+                            scoreElk(1) + scoreElkGroup(elkGroup, scoringCardA, depth + 1)
+                        } else scoreElk(1)
+
+                    if (score == maxScore) return score
+                    else scores.add(score)
+
+                    elkGroup.forEach { elk -> elk.marked = false }
+                    elkGroup.forEach { elk ->
+                        if (elk.marked2 > depth) elk.marked2 = 0
+                    }
+                }
             }
 
             //Sonst kannst du auch 2 Variablen einfach nehmen jeweils mit dem Typ
             //Oder eine normale for Schleife, damit man den duplicate code nicht hat
-            //TODO ändern um Warning zu entfernen
             if (scoringCardA) {
                 neighborElksA.forEach {
                     markStraightLine(node, it)
@@ -897,6 +913,9 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
 
                     val tmpScore = elkGroup.count { elk -> elk.marked }
 //                    println("tmpScore: $tmpScore, depth: $depth, size: ${elkGroup.size}, scores: $scores, it: $it")
+//                    elkGroup.forEach {elk ->
+//                        println("ID: ${elk.tile.id}, Marked: ${elk.marked}, Marked2: ${elk.marked2}")
+//                    }
 
                     val score =
                         if (elkGroup.any { elk -> (elk.marked2 == 0) && !elk.marked }) {

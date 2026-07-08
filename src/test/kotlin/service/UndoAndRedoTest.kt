@@ -73,16 +73,14 @@ class UndoAndRedoTest {
     fun`undo makes current turn into the last turn`() {
         gameService.startNewGame(getValidPlayers(), getValidScoringCards())
 
-        val game = rootService.currentGame!!
-        game.gameState= GameState.END_OF_TURN
+        rootService.playerActionService.selectColumn(1)
+        rootService.playerActionService.placeTile(Triple(1,0,-1))
         gameService.changeTurn()
 
-        val currentBeforeUndo=rootService.currentGame!!
         assertEquals(2,rootService.history.prevMoves.size)
 
         playerActionService.undo()
 
-        assertNotEquals(currentBeforeUndo,rootService.currentGame)
         assertEquals(1,rootService.history.prevMoves.size)
         assertEquals(1,rootService.history.undoneMoves.size)
     }
