@@ -337,10 +337,16 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private val undo = Button(width = 130, height = 60, posX = 35, posY = 985, text = "Undo",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(10) }
+        onMouseClicked = {
+            rootService.playerActionService.undo()
+        }
     }
     private val redo = Button(width = 130, height = 60, posX = 190, posY = 985, text = "Redo",
         font = Font(size = 16, color = Color(255, 255, 255, 127))).apply {
         visual = ColorVisual(0,0, 0, 127).apply { style.borderRadius = BorderRadius(10) }
+        onMouseClicked = {
+            rootService.playerActionService.redo()
+        }
     }
 
     private val animationSpeedControl = ComboBox<Double>(
@@ -922,6 +928,26 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).forEach { it.clear() }
         listOf(natureTokenCountOneSide, natureTokenCountTwoSide, natureTokenCountThreeSide, natureTokenCountFourSide).
         forEach { it.text = "0" }
+
+        selectAnimal = -1
+        selectTile = -1
+        animationSpeed = 1.0
+        animationSpeedControl.selectedItem = animationSpeedControl.items[0]
+        customChoiceActive = false
+        changeWildlifeActive = false
+        changeAnimalsArray = booleanArrayOf(false,false,false,false)
+        player = 0
+
+        allButtonsAllowed = true
+        animationsEnabled = true
+        isPlayerHuman = true
+        animationSpeed = 1.0
+        shop[0] = null
+        shop[1] = null
+        shop[2] = null
+        shop[3] = null
+        selectedGridX = null
+        selectedGridY = null
     }
 
 
@@ -1344,6 +1370,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     override fun refreshAfterUndo() {
         refreshAfterStartGame()
+        println("Test")
     }
 
     override fun refreshAfterSelectColumn(index: Int) {
@@ -1368,7 +1395,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     override fun refreshAfterRotate(right: Boolean) {
         val game = rootService.currentGame
         checkNotNull(game)
-        println("Test")
         rotateInSelection(right, tileMap.forward(game.choices.elementAt(game.selectedChoice.first).first))
     }
 
