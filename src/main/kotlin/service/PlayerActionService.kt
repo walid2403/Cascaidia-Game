@@ -197,6 +197,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
                 selectedTile.habs.add(firstHabitat)
             }
         }
+        onAllRefreshables { refreshAfterRotate(right) }
     }
 
     /**
