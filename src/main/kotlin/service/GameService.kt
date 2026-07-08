@@ -1,6 +1,11 @@
 package service
 
 import entity.*
+import entity.SaveState
+import java.io.*
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.databind.module.SimpleModule
 import kotlin.math.max
 
 /**
@@ -8,6 +13,23 @@ import kotlin.math.max
  */
 
 class GameService(private val rootService: RootService) : AbstractRefreshingService() {
+
+    /**
+     * A Jackson object mapper configured with a custom `SimpleModule` to handle
+     * specific key deserialization needs for JSON Maps.
+     *
+     * This mapper enables seamless conversion of JSON map keys formatted as strings
+     * (e.g., `(1, -1, 0)`) into actual Kotlin `Triple<Int, Int, Int>` objects
+     * through the `TripleKeyDeserializer`.
+     *
+     * The customization is essential for deserializing game-related data structures
+     * that involve triples as keys.
+     */
+    private val mapper = jacksonObjectMapper().apply {
+        val module = SimpleModule()
+        module.addKeyDeserializer(Triple::class.java, TripleKeyDeserializer())
+        registerModule(module)
+    }
 
     /**
      * A function to start a new game from scratch
@@ -225,13 +247,13 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @return Habitatstile
      * @param line eine Zeile aus der csv datei die bereits ein String ist
      */
-    private fun createHabitatTile(line: String): Tile {
+    private fun createHabitatTile(line: String, startingTile: Boolean = false): Tile {
 
-        //aus line eine liste machen die die 4 attribute der Bezeichner besitzt
+        // Aus line eine Liste machen, welche die 4 Attribute der Bezeichner besitzt
         val parts = line.split(";")
 
 
-        val id = parts[0].toInt()
+        val id = parts[0].toInt() * if (startingTile) 10 else 1
         val habitats = parts[1]
         val wildlife = parts[2]
 
@@ -291,6 +313,36 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
     }
 
     /**
+     * Restores a `CascadiaGame` instance from a provided `GameSnapshot`.
+     *
+     * This method initializes a new `CascadiaGame` object based on the state encapsulated
+     * in the given `GameSnapshot`. It restores the game elements such as nature tokens, state,
+     * selected choices, players, and token stacks.
+     *
+     * @param snapshot The `GameSnapshot` object containing the serialized game state to restore.
+     * @return A new `CascadiaGame` instance with the restored game state.
+     */
+    private fun restoreSnapshot(snapshot: GameSnapshot): CascadiaGame {
+        val game = CascadiaGame(snapshot.scoringCards, snapshot.isLocal)
+        game.natureTokens = snapshot.natureTokens
+        game.gameState = snapshot.gameState
+        game.selectedChoice = snapshot.selectedChoice
+
+        game.choices.clear()
+        game.choices.addAll(snapshot.choicesList)
+        game.removedTokens.clear()
+        game.removedTokens.addAll(snapshot.removedTokensList)
+
+        snapshot.tileStackList.reversed().forEach { game.tileStack.push(it) }
+        snapshot.wildlifeTokensList.reversed().forEach { game.wildlifeTokens.push(it) }
+
+        game.playerQueue.clear()
+        game.playerQueue.addAll(snapshot.playerQueue)
+
+        return game
+    }
+
+    /**
      * A function to load a previously saved game. The saved game is identified by the name Parameter.
      *
      * @param name The name of the previously saved game
@@ -300,6 +352,27 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      */
     fun loadGame(name: String) {
 
+        if (rootService.currentGame != null) throw IllegalStateException("Es läuft bereits ein Spiel.")
+        if (name.isBlank()) throw IllegalArgumentException("Der Name darf nicht leer sein.")
+
+        val file = File(RootService.SAVE_DIRECTORY, "$name${RootService.SAVE_EXTENSION}")
+        if (!file.exists()) throw IllegalArgumentException("Spielstand '$name' existiert nicht.")
+
+        val loadedState: SaveState = mapper.readValue(file)
+
+        rootService.currentGame = restoreSnapshot(loadedState.currentGame)
+
+        rootService.history.prevMoves.clear()
+        loadedState.prevMovesList.forEach { snapshot ->
+            rootService.history.prevMoves.push(restoreSnapshot(snapshot))
+        }
+
+        rootService.history.undoneMoves.clear()
+        loadedState.undoneMovesList.forEach { snapshot ->
+            rootService.history.undoneMoves.push(restoreSnapshot(snapshot))
+        }
+
+        onAllRefreshables { refreshAfterLoadGame() }
     }
 
     /**
@@ -518,6 +591,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         scores: MutableList<Pair<String, MutableList<Int>>>,
         currentGame: CascadiaGame
     ) {
+        if (currentGame.playerQueue.isEmpty()) return
         if (currentGame.playerQueue.size == 2) {
             for (habitat in 0..4) {
                 if (scores[0].second[habitat] == scores[1].second[habitat]) {
@@ -531,38 +605,38 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                     scores[0].second.add(0)
                 }
             }
-        } else {    //evtl. auf foreach {} ändern, wenn Detekt sonst meckert
-            for (habitat in 0..4) {
-                val localeScores = mutableListOf<Int>()
-                for (playerScore in scores) {
-                    localeScores.add(playerScore.second[habitat])
+            return
+        }
+        for (habitat in 0..4) {
+            val localeScores = mutableListOf<Int>()
+            for (playerScore in scores) {
+                localeScores.add(playerScore.second[habitat])
+            }
+            val largest = localeScores.max()
+            val largestCount = localeScores.count { it == largest }
+            when (largestCount) {
+                1 -> {
+                    for (index in scores.indices) {
+                        val secondLargest = localeScores.toList().filter { it != largest }.max()
+                        val secondLargestCount = localeScores.count { it == secondLargest }
+                        if (localeScores[index] == largest) scores[index].second.add(3)
+                        else if (secondLargestCount == 1 && localeScores[index] == secondLargest)
+                            scores[index].second.add(1)
+                        else scores[index].second.add(0)
+                    }
                 }
-                val largest = localeScores.max()
-                val largestCount = localeScores.count { it == largest }
-                when (largestCount) {
-                    1 -> {
-                        for (index in scores.indices) {
-                            val secondLargest = localeScores.toList().filter { it != largest }.max()
-                            val secondLargestCount = localeScores.count { it == secondLargest }
-                            if (localeScores[index] == largest) scores[index].second.add(3)
-                            else if (secondLargestCount == 1 && localeScores[index] == secondLargest)
-                                scores[index].second.add(1)
-                            else scores[index].second.add(0)
-                        }
-                    }
 
-                    2 -> {
-                        for (index in scores.indices) {
-                            if (localeScores[index] == largest) scores[index].second.add(2)
-                            else scores[index].second.add(0)
-                        }
+                2 -> {
+                    for (index in scores.indices) {
+                        if (localeScores[index] == largest) scores[index].second.add(2)
+                        else scores[index].second.add(0)
                     }
+                }
 
-                    else -> {
-                        for (index in scores.indices) {
-                            if (localeScores[index] == largest) scores[index].second.add(1)
-                            else scores[index].second.add(0)
-                        }
+                else -> {
+                    for (index in scores.indices) {
+                        if (localeScores[index] == largest) scores[index].second.add(1)
+                        else scores[index].second.add(0)
                     }
                 }
             }

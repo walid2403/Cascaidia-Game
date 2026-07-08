@@ -89,6 +89,11 @@ interface Refreshable {
      */
     fun refreshAfterEndGame(scores: List<Pair<String,List<Int>>>) {}
 
+    /**
+     * Perform refreshes necessary after the game has been saved
+     */
+    fun refreshAfterSaveGame() {}
+
     // Network specific refreshes:
     /**
      * Perform refreshes necessary after a player couldn't join a game
