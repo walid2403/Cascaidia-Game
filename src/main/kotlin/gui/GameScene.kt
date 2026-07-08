@@ -1120,6 +1120,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         } else {
             //deactivateAllButtons()
         }
+        checkRemoveWildlifeButton()
 
         //refreshShop()       //Game Ende testen wenn TileStack leer ist oder zu wenig animal Tokens
         //saveGameState()
