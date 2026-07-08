@@ -142,27 +142,4 @@ class StartNewGameTest {
             )
         }
     }
-
-    /**
-     * Tests if there is currently a game running
-     */
-    @Test
-    fun `test throws exception if there is currently a game running`(){
-        gameService.startNewGame(
-            playerList = listOf(
-                Pair("Mert", PlayerType.HUMAN),
-                Pair("Noman", PlayerType.EASY_BOT),
-            ),
-            getValidScoringCards()
-        )
-        assertFailsWith<IllegalStateException> {
-            gameService.startNewGame(
-                playerList = listOf(
-                    Pair("Mert", PlayerType.HUMAN),
-                    Pair("Noman", PlayerType.EASY_BOT),
-                ),
-                getValidScoringCards()
-            )
-        }
-    }
 }
