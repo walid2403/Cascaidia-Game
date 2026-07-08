@@ -590,6 +590,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         scores: MutableList<Pair<String, MutableList<Int>>>,
         currentGame: CascadiaGame
     ) {
+        if (currentGame.playerQueue.isEmpty()) return
         if (currentGame.playerQueue.size == 2) {
             for (habitat in 0..4) {
                 if (scores[0].second[habitat] == scores[1].second[habitat]) {
@@ -603,38 +604,38 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                     scores[0].second.add(0)
                 }
             }
-        } else {    //evtl. auf foreach {} ändern, wenn Detekt sonst meckert
-            for (habitat in 0..4) {
-                val localeScores = mutableListOf<Int>()
-                for (playerScore in scores) {
-                    localeScores.add(playerScore.second[habitat])
+            return
+        }
+        for (habitat in 0..4) {
+            val localeScores = mutableListOf<Int>()
+            for (playerScore in scores) {
+                localeScores.add(playerScore.second[habitat])
+            }
+            val largest = localeScores.max()
+            val largestCount = localeScores.count { it == largest }
+            when (largestCount) {
+                1 -> {
+                    for (index in scores.indices) {
+                        val secondLargest = localeScores.toList().filter { it != largest }.max()
+                        val secondLargestCount = localeScores.count { it == secondLargest }
+                        if (localeScores[index] == largest) scores[index].second.add(3)
+                        else if (secondLargestCount == 1 && localeScores[index] == secondLargest)
+                            scores[index].second.add(1)
+                        else scores[index].second.add(0)
+                    }
                 }
-                val largest = localeScores.max()
-                val largestCount = localeScores.count { it == largest }
-                when (largestCount) {
-                    1 -> {
-                        for (index in scores.indices) {
-                            val secondLargest = localeScores.toList().filter { it != largest }.max()
-                            val secondLargestCount = localeScores.count { it == secondLargest }
-                            if (localeScores[index] == largest) scores[index].second.add(3)
-                            else if (secondLargestCount == 1 && localeScores[index] == secondLargest)
-                                scores[index].second.add(1)
-                            else scores[index].second.add(0)
-                        }
-                    }
 
-                    2 -> {
-                        for (index in scores.indices) {
-                            if (localeScores[index] == largest) scores[index].second.add(2)
-                            else scores[index].second.add(0)
-                        }
+                2 -> {
+                    for (index in scores.indices) {
+                        if (localeScores[index] == largest) scores[index].second.add(2)
+                        else scores[index].second.add(0)
                     }
+                }
 
-                    else -> {
-                        for (index in scores.indices) {
-                            if (localeScores[index] == largest) scores[index].second.add(1)
-                            else scores[index].second.add(0)
-                        }
+                else -> {
+                    for (index in scores.indices) {
+                        if (localeScores[index] == largest) scores[index].second.add(1)
+                        else scores[index].second.add(0)
                     }
                 }
             }
