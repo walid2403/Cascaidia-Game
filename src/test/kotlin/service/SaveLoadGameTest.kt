@@ -161,7 +161,7 @@ class SaveLoadGameTest {
     fun `save game throws IllegalArgumentException if it is a network game`() {
         val rootService = RootService()
 
-        val networkGame = CascadiaGame(listOf(true, false, true, false, true), true)
+        val networkGame = CascadiaGame(listOf(true, false, true, false, true), false)
         networkGame.playerQueue.add(Player("LocalPlayer", PlayerType.HUMAN))
         networkGame.playerQueue.add(Player("NetPlayer", PlayerType.NETWORK))
         rootService.currentGame = networkGame
