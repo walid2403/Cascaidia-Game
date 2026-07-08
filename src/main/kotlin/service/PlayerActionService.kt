@@ -277,6 +277,8 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             undoneMovesList = rootService.history.undoneMoves.peekAll().map { createSnapshot(it) }
         )
         mapper.writeValue(file, state)
+
+        onAllRefreshables { refreshAfterSaveGame() }
     }
 
     /**
