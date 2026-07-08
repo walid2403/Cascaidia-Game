@@ -1117,14 +1117,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         changeGreyVisibility(true, player)
 
         if(isHuman()) {
-            //activateButtons()
+            unlock()
         } else {
-            //deactivateAllButtons()
+            lock()
         }
         checkRemoveWildlifeButton()
-
-        //refreshShop()       //Game Ende testen wenn TileStack leer ist oder zu wenig animal Tokens
-        //saveGameState()
+        checkExterminateButton()
     }
 
     private fun isHuman(): Boolean {
