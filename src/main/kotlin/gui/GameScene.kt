@@ -99,6 +99,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 }
                 this.font = Font(size = 16, color = Color(0, 0, 0))
                 this.text = "Remove selection"
+                updateNatureTokenCount(1)
 
                 //Alle Tiles-OnClicks und Rotate-Buttons deaktivieren und alle runterskalieren und Auswahl zurücksetzten
                 enableTilesInShop(false)
@@ -1420,8 +1421,19 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         val image = getTileWithAnimal(tileMap.backward(tile))
         currentArea[index.first, index.second]?.visual = image
         currentArea[index.first, index.second]?.isDisabled = true
+
+        updateNatureTokenCount()
     }
 
+    private fun updateNatureTokenCount(removeManually: Int = 0) {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        val tokenCount = listOf(natureTokenCountOneSide, natureTokenCountTwoSide,
+            natureTokenCountThreeSide, natureTokenCountFourSide).elementAt(player)
+
+        val newCount = game.playerQueue.peek().natureTokens - removeManually
+        tokenCount.text = "$newCount"
+    }
 
 
     override fun refreshAfterChatMessage(messageSender: String, message: String) {
@@ -1436,8 +1448,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
         customChoice.font = Font(size = 16, color = Color(0, 0, 0))
         customChoiceActive = true
+        updateNatureTokenCount()
     }
-
 
 
     //Liste wird bei refreshAfterStartGame mit der Startreihenfolge befüllt
@@ -1470,7 +1482,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 when (i) {
                     0 -> bearScoringCard.visual = ImageVisual("scoringCards/Scoring_Bear_B.png")
                     1 -> elkScoringCard.visual = ImageVisual("scoringCards/Scoring_Elk_B.png")
-                    2 -> salmonScoringCard.visual = ImageVisual("scoringCards/Scoring_Elk_B.png")
+                    2 -> salmonScoringCard.visual = ImageVisual("scoringCards/Scoring_Salmon_B.png")
                     3 -> hawkScoringCard.visual = ImageVisual("scoringCards/Scoring_Hawk_B.png")
                     4 -> foxScoringCard.visual = ImageVisual("scoringCards/Scoring_Fox_B.png")
                     else -> throw IllegalArgumentException("scoreCard list has too many indices: " +
@@ -1479,7 +1491,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             }
         }
     }
-
 
 
 
