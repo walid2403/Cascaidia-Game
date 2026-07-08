@@ -6,6 +6,7 @@ import java.io.*
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.databind.module.SimpleModule
+import kotlin.math.max
 
 /**
  * The game service class of the Cascadia Game. It includes all functions which work mostly on the system-logic side
