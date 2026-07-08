@@ -10,6 +10,7 @@ package entity
  * @property type Die Art des Spielers als [PlayerType] Objekt
  * @property natureTokens Die Anzahl an Nature Tokens die der Spieler besitzt als [Int]
  * @property board Das Spiel-Board des Spielers, als [MutableMap] eines [Triple] Objekts mit [Int] Objekten,
+ * @property startingTileID Die ID der StartTiles des Spielers als [Int]
  * und einem [Tile] Objekt
  */
 
@@ -18,11 +19,15 @@ class Player(val name: String, val type: PlayerType) {
 
     val board: MutableMap<Triple<Int, Int, Int>, Tile> = mutableMapOf()
 
+    var startingTileID: Int = 0
+
     constructor(other: Player) : this(
         name = other.name,
         type = other.type
     ) {
         natureTokens = other.natureTokens
+
+        startingTileID = other.startingTileID
 
         other.board.forEach { (key, value) ->
             board[key] = Tile(value)

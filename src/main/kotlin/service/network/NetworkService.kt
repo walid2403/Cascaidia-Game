@@ -145,10 +145,10 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
         val message = GameInitMessage(
             tileList, reorderList.map { scoringCards[it] },
-            playerNames.map { NetPlayer(it.first, TODO("Starter ID einfügen")) }, wildlifeList
+            game.playerQueue.map { NetPlayer(it.name, it.startingTileID) }, wildlifeList
         )
 
-        if (playerNames.first().second == PlayerType.NETWORK) updateConnectionState(ConnectionState.WAITING_FOR_PLAYER_TURN)
+        if (game.playerQueue.peek().type == PlayerType.NETWORK) updateConnectionState(ConnectionState.WAITING_FOR_PLAYER_TURN)
         else updateConnectionState(ConnectionState.PLACING)
         client?.sendGameActionMessage(message)
     }
@@ -210,16 +210,49 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         }
     }
 
-    fun sendPlace() {
+    fun sendPlace(habCoords: Triple<Int, Int, Int>, tokenCoords: Triple<Int, Int, Int>?, habRotation: Int) {
+        val wildlifeCoords = if (tokenCoords != null) {
+            Pair(tokenCoords.first, tokenCoords.second)
+        } else {
+            null
+        }
 
+        val message: PlaceMessage = PlaceMessage(
+            Pair(habCoords.first, habCoords.second), wildlifeCoords, habRotation
+        )
+
+        client?.sendGameActionMessage(message)
     }
 
     fun receivePlace(message: PlaceMessage) {
+        val game = rootService.currentGame
+        checkNotNull(game) { "No running game found" }
 
+        val habCoords: Triple<Int, Int, Int> = Triple(message.habitatCoordinates.first, message.habitatCoordinates.second,
+            -(message.habitatCoordinates.first + message.habitatCoordinates.second))
+
+        rootService.playerActionService.placeTile(habCoords)
+        game.playerQueue.peek().board[habCoords]?.rotation = message.habitatRotation
+
+        if (message.wildlifeCoordinates != null) {
+            val tokenCoords: Triple<Int, Int, Int> = Triple(
+                message.wildlifeCoordinates!!.first, message.wildlifeCoordinates!!.second,
+                -(message.wildlifeCoordinates!!.first + message.wildlifeCoordinates!!.second))
+
+            rootService.playerActionService.placeWildlife(tokenCoords)
+        }
     }
 
-    fun sendExterminate() {
+    fun sendExterminate(indices: List<Int>, natureToken: Boolean) {
+        val game = rootService.currentGame
+        checkNotNull(game) { "No running game found" }
 
+        val wildlifeList = game.choices.map { NetWildlife.valueOf(it.second.name) }.reversed().toMutableList()
+        wildlifeList.addAll(game.wildlifeTokens.peekAll().map { NetWildlife.valueOf(it.name) }.reversed())
+
+        val message = WipeWildlifeMessage(
+            natureToken, game.playerQueue.peek().natureTokens, indices, wildlifeList
+        )
     }
 
     fun receiveExterminate(message: WipeWildlifeMessage) {
