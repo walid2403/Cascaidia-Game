@@ -97,7 +97,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     private val p1Input: TextField = TextField(
         width = nameWidth, height = nameHeight,
         posX = nameX, posY = nameY,
-        prompt = "Player 1",
+        prompt = "Player 1", text = "Player 1",
         font = Font(size = 31)
 
     ).apply {
@@ -117,7 +117,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     private val p2Input: TextField = TextField(
         width = nameWidth, height = nameHeight,
         posX = nameX, posY = nameY + nameHeight + nameDistance,
-        prompt = "Player 2",
+        prompt = "Player 2", text = "Player 2",
         font = Font(size = 31),
 
         ).apply {
@@ -497,6 +497,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = 30,
         height = 50,
         text = "A",
+        isChecked = true,
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
     ).apply {
@@ -532,6 +533,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = 30,
         height = 50,
         text = "A",
+        isChecked = true,
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
     ).apply {
@@ -567,6 +569,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = 30,
         height = 50,
         text = "A",
+        isChecked = true,
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
     ).apply {
@@ -602,6 +605,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = 30,
         height = 50,
         text = "A",
+        isChecked = true,
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
     ).apply {
@@ -638,6 +642,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         width = 30,
         height = 50,
         text = "A",
+        isChecked = true,
         alignment = Alignment.CENTER_LEFT,
         font = Font(20.0, Color.WHITE),
     ).apply {
