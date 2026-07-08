@@ -959,6 +959,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         createTileView()
         initializeShop()
 
+        loadScoreCards(game.scoringCards)
+
         for(i in 0..3) {
             val animal = game.choices.elementAt(i).second
             listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(i).visual =
@@ -1461,6 +1463,21 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         return index
     }
 
+    private fun loadScoreCards(selection: List<Boolean>) {
+        for (i in selection.indices) {
+            if(!selection[i]) {
+                when (i) {
+                    0 -> bearScoringCard.visual = ImageVisual("scoringCards/Scoring_Bear_B.png")
+                    1 -> elkScoringCard.visual = ImageVisual("scoringCards/Scoring_Elk_B.png")
+                    2 -> salmonScoringCard.visual = ImageVisual("scoringCards/Scoring_Elk_B.png")
+                    3 -> hawkScoringCard.visual = ImageVisual("scoringCards/Scoring_Hawk_B.png")
+                    4 -> foxScoringCard.visual = ImageVisual("scoringCards/Scoring_Fox_B.png")
+                    else -> throw IllegalArgumentException("scoreCard list has too many indices: " +
+                            "${selection.indices} indices")
+                }
+            }
+        }
+    }
 
 
 
