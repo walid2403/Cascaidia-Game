@@ -1,13 +1,34 @@
 package service
 
 import entity.*
-import kotlin.math.max
+import entity.SaveState
+import java.io.*
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.databind.module.SimpleModule
 
 /**
  * The game service class of the Cascadia Game. It includes all functions which work mostly on the system-logic side
  */
 
 class GameService(private val rootService: RootService) : AbstractRefreshingService() {
+
+    /**
+     * A Jackson object mapper configured with a custom `SimpleModule` to handle
+     * specific key deserialization needs for JSON Maps.
+     *
+     * This mapper enables seamless conversion of JSON map keys formatted as strings
+     * (e.g., `(1, -1, 0)`) into actual Kotlin `Triple<Int, Int, Int>` objects
+     * through the `TripleKeyDeserializer`.
+     *
+     * The customization is essential for deserializing game-related data structures
+     * that involve triples as keys.
+     */
+    private val mapper = jacksonObjectMapper().apply {
+        val module = SimpleModule()
+        module.addKeyDeserializer(Triple::class.java, TripleKeyDeserializer())
+        registerModule(module)
+    }
 
     /**
      * A function to start a new game from scratch
@@ -291,6 +312,36 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
     }
 
     /**
+     * Restores a `CascadiaGame` instance from a provided `GameSnapshot`.
+     *
+     * This method initializes a new `CascadiaGame` object based on the state encapsulated
+     * in the given `GameSnapshot`. It restores the game elements such as nature tokens, state,
+     * selected choices, players, and token stacks.
+     *
+     * @param snapshot The `GameSnapshot` object containing the serialized game state to restore.
+     * @return A new `CascadiaGame` instance with the restored game state.
+     */
+    private fun restoreSnapshot(snapshot: GameSnapshot): CascadiaGame {
+        val game = CascadiaGame(snapshot.scoringCards, snapshot.isLocal)
+        game.natureTokens = snapshot.natureTokens
+        game.gameState = snapshot.gameState
+        game.selectedChoice = snapshot.selectedChoice
+
+        game.choices.clear()
+        game.choices.addAll(snapshot.choicesList)
+        game.removedTokens.clear()
+        game.removedTokens.addAll(snapshot.removedTokensList)
+
+        snapshot.tileStackList.reversed().forEach { game.tileStack.push(it) }
+        snapshot.wildlifeTokensList.reversed().forEach { game.wildlifeTokens.push(it) }
+
+        game.playerQueue.clear()
+        game.playerQueue.addAll(snapshot.playerQueue)
+
+        return game
+    }
+
+    /**
      * A function to load a previously saved game. The saved game is identified by the name Parameter.
      *
      * @param name The name of the previously saved game
@@ -300,6 +351,27 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      */
     fun loadGame(name: String) {
 
+        if (rootService.currentGame != null) throw IllegalStateException("Es läuft bereits ein Spiel.")
+        if (name.isBlank()) throw IllegalArgumentException("Der Name darf nicht leer sein.")
+
+        val file = File(RootService.SAVE_DIRECTORY, "$name${RootService.SAVE_EXTENSION}")
+        if (!file.exists()) throw IllegalArgumentException("Spielstand '$name' existiert nicht.")
+
+        val loadedState: SaveState = mapper.readValue(file)
+
+        rootService.currentGame = restoreSnapshot(loadedState.currentGame)
+
+        rootService.history.prevMoves.clear()
+        loadedState.prevMovesList.forEach { snapshot ->
+            rootService.history.prevMoves.push(restoreSnapshot(snapshot))
+        }
+
+        rootService.history.undoneMoves.clear()
+        loadedState.undoneMovesList.forEach { snapshot ->
+            rootService.history.undoneMoves.push(restoreSnapshot(snapshot))
+        }
+
+        onAllRefreshables { refreshAfterLoadGame() }
     }
 
     /**
