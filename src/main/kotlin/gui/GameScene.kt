@@ -653,12 +653,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             barOne, barTwo, barThree, nameOneSide, nameTwoSide, nameThreeSide, nameFourSide,
             natureTokenOneSide, natureTokenTwoSide, natureTokenThreeSide, natureTokenFourSide,
             natureTokenCountOneSide, natureTokenCountTwoSide, natureTokenCountThreeSide, natureTokenCountFourSide,
-            cameraPaneOneSide, cameraPaneTwoSide, cameraPaneThreeSide, cameraPaneFourSide,
-            lableAboveCamOne, lableAboveCamTwo, lableAboveCamThree, lableAboveCamFour, playerName,
+            cameraPaneOneSide, cameraPaneTwoSide,
+            lableAboveCamOne, lableAboveCamTwo, playerName,
             bearScoringCard, elkScoringCard, salmonScoringCard, hawkScoringCard, foxScoringCard,
             zoomIn, zoomOut,
             tileChoice1, tileChoice2, tileChoice3, tileChoice4,
-            animationSpeedControl,
+            animationSpeedControl
         )
     }
 
@@ -1207,7 +1207,38 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     private fun showPlayerAreasAtStart() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        val playerCount = game.playerQueue.size
 
+        //Erstmal für alle wieder freischalten (falls neues Spiel in selber Szene)
+        if(this.components.none { it == cameraPaneThreeSide }) this.addComponents(cameraPaneThreeSide)
+        if(this.components.none { it == cameraPaneFourSide }) this.addComponents(cameraPaneFourSide)
+        if(this.components.none { it == lableAboveCamFour }) this.addComponents(lableAboveCamFour)
+        if(this.components.none { it == lableAboveCamThree }) this.addComponents(lableAboveCamThree)
+        listOf(cameraPaneThreeSide, cameraPaneFourSide, lableAboveCamFour, lableAboveCamThree, nameThreeSide,
+            nameFourSide, natureTokenThreeSide, natureTokenFourSide, natureTokenCountThreeSide,
+            natureTokenCountFourSide, barTwo, barThree).forEach { it.isVisible = true }
+        viewPanel.height = 912.0
+
+        //Danach die nicht gebrauchten ausblenden
+        if(playerCount < 4) {
+            this.removeComponents(cameraPaneFourSide)
+            this.removeComponents(lableAboveCamFour)
+            listOf(cameraPaneFourSide, nameFourSide, natureTokenFourSide, natureTokenCountFourSide, barThree).forEach{
+                it.isVisible = false
+            }
+            viewPanel.height = 684.0
+        }
+
+        if(playerCount < 3) {
+            this.removeComponents(cameraPaneThreeSide)
+            this.removeComponents(lableAboveCamThree)
+            listOf(cameraPaneThreeSide, nameThreeSide, natureTokenThreeSide, natureTokenCountThreeSide, barTwo).forEach{
+                it.isVisible = false
+            }
+            viewPanel.height = 456.0
+        }
     }
 
 
