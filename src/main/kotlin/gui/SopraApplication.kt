@@ -55,5 +55,13 @@ class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
         this.hideMenuScene()
         this.showGameScene(gameScene)
     }
+
+    override fun refreshAfterSaveGame() {
+        this.showMenuScene(mainMenuScene)
+    }
+
+    override fun refreshAfterLoadGame() {
+        this.hideMenuScene()
+    }
 }
 

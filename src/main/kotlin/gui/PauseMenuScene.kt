@@ -133,7 +133,6 @@ class PauseMenuScene (private val app: SopraApplication, private val rootService
         onMouseClicked = {
             if(textField.text.isNotBlank()) {
                 rootService.playerActionService.saveGame(textField.text.trim())
-                app.showMenuScene(MainMenuScene(app,rootService))
             }
         }
     }

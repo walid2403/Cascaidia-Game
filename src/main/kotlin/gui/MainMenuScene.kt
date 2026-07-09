@@ -7,6 +7,8 @@ import tools.aqua.bgw.components.StaticComponentView
 import tools.aqua.bgw.components.layoutviews.Pane
 import tools.aqua.bgw.components.uicomponents.Button
 import tools.aqua.bgw.components.uicomponents.Label
+import tools.aqua.bgw.components.uicomponents.TextField
+import tools.aqua.bgw.core.Color
 import tools.aqua.bgw.core.MenuScene
 import tools.aqua.bgw.style.BorderRadius
 import tools.aqua.bgw.util.Font
@@ -60,6 +62,8 @@ class MainMenuScene(private val app: SopraApplication,private val rootService: R
         }
     }
 
+    private var loadActive = false
+
     val loadButton = Button(
         width = 260, height = 70,
         //posX = 1920/2 -270, posY = 1080/2 + 150,
@@ -69,7 +73,48 @@ class MainMenuScene(private val app: SopraApplication,private val rootService: R
     ).apply {
         visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(15) }
         onMouseClicked = {
+            if(loadActive) {
+                enableSaveEntry(false)
+            } else {
 
+                enableSaveEntry(true)
+            }
+            loadActive = !loadActive
+        }
+    }
+
+    private val saveNameTextField = TextField(
+        width = 260,
+        height = 55,
+        posX = (paneWidth - (2*260))/4,
+        posY = paneHeight/2 + 2*(paneHeight/2 - 2*70)/3 + 70 + 80,
+        prompt = "Enter the name of your save",
+        font = Font(size = 18, color = Color.DARK_GRAY),
+        visual = ColorVisual(Color.WHITE).apply {
+            style.borderRadius = BorderRadius(8)
+        }
+    ).apply {
+        isVisible = false
+        onTextChanged = {
+            enableConfirmButton(this.text.isNotBlank())
+        }
+    }
+
+    private val confirmButton = Button(
+        width = 80,
+        height = 55,
+        posX = (paneWidth - (2*260))/4 + 270,
+        posY = loadButton.posY + 80,
+        text = "confirm",
+        font = Font(size = 18, family = "Canva Sans", color = Color.WHITE, fontWeight = Font.FontWeight.BOLD),
+        visual = ColorVisual(173, 208, 75).apply {
+            style.borderRadius = BorderRadius(8)
+        }
+    ).apply {
+        isVisible = false
+        isDisabled = true
+        onMouseClicked = {
+            rootService.gameService.loadGame(saveNameTextField.text)
         }
     }
 
@@ -163,6 +208,22 @@ class MainMenuScene(private val app: SopraApplication,private val rootService: R
             loadButton,
             newGameButton,
             joinButton,
+            saveNameTextField,
+            confirmButton,
         )
+    }
+
+    private fun enableSaveEntry(enable: Boolean) {
+        if(enable) {
+            saveNameTextField.isVisible = true
+            confirmButton.isVisible = true
+        } else {
+            saveNameTextField.isVisible = false
+            confirmButton.isVisible = false
+        }
+    }
+
+    private fun enableConfirmButton(enable: Boolean) {
+        confirmButton.isDisabled = !enable
     }
 }
