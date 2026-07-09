@@ -697,15 +697,19 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
      * Reduziert die Größe der Tiles in den HexagonGrids, sobald diese größer werden als der Bereich
      * @param areaIndex von dem Typ [Int], gibt den Index (1-4) des aktuellen Spielers und damit Spielbereich an
      */
-    private fun adjustTileSize(areaIndex: Int) {
-        val area = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(areaIndex-1)
-        if(area.height > 158 || area.width > 300) {
-            area.components.forEach { it.size -= 5 }
+    private fun adjustTileSize() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(getPlayerId())
+
+        if(currentArea.height > 158.0 || currentArea.width > 300.0) {
+            currentArea.components.forEach { it.size -= 30 }
         }
 
         //Nach der Größenveränderung muss neu zentriert werden
         adjustAreas()
     }
+
 
 //    /**
 //     * Zoomt mit dem CameraPane aus dem letzten Spieler heraus und auf den aktuellen
@@ -1143,6 +1147,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 //        disableAllButtons()
         setNames()
         adjustAreas()
+        //adjustTileSize()
 
         //animateDealTile()
         changeGreyVisibility(true, 0)
@@ -1360,6 +1365,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         disableAllTilesOnclick()
         adjustAreas()
+        //adjustTileSize()
 
         deactivateTileButtons()
         //player++
