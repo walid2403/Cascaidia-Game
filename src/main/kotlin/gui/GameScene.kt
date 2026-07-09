@@ -107,8 +107,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
                 //Alle Tiles-OnClicks und Rotate-Buttons deaktivieren und alle runterskalieren und Auswahl zurücksetzten
                 enableTilesInShop(false)
-                scaleDownOtherTiles(0)
-                scaleDownOtherAnimals(0)
+                scaleDownOtherTiles(-1)
+                scaleDownOtherAnimals(-1)
                 //deactivateRotateButtons()
                 selectTile = -1
                 selectAnimal = -1
@@ -124,7 +124,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
                 //Alle Tiere wieder runterskalieren und Tiles-OnClick wieder aktivieren und Tierauswahl entfernen
                 enableTilesInShop(true)
-                scaleDownOtherAnimals(0)
+                scaleDownOtherAnimals(-1)
                 rootService.playerActionService.changeWildlife(listOf(0, 1, 2, 3).filter {changeAnimalsArray[it]})
                 println("test button")
             }
@@ -1232,7 +1232,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         } else {
             lock()
         }
-
+        enableWildlifeInShop(true)
         checkRemoveWildlifeButton()
         checkExterminateButton()
 
