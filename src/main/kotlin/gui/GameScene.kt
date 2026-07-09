@@ -1247,6 +1247,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
+    //Wandelt Koordinaten der Serviceschicht um
     private fun convertCoordinates(serviceCoordinates: Triple<Int, Int, Int>): Pair<Int, Int> {
         val x = serviceCoordinates.third
         val y = serviceCoordinates.second
