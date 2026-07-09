@@ -322,8 +322,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(10) }
         onMouseClicked = {
-            if(player == 3) player = 0
-            else player++
+//            if(player == 3) player = 0
+//            else player++
+            val game = rootService.currentGame
+            checkNotNull(game)
             rootService.gameService.changeTurn()
 //            zoomOnNextPlayer()
         }
@@ -960,6 +962,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             }
             tileMap.add(tile to hexagon)
         }
+        tileMap.entries.forEach {
+           entry -> println("value: ${entry.first.id}, coordinates: ${entry.second.toString()}")
+        }
     }
 
     private fun onClickForTiles(tile: HexagonViewExtended) {
@@ -1230,6 +1235,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         selectTile = -1
         selectAnimal = -1
+        for(tile in game.playerQueue.peek().board){
+            //if(tileMap.forward(tile.value).visual != ColorVisual(170, 170, 170, 127)) {
+            println("calling addGreyHexagon for tile ${tile.value.id}")
+            addGreyHexagon(tileMap.forward(tile.value))
+            //}
+        }
 
         //refreshShop()       //Game Ende testen wenn TileStack leer ist oder zu wenig animal Tokens
         //saveGameState()
@@ -1294,6 +1305,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         for(i in 0..3) {
             tileShop[i].visual = getShopVisual(i)
+            tileShop[i].isVisible = true
+            tileShop[i].isDisabled = false
         }
     }
 
@@ -1396,19 +1409,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             throw IllegalArgumentException("Tile has no occupant! Tile ID: {$tile.id")
         }
 
-        var rotation = 0
-
-        rotation += when(tile.rotation) {
-            0 -> 0
-            1 -> 60
-            2 -> 120
-            3 -> 180
-            4 -> 240
-            5 -> 300
-            else -> throw IllegalArgumentException("Invalid rotation: ${tile.rotation}")
-        }
-
-        rotation += when(tile.id) {
+        val rotation = when(tile.id) {
             110 -> 300
             120 -> 60
             210 -> 300
@@ -1435,6 +1436,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         val nbhs = listOf(Pair(1, -1), Pair(1, 0), Pair(0, 1), Pair(-1, 1), Pair(-1, 0), Pair(0, -1))
 
         val tile = tileMap.backward(tileView)
+        checkNotNull(tile)
+        println("tile being processed: ${tile.id}")
         val tilePos = game.playerQueue.elementAt(playerIndex).board.entries.find { it.value == tile }?.key
         checkNotNull(tilePos)
         val tileViewPos = Pair(tilePos.first, tilePos.second)
