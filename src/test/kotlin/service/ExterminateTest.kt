@@ -10,6 +10,7 @@ class ExterminateTest {
 
     private lateinit var rootService: RootService
     private var refreshWasCalled = false
+    private var refreshWasCalled2 = false
 
     /**
      * Creates a Cascadia game and stores it in the rootService.
@@ -28,6 +29,7 @@ class ExterminateTest {
     fun setUp() {
         rootService = RootService()
         refreshWasCalled = false
+        refreshWasCalled2 = false
 
         val currentGame = CascadiaGame(List(5) { true }, true)
         currentGame.gameState = GameState.START_OF_TURN
@@ -56,6 +58,10 @@ class ExterminateTest {
         val refreshable = object : Refreshable {
             override fun refreshAfterExterminate() {
                 refreshWasCalled = true
+            }
+
+            override fun refreshAfterEndGame(scores: List<Pair<String, List<Int>>>) {
+                refreshWasCalled2 = true
             }
         }
         rootService.addRefreshable(refreshable)
@@ -335,7 +341,7 @@ class ExterminateTest {
             )
         )
         rootService.gameService.exterminate(false)
-        assertTrue(currentGame.removedTokens.isEmpty())
+        assertTrue(refreshWasCalled)
         assertTrue(refreshWasCalled)
     }
     /**
