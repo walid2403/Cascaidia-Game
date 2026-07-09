@@ -26,6 +26,9 @@ import tools.aqua.bgw.components.gamecomponentviews.HexagonView
 import tools.aqua.bgw.components.uicomponents.ComboBox
 import tools.aqua.bgw.net.common.response.SpectatorJoinGameResponse
 import tools.aqua.bgw.visual.Visual
+import java.awt.image.BufferedImage
+import java.io.File
+import javax.imageio.ImageIO
 
 /**
  * Die Klasse GameScene ist die Hauptszene des Cascadia Spiels
@@ -1664,7 +1667,38 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
 
+    private fun renderImage(tileName: String, tokenName: String, tileRotation: Int): String {
+        val background = ImageIO.read(File("tiles/clear/$tileName.png"))
+        val foreground = ImageIO.read(File("tokens/$tokenName.png"))
 
+        val result = BufferedImage(
+            background.width,
+            background.height,
+            BufferedImage.TYPE_INT_RGB
+        )
+
+        val g = result.createGraphics()
+
+        g.drawImage(background, 0, 0, background.width, background.height, null)
+
+        val angle = Math.toRadians(60.0 * tileRotation.toDouble())
+
+        val x = 50 // Abstand vom linken Rand des Hintergrundbildes
+        val y = 50 // Abstand vom oberen Rand des Hintergrundbildes
+
+        val centerX = x + foreground.width / 2.0
+        val centerY = y + foreground.height / 2.0
+
+        g.rotate(angle, centerX, centerY)
+        g.drawImage(foreground, x, y, foreground.width * 1, foreground.height * 1, null)
+
+        g.dispose()
+
+        val tmpFile = File.createTempFile("cascadia_renderedTile_", ".png")
+        ImageIO.write(result, "png", tmpFile)
+
+        return tmpFile.absolutePath
+    }
 
 
 
