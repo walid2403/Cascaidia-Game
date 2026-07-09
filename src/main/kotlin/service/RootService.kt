@@ -2,7 +2,6 @@ package service
 
 import entity.*
 import service.bot.Bot
-import service.bot.HeuristicBot
 
 
 /**
@@ -18,9 +17,20 @@ class RootService {
     val playerActionService = PlayerActionService(this)
     val bot = Bot(this)
 
-
     var currentGame : CascadiaGame ?= null
     val history = CascadiaGames()
+
+    /**
+     * Companion object for the `RootService` class that contains constant values
+     * related to the saving and loading of game data.
+     *
+     * - `SAVE_DIRECTORY`: Specifies the directory where game save files are stored.
+     * - `SAVE_EXTENSION`: Specifies the file extension used for save files.
+     */
+    companion object {
+        const val SAVE_DIRECTORY = "SavedGames"
+        const val SAVE_EXTENSION = ".cascadia"
+    }
 
     /**
      * Adds the provided [newRefreshable] to all services connected
@@ -31,3 +41,4 @@ class RootService {
         playerActionService.addRefreshable(newRefreshable)
     }
 }
+

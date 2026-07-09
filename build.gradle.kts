@@ -7,7 +7,7 @@ import org.gradle.kotlin.dsl.application
 plugins {
     kotlin("jvm") version "2.3.0"
     application
-    id("edu.udo.cs.sopra") version "1.0.3"
+    id("edu.udo.cs.sopra") version "1.0.4"
 }
 
 group = "edu.udo.cs.sopra"
@@ -35,6 +35,8 @@ dependencies {
     implementation(group = "tools.aqua", name = "bgw-gui", version = bgwVersion)
     implementation(group = "tools.aqua", name = "bgw-net-common", version = bgwVersion)
     implementation(group = "tools.aqua", name = "bgw-net-client", version = bgwVersion)
+    implementation(group = "edu.udo.cs.sopra", name = "ntf", version = "26B.1.0")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.8")
 }
 
 /* This is how you can add the HowToPlay.pdf to the distribution zip file */

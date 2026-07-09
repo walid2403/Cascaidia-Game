@@ -1,12 +1,27 @@
 package service
 
 import entity.*
+import java.io.File
+import entity.SaveState
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.module.SimpleModule
+
 
 /**
  * The player action service class of the Cascadia game. It includes all functions which rely heavily on player inputs.
  */
 
 class PlayerActionService(private val rootService: RootService) : AbstractRefreshingService() {
+
+    /**
+     * A Jackson object mapper configured with a custom `SimpleModule` to handle
+     * specific key deserialization needs for JSON Maps.
+     */
+    private val mapper = jacksonObjectMapper().apply {
+        val module = SimpleModule()
+        module.addKeyDeserializer(Triple::class.java, TripleKeyDeserializer())
+        registerModule(module)
+    }
 
     /**
      * Allows the active player to swap any number (0..4) of wildlife tokens in the market
@@ -29,6 +44,45 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * if the number of indices is not in 0..4 or if not all indices are distinct
      */
     fun changeWildlife(indices: List<Int>) {
+        val currentGame = checkNotNull(rootService.currentGame){"Es Wurde kein Spiel im RootService gefunden!"}
+        val currentPlayer = currentGame.playerQueue.peek()
+
+        //wirft automatisch ein IllegalStateException
+        check( currentGame.gameState == GameState.START_OF_TURN ||
+                currentGame.gameState == GameState.HAS_EXTERMINATED) {
+            "Spieler darf Aktuell kein Combination auswählen"
+        }
+
+        // Naturzapfen prüfen (Muss GRÖSSER als 0 sein!)
+        check(currentPlayer.natureTokens > 0) { "Spieler besitzt keinen NatureToken" }
+
+        //throw IllegalArgumentException
+        require(indices.size in 0..4) { "Man kann nur zwischen 0 und 4 Token tauschen!" }
+        require(indices.all { it in 0..3 }) { "Die angegebenen Plätze müssen zwischen 0 und 3 liegen!" }
+        require(indices.distinct().size == indices.size) {"Ein Index darf nicht doppelt in der Liste vorkommen"}
+        //Sind genug Tiere zum Tauschen da?
+        if(currentGame.wildlifeTokens.size < indices.size) {
+            rootService.gameService.calculateScores()
+            return
+        }
+
+        val alteTierToken: MutableList<WildlifeToken> = mutableListOf()
+
+        for (index in indices) {
+            val currentPair = currentGame.choices[index]
+            alteTierToken.add(currentPair.second)
+            val newToken = currentGame.wildlifeTokens.pop()
+            currentGame.choices[index] = Pair(currentPair.first,newToken)
+        }
+
+        for (wildeLifeToken in alteTierToken) {
+            currentGame.wildlifeTokens.push(wildeLifeToken)
+        }
+
+        currentGame.wildlifeTokens.shuffle()
+
+        currentPlayer.natureTokens--
+        onAllRefreshables { refreshAfterChangeWildlife(indices) }
 
     }
 
@@ -53,6 +107,36 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * @throws IllegalArgumentException If the provided indices are not in 0..3
      */
     fun freeSelection(tileIndex: Int, wildlifeIndex: Int) {
+        val currentGame = checkNotNull(rootService.currentGame){"Es Wurde kein Spiel im RootService gefunden!"}
+        val currentPlayer = currentGame.playerQueue.peek()
+
+        //wirft automatisch ein IllegalStateException
+        check( currentGame.gameState == GameState.START_OF_TURN ||
+                currentGame.gameState == GameState.HAS_EXTERMINATED) {
+            "Spieler darf Aktuell kein Combination auswählen"
+        }
+        //wirft automatisch ein IllegalArgumentException
+        require (tileIndex in 0..3){
+            "Zug ungültig: tileIndex $tileIndex außerhalb des Markts"
+        }
+        //wirft automatisch ein IllegalArgumentException
+        require (wildlifeIndex in 0..3){
+            "Zug ungültig: wildlifeIndex $wildlifeIndex außerhalb des Markts"
+        }
+
+        //wirft automatisch ein IllegalStateException.
+        // NUR WENN es eine echte freie Auswahl ist, muss er einen Token haben.
+        check(currentPlayer.natureTokens > 0) {
+            "Spieler besitzt Kein NatureToken, um ungleiche Paare zu wählen"
+        }
+
+
+        currentPlayer.natureTokens--
+        currentGame.selectedChoice = Pair(tileIndex,wildlifeIndex)
+        currentGame.gameState = GameState.MADE_CHOICE
+
+
+        onAllRefreshables { refreshAfterFreeSelection() }
 
     }
 
@@ -68,6 +152,24 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * @throws IllegalStateException If the gameState is not [GameState.START_OF_TURN] or [GameState.HAS_EXTERMINATED]
      */
     fun selectColumn(index: Int) {
+        val currentGame = checkNotNull(rootService.currentGame){"Es Wurde kein Spiel im RootService gefunden!"}
+
+        //wirft automatisch ein IllegalStateException
+        check( currentGame.gameState == GameState.START_OF_TURN ||
+                currentGame.gameState == GameState.HAS_EXTERMINATED) {
+            "Spieler darf Aktuell kein Combination auswählen"
+        }
+        //wirft automatisch ein IllegalArgumentException
+        require (index in 0..3){ //war require
+
+            "Zug ungültig: Index $index außerhalb des Markts"
+
+        }
+
+        currentGame.selectedChoice = Pair(index,index)
+        currentGame.gameState = GameState.MADE_CHOICE
+
+        onAllRefreshables { refreshAfterSelectColumn(index) }
 
     }
 
@@ -81,7 +183,35 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * @throws IllegalStateException if the [GameState] is not `MADE_CHOICE`.
      */
     fun rotateTile(right: Boolean) {
+        val game = rootService.currentGame ?: error("No current game")
 
+        check(game.gameState == GameState.MADE_CHOICE) {
+            "Tile can only be rotated after a choice was made."
+        }
+
+        val tileIndex = game.selectedChoice.first
+
+        require(tileIndex in game.choices.indices) {
+            "No valid tile was selected."
+        }
+
+        val selectedTile = game.choices[tileIndex].first
+
+        if (right) {
+            selectedTile.rotation = (selectedTile.rotation + 1) % 6
+
+            if (selectedTile.habs.isNotEmpty()) {
+                val lastHabitat = selectedTile.habs.removeAt(selectedTile.habs.lastIndex)
+                selectedTile.habs.add(0, lastHabitat)
+            }
+        } else {
+            selectedTile.rotation = (selectedTile.rotation + 5) % 6
+
+            if (selectedTile.habs.isNotEmpty()) {
+                val firstHabitat = selectedTile.habs.removeAt(0)
+                selectedTile.habs.add(firstHabitat)
+            }
+        }
     }
 
     /**
@@ -99,7 +229,52 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * it is not adjacent to any existing tile.
      */
     fun placeTile(index: Triple<Int, Int, Int>) {
+        val game = rootService.currentGame ?: error("No current game")
 
+        check(game.gameState == GameState.MADE_CHOICE) {
+            "Tile can only be placed after a choice was made."
+        }
+
+        val currentPlayer = game.playerQueue.peek()
+            ?: throw IllegalStateException("No current player found.")
+
+        val tileIndex = game.selectedChoice.first
+
+        require(tileIndex in game.choices.indices) {
+            "No valid tile was selected."
+        }
+
+        require(index.first + index.second + index.third == 0) {
+            "The coordinate must be a valid cube coordinate."
+        }
+
+        require(!currentPlayer.board.containsKey(index)) {
+            "There is already a tile at this coordinate."
+        }
+
+        val x = index.first
+        val y = index.second
+        val z = index.third
+
+        val neighbours = listOf(
+            Triple(x + 1, y - 1, z),
+            Triple(x + 1, y, z - 1),
+            Triple(x, y + 1, z - 1),
+            Triple(x - 1, y + 1, z),
+            Triple(x - 1, y, z + 1),
+            Triple(x, y - 1, z + 1)
+        )
+
+        require(neighbours.any { currentPlayer.board.containsKey(it) }) {
+            "The tile must be placed next to another tile."
+        }
+
+        val selectedTile = game.choices[tileIndex].first
+        currentPlayer.board[index] = selectedTile
+
+        game.gameState = GameState.PLAYED_TILE
+
+        onAllRefreshables { refreshAfterPlaceTile(Triple(x, y, z)) }
     }
 
     /**
@@ -120,9 +295,60 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * not adjacent to another position
      */
     fun placeWildlife(index: Triple<Int, Int, Int>) {
+        val game = rootService.currentGame ?: error("No current game")
+        val currentPlayer = game.playerQueue.peek()
+        check(game.gameState == GameState.PLAYED_TILE) {
+            "Wildlife can only be placed in PLAYED_TILE state"
+        }
+        val tile = currentPlayer.board[index]
+            ?: throw IllegalArgumentException(
+                "There is no tile at the selected position"
+            )
+        require(tile.occupant == null) {
+            "This tile already contains a wildlife token"
+        }
+        require(game.selectedChoice.second in game.choices.indices) {
+            "No wildlife token has been selected"
+        }
+        val selectedWildlife = game.choices[game.selectedChoice.second].second
+        require(selectedWildlife in tile.possibles) {
+            "This wildlife token is not allowed on the selected tile"
+        }
+        tile.occupant = selectedWildlife
+        if (tile.possibles.size == 1 && game.natureTokens > 0) {
+            currentPlayer.natureTokens++
+            game.natureTokens--
+        }
+        game.gameState = GameState.END_OF_TURN
+        onAllRefreshables {
+            refreshAfterPlaceWildlife(index)
+        }
+
 
     }
 
+    /**
+     * Creates a snapshot of the current game state for persistence or undo/redo functionality.
+     *
+     * @param game The current instance of the game [CascadiaGame] whose state is to be captured.
+     * @return A [GameSnapshot] object representing the current game state, including the tile stack,
+     * nature tokens, player choices, selected choice, game state, player queue, removed tokens,
+     * wildlife tokens, scoring cards, and local game information.
+     */
+    private fun createSnapshot(game: CascadiaGame): GameSnapshot {
+        return GameSnapshot(
+            tileStackList = game.tileStack.peekAll(),
+            natureTokens = game.natureTokens,
+            choicesList = game.choices.toList(),
+            selectedChoice = game.selectedChoice,
+            gameState = game.gameState,
+            playerQueue = java.util.ArrayDeque(game.playerQueue),
+            removedTokensList = game.removedTokens.toList(),
+            wildlifeTokensList = game.wildlifeTokens.peekAll(),
+            scoringCards = game.scoringCards,
+            isLocal = game.isLocal
+        )
+    }
     /**
      * Interrupts the current game and saves it under the specified name.
      *
@@ -134,32 +360,90 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      *
      * @param name The file name or identifier under which the game should be saved.
      *
-     * @throws IllegalArgumentException if there is no .cascadia file with the given name in the SavedGames Folder
+     * @throws IllegalArgumentException if the name is empty, or if the game is not in a state where it can be saved.
      */
     fun saveGame(name: String) {
+        val game = rootService.currentGame ?: throw IllegalStateException("Kein aktives Spiel zum Speichern vorhanden.")
+        if (name.isEmpty()) throw IllegalArgumentException("Der Name darf nicht leer sein.")
+        if (!game.isLocal) {
+            throw IllegalArgumentException("Netzwerkspiele können nicht gespeichert werden.")
+        }
+
+        val folder = File(RootService.SAVE_DIRECTORY)
+        if (!folder.exists()) folder.mkdirs()
+        val file = File(folder, "$name${RootService.SAVE_EXTENSION}")
+
+        val state = SaveState(
+            currentGame = createSnapshot(game),
+            prevMovesList = rootService.history.prevMoves.peekAll().map { createSnapshot(it) },
+            undoneMovesList = rootService.history.undoneMoves.peekAll().map { createSnapshot(it) }
+        )
+        mapper.writeValue(file, state)
+
+        onAllRefreshables { refreshAfterSaveGame() }
+    }
+
+    /**
+     * this function allows the player to redo an action that has been undone
+     *
+     * @throws IllegalStateException if there are no undone moves and current player is not human and current game
+     * is not local
+     */
+    fun redo() {
+        val game=rootService.currentGame
+        checkNotNull(game){"Spiel nicht initialisiert"}
+
+        val games=rootService.history
+
+        check(games.undoneMoves.isNotEmpty()){"keine zurückgenommenen Züge existieren "}
+        check(game.playerQueue.first().type== PlayerType.HUMAN)
+        {"Bots und Netzwerkspieler dürfen nicht redoen"}
+        check(game.isLocal){"im Netzwerkmodus ist die Funktion nicht erlaubt"}
+
+
+        val nextGame=games.undoneMoves.pop()
+
+        games.prevMoves.push(CascadiaGame(nextGame))
+
+        rootService.currentGame=nextGame
+
+        onAllRefreshables { refreshAfterRedo() }
+
+
+
 
     }
 
     /**
      * this function allows the player to redo an action that has been undone
      *
-     * @throws IllegalStateException if there are no undone moves
-     */
-    fun redo() {
-
-    }
-
-    /**
-     * this function reverts the last action
-     * it allows the current player to go back to their previous action
-     * or to the end of the previous players turn
-     *
-     * stores current [CascadiaGame] in [CascadiaGames.undoneMoves]
-     * takes the previous Game from [entity.CascadiaGames.prevMoves]
-     * @throws IllegalStateException if [CascadiaGames.prevMoves] is empty
-     * (this would occur in the first Action of the first turn by a human)
+     * @throws IllegalStateException if there are no undone moves and current player is not human and current game
+     * is not local
      */
     fun undo() {
+        val  game=rootService.currentGame
+        checkNotNull(game)
 
+        val games=rootService.history
+
+        check(game.playerQueue.first().type== PlayerType.HUMAN){"nur Menschen dürfen zurückgehen"}
+        check(game.isLocal){"Funktion nur im lokalen Modus gestattet"}
+        if(game.gameState == GameState.START_OF_TURN) {
+            check(games.prevMoves.size > 1) {
+                "Am Anfang der ersten Runde gibt es keine vorherigen Züge"
+            }
+        }
+        if(game.gameState==GameState.START_OF_TURN) {
+            //wenn am Anfang der Runde: Spiel in undoneMoves speichern
+            val currentGame = games.prevMoves.pop()
+            games.undoneMoves.push(CascadiaGame(currentGame))
+        }
+        //letztes gespeichertes Spiel "laden"
+        val prevGame=games.prevMoves.peek()
+        rootService.currentGame= CascadiaGame(prevGame)
+
+
+
+        onAllRefreshables { refreshAfterUndo() }
     }
 }
