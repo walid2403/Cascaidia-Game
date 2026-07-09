@@ -25,6 +25,7 @@ import tools.aqua.bgw.animation.MovementAnimation
 import tools.aqua.bgw.components.gamecomponentviews.HexagonView
 import tools.aqua.bgw.components.uicomponents.ComboBox
 import tools.aqua.bgw.net.common.response.SpectatorJoinGameResponse
+import tools.aqua.bgw.util.Coordinate
 import tools.aqua.bgw.visual.Visual
 import java.awt.image.BufferedImage
 import java.io.File
@@ -1244,6 +1245,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             }
             viewPanel.height = 456.0
         }
+    }
+
+    private fun convertCoordinates(serviceCoordinates: Triple<Int, Int, Int>): Pair<Int, Int> {
+        val x = serviceCoordinates.third
+        val y = serviceCoordinates.second
+        return Pair(x, y)
     }
 
 
