@@ -106,12 +106,16 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 updateNatureTokenCount(1)
 
                 //Alle Tiles-OnClicks und Rotate-Buttons deaktivieren und alle runterskalieren und Auswahl zurücksetzten
-                enableTilesInShop(false)
+                disableShopOnclick()
+                enableWildlifeInShop(true)
+                disableGreyHexagonOnClicks()
                 scaleDownOtherTiles(-1)
                 scaleDownOtherAnimals(-1)
-                //deactivateRotateButtons()
                 selectTile = -1
                 selectAnimal = -1
+                disableAllTilesOnclick()
+                clearOverpopulationButton.isDisabled = true
+                customChoiceButton.isDisabled = true
             }
             //Wenn die Tiere ausgetauscht werden sollen
             else {
@@ -123,10 +127,14 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 this.text = "Change Wildlife"
 
                 //Alle Tiere wieder runterskalieren und Tiles-OnClick wieder aktivieren und Tierauswahl entfernen
-                enableTilesInShop(true)
                 scaleDownOtherAnimals(-1)
+                scaleDownOtherTiles(-1)
                 rootService.playerActionService.changeWildlife(listOf(0, 1, 2, 3).filter {changeAnimalsArray[it]})
                 println("test button")
+                enableShopOnclick()
+                customChoiceButton.isDisabled = false
+                enableCurrentPlayerTilesOnClick()
+                enableGreyHexagonOnClicks()
             }
             changeWildlifeActive = !changeWildlifeActive
         }
@@ -869,6 +877,76 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 //        }
 //    }
 
+    private fun disableAllOnclicks() {
+        disableAllTilesOnclick()
+        disableShopOnclick()
+        disableConfirmRotateButtons()
+        disableShopButtons()
+    }
+
+
+
+    private fun disableAllTilesOnclick() {
+        tileMap.entries.forEach {
+            it.second.isDisabled = true
+        }
+    }
+
+    private fun enableCurrentPlayerTilesOnClick() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        game.playerQueue.peek().board.forEach { (triple, tile) ->
+            tileMap.forward(tile).isDisabled = false
+        }
+    }
+
+    private fun disableShopOnclick() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        tileShop.forEach { it.isDisabled = true }
+        listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).forEach { it.isDisabled = true }
+    }
+
+    private fun enableShopOnclick() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        tileShop.forEach { it.isDisabled = false }
+        listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).forEach { it.isDisabled = false }
+    }
+
+    private fun disableMiniMapHover() {
+        listOf(lableAboveCamOne, lableAboveCamTwo, lableAboveCamThree, lableAboveCamFour).forEach { it.isDisabled = true }
+    }
+
+    private fun enableMiniMapHover() {
+        listOf(lableAboveCamOne, lableAboveCamTwo, lableAboveCamThree, lableAboveCamFour).forEach { it.isDisabled = false }
+    }
+
+    private fun disableConfirmRotateButtons() {
+        listOf(confirm, rotateTileLeft, rotateTileRight).forEach { it.isDisabled = true }
+    }
+
+    private fun enableConfirmRotateButtons() {
+        listOf(confirm, rotateTileLeft, rotateTileRight).forEach { it.isDisabled = false }
+    }
+
+    private fun disableShopButtons() {
+        listOf(customChoiceButton, changeWildlifeButton, clearOverpopulationButton).forEach { it.isDisabled = true }
+    }
+
+    private fun enableShopButtons() {
+        listOf(customChoiceButton, changeWildlifeButton, clearOverpopulationButton).forEach { it.isDisabled = false }
+    }
+
+    private fun disableGreyHexagonOnClicks() {
+        changeGreyVisibility(false, getPlayerId())
+    }
+
+    private fun enableGreyHexagonOnClicks() {
+        changeGreyVisibility(true, getPlayerId())
+    }
+
+
 
     private fun scaleDownOtherTiles(select: Int) {
         tileShop.forEachIndexed { i, tile ->
@@ -1051,12 +1129,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         loadScoreCards(game.scoringCards)
 
-        for(i in 0..3) {
-            val animal = game.choices.elementAt(i).second
-            listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(i).visual =
-                createAnimalView(animal)
-        }
-
         loadStartTiles()
         initializeCamerasOnSide()
 //        disableAllButtons()
@@ -1071,6 +1143,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         zoomOnFirstPlayer()
         checkExterminateButton()
+        disableAllTilesOnclick()
 
         //Testblock
 //        shop[0]?.isVisible = true
@@ -1216,13 +1289,26 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         listOf(confirm, rotateTileLeft, rotateTileRight).forEach { it.isVisible = false }
     }
 
+    private fun resetCustomChoice() {
+        customChoiceButton.font = Font(size = 16, color = Color(255, 255, 255, 255)).apply {
+            customChoiceButton.visual = ColorVisual(0, 0, 0).apply {
+                style.borderRadius = BorderRadius(10)
+            }
+        }
+    }
+
     override fun refreshAfterChangeTurn(lastTurn: Boolean) {
         val game = rootService.currentGame
         checkNotNull(game)
 
+        disableAllTilesOnclick()
+
         deactivateTileButtons()
         //player++
         player = (player + 1)%game.playerQueue.size
+
+        customChoiceActive = false
+        resetCustomChoice()
 
         zoomOnNextPlayer()
         changeGreyVisibility(true, player)
@@ -1318,6 +1404,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             tileShop[i].visual = getShopVisual(i)
             tileShop[i].isVisible = true
             tileShop[i].isDisabled = false
+        }
+
+        for(i in 0..3) {
+            val animal = game.choices.elementAt(i).second
+            listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(i).visual =
+                createAnimalView(animal)
         }
     }
 
@@ -1459,11 +1551,16 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 nbhTileView = HexagonViewExtended(tileView.size, ColorVisual(170, 170, 170, 127))
                 nbhTileView.apply {
                     onMouseClicked = {
-                        selectedGridX = tileViewPos.first + nbh.first
-                        selectedGridY = tileViewPos.second + nbh.second
+                        if(selectTile != -1 && selectAnimal != -1) {
+                            selectedGridX = tileViewPos.first + nbh.first
+                            selectedGridY = tileViewPos.second + nbh.second
 
-                        if (customChoiceActive) rootService.playerActionService.freeSelection(selectTile, selectAnimal)
-                        else rootService.playerActionService.selectColumn(selectTile)
+                            if (customChoiceActive) rootService.playerActionService.freeSelection(
+                                selectTile,
+                                selectAnimal
+                            )
+                            else rootService.playerActionService.selectColumn(selectTile)
+                        }
                     }
                 }
 
@@ -1555,6 +1652,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     override fun refreshAfterSelectColumn(index: Int) {
         placeChosenTile()
+        disableShopOnclick()
+        disableGreyHexagonOnClicks()
+        disableShopButtons()
+        disableAllTilesOnclick()
     }
 
     override fun refreshAfterRedo() {
@@ -1564,6 +1665,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     override fun refreshAfterFreeSelection() {
         placeChosenTile()
+        disableShopOnclick()
+        disableGreyHexagonOnClicks()
+        disableShopButtons()
+        disableAllTilesOnclick()
     }
 
 
