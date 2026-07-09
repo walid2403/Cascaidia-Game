@@ -20,11 +20,15 @@ import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 import entity.*
+import tools.aqua.bgw.animation.FadeAnimation
 import tools.aqua.bgw.animation.MovementAnimation
 import tools.aqua.bgw.components.gamecomponentviews.HexagonView
 import tools.aqua.bgw.components.uicomponents.ComboBox
 import tools.aqua.bgw.net.common.response.SpectatorJoinGameResponse
 import tools.aqua.bgw.visual.Visual
+import java.awt.image.BufferedImage
+import java.io.File
+import javax.imageio.ImageIO
 
 /**
  * Die Klasse GameScene ist die Hauptszene des Cascadia Spiels
@@ -68,7 +72,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     //Buttons in grauer Box
-    private val customChoice = Button(width = 200, height = 60, posX = 550, posY = 25, text = "Custom Choice",
+    private val customChoiceButton = Button(width = 200, height = 60, posX = 550, posY = 25, text = "Custom Choice",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0, 0, 0).apply {
             style.borderRadius = BorderRadius(10)
@@ -85,7 +89,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
-    private val changeWildlife = Button(width = 200, height = 60, posX = 550, posY = 100, text = "Change Wildlife",
+    private val changeWildlifeButton = Button(width = 200, height = 60, posX = 550, posY = 100, text = "Change Wildlife",
         font = Font(size = 16, color = Color(255, 255, 255))).apply {
         visual = ColorVisual(0, 0, 0).apply {
             style.borderRadius = BorderRadius(10)
@@ -102,12 +106,16 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 updateNatureTokenCount(1)
 
                 //Alle Tiles-OnClicks und Rotate-Buttons deaktivieren und alle runterskalieren und Auswahl zurücksetzten
-                enableTilesInShop(false)
-                scaleDownOtherTiles(0)
-                scaleDownOtherAnimals(0)
-                deactivateRotateButtons()
-                selectTile = 0
+                disableShopOnclick()
+                enableWildlifeInShop(true)
+                disableGreyHexagonOnClicks()
+                scaleDownOtherTiles(-1)
+                scaleDownOtherAnimals(-1)
+                selectTile = -1
                 selectAnimal = -1
+                disableAllTilesOnclick()
+                clearOverpopulationButton.isDisabled = true
+                customChoiceButton.isDisabled = true
             }
             //Wenn die Tiere ausgetauscht werden sollen
             else {
@@ -119,17 +127,24 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 this.text = "Change Wildlife"
 
                 //Alle Tiere wieder runterskalieren und Tiles-OnClick wieder aktivieren und Tierauswahl entfernen
-                enableTilesInShop(true)
-                scaleDownOtherAnimals(0)
+                scaleDownOtherAnimals(-1)
+                scaleDownOtherTiles(-1)
                 rootService.playerActionService.changeWildlife(listOf(0, 1, 2, 3).filter {changeAnimalsArray[it]})
+                println("test button")
+                enableShopOnclick()
+                customChoiceButton.isDisabled = false
+                enableCurrentPlayerTilesOnClick()
+                enableGreyHexagonOnClicks()
             }
             changeWildlifeActive = !changeWildlifeActive
         }
     }
 
-    private val clearOverpopulation = Button(width = 200, height = 60, posX = 550,
+    private val clearOverpopulationButton = Button(
+        width = 200, height = 60, posX = 550,
         posY = 175, text = "Clear Overpopulation",
-        font = Font(size = 16, color = Color(255, 255, 255, 127))).apply {
+        font = Font(size = 16, color = Color(255, 255, 255, 127))
+    ).apply {
         visual = ColorVisual(0, 0, 0, 127).apply {
             style.borderRadius = BorderRadius(10)
         }
@@ -149,87 +164,139 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private val pineCone1 = Label(posX = 525,posY = 35,width = 40,height = 40,visual = ImageVisual("tokens/pinecone.png"))
     private val pineCone2 = Label(posX = 525,posY = 110,width = 40,height = 40,visual = ImageVisual("tokens/pinecone.png"))
 
-//    //Auswahl Habitate
-//    private val tileChoice1 = HexagonViewExtended(posX = 820, posY = 30, size = 60, visual = ColorVisual(170,170,170)).apply {
-//        onMouseClicked = { chooseTile(1, this) }
-//    }
-//    private val tileChoice2 = HexagonViewExtended(posX = 974, posY = 30, size = 60, visual = ColorVisual(170,170,170)).apply {
-//        onMouseClicked = { chooseTile(2, this) }
-//    }
-//    private val tileChoice3 = HexagonViewExtended(posX = 1128, posY = 30, size = 60, visual = ColorVisual(170,170,170)).apply {
-//        onMouseClicked = { chooseTile(3, this) }
-//    }
-//    private val tileChoice4 = HexagonViewExtended(posX = 1282, posY = 30, size = 60, visual = ColorVisual(170,170,170)).apply {
-//        onMouseClicked = { chooseTile(4, this) }
-//    }
+
+    //Auswahl Tiles
+    private val tileChoice1 = Label(
+        width = 100,
+        height = 116,
+        posX = 822,
+        posY = 25,
+    ).apply {
+        onMouseClicked = {
+            chooseTile(0)
+        }
+    }
+
+    private val tileChoice2 = Label(
+        width = 100,
+        height = 116,
+        posX = 976,
+        posY = 25,
+    ).apply {
+        onMouseClicked = {
+            chooseTile(1)
+        }
+    }
+
+    private val tileChoice3 = Label(
+        width = 100,
+        height = 116,
+        posX = 1130,
+        posY = 25,
+    ).apply {
+        onMouseClicked = {
+            chooseTile(2)
+        }
+    }
+
+    private val tileChoice4 = Label(
+        width = 100,
+        height = 116,
+        posX = 1284,
+        posY = 25,
+    ).apply {
+        onMouseClicked = {
+            chooseTile(3)
+        }
+    }
+
+    private val tileShop = listOf(tileChoice1, tileChoice2, tileChoice3, tileChoice4)
 
     //Auswahl Tiere
-    private val animalChoice1 = Label(width = 60, height = 60, posX = 842, posY = 175).apply {
+    private val animalChoice1 = Label(
+        width = 60, height = 60, posX = 842, posY = 175
+    ).apply {
         visual= ColorVisual(170,170,170)
-        onMouseClicked = { chooseAnimal(1, this) }
+        onMouseClicked = {
+            chooseAnimal(0, this)
+        }
     }
-    private val animalChoice2 = Label(width = 60, height = 60, posX = 996, posY = 175).apply {
+    private val animalChoice2 = Label(
+        width = 60, height = 60, posX = 996, posY = 175
+    ).apply {
         visual= ColorVisual(170,170,170)
-        onMouseClicked = { chooseAnimal(2, this) }
+        onMouseClicked = {
+            chooseAnimal(1, this)
+        }
     }
-    private val animalChoice3 = Label(width = 60, height = 60, posX = 1150, posY = 175).apply {
+    private val animalChoice3 = Label(
+        width = 60, height = 60, posX = 1150, posY = 175
+    ).apply {
         visual= ColorVisual(170,170,170)
-        onMouseClicked = { chooseAnimal(3, this) }
+        onMouseClicked = {
+            chooseAnimal(2, this)
+        }
     }
-    private val animalChoice4 = Label(width = 60, height = 60, posX = 1304, posY = 175).apply {
+    private val animalChoice4 = Label(
+        width = 60, height = 60, posX = 1304, posY = 175
+    ).apply {
         visual= ColorVisual(170,170,170)
-        onMouseClicked = { chooseAnimal(4, this) }
+        onMouseClicked = {
+            chooseAnimal(3, this)
+        }
     }
 
+    private val animalShop = listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4)
+
     //Rotations Knöpfe oben
-    private val rotateOneCW = Button(width = 40, height = 40, posX = 782, posY = 155, text = "<",
-        font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
-        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
-        this.isVisible = false
-        onMouseClicked = { rotateInSelection(true, shop[0] as HexagonViewExtended) }
-    }
-    private val rotateOneCCW = Button(width = 40, height = 40, posX = 922, posY = 155, text = ">",
-        font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
-        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
-        this.isVisible = false
-        onMouseClicked = { rotateInSelection(false, shop[0] as HexagonViewExtended) }
-    }
-    private val rotateTwoCW = Button(width = 40, height = 40, posX = 936, posY = 155, text = "<",
-        font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
-        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
-        this.isVisible = false
-        onMouseClicked = { rotateInSelection(true, shop[1] as HexagonViewExtended) }
-    }
-    private val rotateTwoCCW = Button(width = 40, height = 40, posX = 1076, posY = 155, text = ">",
-        font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
-        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
-        this.isVisible = false
-        onMouseClicked = { rotateInSelection(false, shop[1] as HexagonViewExtended) }
-    }
-    private val rotateThreeCW = Button(width = 40, height = 40, posX = 1090, posY = 155, text = "<",
-        font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
-        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
-        this.isVisible = false
-        onMouseClicked = { rotateInSelection(true, shop[2] as HexagonViewExtended) }
-    }
-    private val rotateThreeCCW = Button(width = 40, height = 40, posX = 1230, posY = 155, text = ">",
-        font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
-        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
-        this.isVisible = false
-        onMouseClicked = { rotateInSelection(false, shop[2] as HexagonViewExtended) }
-    }
-    private val rotateFourCW = Button(width = 40, height = 40, posX = 1244, posY = 155, text = "<",
-        font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
-        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
-        this.isVisible = false
-        onMouseClicked = { rotateInSelection(true, shop[3] as HexagonViewExtended) }
-    }
-    private val rotateFourCCW = Button(width = 40, height = 40, posX = 1384, posY = 155, text = ">",
-        font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
-        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
-        this.isVisible = false
-        onMouseClicked = { rotateInSelection(false, shop[3] as HexagonViewExtended) }
-    }
+//    private val rotateOneCW = Button(width = 40, height = 40, posX = 782, posY = 155, text = "<",
+//        font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
+//        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
+//        this.isVisible = false
+//        onMouseClicked = { rotateInSelection(true, shop[0] as HexagonViewExtended) }
+//    }
+//    private val rotateOneCCW = Button(width = 40, height = 40, posX = 922, posY = 155, text = ">",
+//        font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
+//        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
+//        this.isVisible = false
+//        onMouseClicked = { rotateInSelection(false, shop[0] as HexagonViewExtended) }
+//    }
+//    private val rotateTwoCW = Button(width = 40, height = 40, posX = 936, posY = 155, text = "<",
+//        font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
+//        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
+//        this.isVisible = false
+//        onMouseClicked = { rotateInSelection(true, shop[1] as HexagonViewExtended) }
+//    }
+//    private val rotateTwoCCW = Button(width = 40, height = 40, posX = 1076, posY = 155, text = ">",
+//        font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
+//        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
+//        this.isVisible = false
+//        onMouseClicked = { rotateInSelection(false, shop[1] as HexagonViewExtended) }
+//    }
+//    private val rotateThreeCW = Button(width = 40, height = 40, posX = 1090, posY = 155, text = "<",
+//        font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
+//        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
+//        this.isVisible = false
+//        onMouseClicked = { rotateInSelection(true, shop[2] as HexagonViewExtended) }
+//    }
+//    private val rotateThreeCCW = Button(width = 40, height = 40, posX = 1230, posY = 155, text = ">",
+//        font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
+//        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
+//        this.isVisible = false
+//        onMouseClicked = { rotateInSelection(false, shop[2] as HexagonViewExtended) }
+//    }
+//    private val rotateFourCW = Button(width = 40, height = 40, posX = 1244, posY = 155, text = "<",
+//        font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
+//        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
+//        this.isVisible = false
+//        onMouseClicked = { rotateInSelection(true, shop[3] as HexagonViewExtended) }
+//    }
+//    private val rotateFourCCW = Button(width = 40, height = 40, posX = 1384, posY = 155, text = ">",
+//        font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
+//        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(20) }
+//        this.isVisible = false
+//        onMouseClicked = { rotateInSelection(false, shop[3] as HexagonViewExtended) }
+//    }
 
     //Bereiche der Spieler
     private val playerOneArea = HexagonGrid<HexagonViewExtended>(
@@ -267,13 +334,11 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(10) }
         onMouseClicked = {
-            if(player == 3) player = 0
-            else player++
 
             val game = rootService.currentGame
             checkNotNull(game)
             if(game.gameState == GameState.PLAYED_TILE || game.gameState == GameState.END_OF_TURN) {
-                disableAllOnclicks()
+                //disableAllOnclicks()
                 rootService.gameService.changeTurn()
             }
         }
@@ -542,8 +607,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             app.showMenuScene(PauseMenuScene(app,rootService))
         }
     }
-    
-
 
 
     //Testweise
@@ -571,11 +634,11 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         addComponents(
             cameraPane,
-            grayBox, customChoice, changeWildlife, clearOverpopulation, pineCone1, pineCone2,
-            //tileChoice1, tileChoice2, tileChoice3, tileChoice4,
+            grayBox, customChoiceButton, changeWildlifeButton, clearOverpopulationButton, pineCone1, pineCone2,
+
             animalChoice1, animalChoice2, animalChoice3, animalChoice4,
-            rotateOneCW, rotateOneCCW, rotateTwoCW, rotateTwoCCW,
-            rotateThreeCW, rotateThreeCCW, rotateFourCW, rotateFourCCW,
+//            rotateOneCW, rotateOneCCW, rotateTwoCW, rotateTwoCCW,
+//            rotateThreeCW, rotateThreeCCW, rotateFourCW, rotateFourCCW,
             endTurn, undo, redo, viewPanel, confirm, rotateTileLeft, rotateTileRight,
             grayBoxScoringAnimals, pause, bear, elk, salmon, hawk, fox,
             barOne, barTwo, barThree, nameOneSide, nameTwoSide, nameThreeSide, nameFourSide,
@@ -585,7 +648,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             lableAboveCamOne, lableAboveCamTwo, lableAboveCamThree, lableAboveCamFour, playerName,
             bearScoringCard, elkScoringCard, salmonScoringCard, hawkScoringCard, foxScoringCard,
             zoomIn, zoomOut,
-
+            tileChoice1, tileChoice2, tileChoice3, tileChoice4,
             animationSpeedControl,
         )
     }
@@ -755,8 +818,15 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     /**
      * 
      */
-    private fun chooseTile(index: Int, tile: HexagonViewExtended) {
-        deactivateRotateButtons()
+    private fun chooseTile(index: Int) {
+        //deactivateRotateButtons()
+        val tile = when (index) {
+            0 -> tileChoice1
+            1 -> tileChoice2
+            2 -> tileChoice3
+            3 -> tileChoice4
+            else -> throw IllegalArgumentException("Invalid index given: $index")
+        }
         if(selectTile == index) selectTile = -1
         else {
             selectTile = index
@@ -779,8 +849,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     private fun chooseAnimal(index: Int, animal: Label) {
         if(!customChoiceActive && !changeWildlifeActive) {
-            val tile = shop[index] as HexagonViewExtended
-            chooseTile(index, tile)
+            chooseTile(index)
         } else {
             if(!changeWildlifeActive) {
                 if (selectAnimal == index) selectAnimal = -1
@@ -801,17 +870,88 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
-    private fun deactivateRotateButtons() {
-        listOf(rotateOneCW, rotateOneCCW, rotateTwoCW, rotateTwoCCW,
-            rotateThreeCW, rotateThreeCCW, rotateFourCW, rotateFourCCW).forEach {
-                it.isVisible = false
+//    private fun deactivateRotateButtons() {
+//        listOf(rotateOneCW, rotateOneCCW, rotateTwoCW, rotateTwoCCW,
+//            rotateThreeCW, rotateThreeCCW, rotateFourCW, rotateFourCCW).forEach {
+//                it.isVisible = false
+//        }
+//    }
+
+    private fun disableAllOnclicks() {
+        disableAllTilesOnclick()
+        disableShopOnclick()
+        disableConfirmRotateButtons()
+        disableShopButtons()
+    }
+
+
+
+    private fun disableAllTilesOnclick() {
+        tileMap.entries.forEach {
+            it.second.isDisabled = true
         }
     }
 
+    private fun enableCurrentPlayerTilesOnClick() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        game.playerQueue.peek().board.forEach { (triple, tile) ->
+            tileMap.forward(tile).isDisabled = false
+        }
+    }
+
+    private fun disableShopOnclick() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        tileShop.forEach { it.isDisabled = true }
+        listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).forEach { it.isDisabled = true }
+    }
+
+    private fun enableShopOnclick() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        tileShop.forEach { it.isDisabled = false }
+        listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).forEach { it.isDisabled = false }
+    }
+
+    private fun disableMiniMapHover() {
+        listOf(lableAboveCamOne, lableAboveCamTwo, lableAboveCamThree, lableAboveCamFour).forEach { it.isDisabled = true }
+    }
+
+    private fun enableMiniMapHover() {
+        listOf(lableAboveCamOne, lableAboveCamTwo, lableAboveCamThree, lableAboveCamFour).forEach { it.isDisabled = false }
+    }
+
+    private fun disableConfirmRotateButtons() {
+        listOf(confirm, rotateTileLeft, rotateTileRight).forEach { it.isDisabled = true }
+    }
+
+    private fun enableConfirmRotateButtons() {
+        listOf(confirm, rotateTileLeft, rotateTileRight).forEach { it.isDisabled = false }
+    }
+
+    private fun disableShopButtons() {
+        listOf(customChoiceButton, changeWildlifeButton, clearOverpopulationButton).forEach { it.isDisabled = true }
+    }
+
+    private fun enableShopButtons() {
+        listOf(customChoiceButton, changeWildlifeButton, clearOverpopulationButton).forEach { it.isDisabled = false }
+    }
+
+    private fun disableGreyHexagonOnClicks() {
+        changeGreyVisibility(false, getPlayerId())
+    }
+
+    private fun enableGreyHexagonOnClicks() {
+        changeGreyVisibility(true, getPlayerId())
+    }
+
+
+
     private fun scaleDownOtherTiles(select: Int) {
-        shop.forEachIndexed { i, tile ->
+        tileShop.forEachIndexed { i, tile ->
             if(i != select) {
-                scaleTile(false, tile as HexagonViewExtended)
+                scaleTile(false, tile)
             }
         }
     }
@@ -824,14 +964,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
-
-    private fun scaleTile(sizeUp: Boolean, hexView: HexagonViewExtended) {
+    private fun scaleTile(sizeUp: Boolean, tileLabel: Label) {
         val targetScale = if(sizeUp) {100.0 / 80.0 } else { 1.0 }
         playAnimation(
             ScaleAnimation(
-                componentView = hexView,
-                fromScaleX = hexView.scaleX,
-                fromScaleY = hexView.scaleY,
+                componentView = tileLabel,
+                fromScaleX = tileLabel.scaleX,
+                fromScaleY = tileLabel.scaleY,
                 toScaleX = targetScale,
                 toScaleY = targetScale,
                 duration = (300/animationSpeed).toInt(),
@@ -855,8 +994,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         )
     }
 
-    private fun rotateInSelection(clockwise: Boolean, tile: HexagonViewExtended) {
-        val rotation = if(clockwise) 60.0 else -60.0
+    private fun rotateInSelection(amount: Int, tile: HexagonViewExtended) {
+        val rotation = amount.toDouble() * 60.0
         if(animationsEnabled) {
             playAnimation(
                 RotationAnimation(
@@ -883,38 +1022,56 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).forEach { it.isDisabled = !enabled }
     }
 
-
-
-
+    /**
+     * This function creates [HexagonViewExtended] for every players' start tiles, adds them to the players grid
+     * and adds the tile and tile view to the [tileMap]
+     */
     private fun createTileView() {
         val game = rootService.currentGame
         checkNotNull(game)
 
-        val tileList = game.tileStack.peekAll().toMutableList()
-        tileList.addAll(game.choices.map { it.first })
+        val tileList = mutableListOf<Tile>()
 
         for (player in game.playerQueue) {
             tileList.addAll(player.board.values)
         }
 
         for(tile in tileList) {
-            val hexagon = HexagonViewExtended(size = 14.0, visual = ImageVisual("tiles/choices/tile_${tile.id}.png")).apply {
-                //Neuerung 06.07
+            val hexagon = HexagonViewExtended(size = 14.0, visual =
+                ImageVisual("tiles/choices/tile_${tile.id}.png")).apply {
                 onMouseClicked = {
-                    if(this.inShop) {
-                        chooseTile(shop.indexOf(this), this)
-                    } else {
-                        val coordinates = playerOneArea.getCoordinateMap().entries.first { it.value == this  }.key
-                        val x = coordinates.first
-                        val y = coordinates.second
-                        val s = (x + y) * (-1)
-                        println("$x, $y")
-                        println(selectAnimal)
-                        rootService.playerActionService.placeWildlife(Triple(x, y, s))
-                    }
+                    onClickForTiles(this)
                 }
             }
             tileMap.add(tile to hexagon)
+        }
+        tileMap.entries.forEach {
+           entry -> println("value: ${entry.first.id}, coordinates: ${entry.second.toString()}")
+        }
+    }
+
+    private fun onClickForTiles(tile: HexagonViewExtended) {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        //wenn auf ein graues Randhexagon geklickt wird, wird select tile aufgerufen, sonst place wildlife
+        if (tile.visual == ColorVisual(170, 170, 170, 127)) {
+            selectedGridX = game.playerQueue.peek().board.entries.find {
+                it.value == tileMap.backward(tile)}?.key?.first
+            selectedGridY = game.playerQueue.peek().board.entries.find {
+                it.value == tileMap.backward(tile)}?.key?.second
+
+            if (customChoiceActive) rootService.playerActionService.freeSelection(selectTile, selectAnimal)
+            else rootService.playerActionService.selectColumn(selectTile)
+
+        } else {
+            println("place wildlife soll aufgerufen werden")
+
+            val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(getPlayerId())
+            val coordinates = currentArea.getCoordinateMap().entries.first { it.value == tile  }.key
+            val x = coordinates.first
+            val y = coordinates.second
+            val s = (x + y) * (-1)
+            rootService.playerActionService.placeWildlife(Triple(x, y, s))
         }
     }
 
@@ -974,20 +1131,19 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         loadStartTiles()
         initializeCamerasOnSide()
+//        disableAllButtons()
         setNames()
         adjustAreas()
 
-        animateDealTile()
+        //animateDealTile()
         changeGreyVisibility(true, 0)
         changeGreyVisibility(false, 1)
         changeGreyVisibility(false, 2)
         changeGreyVisibility(false, 3)
 
-        disableAllOnclicks()
-        enableShopOnclick()
-        enableShopButtons()
-
         zoomOnFirstPlayer()
+        checkExterminateButton()
+        disableAllTilesOnclick()
 
         //Testblock
 //        shop[0]?.isVisible = true
@@ -1001,7 +1157,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         val game = rootService.currentGame
         checkNotNull(game)
 
-        for(i in 0 until game.playerQueue.size) {
+        for(i in game.playerQueue.indices) {
             listOf(nameOneSide, nameTwoSide, nameThreeSide, nameFourSide).elementAt(i).text =
                 game.playerQueue.elementAt(i).name
         }
@@ -1016,98 +1172,91 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 var tile = game.playerQueue.elementAt(index).board[Triple(0,0,0)]
                 checkNotNull(tile)
                 var hexView = tileMap.forward(tile)
-                hexView.inShop = false
                 grid[0,0] = hexView
-//                hexView.onMouseClicked = {
-//                    println("clicked")
-//                }
                 println("current Index: $index")
                 addGreyHexagon(hexView, index)
 
                 tile = game.playerQueue.elementAt(index).board[Triple(0,1,-1)]
                 checkNotNull(tile)
                 hexView = tileMap.forward(tile)
-                hexView.inShop = false
                 grid[0,1] = hexView
                 addGreyHexagon(hexView, index)
 
                 tile = game.playerQueue.elementAt(index).board[Triple(-1,1,0)]
                 checkNotNull(tile)
                 hexView = tileMap.forward(tile)
-                hexView.inShop = false
                 grid[-1,1] = hexView
                 addGreyHexagon(hexView, index)
             }
-
         }
     }
+
 
     private fun placeChosenTile() {
         val game = rootService.currentGame
         checkNotNull(game)
+
         val playerID = getPlayerId()
         val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(playerID)
-        val chosenTile = shop[selectTile]
-        checkNotNull(chosenTile)
+
+        val chosenTile = tileShop[selectTile]
+        scaleTile( false, chosenTile)
+        //chosenTile.size = 14.0
+        //TODO("Größe vom tile Label im shop scalen auf Größe von tiles im Player Grid")
 
         val x = selectedGridX
         val y = selectedGridY
         checkNotNull(x)
         checkNotNull(y)
-//
-//        val xTemp = currentArea[x,y]?.posX
-//        val yTemp = currentArea[x,y]?.posY
-//        checkNotNull(xTemp)
-//        checkNotNull(yTemp)
-//
-//        if(animationsEnabled) {
-//            playAnimation(
-//                MovementAnimation(
-//                    componentView = selectTile as HexagonViewExtended,
-//                    toX = xTemp,
-//                    toY = yTemp,
-//                    duration = (500/animationSpeed).toInt()
-//                )
-//            )
-//        } else {
-//            selectTile.posX = xTemp
-//            selectTile.posY = yTemp
-//        }
-
-
-        scaleTile( false, chosenTile)
-        this.removeComponents(chosenTile)
-        chosenTile.size = 14.0
-        chosenTile.inShop = false
-
         val greyTile = currentArea[x,y]
         checkNotNull(greyTile)
-        chosenTile.posX = greyTile.posX
-        chosenTile.posY = greyTile.posY
 
-        currentArea.set(x,y,chosenTile)
+        //bewege das shop label des ausgewählten Tiles an die gewählte Position im Grid, übertrage das tile visual in
+        //das angeklickte graue Hexagon, ergänze das hexagon in der tileMap und mache das shop Label unsichtbar (in change Turn wird es zurück in den shop
+        //bewegt, mit dem nachgelegten Tile befüllt und wieder sichtbar gemacht)
 
-//        enableTilesInShop(false)
-//        enableWildlifeInShop(false)
-//        customChoice.isDisabled = true
-//        changeWildlife.isDisabled = true
-//        clearOverpopulation.isDisabled = true
+//        playAnimation(
+//            MovementAnimation(
+//                tileShop[selectTile],
+//                toX = greyTile.posX,
+//                toY = greyTile.posY,
+//                duration = (500/animationSpeed).toInt()
+//            ).apply {
+//                onFinished = {
+//                    println("post animation")
+//                    greyTile.visual = chosenTile.visual
+//                    chosenTile.isVisible = false
 //
-//        activatesTileButtons()
-//        changeGreyVisibility(false, playerID)
-//        deactivateRotateButtons()
-//        confirm.isDisabled = false
+//                    tileMap.add(game.choices[selectTile].first to greyTile)
+//                    addGreyHexagon(greyTile)
+//                }
+//            }
+//        )
 
 
-        confirm.isVisible = true
-        rotateTileRight.isVisible = true
-        rotateTileLeft.isVisible = true
-        disableShopButtons()
-        disableShopOnclick()
-        disableAllTilesOnclick()
-        enableConfirmRotateButtons()
+        //das soll eigentlich alles im onFinished der Animation passieren, da die nicht funktioniert habe ich das
+        // rausgezogen. Wenn die Animation gefixt wird bitte löschen
+        greyTile.visual = chosenTile.visual
+        chosenTile.isVisible = false
+        tileMap.add(game.choices[selectTile].first to greyTile)
 
-        changeGreyVisibility(false, playerID)
+
+        //deaktiviere nach dem Legen den Shop und alle Shop Buttons
+        enableTilesInShop(false)
+        enableWildlifeInShop(false)
+        customChoiceButton.isDisabled = true
+        changeWildlifeButton.isDisabled = true
+        clearOverpopulationButton.isDisabled = true
+
+        activatesTileButtons()
+        changeGreyVisibility(false, playerID, greyTile)
+        //deactivateRotateButtons()
+
+        greyTile.isDisabled = false
+        greyTile.onMouseClicked = { onClickForTiles(greyTile) }
+        greyTile.choiceHex = false
+
+        confirm.isDisabled = false
     }
 
     private fun putTileInGrid(x: Int, y: Int) {
@@ -1121,6 +1270,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         selectTile.inShop = false
     }
 
+    /**
+     * This function activates the confirm, rotateTileLeft and rotateTileRight Buttons
+     */
     private fun activatesTileButtons() {
         if(isPlayerHuman) {
             listOf(confirm, rotateTileLeft, rotateTileRight).forEach {
@@ -1130,87 +1282,128 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
+    /**
+     * This function deactivates the confirm, rotateTileLeft and rotateTileRight Buttons
+     */
     private fun deactivateTileButtons() {
         listOf(confirm, rotateTileLeft, rotateTileRight).forEach { it.isVisible = false }
     }
 
-    override fun refreshAfterChangeTurn(lastTurn: Boolean) {
-//        deactivateTileButtons()
-//        player++
-//        zoomOnNextPlayer()
-//        changeGreyVisibility(true, player)
-//
-//        if(isHuman()) {
-//            unlock()
-//        } else {
-//            lock()
-//        }
-//        checkRemoveWildlifeButton()
-//        checkExterminateButton()
+    private fun resetCustomChoice() {
+        customChoiceButton.font = Font(size = 16, color = Color(255, 255, 255, 255)).apply {
+            customChoiceButton.visual = ColorVisual(0, 0, 0).apply {
+                style.borderRadius = BorderRadius(10)
+            }
+        }
+    }
 
+    override fun refreshAfterChangeTurn(lastTurn: Boolean) {
+        val game = rootService.currentGame
+        checkNotNull(game)
+
+        disableAllTilesOnclick()
+
+        deactivateTileButtons()
+        //player++
+        player = (player + 1)%game.playerQueue.size
+
+        customChoiceActive = false
+        resetCustomChoice()
 
         zoomOnNextPlayer()
-        enableShopOnclick()
-        enableShopButtons()
-        changeGreyVisibility(true, getPlayerId())
-
-        refillShop()
-
-        selectTile = -1
-        selectAnimal = -1
-        selectedGridX = null
-        selectedGridY = null
+        changeGreyVisibility(true, player)
 
         if(isHuman()) {
             unlock()
         } else {
             lock()
         }
+        enableWildlifeInShop(true)
         checkRemoveWildlifeButton()
         checkExterminateButton()
+
+        //load new visual into Shop Label of the Tile selected by the last player, then move it back into the Shop
+        //position and make it visible again
+        tileShop[selectTile].visual = getShopVisual(selectTile)
+        moveLabelToShop(selectTile)
+
+        animalShop[selectAnimal].visual = createAnimalView(game.choices[selectAnimal].second)
+        chooseAnimal(selectAnimal, animalShop[selectAnimal])
+
+        selectTile = -1
+        selectAnimal = -1
+        for(tile in game.playerQueue.peek().board){
+            //if(tileMap.forward(tile.value).visual != ColorVisual(170, 170, 170, 127)) {
+            println("calling addGreyHexagon for tile ${tile.value.id}")
+            addGreyHexagon(tileMap.forward(tile.value))
+            //}
+        }
+
+        //refreshShop()       //Game Ende testen wenn TileStack leer ist oder zu wenig animal Tokens
+        //saveGameState()
+    }
+
+    /**
+     * This function moves the Tile Label corresponding to the [shopIndex] back into its position in the shop and makes
+     * it visible again
+     */
+    private fun moveLabelToShop(shopIndex: Int) {
+        var label = tileChoice1
+        var posX = 0.0
+        val posY = 25.0
+
+        when(shopIndex) {
+            0 -> {
+                label = tileChoice1
+                posX = 822.0
+            }
+            1 -> {
+                label = tileChoice2
+                posX = 976.0
+            }
+            2 -> {
+                label = tileChoice3
+                posX = 1130.0
+            }
+            3 -> {
+                label = tileChoice4
+                posX = 1284.0
+            }
+            else -> throw IllegalArgumentException("Invalid shop index $shopIndex")
+        }
+
+        label.posX = posX
+        label.posY = posY
+
+        playAnimation(
+            FadeAnimation(
+                label,
+                toOpacity = 1.0,
+                duration = (300/animationSpeed).toInt()
+            ).apply {
+                onFinished = {
+                    label.isVisible = true
+                    println("label was moved")
+                }
+            }
+        )
     }
 
     private fun isHuman(): Boolean {
         val game = rootService.currentGame
         checkNotNull(game)
-        return if(game.playerQueue.peek().type == PlayerType.HUMAN) true else false
-    }
-
-    private fun refillShop() {
-        //Animal Token entfernen, falls es nicht genutzt wurde
-        var animalPlace = listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(selectAnimal)
-        if(animalPlace.visual != Visual.EMPTY) { animalPlace.visual = Visual.EMPTY }
-
-        val game = rootService.currentGame
-        checkNotNull(game)
-        shop[selectTile] = tileMap.forward(game.choices.elementAt(selectTile).first)
-        val animal = game.choices.elementAt(selectTile).second
-        when(animal) {
-            WildlifeToken.ELK -> animalPlace.visual = ImageVisual("tokens/elk.png")
-            WildlifeToken.BEAR -> animalPlace.visual = ImageVisual("tokens/bear.png")
-            WildlifeToken.SALMON -> animalPlace.visual = ImageVisual("tokens/salmon.png")
-            WildlifeToken.HAWK -> animalPlace.visual = ImageVisual("tokens/hawk.png")
-            WildlifeToken.FOX -> animalPlace.visual = ImageVisual("tokens/fox.png")
-        }
-        scaleAnimal(false, animalPlace)
-        scaleTile(false, shop[selectTile]!!)
-        shop[selectTile]?.isVisible = true
-        addComponents(shop[selectTile] as HexagonView)
-        animateDealTile()
+        return game.playerQueue.peek().type == PlayerType.HUMAN
     }
 
 
-    //Neuerungen 06.07
     private fun initializeShop() {
         val game = rootService.currentGame
         checkNotNull(game)
 
         for(i in 0..3) {
-            shop[i] = tileMap.forward(game.choices.elementAt(i).first)
-            shop[i]?.inShop = true
-            shop[i]?.isVisible = true
-            addComponents(shop[i] as HexagonView)
-            println(shop[i]?.inShop.toString())
+            tileShop[i].visual = getShopVisual(i)
+            tileShop[i].isVisible = true
+            tileShop[i].isDisabled = false
         }
 
         for(i in 0..3) {
@@ -1218,6 +1411,14 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(i).visual =
                 createAnimalView(animal)
         }
+    }
+
+    private fun getShopVisual(shopIndex: Int): ImageVisual {
+        val game = rootService.currentGame
+        checkNotNull(game)
+
+        val tileID = game.choices[shopIndex].first.id
+        return ImageVisual("tiles/choices/tile_$tileID.png")
     }
 
     private fun animateDealTile() {
@@ -1271,7 +1472,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 //        deactivateRotateButtons()
 //    }
 
-    private fun getTileWithAnimal(tile: Tile): ImageVisual {
+    private fun getTileWithAnimal(tile: Tile): Pair<ImageVisual, Int> {
         var path = "tilesWithWildlife/"
         path += when(tile.id) {
             0,1,2,3,4,5,420 -> "PF"
@@ -1311,19 +1512,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             throw IllegalArgumentException("Tile has no occupant! Tile ID: {$tile.id")
         }
 
-        var rotation = 0
-
-        rotation = when(tile.rotation) {
-            0 -> 0
-            1 -> 60
-            2 -> 120
-            3 -> 180
-            4 -> 240
-            5 -> 300
-            else -> throw IllegalArgumentException("Invalid rotation: ${tile.rotation}")
-        }
-
-        rotation += when(tile.id) {
+        val rotation = when(tile.id) {
             110 -> 300
             120 -> 60
             210 -> 300
@@ -1336,20 +1525,22 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             520 -> 240
             else -> 0
         }
-
-        return ImageVisual("$path.png", rotation = rotation)
+        return Pair(ImageVisual("$path.png"), rotation)
     }
 
     private fun addGreyHexagon(tileView: HexagonViewExtended, playerIndex: Int = 0) {
         val game = rootService.currentGame
         checkNotNull(game)
         println("index in addHexagons: $playerIndex")
+
         val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(player)
         println("area selected")
 
         val nbhs = listOf(Pair(1, -1), Pair(1, 0), Pair(0, 1), Pair(-1, 1), Pair(-1, 0), Pair(0, -1))
 
         val tile = tileMap.backward(tileView)
+        checkNotNull(tile)
+        println("tile being processed: ${tile.id}")
         val tilePos = game.playerQueue.elementAt(playerIndex).board.entries.find { it.value == tile }?.key
         checkNotNull(tilePos)
         val tileViewPos = Pair(tilePos.first, tilePos.second)
@@ -1360,11 +1551,16 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 nbhTileView = HexagonViewExtended(tileView.size, ColorVisual(170, 170, 170, 127))
                 nbhTileView.apply {
                     onMouseClicked = {
-                        selectedGridX = tileViewPos.first + nbh.first
-                        selectedGridY = tileViewPos.second + nbh.second
+                        if(selectTile != -1 && selectAnimal != -1) {
+                            selectedGridX = tileViewPos.first + nbh.first
+                            selectedGridY = tileViewPos.second + nbh.second
 
-                        if (customChoiceActive) rootService.playerActionService.freeSelection(selectTile, selectAnimal)
-                        else rootService.playerActionService.selectColumn(selectTile)
+                            if (customChoiceActive) rootService.playerActionService.freeSelection(
+                                selectTile,
+                                selectAnimal
+                            )
+                            else rootService.playerActionService.selectColumn(selectTile)
+                        }
                     }
                 }
 
@@ -1374,8 +1570,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
-    private fun changeGreyVisibility(visible: Boolean, player: Int) {
-        listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(player).components.filter { it.choiceHex }.forEach { it.isVisible = visible }
+    private fun changeGreyVisibility(visible: Boolean, player: Int, exception: HexagonViewExtended? = null) {
+        listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(player).components.filter {
+            it.choiceHex }.forEach {
+                if(exception == null || it != exception) {
+                    it.isVisible = visible
+                }
+            }
     }
 
 
@@ -1386,38 +1587,35 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             val image = createAnimalView(game.choices.elementAt(i).second)
             listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(i).visual = image
         }
+        println("refresh")
 
         checkRemoveWildlifeButton()
         checkExterminateButton()
-
-        disableShopOnclick()
-        disableAllTilesOnclick()
-        disableConfirmRotateButtons()
     }
 
     private fun checkRemoveWildlifeButton() {
         val game = rootService.currentGame
         checkNotNull(game)
 
-        changeWildlife.isDisabled = true
+        changeWildlifeButton.isDisabled = true
 
         if (game.gameState !in listOf(GameState.START_OF_TURN, GameState.HAS_EXTERMINATED)) return
 
         if (game.playerQueue.peek().natureTokens < 1) return
 
-        changeWildlife.visual = ColorVisual(0,0,0,255).apply {
+        changeWildlifeButton.visual = ColorVisual(0,0,0,255).apply {
             style.borderRadius = BorderRadius(10)
         }
-        changeWildlife.font = Font(size = 16, color = Color(255, 255, 255, 255))
+        changeWildlifeButton.font = Font(size = 16, color = Color(255, 255, 255, 255))
 
-        changeWildlife.isDisabled = false
+        changeWildlifeButton.isDisabled = false
     }
 
     private fun checkExterminateButton() {
         val game = rootService.currentGame
         checkNotNull(game)
 
-        clearOverpopulation.isDisabled = true
+        clearOverpopulationButton.isDisabled = true
 
         if (game.gameState != GameState.START_OF_TURN) return
 
@@ -1425,19 +1623,19 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         if (choices.distinct().size != 2) return
 
-        if (choices.count {it == choices[0]} != 3 && choices.count {it == choices[0]} != 3) return
+        if (choices.count {it == choices[0]} != 3 && choices.count {it == choices[1]} != 3) return
 
-        clearOverpopulation.visual = ColorVisual(0,0,0,255).apply {
+        clearOverpopulationButton.visual = ColorVisual(0,0,0,255).apply {
             style.borderRadius = BorderRadius(10)
         }
-        clearOverpopulation.font = Font(size = 16, color = Color(255, 255, 255, 255))
+        clearOverpopulationButton.font = Font(size = 16, color = Color(255, 255, 255, 255))
 
-        clearOverpopulation.isDisabled = false
+        clearOverpopulationButton.isDisabled = false
     }
 
 
     override fun refreshAfterExterminate() {
-        deactivateRotateButtons()
+        //deactivateRotateButtons()
         selectTile = -1
         selectAnimal = -1
         scaleDownOtherTiles(selectTile)
@@ -1454,6 +1652,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     override fun refreshAfterSelectColumn(index: Int) {
         placeChosenTile()
+        disableShopOnclick()
+        disableGreyHexagonOnClicks()
+        disableShopButtons()
         disableAllTilesOnclick()
     }
 
@@ -1464,6 +1665,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     override fun refreshAfterFreeSelection() {
         placeChosenTile()
+        disableShopOnclick()
+        disableGreyHexagonOnClicks()
+        disableShopButtons()
         disableAllTilesOnclick()
     }
 
@@ -1473,108 +1677,27 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
 
-    override fun refreshAfterRotate(right: Boolean) {
+    override fun refreshAfterRotate(amount: Int) {
         val game = rootService.currentGame
         checkNotNull(game)
-        rotateInSelection(right, tileMap.forward(game.choices.elementAt(game.selectedChoice.first).first))
+        rotateInSelection(amount, tileMap.forward(game.choices.elementAt(game.selectedChoice.first).first))
     }
 
 
     override fun refreshAfterPlaceTile(index: Triple<Int, Int, Int>) {
-        println("place tile confirmation")
+
+        val game = rootService.currentGame
+        checkNotNull(game)
+
         confirm.isVisible = false
         rotateTileRight.isVisible = false
         rotateTileLeft.isVisible = false
+
+        //TODO("eig. wird das Tile jetzt zu früh (nach select statt nach place Tile) ins Grid gepackt. Macht anders nur keinen Sinn?")
+
+
         //putTileInGrid(index.first, index.second)
-
-        enableCurrentPlayerTilesOnclick()
-
     }
-
-
-
-
-
-
-
-
-
-    private fun disableAllOnclicks() {
-        disableAllTilesOnclick()
-        disableShopOnclick()
-        disableConfirmRotateButtons()
-        disableShopButtons()
-    }
-
-
-
-    private fun disableAllTilesOnclick() {
-        tileMap.entries.forEach {
-            it.second.isDisabled = true
-        }
-    }
-
-    private fun enableCurrentPlayerTilesOnclick() {
-        val game = rootService.currentGame
-        checkNotNull(game)
-        game.playerQueue.peek().board.forEach { (triple, tile) ->
-            tileMap.forward(tile).isDisabled = false
-        }
-    }
-
-    private fun disableShopOnclick() {
-        val game = rootService.currentGame
-        checkNotNull(game)
-        game.choices.forEach { tileMap.forward(it.first).isDisabled = true }
-        listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).forEach { it.isDisabled = true }
-    }
-
-    private fun enableShopOnclick() {
-        val game = rootService.currentGame
-        checkNotNull(game)
-        game.choices.forEach { tileMap.forward(it.first).isDisabled = false }
-        listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).forEach { it.isDisabled = false }
-    }
-
-    private fun disableMiniMapHover() {
-        listOf(lableAboveCamOne, lableAboveCamTwo, lableAboveCamThree, lableAboveCamFour).forEach { it.isDisabled = true }
-    }
-
-    private fun enableMiniMapHover() {
-        listOf(lableAboveCamOne, lableAboveCamTwo, lableAboveCamThree, lableAboveCamFour).forEach { it.isDisabled = false }
-    }
-
-    private fun disableConfirmRotateButtons() {
-        listOf(confirm, rotateTileLeft, rotateTileRight).forEach { it.isDisabled = true }
-    }
-
-    private fun enableConfirmRotateButtons() {
-        listOf(confirm, rotateTileLeft, rotateTileRight).forEach { it.isDisabled = false }
-    }
-
-    private fun disableShopButtons() {
-        listOf(customChoice, changeWildlife, clearOverpopulation).forEach { it.isDisabled = true }
-    }
-
-    private fun enableShopButtons() {
-        listOf(customChoice, changeWildlife, clearOverpopulation).forEach { it.isDisabled = false }
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     override fun refreshAfterPlaceWildlife(index: Triple<Int, Int, Int>) {
@@ -1584,10 +1707,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         val tile = currentArea[index.first, index.second]
         checkNotNull(tile)
-        val image = getTileWithAnimal(tileMap.backward(tile))
-        currentArea[index.first, index.second]?.visual = image
-        currentArea[index.first, index.second]?.isDisabled = true
-        listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(selectAnimal).visual = Visual.EMPTY
+        val newVisual = getTileWithAnimal(tileMap.backward(tile))
+        tile.visual = newVisual.first
+        tile.isDisabled = true
+        tile.rotate(newVisual.second)
+
+        animalShop[selectAnimal].visual = Visual.EMPTY
 
         updateNatureTokenCount()
     }
@@ -1602,22 +1727,18 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         tokenCount.text = "$newCount"
     }
 
-
     override fun refreshAfterChatMessage(messageSender: String, message: String) {
 
     }
 
-
-
-    override fun refreshAfterUseNatureToken() {
-        customChoice.visual = ColorVisual(256, 181, 0).apply {
+    override fun refreshAfterUnlockSelection() {
+        customChoiceButton.visual = ColorVisual(256, 181, 0).apply {
             style.borderRadius = BorderRadius(10)
         }
-        customChoice.font = Font(size = 16, color = Color(0, 0, 0))
+        customChoiceButton.font = Font(size = 16, color = Color(0, 0, 0))
         customChoiceActive = true
         updateNatureTokenCount()
     }
-
 
     //Liste wird bei refreshAfterStartGame mit der Startreihenfolge befüllt
     private var playerListAtStart = mutableListOf<Player>()
@@ -1637,10 +1758,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             playerListAtStart.removeAll{ it !in game.playerQueue}
         }
 
-        //Philllip wird hier einen Rechtschreibfehler erwähnen
-        val index = playerListAtStart.indexOf(game.playerQueue.peek())
-        require(index >= 0 && index < game.playerQueue.size) { "Player-Index out of bounds (GUI)" }
-        return index
+        return playerListAtStart.indexOf(game.playerQueue.peek())
     }
 
     private fun loadScoreCards(selection: List<Boolean>) {
@@ -1660,7 +1778,38 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
 
+    private fun renderImage(tileName: String, tokenName: String, tileRotation: Int): String {
+        val background = ImageIO.read(File("tiles/clear/$tileName.png"))
+        val foreground = ImageIO.read(File("tokens/$tokenName.png"))
 
+        val result = BufferedImage(
+            background.width,
+            background.height,
+            BufferedImage.TYPE_INT_RGB
+        )
+
+        val g = result.createGraphics()
+
+        g.drawImage(background, 0, 0, background.width, background.height, null)
+
+        val angle = Math.toRadians(60.0 * tileRotation.toDouble())
+
+        val x = 50 // Abstand vom linken Rand des Hintergrundbildes
+        val y = 50 // Abstand vom oberen Rand des Hintergrundbildes
+
+        val centerX = x + foreground.width / 2.0
+        val centerY = y + foreground.height / 2.0
+
+        g.rotate(angle, centerX, centerY)
+        g.drawImage(foreground, x, y, foreground.width * 1, foreground.height * 1, null)
+
+        g.dispose()
+
+        val tmpFile = File.createTempFile("cascadia_renderedTile_", ".png")
+        ImageIO.write(result, "png", tmpFile)
+
+        return tmpFile.absolutePath
+    }
 
 
 

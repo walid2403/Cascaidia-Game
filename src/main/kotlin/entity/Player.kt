@@ -1,5 +1,4 @@
 package entity
-
 /**
  * Diese Entity-Klasse stellt einen Spieler des Spiels Cascadia dar.
  *
