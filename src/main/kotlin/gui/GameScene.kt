@@ -30,6 +30,22 @@ import tools.aqua.bgw.visual.Visual
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
+import kotlin.math.min
+
+//-------------------------------------------------------------
+//
+//Koordinaten umbauen:
+//
+//Zeile: 378
+//Zeile: 1100
+//Zeile: 1116
+//Zeile: 1712
+//
+//
+//-------------------------------------------------------------
+
+
+
 
 /**
  * Die Klasse GameScene ist die Hauptszene des Cascadia Spiels
@@ -45,6 +61,7 @@ import javax.imageio.ImageIO
  *  @property player ein Objekt des Typs [Int], speichert den aktullen Spieler Index (-1 = Rundenanfang)
  */
 class GameScene(private val app: SopraApplication,private val rootService: RootService) : BoardGameScene(1920, 1080), Refreshable {
+
     private var selectAnimal = -1
     private var selectTile = -1
     private var customChoiceActive = false
@@ -358,6 +375,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             println("on Click Test ")
             val s = ((selectedGridX!! + selectedGridY!!) * (-1))
             rootService.playerActionService.placeTile(Triple(selectedGridX!!, selectedGridY!!, s))
+            //TODO("rootService.playerActionService.placeTile(Triple(s, selectedGridY!!, selectedGridY!!))")
         }
     }
 
@@ -687,32 +705,33 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
      * */
     private fun adjustAreas() {
         playerOneArea.posX = 1140 - playerOneArea.width / 2
-        playerOneArea.posY = 404 - playerOneArea.height / 2
+        playerOneArea.posY = 394 - playerOneArea.height / 2
 
         playerTwoArea.posX = 1550 - playerTwoArea.width / 2
-        playerTwoArea.posY = 729 - playerTwoArea.height / 2
+        playerTwoArea.posY = 719 - playerTwoArea.height / 2
 
         playerThreeArea.posX = 1000 - playerThreeArea.width / 2
-        playerThreeArea.posY = 854 - playerThreeArea.width / 2
+        playerThreeArea.posY = 844 - playerThreeArea.height / 2
 
         playerFourArea.posX = 590 - playerFourArea.width / 2
-        playerFourArea.posY = 529 - playerFourArea.width / 2
+        playerFourArea.posY = 519 - playerFourArea.height / 2
     }
 
     /**
      * Reduziert die Größe der Tiles in den HexagonGrids, sobald diese größer werden als der Bereich
      * @param areaIndex von dem Typ [Int], gibt den Index (1-4) des aktuellen Spielers und damit Spielbereich an
      */
-    private fun adjustTileSize() {
+    private fun scaleArea() {
         val game = rootService.currentGame
         checkNotNull(game)
         val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(getPlayerId())
 
-        if(currentArea.height > 158.0 || currentArea.width > 300.0) {
-            currentArea.components.forEach { it.size -= 30 }
+        if(currentArea.height > 134.0 || currentArea.width > 300.0) {
+            val scaleX = 134.0 / currentArea.height
+            val scaleY = 300.0 / currentArea.width
+            val scaleFactor = min(scaleX, scaleY)
+            currentArea.scale(scaleFactor)
         }
-
-        //Nach der Größenveränderung muss neu zentriert werden
         adjustAreas()
     }
 
@@ -1078,6 +1097,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         if (tile.visual == ColorVisual(170, 170, 170, 127)) {
             selectedGridX = game.playerQueue.peek().board.entries.find {
                 it.value == tileMap.backward(tile)}?.key?.first
+                //TODO("it.value == tileMap.backward(tile)}?.key?.third")
             selectedGridY = game.playerQueue.peek().board.entries.find {
                 it.value == tileMap.backward(tile)}?.key?.second
 
@@ -1093,6 +1113,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             val y = coordinates.second
             val s = (x + y) * (-1)
             rootService.playerActionService.placeWildlife(Triple(x, y, s))
+            //TODO("rootService.playerActionService.placeWildlife(Triple(s, y, x))")
         }
     }
 
@@ -1179,6 +1200,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         setPlayerNameAtBottom(null)
         showPlayerAreasAtStart()
 
+        adjustAreas()
         if(isHuman()) {
             unlock()
         } else {
@@ -1436,10 +1458,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         checkNotNull(game)
 
         disableAllTilesOnclick()
-        adjustAreas()
-        //adjustTileSize()
+        scaleArea()
 
         deactivateTileButtons()
+        //player++
         player = (player + 1)%game.playerQueue.size
 
         customChoiceActive = false
@@ -1478,6 +1500,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         for(tile in game.playerQueue.peek().board){
             addGreyHexagon(tileMap.forward(tile.value))
         }
+
+        initializeCamerasOnSide()
 
         //refreshShop()       //Game Ende testen wenn TileStack leer ist oder zu wenig animal Tokens
         //saveGameState()
@@ -1685,6 +1709,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         val tilePos = game.playerQueue.elementAt(playerIndex).board.entries.find { it.value == tile }?.key
         checkNotNull(tilePos)
         val tileViewPos = Pair(tilePos.first, tilePos.second)
+        //TODO("val tileViewPos = Pair(tilePos.third, tilePos.second)")
 
         nbhs.forEach { nbh ->
             var nbhTileView = currentArea[tileViewPos.first + nbh.first, tileViewPos.second + nbh.second]
