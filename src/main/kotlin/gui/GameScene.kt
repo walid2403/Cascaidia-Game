@@ -126,6 +126,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 enableTilesInShop(true)
                 scaleDownOtherAnimals(0)
                 rootService.playerActionService.changeWildlife(listOf(0, 1, 2, 3).filter {changeAnimalsArray[it]})
+                println("test button")
             }
             changeWildlifeActive = !changeWildlifeActive
         }
@@ -1069,6 +1070,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         changeGreyVisibility(false, 3)
 
         zoomOnFirstPlayer()
+        checkExterminateButton()
 
         //Testblock
 //        shop[0]?.isVisible = true
@@ -1488,6 +1490,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             val image = createAnimalView(game.choices.elementAt(i).second)
             listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(i).visual = image
         }
+        println("refresh")
 
         checkRemoveWildlifeButton()
         checkExterminateButton()
@@ -1523,7 +1526,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         if (choices.distinct().size != 2) return
 
-        if (choices.count {it == choices[0]} != 3 && choices.count {it == choices[0]} != 3) return
+        if (choices.count {it == choices[0]} != 3 && choices.count {it == choices[1]} != 3) return
 
         clearOverpopulationButton.visual = ColorVisual(0,0,0,255).apply {
             style.borderRadius = BorderRadius(10)
