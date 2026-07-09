@@ -1,12 +1,27 @@
 package service
 
 import entity.*
+import java.io.File
+import entity.SaveState
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.module.SimpleModule
+
 
 /**
  * The player action service class of the Cascadia game. It includes all functions which rely heavily on player inputs.
  */
 
 class PlayerActionService(private val rootService: RootService) : AbstractRefreshingService() {
+
+    /**
+     * A Jackson object mapper configured with a custom `SimpleModule` to handle
+     * specific key deserialization needs for JSON Maps.
+     */
+    private val mapper = jacksonObjectMapper().apply {
+        val module = SimpleModule()
+        module.addKeyDeserializer(Triple::class.java, TripleKeyDeserializer())
+        registerModule(module)
+    }
 
     /**
      * Allows the active player to swap any number (0..4) of wildlife tokens in the market
@@ -167,7 +182,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      *
      * @throws IllegalStateException if the [GameState] is not `MADE_CHOICE`.
      */
-    fun rotateTile(right: Boolean) {
+    fun rotateTile(right: Boolean?, targetRotation: Int? = null) {
         val game = rootService.currentGame ?: error("No current game")
 
         check(game.gameState == GameState.MADE_CHOICE) {
@@ -182,20 +197,39 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
         val selectedTile = game.choices[tileIndex].first
 
-        if (right) {
-            selectedTile.rotation = (selectedTile.rotation + 1) % 6
+        if (right != null) {
+            if (right) {
+                selectedTile.rotation = (selectedTile.rotation + 1) % 6
 
-            if (selectedTile.habs.isNotEmpty()) {
-                val lastHabitat = selectedTile.habs.removeAt(selectedTile.habs.lastIndex)
-                selectedTile.habs.add(0, lastHabitat)
-            }
-        } else {
-            selectedTile.rotation = (selectedTile.rotation + 5) % 6
+                if (selectedTile.habs.isNotEmpty()) {
+                    val lastHabitat = selectedTile.habs.removeAt(selectedTile.habs.lastIndex)
+                    selectedTile.habs.add(0, lastHabitat)
+                }
 
-            if (selectedTile.habs.isNotEmpty()) {
-                val firstHabitat = selectedTile.habs.removeAt(0)
-                selectedTile.habs.add(firstHabitat)
+                onAllRefreshables { refreshAfterRotate(1) }
+            } else {
+                selectedTile.rotation = (selectedTile.rotation + 5) % 6
+
+                if (selectedTile.habs.isNotEmpty()) {
+                    val firstHabitat = selectedTile.habs.removeAt(0)
+                    selectedTile.habs.add(firstHabitat)
+                }
+
+                onAllRefreshables { refreshAfterRotate(-1) }
             }
+        } else if (targetRotation != null) {
+            val rightTimes = targetRotation - selectedTile.rotation
+            val leftTimes = selectedTile.rotation - targetRotation
+
+            selectedTile.rotation = targetRotation
+
+            var amount = rightTimes
+
+            if (leftTimes < rightTimes) {
+                amount = leftTimes * (-1)
+            }
+
+            onAllRefreshables { refreshAfterRotate(amount) }
         }
         onAllRefreshables { refreshAfterRotate(right) }
     }
@@ -312,6 +346,28 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
     }
 
     /**
+     * Creates a snapshot of the current game state for persistence or undo/redo functionality.
+     *
+     * @param game The current instance of the game [CascadiaGame] whose state is to be captured.
+     * @return A [GameSnapshot] object representing the current game state, including the tile stack,
+     * nature tokens, player choices, selected choice, game state, player queue, removed tokens,
+     * wildlife tokens, scoring cards, and local game information.
+     */
+    private fun createSnapshot(game: CascadiaGame): GameSnapshot {
+        return GameSnapshot(
+            tileStackList = game.tileStack.peekAll(),
+            natureTokens = game.natureTokens,
+            choicesList = game.choices.toList(),
+            selectedChoice = game.selectedChoice,
+            gameState = game.gameState,
+            playerQueue = java.util.ArrayDeque(game.playerQueue),
+            removedTokensList = game.removedTokens.toList(),
+            wildlifeTokensList = game.wildlifeTokens.peekAll(),
+            scoringCards = game.scoringCards,
+            isLocal = game.isLocal
+        )
+    }
+    /**
      * Interrupts the current game and saves it under the specified name.
      *
      * The complete move history is saved along with the game.
@@ -322,10 +378,27 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      *
      * @param name The file name or identifier under which the game should be saved.
      *
-     * @throws IllegalArgumentException if there is no .cascadia file with the given name in the SavedGames Folder
+     * @throws IllegalArgumentException if the name is empty, or if the game is not in a state where it can be saved.
      */
     fun saveGame(name: String) {
+        val game = rootService.currentGame ?: throw IllegalStateException("Kein aktives Spiel zum Speichern vorhanden.")
+        if (name.isEmpty()) throw IllegalArgumentException("Der Name darf nicht leer sein.")
+        if (!game.isLocal) {
+            throw IllegalArgumentException("Netzwerkspiele können nicht gespeichert werden.")
+        }
 
+        val folder = File(RootService.SAVE_DIRECTORY)
+        if (!folder.exists()) folder.mkdirs()
+        val file = File(folder, "$name${RootService.SAVE_EXTENSION}")
+
+        val state = SaveState(
+            currentGame = createSnapshot(game),
+            prevMovesList = rootService.history.prevMoves.peekAll().map { createSnapshot(it) },
+            undoneMovesList = rootService.history.undoneMoves.peekAll().map { createSnapshot(it) }
+        )
+        mapper.writeValue(file, state)
+
+        onAllRefreshables { refreshAfterSaveGame() }
     }
 
     /**
