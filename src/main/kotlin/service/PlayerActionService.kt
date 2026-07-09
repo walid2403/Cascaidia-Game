@@ -182,7 +182,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      *
      * @throws IllegalStateException if the [GameState] is not `MADE_CHOICE`.
      */
-    fun rotateTile(right: Boolean) {
+    fun rotateTile(right: Boolean?, targetRotation: Int? = null) {
         val game = rootService.currentGame ?: error("No current game")
 
         check(game.gameState == GameState.MADE_CHOICE) {
@@ -197,20 +197,39 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
         val selectedTile = game.choices[tileIndex].first
 
-        if (right) {
-            selectedTile.rotation = (selectedTile.rotation + 1) % 6
+        if (right != null) {
+            if (right) {
+                selectedTile.rotation = (selectedTile.rotation + 1) % 6
 
-            if (selectedTile.habs.isNotEmpty()) {
-                val lastHabitat = selectedTile.habs.removeAt(selectedTile.habs.lastIndex)
-                selectedTile.habs.add(0, lastHabitat)
-            }
-        } else {
-            selectedTile.rotation = (selectedTile.rotation + 5) % 6
+                if (selectedTile.habs.isNotEmpty()) {
+                    val lastHabitat = selectedTile.habs.removeAt(selectedTile.habs.lastIndex)
+                    selectedTile.habs.add(0, lastHabitat)
+                }
 
-            if (selectedTile.habs.isNotEmpty()) {
-                val firstHabitat = selectedTile.habs.removeAt(0)
-                selectedTile.habs.add(firstHabitat)
+                onAllRefreshables { refreshAfterRotate(1) }
+            } else {
+                selectedTile.rotation = (selectedTile.rotation + 5) % 6
+
+                if (selectedTile.habs.isNotEmpty()) {
+                    val firstHabitat = selectedTile.habs.removeAt(0)
+                    selectedTile.habs.add(firstHabitat)
+                }
+
+                onAllRefreshables { refreshAfterRotate(-1) }
             }
+        } else if (targetRotation != null) {
+            val rightTimes = targetRotation - selectedTile.rotation
+            val leftTimes = selectedTile.rotation - targetRotation
+
+            selectedTile.rotation = targetRotation
+
+            var amount = rightTimes
+
+            if (leftTimes < rightTimes) {
+                amount = leftTimes * (-1)
+            }
+
+            onAllRefreshables { refreshAfterRotate(amount) }
         }
     }
 

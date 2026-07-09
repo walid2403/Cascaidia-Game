@@ -66,9 +66,10 @@ interface Refreshable {
     /**
      * Perform refreshes necessary after a tile has been rotated
      *
-     * @param right Has the tile been rotated in the right direction? ([Boolean])
+     * @param amount How often should the tile be rotated, negative values mean a rotation in the left direction,
+     * positive values a rotation in the right direction ([Int])
      */
-    fun refreshAfterRotate(right: Boolean) {}
+    fun refreshAfterRotate(amount: Int) {}
 
     /**
      * Perform refreshes necessary after a tile has been placed
@@ -118,5 +119,15 @@ interface Refreshable {
     /**
      * Perform refreshes necessary after a nature token has been used
      */
-    fun refreshAfterUseNatureToken() {}
+    fun refreshAfterUnlockSelection() {}
+
+    /**
+     * Perform refreshes necessary after a nature token has been used
+     */
+    fun refreshAfterSelectWildlife(wildlifeIndex: Int) {}
+
+    /**
+     * Perform refreshes necessary after a nature token has been used
+     */
+    fun refreshAfterSelectTile(tileIndex: Int) {}
 }

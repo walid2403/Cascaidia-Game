@@ -1,6 +1,6 @@
 package service
 
-import org.junit.jupiter.api.assertDoesNotThrow
+import tools.aqua.bgw.util.Stack
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -27,6 +27,15 @@ class ExampleTest {
      */
     @Test
     fun testIfSetUpWorked() {
-        assertDoesNotThrow("The root service should be initialized.") { rootService }
+        val testStack = Stack<Int>()
+
+        for (i in 0..10) {
+            testStack.push(i)
+        }
+
+        println(testStack.peek())
+        println(testStack.peekAll())
+        testStack.pushAll(testStack.popAll())
+        println(testStack.peekAll())
     }
 }
