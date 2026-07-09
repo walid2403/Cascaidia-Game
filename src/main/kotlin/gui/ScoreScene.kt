@@ -737,17 +737,17 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
             habitatTableTopHalf -> {
                 when(index) {
                     //will be replaced with different/correct images, ignore duplicate warning for now
-                    1 -> ImageVisual("tile1.png", entryWidth, entryHeight)
-                    2 -> ImageVisual("tile1.png", entryWidth, entryHeight)
-                    3 -> ImageVisual("tile1.png", entryWidth, entryHeight)
-                    4 -> ImageVisual("tile1.png", entryWidth, entryHeight)
+                    1 -> ImageVisual("swamp+R.png", entryWidth, entryHeight)
+                    2 -> ImageVisual("swamp+R.png", entryWidth, entryHeight)
+                    3 -> ImageVisual("swamp+R.png", entryWidth, entryHeight)
+                    4 -> ImageVisual("swamp+R.png", entryWidth, entryHeight)
                     else -> throw IllegalArgumentException("index $index in table ${table.name} " +
                             "does not contain an image" )
                 }
             }
             habitatTableBottomHalf -> {
                 when(index) {
-                    0 -> ImageVisual("tile1.png", entryWidth, entryHeight)
+                    0 -> ImageVisual("swamp+R.png", entryWidth, entryHeight)
                     2 -> ImageVisual("tokens/pinecone.png", entryWidth, entryHeight, offsetX = -15)
                     else -> throw IllegalArgumentException("index $index in table ${table.name} " +
                             "does not contain an image" )
