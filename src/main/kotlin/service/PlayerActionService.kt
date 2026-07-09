@@ -231,7 +231,6 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
             onAllRefreshables { refreshAfterRotate(amount) }
         }
-        onAllRefreshables { refreshAfterRotate(right) }
     }
 
     /**

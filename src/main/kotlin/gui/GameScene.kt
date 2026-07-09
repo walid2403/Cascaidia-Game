@@ -325,12 +325,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(10) }
         onMouseClicked = {
-//            if(player == 3) player = 0
-//            else player++
+
             val game = rootService.currentGame
             checkNotNull(game)
-            rootService.gameService.changeTurn()
-//            zoomOnNextPlayer()
+            if(game.gameState == GameState.PLAYED_TILE || game.gameState == GameState.END_OF_TURN) {
+                //disableAllOnclicks()
+                rootService.gameService.changeTurn()
+            }
         }
     }
 
@@ -914,8 +915,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         )
     }
 
-    private fun rotateInSelection(clockwise: Boolean, tile: HexagonViewExtended) {
-        val rotation = if(clockwise) 60.0 else -60.0
+    private fun rotateInSelection(amount: Int, tile: HexagonViewExtended) {
+        val rotation = amount.toDouble() * 60.0
         if(animationsEnabled) {
             playAnimation(
                 RotationAnimation(
@@ -985,8 +986,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         } else {
             println("place wildlife soll aufgerufen werden")
-            val s = ((selectedGridX!! + selectedGridY!!) * (-1))
-            rootService.playerActionService.placeWildlife(Triple(selectedGridX!!, selectedGridY!!, s))
+
+            val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(getPlayerId())
+            val coordinates = currentArea.getCoordinateMap().entries.first { it.value == tile  }.key
+            val x = coordinates.first
+            val y = coordinates.second
+            val s = (x + y) * (-1)
+            rootService.playerActionService.placeWildlife(Triple(x, y, s))
         }
     }
 
@@ -1563,10 +1569,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
 
-    override fun refreshAfterRotate(right: Boolean) {
+    override fun refreshAfterRotate(amount: Int) {
         val game = rootService.currentGame
         checkNotNull(game)
-        rotateInSelection(right, tileMap.forward(game.choices.elementAt(game.selectedChoice.first).first))
+        rotateInSelection(amount, tileMap.forward(game.choices.elementAt(game.selectedChoice.first).first))
     }
 
 
@@ -1617,7 +1623,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     }
 
-    override fun refreshAfterUseNatureToken() {
+    override fun refreshAfterUnlockSelection() {
         customChoiceButton.visual = ColorVisual(256, 181, 0).apply {
             style.borderRadius = BorderRadius(10)
         }
