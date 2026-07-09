@@ -85,6 +85,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 }
                 this.font = Font(size = 16, color = Color(0, 0, 0))
                 customChoiceActive = true
+                enableShopOnclick()
             }
         }
     }
@@ -455,11 +456,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             zoomIn.isVisible = false
             zoomOut.isVisible = false
             showOtherPlayer(0)
+            setPlayerNameAtBottom(0)
         }
         onMouseExited = {
             zoomIn.isVisible = true
             zoomOut.isVisible = true
             showOtherPlayer(getPlayerId())
+            setPlayerNameAtBottom(null)
         }
     }
     private val lableAboveCamTwo = Label(posX = 55, posY = 295, width = 245, height = 130).apply {
@@ -467,11 +470,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             zoomIn.isVisible = false
             zoomOut.isVisible = false
             showOtherPlayer(1)
+            setPlayerNameAtBottom(1)
         }
         onMouseExited = {
             zoomIn.isVisible = true
             zoomOut.isVisible = true
             showOtherPlayer(getPlayerId())
+            setPlayerNameAtBottom(null)
         }
     }
     private val lableAboveCamThree = Label(posX = 55, posY = 525, width = 245, height = 130).apply {
@@ -479,11 +484,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             zoomIn.isVisible = false
             zoomOut.isVisible = false
             showOtherPlayer(2)
+            setPlayerNameAtBottom(2)
         }
         onMouseExited = {
             zoomIn.isVisible = true
             zoomOut.isVisible = true
             showOtherPlayer(getPlayerId())
+            setPlayerNameAtBottom(null)
         }
     }
     private val lableAboveCamFour = Label(posX = 55, posY = 755, width = 245, height = 130).apply {
@@ -491,11 +498,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             zoomIn.isVisible = false
             zoomOut.isVisible = false
             showOtherPlayer(3)
+            setPlayerNameAtBottom(3)
         }
         onMouseExited = {
             zoomIn.isVisible = true
             zoomOut.isVisible = true
             showOtherPlayer(getPlayerId())
+            setPlayerNameAtBottom(null)
         }
     }
 
@@ -1063,7 +1072,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             if (customChoiceActive) rootService.playerActionService.freeSelection(selectTile, selectAnimal)
             else rootService.playerActionService.selectColumn(selectTile)
 
-        } else {
+        } else if(game.gameState == GameState.PLAYED_TILE) {
             println("place wildlife soll aufgerufen werden")
 
             val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(getPlayerId())
@@ -1143,7 +1152,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         zoomOnFirstPlayer()
         checkExterminateButton()
-        disableAllTilesOnclick()
+        disableAllOnclicks()
+
+        enableShopButtons()
+        enableShopOnclick()
+
+        setPlayerNameAtBottom(null)
+        showPlayerAreasAtStart()
 
         //Testblock
 //        shop[0]?.isVisible = true
@@ -1189,6 +1204,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 addGreyHexagon(hexView, index)
             }
         }
+    }
+
+    private fun showPlayerAreasAtStart() {
+
     }
 
 
@@ -1289,6 +1308,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         listOf(confirm, rotateTileLeft, rotateTileRight).forEach { it.isVisible = false }
     }
 
+    private fun setPlayerNameAtBottom(nameIndex: Int?) {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        if(nameIndex == null) playerName.text = game.playerQueue.peek().name
+        else playerName.text = listOf(nameOneSide, nameTwoSide, nameThreeSide, nameFourSide).elementAt(nameIndex).text
+    }
+
     private fun resetCustomChoice() {
         customChoiceButton.font = Font(size = 16, color = Color(255, 255, 255, 255)).apply {
             customChoiceButton.visual = ColorVisual(0, 0, 0).apply {
@@ -1302,6 +1328,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         checkNotNull(game)
 
         disableAllTilesOnclick()
+        adjustAreas()
 
         deactivateTileButtons()
         //player++
@@ -1318,9 +1345,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         } else {
             lock()
         }
-        enableWildlifeInShop(true)
+        customChoiceButton.isDisabled = false
+        enableShopButtons()
+        enableShopOnclick()
         checkRemoveWildlifeButton()
         checkExterminateButton()
+
+        setPlayerNameAtBottom(null)
 
         //load new visual into Shop Label of the Tile selected by the last player, then move it back into the Shop
         //position and make it visible again
@@ -1587,8 +1618,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             val image = createAnimalView(game.choices.elementAt(i).second)
             listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(i).visual = image
         }
-        println("refresh")
 
+        disableAllTilesOnclick()
         checkRemoveWildlifeButton()
         checkExterminateButton()
     }
@@ -1692,6 +1723,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         confirm.isVisible = false
         rotateTileRight.isVisible = false
         rotateTileLeft.isVisible = false
+        enableCurrentPlayerTilesOnClick()
 
         //TODO("eig. wird das Tile jetzt zu früh (nach select statt nach place Tile) ins Grid gepackt. Macht anders nur keinen Sinn?")
 
