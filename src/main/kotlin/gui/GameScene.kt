@@ -98,13 +98,17 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
         //Beim ersten mal anlicken wird customChoiceActive auf true gesetzt und die Button Farbe ändert sich
         onMouseClicked = {
-            if(!customChoiceActive) {
-                this.visual = ColorVisual(256, 181, 0).apply {
-                    style.borderRadius = BorderRadius(10)
+            val game = rootService.currentGame
+            checkNotNull(game)
+            if(game.playerQueue.peek().natureTokens > 0) {
+                if (!customChoiceActive) {
+                    this.visual = ColorVisual(256, 181, 0).apply {
+                        style.borderRadius = BorderRadius(10)
+                    }
+                    this.font = Font(size = 16, color = Color(0, 0, 0))
+                    customChoiceActive = true
+                    enableShopOnclick()
                 }
-                this.font = Font(size = 16, color = Color(0, 0, 0))
-                customChoiceActive = true
-                enableShopOnclick()
             }
         }
     }
@@ -115,48 +119,52 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             style.borderRadius = BorderRadius(10)
         }
         onMouseClicked = {
-            //Wenn es gerade aktiviert wird
-            if(!changeWildlifeActive) {
-                //Visuelle Änderung am Button
-                this.visual = ColorVisual(256, 181, 0).apply {
-                    style.borderRadius = BorderRadius(10)
-                }
-                this.font = Font(size = 16, color = Color(0, 0, 0))
-                this.text = "Remove selection"
-                updateNatureTokenCount(1)
+            val game = rootService.currentGame
+            checkNotNull(game)
+            if(game.playerQueue.peek().natureTokens > 0) {
+                //Wenn es gerade aktiviert wird
+                if (!changeWildlifeActive) {
+                    //Visuelle Änderung am Button
+                    this.visual = ColorVisual(256, 181, 0).apply {
+                        style.borderRadius = BorderRadius(10)
+                    }
+                    this.font = Font(size = 16, color = Color(0, 0, 0))
+                    this.text = "Remove selection"
+                    updateNatureTokenCount(1)
 
-                //Alle Tiles-OnClicks und Rotate-Buttons deaktivieren und alle runterskalieren und Auswahl zurücksetzten
-                disableShopOnclick()
-                enableWildlifeInShop(true)
-                disableGreyHexagonOnClicks()
-                scaleDownOtherTiles(-1)
-                scaleDownOtherAnimals(-1)
-                selectTile = -1
-                selectAnimal = -1
-                disableAllTilesOnclick()
-                clearOverpopulationButton.isDisabled = true
-                customChoiceButton.isDisabled = true
-            }
-            //Wenn die Tiere ausgetauscht werden sollen
-            else {
-                //Visuelle Änderung am Button
-                this.visual = ColorVisual(0, 0, 0).apply {
-                    style.borderRadius = BorderRadius(10)
+                    //Alle Tiles-OnClicks und Rotate-Buttons deaktivieren und alle runterskalieren und Auswahl zurücksetzten
+                    disableShopOnclick()
+                    enableWildlifeInShop(true)
+                    disableGreyHexagonOnClicks()
+                    scaleDownOtherTiles(-1)
+                    scaleDownOtherAnimals(-1)
+                    selectTile = -1
+                    selectAnimal = -1
+                    disableAllTilesOnclick()
+                    clearOverpopulationButton.isDisabled = true
+                    customChoiceButton.isDisabled = true
                 }
-                this.font = Font(size = 16, color = Color(255, 255, 255))
-                this.text = "Change Wildlife"
+                //Wenn die Tiere ausgetauscht werden sollen
+                else {
+                    //Visuelle Änderung am Button
+                    this.visual = ColorVisual(0, 0, 0).apply {
+                        style.borderRadius = BorderRadius(10)
+                    }
+                    this.font = Font(size = 16, color = Color(255, 255, 255))
+                    this.text = "Change Wildlife"
 
-                //Alle Tiere wieder runterskalieren und Tiles-OnClick wieder aktivieren und Tierauswahl entfernen
-                scaleDownOtherAnimals(-1)
-                scaleDownOtherTiles(-1)
-                rootService.playerActionService.changeWildlife(listOf(0, 1, 2, 3).filter {changeAnimalsArray[it]})
-                println("test button")
-                enableShopOnclick()
-                customChoiceButton.isDisabled = false
-                enableCurrentPlayerTilesOnClick()
-                enableGreyHexagonOnClicks()
+                    //Alle Tiere wieder runterskalieren und Tiles-OnClick wieder aktivieren und Tierauswahl entfernen
+                    scaleDownOtherAnimals(-1)
+                    scaleDownOtherTiles(-1)
+                    rootService.playerActionService.changeWildlife(listOf(0, 1, 2, 3).filter { changeAnimalsArray[it] })
+                    println("test button")
+                    enableShopOnclick()
+                    customChoiceButton.isDisabled = false
+                    enableCurrentPlayerTilesOnClick()
+                    enableGreyHexagonOnClicks()
+                }
+                changeWildlifeActive = !changeWildlifeActive
             }
-            changeWildlifeActive = !changeWildlifeActive
         }
     }
 
