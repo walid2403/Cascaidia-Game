@@ -98,13 +98,17 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
         //Beim ersten mal anlicken wird customChoiceActive auf true gesetzt und die Button Farbe ändert sich
         onMouseClicked = {
-            if(!customChoiceActive) {
-                this.visual = ColorVisual(256, 181, 0).apply {
-                    style.borderRadius = BorderRadius(10)
+            val game = rootService.currentGame
+            checkNotNull(game)
+            if(game.playerQueue.peek().natureTokens > 0) {
+                if (!customChoiceActive) {
+                    this.visual = ColorVisual(256, 181, 0).apply {
+                        style.borderRadius = BorderRadius(10)
+                    }
+                    this.font = Font(size = 16, color = Color(0, 0, 0))
+                    customChoiceActive = true
+                    enableShopOnclick()
                 }
-                this.font = Font(size = 16, color = Color(0, 0, 0))
-                customChoiceActive = true
-                enableShopOnclick()
             }
         }
     }
@@ -115,48 +119,52 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             style.borderRadius = BorderRadius(10)
         }
         onMouseClicked = {
-            //Wenn es gerade aktiviert wird
-            if(!changeWildlifeActive) {
-                //Visuelle Änderung am Button
-                this.visual = ColorVisual(256, 181, 0).apply {
-                    style.borderRadius = BorderRadius(10)
-                }
-                this.font = Font(size = 16, color = Color(0, 0, 0))
-                this.text = "Remove selection"
-                updateNatureTokenCount(1)
+            val game = rootService.currentGame
+            checkNotNull(game)
+            if(game.playerQueue.peek().natureTokens > 0) {
+                //Wenn es gerade aktiviert wird
+                if (!changeWildlifeActive) {
+                    //Visuelle Änderung am Button
+                    this.visual = ColorVisual(256, 181, 0).apply {
+                        style.borderRadius = BorderRadius(10)
+                    }
+                    this.font = Font(size = 16, color = Color(0, 0, 0))
+                    this.text = "Remove selection"
+                    updateNatureTokenCount(1)
 
-                //Alle Tiles-OnClicks und Rotate-Buttons deaktivieren und alle runterskalieren und Auswahl zurücksetzten
-                disableShopOnclick()
-                enableWildlifeInShop(true)
-                disableGreyHexagonOnClicks()
-                scaleDownOtherTiles(-1)
-                scaleDownOtherAnimals(-1)
-                selectTile = -1
-                selectAnimal = -1
-                disableAllTilesOnclick()
-                clearOverpopulationButton.isDisabled = true
-                customChoiceButton.isDisabled = true
-            }
-            //Wenn die Tiere ausgetauscht werden sollen
-            else {
-                //Visuelle Änderung am Button
-                this.visual = ColorVisual(0, 0, 0).apply {
-                    style.borderRadius = BorderRadius(10)
+                    //Alle Tiles-OnClicks und Rotate-Buttons deaktivieren und alle runterskalieren und Auswahl zurücksetzten
+                    disableShopOnclick()
+                    enableWildlifeInShop(true)
+                    disableGreyHexagonOnClicks()
+                    scaleDownOtherTiles(-1)
+                    scaleDownOtherAnimals(-1)
+                    selectTile = -1
+                    selectAnimal = -1
+                    disableAllTilesOnclick()
+                    clearOverpopulationButton.isDisabled = true
+                    customChoiceButton.isDisabled = true
                 }
-                this.font = Font(size = 16, color = Color(255, 255, 255))
-                this.text = "Change Wildlife"
+                //Wenn die Tiere ausgetauscht werden sollen
+                else {
+                    //Visuelle Änderung am Button
+                    this.visual = ColorVisual(0, 0, 0).apply {
+                        style.borderRadius = BorderRadius(10)
+                    }
+                    this.font = Font(size = 16, color = Color(255, 255, 255))
+                    this.text = "Change Wildlife"
 
-                //Alle Tiere wieder runterskalieren und Tiles-OnClick wieder aktivieren und Tierauswahl entfernen
-                scaleDownOtherAnimals(-1)
-                scaleDownOtherTiles(-1)
-                rootService.playerActionService.changeWildlife(listOf(0, 1, 2, 3).filter {changeAnimalsArray[it]})
-                println("test button")
-                enableShopOnclick()
-                customChoiceButton.isDisabled = false
-                enableCurrentPlayerTilesOnClick()
-                enableGreyHexagonOnClicks()
+                    //Alle Tiere wieder runterskalieren und Tiles-OnClick wieder aktivieren und Tierauswahl entfernen
+                    scaleDownOtherAnimals(-1)
+                    scaleDownOtherTiles(-1)
+                    rootService.playerActionService.changeWildlife(listOf(0, 1, 2, 3).filter { changeAnimalsArray[it] })
+                    println("test button")
+                    enableShopOnclick()
+                    customChoiceButton.isDisabled = false
+                    enableCurrentPlayerTilesOnClick()
+                    enableGreyHexagonOnClicks()
+                }
+                changeWildlifeActive = !changeWildlifeActive
             }
-            changeWildlifeActive = !changeWildlifeActive
         }
     }
 
@@ -374,8 +382,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         onMouseClicked = {
             println("on Click Test ")
             val s = ((selectedGridX!! + selectedGridY!!) * (-1))
-            rootService.playerActionService.placeTile(Triple(selectedGridX!!, selectedGridY!!, s))
-            //TODO("rootService.playerActionService.placeTile(Triple(s, selectedGridY!!, selectedGridY!!))")
+            rootService.playerActionService.placeTile(Triple(s, selectedGridY!!, selectedGridX!!))
         }
     }
 
@@ -1096,8 +1103,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         //wenn auf ein graues Randhexagon geklickt wird, wird select tile aufgerufen, sonst place wildlife
         if (tile.visual == ColorVisual(170, 170, 170, 127)) {
             selectedGridX = game.playerQueue.peek().board.entries.find {
-                it.value == tileMap.backward(tile)}?.key?.first
-                //TODO("it.value == tileMap.backward(tile)}?.key?.third")
+                it.value == tileMap.backward(tile)}?.key?.third
             selectedGridY = game.playerQueue.peek().board.entries.find {
                 it.value == tileMap.backward(tile)}?.key?.second
 
@@ -1112,8 +1118,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             val x = coordinates.first
             val y = coordinates.second
             val s = (x + y) * (-1)
-            rootService.playerActionService.placeWildlife(Triple(x, y, s))
-            //TODO("rootService.playerActionService.placeWildlife(Triple(s, y, x))")
+            rootService.playerActionService.placeWildlife(Triple(s, y, x))
         }
     }
 
@@ -1708,8 +1713,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         println("tile being processed: ${tile.id}")
         val tilePos = game.playerQueue.elementAt(playerIndex).board.entries.find { it.value == tile }?.key
         checkNotNull(tilePos)
-        val tileViewPos = Pair(tilePos.first, tilePos.second)
-        //TODO("val tileViewPos = Pair(tilePos.third, tilePos.second)")
+        val tileViewPos = Pair(tilePos.third, tilePos.second)
 
         nbhs.forEach { nbh ->
             var nbhTileView = currentArea[tileViewPos.first + nbh.first, tileViewPos.second + nbh.second]
@@ -1872,7 +1876,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         checkNotNull(game)
         val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(getPlayerId())
 
-        val tile = currentArea[index.first, index.second]
+        val tile = currentArea[index.third, index.second]
         checkNotNull(tile)
         val newVisual = getTileWithAnimal(tileMap.backward(tile))
         tile.visual = newVisual
