@@ -374,8 +374,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         onMouseClicked = {
             println("on Click Test ")
             val s = ((selectedGridX!! + selectedGridY!!) * (-1))
-            rootService.playerActionService.placeTile(Triple(selectedGridX!!, selectedGridY!!, s))
-            //TODO("rootService.playerActionService.placeTile(Triple(s, selectedGridY!!, selectedGridY!!))")
+            rootService.playerActionService.placeTile(Triple(s, selectedGridY!!, selectedGridX!!))
         }
     }
 
@@ -1096,8 +1095,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         //wenn auf ein graues Randhexagon geklickt wird, wird select tile aufgerufen, sonst place wildlife
         if (tile.visual == ColorVisual(170, 170, 170, 127)) {
             selectedGridX = game.playerQueue.peek().board.entries.find {
-                it.value == tileMap.backward(tile)}?.key?.first
-                //TODO("it.value == tileMap.backward(tile)}?.key?.third")
+                it.value == tileMap.backward(tile)}?.key?.third
             selectedGridY = game.playerQueue.peek().board.entries.find {
                 it.value == tileMap.backward(tile)}?.key?.second
 
@@ -1112,8 +1110,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             val x = coordinates.first
             val y = coordinates.second
             val s = (x + y) * (-1)
-            rootService.playerActionService.placeWildlife(Triple(x, y, s))
-            //TODO("rootService.playerActionService.placeWildlife(Triple(s, y, x))")
+            rootService.playerActionService.placeWildlife(Triple(s, y, x))
         }
     }
 
@@ -1708,8 +1705,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         println("tile being processed: ${tile.id}")
         val tilePos = game.playerQueue.elementAt(playerIndex).board.entries.find { it.value == tile }?.key
         checkNotNull(tilePos)
-        val tileViewPos = Pair(tilePos.first, tilePos.second)
-        //TODO("val tileViewPos = Pair(tilePos.third, tilePos.second)")
+        val tileViewPos = Pair(tilePos.third, tilePos.second)
 
         nbhs.forEach { nbh ->
             var nbhTileView = currentArea[tileViewPos.first + nbh.first, tileViewPos.second + nbh.second]
@@ -1872,7 +1868,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         checkNotNull(game)
         val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(getPlayerId())
 
-        val tile = currentArea[index.first, index.second]
+        val tile = currentArea[index.third, index.second]
         checkNotNull(tile)
         val newVisual = getTileWithAnimal(tileMap.backward(tile))
         tile.visual = newVisual
