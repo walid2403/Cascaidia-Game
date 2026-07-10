@@ -35,7 +35,7 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
     private var playerNum = 4
 
     //
-    // All panes and tabs + their borders
+    // All panes and tabs
     //
 
     private val backgroundImage = Label(
@@ -444,7 +444,7 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
         for (i in 0..3) {
 
             var totalScore = 0
-
+            //Namen in die oberste Zeile füllen
             wildlifeTableTopHalf[i+1, 0] = Label (
                 width = entryWidth,
                 height = entryHeight,
@@ -457,6 +457,7 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
                 }
             }
 
+            //Namen in die oberste Zeile füllen
             habitatTableTopHalf[i+1, 0] = Label (
                 width = entryWidth,
                 height = entryHeight,
@@ -470,7 +471,7 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
             }
 
             var wildlifeSum = 0
-            for (j in 0..4) {
+            for (j in 5..9) {
 
                 val score = Label(
                     width = entryWidth,
@@ -484,7 +485,7 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
                     }
                 }
                 when (j) {
-                    4 -> wildlifeTableBottomHalf[i+1, 0] = score
+                    9 -> wildlifeTableBottomHalf[i+1-5, 0] = score
                     else -> wildlifeTableTopHalf[i+1, j+1] = score
                 }
                 if (i in scores.indices) {
@@ -507,24 +508,24 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
             }
 
             var habitatSum = 0
-            for (j in 5..9) {
+            for (j in 0..4) {
                 val score = Label(
                     width = entryWidth,
                     height = entryHeight,
                     visual = ColorVisual(181, 181, 181)
                 ).apply {
                     if (i in scores.indices) {
-                        text = "" + scores[i].second[j] + "  |  " + scores[i].second[j+5]
+                        text = "" + scores[i].second[j] + "  |  " + scores[i].second[j+10]
                     } else {
                         isVisible = false
                     }
                 }
                 when(j) {
-                    9 -> habitatTableBottomHalf[i+1, 0] = score
-                    else -> habitatTableTopHalf[i+1, j+1-5] = score
+                    4 -> habitatTableBottomHalf[i+1, 0] = score
+                    else -> habitatTableTopHalf[i+1, j+1] = score
                 }
                 if (i in scores.indices) {
-                    habitatSum += scores[i].second[j] + scores[i].second[j+5]
+                    habitatSum += scores[i].second[j] + scores[i].second[j+10]
                 }
             }
 
@@ -533,7 +534,6 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
             habitatTableBottomHalf[i+1, 1] = Label(
                 width = entryWidth,
                 height = entryHeight,
-                text = if (i in scores.indices) "" + habitatSum else "",
                 visual = ColorVisual(181, 181, 181)
             ).apply {
                 if (i in scores.indices) {
@@ -542,6 +542,7 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
                     isVisible = false
                 }
             }
+
             // left over natureTokens
             habitatTableBottomHalf[i+1, 2] = Label(
                 width = entryWidth,
@@ -719,17 +720,17 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
             habitatTableTopHalf -> {
                 when(index) {
                     //will be replaced with different/correct images, ignore duplicate warning for now
-                    1 -> ImageVisual("tiles/choices/tile_0.png", entryWidth, entryHeight)
-                    2 -> ImageVisual("tiles/choices/tile_0.png", entryWidth, entryHeight)
-                    3 -> ImageVisual("tiles/choices/tile_0.png", entryWidth, entryHeight)
-                    4 -> ImageVisual("tiles/choices/tile_0.png", entryWidth, entryHeight)
+                    1 -> ImageVisual("tiles/scoreSceneTiles/mountain.png", entryWidth, entryHeight)
+                    2 -> ImageVisual("tiles/scoreSceneTiles/forest.png", entryWidth, entryHeight)
+                    3 -> ImageVisual("tiles/scoreSceneTiles/desert.png", entryWidth, entryHeight)
+                    4 -> ImageVisual("tiles/scoreSceneTiles/swamp.png", entryWidth, entryHeight)
                     else -> throw IllegalArgumentException("index $index in table ${table.name} " +
                             "does not contain an image" )
                 }
             }
             habitatTableBottomHalf -> {
                 when(index) {
-                    0 -> ImageVisual("tiles/choices/tile_0.png", entryWidth, entryHeight)
+                    0 -> ImageVisual("tiles/choices/lake.png", entryWidth, entryHeight)
                     2 -> ImageVisual("tokens/pinecone.png", entryWidth, entryHeight, offsetX = -15)
                     else -> throw IllegalArgumentException("index $index in table ${table.name} " +
                             "does not contain an image" )
