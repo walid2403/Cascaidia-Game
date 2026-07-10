@@ -34,14 +34,6 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
     private val paneY = (sceneHeight-paneHeight)/2
     private var playerNum = 4
 
-    //temporary lists to test the score scene visuals
-    private var scoreList: MutableList<Int> = mutableListOf(3,4,1,7,0,9,3,1,3,5,2,0,7,3,5,1)
-    private val scoreList2: MutableList<Int> = mutableListOf(5,3,7,9,1,1,2,1,3,6,4,0,7,4,6,8)
-    private val scoreList3: MutableList<Int> = mutableListOf(3,3,5,7,1,1,2,8,6,0,0,6,3,2,8,5)
-    private val scoreList4: MutableList<Int> = mutableListOf(1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7)
-    private val testList1: MutableList<Pair<String, List<Int>>> = ArrayList()
-    var scoresUpdated = false
-
     //
     // All panes and tabs + their borders
     //
@@ -114,16 +106,6 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
             habitatScoreTabOverlay.isVisible = false
             mainScorePane.isVisible = true
             mainScoreTabOverlay.isVisible = true
-
-            //temporary, used to test the score scene visuals, can be deleted later!
-            if(!scoresUpdated) {
-                scoresUpdated = true
-                //testList1.add(Pair("a", scoreList))
-                testList1.add(Pair("b", scoreList2))
-                testList1.add(Pair("c", scoreList3))
-                //testList1.add(Pair("d", scoreList4))
-                refreshAfterEndGame(testList1)
-            }
         }
     }
 

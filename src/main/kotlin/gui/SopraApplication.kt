@@ -63,5 +63,9 @@ class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
     override fun refreshAfterLoadGame() {
         this.hideMenuScene()
     }
+
+    override fun refreshAfterEndGame(scores: List<Pair<String, List<Int>>>) {
+        this.showMenuScene(scoreScene)
+    }
 }
 
