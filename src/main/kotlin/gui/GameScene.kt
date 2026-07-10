@@ -84,7 +84,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private var playerListAtStart = mutableListOf<Player>()
 
     //Hintergrundbild
-    private val logo = Label(posX = 0,posY = 0,width = 1920,height = 1080,visual = ImageVisual("backgrounds/CascadiaHintergrund.png"))
+    private val logo = Label(posX = 0,posY = 0,width = 1920,height = 1080,visual = ImageVisual("backgrounds/CascadiaHintergrund2.png"))
 
     //Graue Box um Auswahl
     private val grayBox = Label(width = 950, height = 300, posX = 485, posY = -40).apply {
@@ -392,7 +392,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
         isVisible = false
         onMouseClicked = {
-            rootService.playerActionService.rotateTile(false)
+            rootService.playerActionService.rotateTile(true)
         }
     }
 
@@ -401,7 +401,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
         isVisible = false
         onMouseClicked = {
-            rootService.playerActionService.rotateTile(true)
+            rootService.playerActionService.rotateTile(false)
         }
     }
 
@@ -445,7 +445,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         font = Font(size = 16, color = Color(255, 255, 255, 127))).apply {
         visual = ColorVisual(0,0, 0, 127).apply { style.borderRadius = BorderRadius(10) }
         onMouseClicked = {
-            rootService.playerActionService.redo()
+            if(rootService.history.undoneMoves.isNotEmpty()) {
+                rootService.playerActionService.redo()
+            }
         }
     }
 
@@ -935,6 +937,23 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         disableShopButtons()
     }
 
+    private fun disableAllForNetworkBotTurn() {
+        disableAllTilesOnclick()
+        disableShopOnclick()
+        disableConfirmRotateButtons()
+        disableShopButtons()
+        disableGreyHexagonOnClicks()
+        redo.isDisabled = true
+        undo.isDisabled = true
+        endTurn.isDisabled = true
+    }
+
+    private fun disableOnlineGameFeatures() {
+        redo.isDisabled = true
+        undo.isDisabled = true
+        app.pauseMenu.saveAndExitButton.isDisabled = true
+    }
+
 
 
     private fun disableAllTilesOnclick() {
@@ -1192,6 +1211,21 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         playerListAtStart = game.playerQueue.toMutableList()
 
+        createGame()
+
+        if(!isHuman()) { disableAllForNetworkBotTurn() }
+        if(rootService.currentGame?.isLocal == false) { disableOnlineGameFeatures() }
+    }
+
+    private fun createGame() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+
+        redo.isDisabled = false
+        undo.isDisabled = false
+        endTurn.isDisabled = false
+        app.pauseMenu.saveAndExitButton.isDisabled = false
+
         resetGame()
 
         createTileView()
@@ -1201,17 +1235,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         //loadStartTiles()xx
         initializeCamerasOnSide()
-        loadPlayerBoards()
+        loadPlayerBoards()                                                          //-> anpassen
         for(tile in game.playerQueue.peek().board){
             addGreyHexagon(tileMap.forward(tile.value))
         }
-//        disableAllButtons()
-        setNames()
-        setNatureTokenCounts()
+        setNames()                                                                  //-> anpassen
+        setNatureTokenCounts()                                                      //-> anpassen 
         adjustAreas()
-        //adjustTileSize()
-
-        //animateDealTile()
         changeGreyVisibility(true, 0)
         changeGreyVisibility(false, 1)
         changeGreyVisibility(false, 2)
@@ -1241,8 +1271,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         checkNotNull(game)
 
         for(i in game.playerQueue.indices) {
-            listOf(nameOneSide, nameTwoSide, nameThreeSide, nameFourSide).elementAt(i).text =
-                game.playerQueue.elementAt(i).name
+            val playerIndex = getPlayerIdForPlayer(game.playerQueue.elementAt(i))
+            listOf(nameOneSide, nameTwoSide, nameThreeSide, nameFourSide).elementAt(playerIndex).text = game.playerQueue.elementAt(i).name
         }
     }
 
@@ -1252,6 +1282,14 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             if(index < playerListAtStart.size)
                 tokenCount.text =  playerListAtStart[index].natureTokens.toString()
             }
+    }
+
+    override fun refreshAfterSelectTile(tileIndex: Int) {
+        chooseTile(tileIndex)
+    }
+
+    override fun refreshAfterSelectWildlife(wildlifeIndex: Int) {
+        chooseAnimal(wildlifeIndex, animalShop.elementAt(wildlifeIndex))
     }
 
     private fun loadPlayerBoards() {
@@ -1484,6 +1522,11 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         val game = rootService.currentGame
         checkNotNull(game)
 
+        redo.isDisabled = false
+        undo.isDisabled = false
+        endTurn.isDisabled = false
+        app.pauseMenu.saveAndExitButton.isDisabled = false
+
         botRotation = 0
         disableAllTilesOnclick()
         scaleArea()
@@ -1532,9 +1575,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         if(isHuman()) {
             unlock()
         } else {
+            disableAllForNetworkBotTurn()
             lock()
             rootService.bot.makeTurn(game.playerQueue.peek().type)
         }
+
+        if(rootService.currentGame?.isLocal == false) { disableOnlineGameFeatures() }
     }
 
     /**
@@ -1845,8 +1891,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
     override fun refreshAfterUndo() {
-        refreshAfterStartGame()
-        println("Test")
+        createGame()
     }
 
     override fun refreshAfterSelectColumn(index: Int) {
@@ -1996,13 +2041,11 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private fun getPlayerId(): Int {
         val game = rootService.currentGame
         checkNotNull(game)
-
-        //Passt die Liste an, falls Spieler das Spiel verlassen haben
-        if(playerListAtStart.size != game.playerQueue.size) {
-            playerListAtStart.removeAll{ it !in game.playerQueue}
-        }
-
         return playerListAtStart.indexOf(game.playerQueue.peek())
+    }
+
+    private fun getPlayerIdForPlayer(player: Player): Int {
+        return playerListAtStart.indexOf(playerListAtStart.find { it.name == player.name})
     }
 
     private fun loadScoreCards(selection: List<Boolean>) {

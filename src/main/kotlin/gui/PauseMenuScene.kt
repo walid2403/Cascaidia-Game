@@ -73,7 +73,7 @@ class PauseMenuScene (private val app: SopraApplication, private val rootService
         }
     }
 
-    private val saveAndExitButton = Button(
+    val saveAndExitButton = Button(
         posX = 70,
         posY = 180,
         width = paneWidth - 140,
