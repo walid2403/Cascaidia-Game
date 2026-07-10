@@ -68,6 +68,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private var changeWildlifeActive = false
     private var changeAnimalsArray = booleanArrayOf(false,false,false,false)
     private var player = -1
+    private var botRotation = 0
 
     private var allButtonsAllowed = true
     var animationsEnabled = true
@@ -1149,6 +1150,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         changeWildlifeActive = false
         changeAnimalsArray = booleanArrayOf(false,false,false,false)
         player = 0
+        botRotation = 0
 
         allButtonsAllowed = true
         animationsEnabled = true
@@ -1462,6 +1464,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         val game = rootService.currentGame
         checkNotNull(game)
 
+        botRotation = 0
         disableAllTilesOnclick()
         scaleArea()
 
@@ -1475,16 +1478,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         zoomOnNextPlayer()
         changeGreyVisibility(true, player)
 
-        if(isHuman()) {
-            unlock()
-        } else {
-            lock()
-            rootService.bot.makeTurn(game.playerQueue.peek().type)
-        }
-
         println("player ${game.playerQueue.peek().name} has ${game.playerQueue.peek().natureTokens} nature tokens")
         customChoiceButton.isDisabled = game.playerQueue.peek().natureTokens == 0
         println("custom Choice disabled: ${customChoiceButton.isDisabled}")
+
         enableShopButtons()
         enableShopOnclick()
         checkRemoveWildlifeButton()
@@ -1510,6 +1507,14 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         //refreshShop()       //Game Ende testen wenn TileStack leer ist oder zu wenig animal Tokens
         //saveGameState()
+
+
+        if(isHuman()) {
+            unlock()
+        } else {
+            lock()
+            rootService.bot.makeTurn(game.playerQueue.peek().type)
+        }
     }
 
     /**
@@ -1517,8 +1522,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
      * it visible again
      */
     private fun moveLabelToShop(shopIndex: Int) {
-        var label = tileChoice1
-        var posX = 0.0
+        var label: Label
+        var posX: Double
         val posY = 25.0
 
         when(shopIndex) {
@@ -1821,11 +1826,17 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     override fun refreshAfterSelectColumn(index: Int) {
-        placeChosenTile()
-        disableShopOnclick()
-        disableGreyHexagonOnClicks()
-        disableShopButtons()
-        disableAllTilesOnclick()
+        if(!isHuman()) {
+            selectTile = index
+            selectAnimal = index
+        } else {
+            placeChosenTile()
+            disableShopOnclick()
+            disableGreyHexagonOnClicks()
+            disableShopButtons()
+            disableAllTilesOnclick()
+        }
+
     }
 
     override fun refreshAfterRedo() {
@@ -1834,11 +1845,18 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
     override fun refreshAfterFreeSelection() {
-        placeChosenTile()
-        disableShopOnclick()
-        disableGreyHexagonOnClicks()
-        disableShopButtons()
-        disableAllTilesOnclick()
+        if (!isHuman()) {
+            val game = rootService.currentGame
+            checkNotNull(game)
+            selectTile = game.selectedChoice.first
+            selectAnimal = game.selectedChoice.second
+        } else {
+            placeChosenTile()
+            disableShopOnclick()
+            disableGreyHexagonOnClicks()
+            disableShopButtons()
+            disableAllTilesOnclick()
+        }
     }
 
 
@@ -1848,16 +1866,51 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
     override fun refreshAfterRotate(amount: Int) {
-        val game = rootService.currentGame
-        checkNotNull(game)
-        rotateInSelection(amount, tileMap.forward(game.choices.elementAt(game.selectedChoice.first).first))
+        if(!isHuman()) {
+            botRotation += amount
+        } else {
+            val game = rootService.currentGame
+            checkNotNull(game)
+            rotateInSelection(amount, tileMap.forward(game.choices.elementAt(game.selectedChoice.first).first))
+        }
     }
 
 
     override fun refreshAfterPlaceTile(index: Triple<Int, Int, Int>) {
+        if(!isHuman()) {
+            val game = rootService.currentGame
+            checkNotNull(game)
 
-        val game = rootService.currentGame
-        checkNotNull(game)
+
+            val chosenTile = tileShop[selectTile]
+            val playerID = getPlayerId()
+            val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(playerID)
+
+            val coordinates = convertCoordinates(index)
+            selectedGridX = coordinates.first
+            selectedGridY = coordinates.second
+            checkNotNull(selectedGridY)
+            checkNotNull(selectedGridX)
+            val x = selectedGridX
+            val y = selectedGridY
+            checkNotNull(x)
+            checkNotNull(y)
+            val greyTile = currentArea[x, y]
+            println("X: $selectedGridX, Y: $selectedGridY, Coordinates: $coordinates")
+            checkNotNull(greyTile)
+
+            greyTile.visual = chosenTile.visual
+            greyTile.rotate(botRotation*60)
+            chosenTile.isVisible = false
+            tileMap.add(game.choices[selectTile].first to greyTile)
+
+            greyTile.isDisabled = false
+            greyTile.onMouseClicked = { onClickForTiles(greyTile) }
+            greyTile.choiceHex = false
+
+            confirm.isDisabled = false
+        }
+        
 
         confirm.isVisible = false
         rotateTileRight.isVisible = false
