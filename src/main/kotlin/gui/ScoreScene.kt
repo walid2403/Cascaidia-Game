@@ -485,8 +485,8 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
                     }
                 }
                 when (j) {
-                    9 -> wildlifeTableBottomHalf[i+1-5, 0] = score
-                    else -> wildlifeTableTopHalf[i+1, j+1] = score
+                    9 -> wildlifeTableBottomHalf[i+1, 0] = score
+                    else -> wildlifeTableTopHalf[i+1, j+1-5] = score
                 }
                 if (i in scores.indices) {
                     wildlifeSum += scores[i].second[j]
@@ -730,7 +730,7 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
             }
             habitatTableBottomHalf -> {
                 when(index) {
-                    0 -> ImageVisual("tiles/choices/lake.png", entryWidth, entryHeight)
+                    0 -> ImageVisual("tiles/scoreSceneTiles/lake.png", entryWidth, entryHeight)
                     2 -> ImageVisual("tokens/pinecone.png", entryWidth, entryHeight, offsetX = -15)
                     else -> throw IllegalArgumentException("index $index in table ${table.name} " +
                             "does not contain an image" )
