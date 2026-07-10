@@ -641,7 +641,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
     }.apply {
         onMouseClicked = {
-            app.showMenuScene(PauseMenuScene(app,rootService))
+            app.showMenuScene(app.pauseMenu)
         }
     }
 
@@ -803,33 +803,38 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private fun zoomOnNextPlayer() {
         val currentPlayerID = getPlayerId()
         val coordinates = getCameraCoordinates(currentPlayerID)
-        cameraPane.pan(x = 0, y = 0, zoom = 1.0, smooth = true)
-        playAnimation(
-            DelayAnimation(duration = (1000/animationSpeed).toInt()).apply {
-                onFinished = {
-                    cameraPane.pan(x = coordinates.first, y = coordinates.second, zoom = 4.32, smooth = true)
+
+        if(animationsEnabled) {
+            cameraPane.pan(x = 0, y = 0, zoom = 1.0, smooth = true)
+            playAnimation(
+                DelayAnimation(duration = (1000 / animationSpeed).toInt()).apply {
+                    onFinished = {
+                        cameraPane.pan(x = coordinates.first, y = coordinates.second, zoom = 4.32, smooth = true)
+                    }
                 }
-            }
-        )
+            )
+        } else {
+            cameraPane.pan(x = coordinates.first, y = coordinates.second, zoom = 4.32, smooth = false)
+        }
     }
 
     private fun showOtherPlayer(playerID: Int) {
         val coordinates = getCameraCoordinates(playerID)
         println(playerID.toString())
         println(coordinates.toString())
-        cameraPane.pan(x = coordinates.first, y = coordinates.second, zoom = 4.32, smooth = true)
+        cameraPane.pan(x = coordinates.first, y = coordinates.second, zoom = 4.32, smooth = animationsEnabled)
         zoomFactor = 4.32
     }
 
     private fun zoomOnFirstPlayer() {
         val coordinates = getCameraCoordinates(0)
-        cameraPane.pan(x = coordinates.first, y = coordinates.second, zoom = 4.32, smooth = true)
+        cameraPane.pan(x = coordinates.first, y = coordinates.second, zoom = 4.32, smooth = animationsEnabled)
     }
 
     private fun changeZoom() {
         val currentPlayerID = getPlayerId()
         val coordinates = getCameraCoordinates(currentPlayerID)
-        cameraPane.pan(x = coordinates.first+5, y = coordinates.second, zoom = zoomFactor, smooth = true)
+        cameraPane.pan(x = coordinates.first+5, y = coordinates.second, zoom = zoomFactor, smooth = animationsEnabled)
     }
 
     private fun getCameraCoordinates(playerID: Int): Pair<Double, Double> {
@@ -1014,36 +1019,47 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     private fun scaleTile(sizeUp: Boolean, tileLabel: Label) {
         val targetScale = if(sizeUp) {100.0 / 80.0 } else { 1.0 }
-        playAnimation(
-            ScaleAnimation(
-                componentView = tileLabel,
-                fromScaleX = tileLabel.scaleX,
-                fromScaleY = tileLabel.scaleY,
-                toScaleX = targetScale,
-                toScaleY = targetScale,
-                duration = (300/animationSpeed).toInt(),
-                persist = true
+
+        if(animationsEnabled) {
+            playAnimation(
+                ScaleAnimation(
+                    componentView = tileLabel,
+                    fromScaleX = tileLabel.scaleX,
+                    fromScaleY = tileLabel.scaleY,
+                    toScaleX = targetScale,
+                    toScaleY = targetScale,
+                    duration = (300 / animationSpeed).toInt(),
+                    persist = true
+                )
             )
-        )
+        } else {
+            tileLabel.scale(targetScale)
+        }
     }
 
     private fun scaleAnimal(sizeUp: Boolean, animalView: Label) {
         val targetScale = if(sizeUp) {100.0 / 81.0 } else { 1.0 }
-        playAnimation(
-            ScaleAnimation(
-                componentView = animalView,
-                fromScaleX = animalView.scaleX,
-                fromScaleY = animalView.scaleY,
-                toScaleX = targetScale,
-                toScaleY = targetScale,
-                duration = (300/animationSpeed).toInt(),
-                persist = true
+
+        if(animationsEnabled) {
+            playAnimation(
+                ScaleAnimation(
+                    componentView = animalView,
+                    fromScaleX = animalView.scaleX,
+                    fromScaleY = animalView.scaleY,
+                    toScaleX = targetScale,
+                    toScaleY = targetScale,
+                    duration = (300 / animationSpeed).toInt(),
+                    persist = true
+                )
             )
-        )
+        } else {
+            animalView.scale(targetScale)
+        }
     }
 
     private fun rotateInSelection(amount: Int, tile: HexagonViewExtended) {
         val rotation = amount.toDouble() * 60.0
+
         if(animationsEnabled) {
             playAnimation(
                 RotationAnimation(
@@ -1112,14 +1128,18 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             else rootService.playerActionService.selectColumn(selectTile)
 
         } else if(game.gameState == GameState.PLAYED_TILE) {
-            println("place wildlife soll aufgerufen werden")
+            val tileObject = tileMap.backward(tile)
+            if(game.choices.elementAt(game.selectedChoice.second).second in tileObject.possibles) {
+                println("place wildlife soll aufgerufen werden")
 
-            val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(getPlayerId())
-            val coordinates = currentArea.getCoordinateMap().entries.first { it.value == tile  }.key
-            val x = coordinates.first
-            val y = coordinates.second
-            val s = (x + y) * (-1)
-            rootService.playerActionService.placeWildlife(Triple(s, y, x))
+                val currentArea =
+                    listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(getPlayerId())
+                val coordinates = currentArea.getCoordinateMap().entries.first { it.value == tile }.key
+                val x = coordinates.first
+                val y = coordinates.second
+                val s = (x + y) * (-1)
+                rootService.playerActionService.placeWildlife(Triple(s, y, x))
+            }
         }
     }
 
@@ -1549,19 +1569,23 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         label.posX = posX
         label.posY = posY
 
-        playAnimation(
-            FadeAnimation(
-                label,
-                toOpacity = 1.0,
-                //duration = (1000/animationSpeed).toInt(),
-                duration = 1000
-            ).apply {
-                onFinished = {
-                    label.isVisible = true
-                    println("label was moved")
+        if(animationsEnabled) {
+            playAnimation(
+                FadeAnimation(
+                    label,
+                    toOpacity = 1.0,
+                    //duration = (1000/animationSpeed).toInt(),
+                    duration = 1000
+                ).apply {
+                    onFinished = {
+                        label.isVisible = true
+                        println("label was moved")
+                    }
                 }
-            }
-        )
+            )
+        } else {
+            label.isVisible = true
+        }
     }
 
     private fun isHuman(): Boolean {

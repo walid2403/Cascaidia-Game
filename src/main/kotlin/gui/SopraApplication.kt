@@ -22,7 +22,7 @@ class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
 
     private val mainMenuScene = MainMenuScene(this@SopraApplication,rootService)
 
-    private val pauseMenu = PauseMenuScene(this@SopraApplication,rootService)
+    val pauseMenu = PauseMenuScene(this@SopraApplication,rootService)
 
     private val scoreScene = ScoreScene(this@SopraApplication, rootService)
 
@@ -44,8 +44,6 @@ class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
             mainMenuScene, pauseMenu, scoreScene, joinOnlineLobbyScene, hostOnlineLobbyScene, hostOnlineScene, joinOnlineScene, lobbyScene,
         )
         this.showGameScene(gameScene)
-        this.showMenuScene(mainMenuScene )
-        //this.showGameScene(gameScene)
         this.showMenuScene(mainMenuScene )
         //this.showMenuScene(scoreScene)
         //this.showMenuScene(testing(this@SopraApplication, rootService))
