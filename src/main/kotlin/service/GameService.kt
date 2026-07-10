@@ -136,9 +136,9 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             //eine liste für einen 3er starter
             val starter = mutableListOf<Tile>()
             //die nächsten 3 zeilen werden zu tiles gemacht und in den starter hinzugefügt
-            starter.add(createHabitatTile(lines[i]))
-            starter.add(createHabitatTile(lines[i + 1]))
-            starter.add(createHabitatTile(lines[i + 2]))
+            starter.add(createHabitatTile(lines[i], true))
+            starter.add(createHabitatTile(lines[i + 1], true))
+            starter.add(createHabitatTile(lines[i + 2], true))
             //in die Liste aller startlandschaften hinzufügen
             startingTiles.add(starter)
             i += 3
