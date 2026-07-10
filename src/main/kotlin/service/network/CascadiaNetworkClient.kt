@@ -13,7 +13,6 @@ import tools.aqua.bgw.net.common.response.*
  * [BoardGameClient] implementation for network communication.
  *
  * @param playerName the name of the player using this client.
- * @param playerType The Typ of the player connected locally
  * @param host the host to connect to.
  * @param secret the secret to use for the connection.
  * @property networkService the [NetworkService] to potentially forward received messages to.
@@ -119,7 +118,7 @@ class CascadiaNetworkClient(
     }
 
     /**
-     * handle a [NetWarGameInitMessage] sent by the server
+     * handle a [GameInitMessage] sent by the server
      */
     @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
@@ -136,7 +135,7 @@ class CascadiaNetworkClient(
     }
 
     /**
-     * handle a [NetWarDrawCardMessage] sent by the server
+     * Handle a [GameConfigMessage] sent by the server
      */
     @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
@@ -149,6 +148,95 @@ class CascadiaNetworkClient(
             networkService.receiveGameConfig(message)
         }
     }
+
+    /**
+     * Handle a [SelectMessage] sent by the server
+     */
+    @Suppress("UNUSED_PARAMETER", "unused")
+    @GameActionReceiver
+    fun onSelectReceived(message: SelectMessage, sender: String) {
+        BoardGameApplication.runOnGUIThread {
+
+        }
+    }
+
+    /**
+     * Handle a [PlaceMessage] sent by the server
+     */
+    @Suppress("UNUSED_PARAMETER", "unused")
+    @GameActionReceiver
+    fun onPlaceReceived(message: PlaceMessage, sender: String) {
+        BoardGameApplication.runOnGUIThread {
+
+        }
+    }
+
+    /**
+     * Handle a [WipeWildlifeMessage] sent by the server
+     */
+    @Suppress("UNUSED_PARAMETER", "unused")
+    @GameActionReceiver
+    fun onWipeWildlifeReceived(message: WipeWildlifeMessage, sender: String) {
+        BoardGameApplication.runOnGUIThread {
+
+        }
+    }
+
+    /**
+     * Handle a [UseNatureTokenMessage] sent by the server
+     */
+    @Suppress("UNUSED_PARAMETER", "unused")
+    @GameActionReceiver
+    fun onUseNatureTokenReceived(message: UseNatureTokenMessage, sender: String) {
+        BoardGameApplication.runOnGUIThread {
+
+        }
+    }
+
+    /**
+     * Handle a [RotationMessage] sent by the server
+     */
+    @Suppress("UNUSED_PARAMETER", "unused")
+    @GameActionReceiver
+    fun onRotationReceived(message: RotationMessage, sender: String) {
+        BoardGameApplication.runOnGUIThread {
+
+        }
+    }
+
+    /**
+     * Handle a [SelectWildlifeMessage] sent by the server
+     */
+    @Suppress("UNUSED_PARAMETER", "unused")
+    @GameActionReceiver
+    fun onSelectWildlifeReceived(message: SelectWildlifeMessage, sender: String) {
+        BoardGameApplication.runOnGUIThread {
+
+        }
+    }
+
+    /**
+     * Handle a [SelectHabitatTileMessage] sent by the server
+     */
+    @Suppress("UNUSED_PARAMETER", "unused")
+    @GameActionReceiver
+    fun onSelectHabitatTileReceived(message: SelectHabitatTileMessage, sender: String) {
+        BoardGameApplication.runOnGUIThread {
+
+        }
+    }
+
+    /**
+     * Handle a [ChatMessage] sent by the server
+     */
+    @Suppress("UNUSED_PARAMETER", "unused")
+    @GameActionReceiver
+    fun onChatReceived(message: ChatMessage, sender: String) {
+        BoardGameApplication.runOnGUIThread {
+
+        }
+    }
+
 
     private fun disconnectAndError(message: Any) {
         networkService.disconnect()
