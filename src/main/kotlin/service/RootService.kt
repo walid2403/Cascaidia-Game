@@ -2,6 +2,7 @@ package service
 
 import entity.*
 import service.bot.Bot
+import service.network.NetworkService
 
 
 /**
@@ -16,6 +17,7 @@ class RootService {
     val gameService = GameService(this)
     val playerActionService = PlayerActionService(this)
     val bot = Bot(this)
+    val networkService = NetworkService(this)
 
     var currentGame : CascadiaGame ?= null
     val history = CascadiaGames()
