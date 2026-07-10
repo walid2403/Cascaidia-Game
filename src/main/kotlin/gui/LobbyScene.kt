@@ -827,6 +827,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
                             }
                             onMouseClicked = {
                                 if(checkStartReady()) {
+                                    println("startGame called on")
                                     rootService.gameService.startNewGame(getFinalPlayers(), getFinalScoreCards())
                                     //app.hideMenuScene()
                                 }
