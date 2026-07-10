@@ -14,6 +14,9 @@ class BotLocaleOptimum(private val rootService: RootService) {
     private val directionY = intArrayOf(-1, -1, 0, 1, 1, 0)
     private val directionZ = intArrayOf(1, 0, -1, -1, 0, 1)
 
+    /** this plays one bot turn: handles overpopulation, then picks the best scoring
+     * option
+     */
     fun makeTurn(){
         val currentGame= rootService.currentGame
         checkNotNull(currentGame){"no current game"}
