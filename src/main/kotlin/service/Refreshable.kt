@@ -1,5 +1,8 @@
 package service
 
+import entity.Tile
+import entity.WildlifeToken
+
 /**
  * This interface provides a mechanism for the service layer classes to communicate
  * (usually to the GUI classes) that certain changes have been made to the entity
@@ -140,4 +143,7 @@ interface Refreshable {
      * Perform refreshes necessary after a nature token has been used
      */
     fun refreshAfterSelectTile(tileIndex: Int) {}
+
+    fun refreshAfterBotTurn(coordinatesTile: Triple<Int, Int, Int>,
+                            coordinatesWildlife: Triple<Int?, Int?, Int?>) {}
 }

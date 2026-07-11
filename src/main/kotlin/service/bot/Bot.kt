@@ -7,7 +7,15 @@ import kotlin.random.Random
 /**
  * Eine Klasse, in der alle Aufrufe der Bot Methoden gebündelt sind
  */
-class Bot (private val rootService: RootService) {
+class Bot (private val rootService: RootService) : AbstractRefreshingService() {
+
+    private var coordinatesTile: Triple<Int?, Int?, Int?> = Triple(null, null, null)
+    private var coordinatesWildlifeToken: Triple<Int?, Int?, Int?> = Triple(null, null, null)
+
+    private fun resetCoordinates() {
+        coordinatesTile = Triple(null, null, null)
+        coordinatesWildlifeToken = Triple(null, null, null)
+    }
 
     /**
      * Die Schnittstelle für die GUI
@@ -17,6 +25,7 @@ class Bot (private val rootService: RootService) {
         require(playerType != PlayerType.NETWORK) { "Die Methode sollte nur für Bot Züge aufgerufen werden" }
         when (playerType) {
             PlayerType.EASY_BOT -> {
+                resetCoordinates()
                 randomBotTurn()
             }
 
@@ -55,7 +64,11 @@ class Bot (private val rootService: RootService) {
             newLegalTurns(legalTurns)
         }
 
-        rootService.gameService.changeTurn()
+        val coordinatesTileNotNull = Triple(requireNotNull(coordinatesTile.first),
+            requireNotNull(coordinatesTile.second), requireNotNull(coordinatesTile.third))
+        onAllRefreshables { refreshAfterBotTurn(coordinatesTileNotNull, coordinatesWildlifeToken) }
+
+        //rootService.gameService.changeTurn()
     }
 
     private fun newLegalTurns(legalTurns: MutableList<TurnOptions>) {
@@ -143,6 +156,7 @@ class Bot (private val rootService: RootService) {
             }
         }
         val position = Random.nextInt(possiblePositions.size)
+        coordinatesTile = possiblePositions[position]
         rootService.playerActionService.placeTile(possiblePositions[position])
     }
 
@@ -160,6 +174,7 @@ class Bot (private val rootService: RootService) {
             return
         }
         val position = Random.nextInt(possiblePositions.size)
+        coordinatesWildlifeToken = possiblePositions[position]
         rootService.playerActionService.placeWildlife(possiblePositions[position])
     }
 

@@ -50,7 +50,7 @@ class PauseMenuScene (private val app: SopraApplication, private val rootService
         text = "Animations Enabled",
         alignment = Alignment.CENTER_LEFT,
         font = Font(38.0),
-        isChecked = true
+        isChecked = false
     ).apply {
         onCheckedChanged = {
             app.gameScene.animationsEnabled = isChecked

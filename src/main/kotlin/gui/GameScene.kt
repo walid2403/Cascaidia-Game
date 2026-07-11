@@ -71,7 +71,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private var botRotation = 0
 
     private var allButtonsAllowed = true
-    var animationsEnabled = true
+    var animationsEnabled = false
     private var isPlayerHuman = true
     private var animationSpeed = 1.0
 
@@ -158,7 +158,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                     scaleDownOtherAnimals(-1)
                     scaleDownOtherTiles(-1)
                     rootService.playerActionService.changeWildlife(listOf(0, 1, 2, 3).filter { changeAnimalsArray[it] })
-                    println("test button")
+                    //println("test button")
                     enableShopOnclick()
                     customChoiceButton.isDisabled = false
                     enableCurrentPlayerTilesOnClick()
@@ -381,7 +381,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     ).apply {
         isVisible = false
         onMouseClicked = {
-            println("on Click Test ")
+            //println("on Click Test ")
             val s = ((selectedGridX!! + selectedGridY!!) * (-1))
             rootService.playerActionService.placeTile(Triple(s, selectedGridY!!, selectedGridX!!))
         }
@@ -822,8 +822,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     private fun showOtherPlayer(playerID: Int) {
         val coordinates = getCameraCoordinates(playerID)
-        println(playerID.toString())
-        println(coordinates.toString())
+        //println(playerID.toString())
+        //println(coordinates.toString())
         cameraPane.pan(x = coordinates.first, y = coordinates.second, zoom = 4.32, smooth = animationsEnabled)
         zoomFactor = 4.32
     }
@@ -1129,7 +1129,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             tileMap.add(tile to hexagon)
         }
         tileMap.entries.forEach {
-           entry -> println("value: ${entry.first.id}, coordinates: ${entry.second}")
+           //entry -> println("value: ${entry.first.id}, coordinates: ${entry.second}")
         }
     }
 
@@ -1149,7 +1149,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         } else if(game.gameState == GameState.PLAYED_TILE) {
             val tileObject = tileMap.backward(tile)
             if(game.choices.elementAt(game.selectedChoice.second).second in tileObject.possibles) {
-                println("place wildlife soll aufgerufen werden")
+                //println("place wildlife soll aufgerufen werden")
 
                 val currentArea =
                     listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(getPlayerId())
@@ -1177,9 +1177,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         listOf(nameOneSide, nameTwoSide, nameThreeSide, nameFourSide, playerName).forEach { it.text = "" }
         listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).forEach { it.visual = Visual.EMPTY }
         listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).forEach { it.visual = Visual.EMPTY }
-        listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).forEach { it.clear() }
         listOf(natureTokenCountOneSide, natureTokenCountTwoSide, natureTokenCountThreeSide, natureTokenCountFourSide).
         forEach { it.text = "0" }
+        listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).forEach {
+            it.clear()
+            it.scale(1.0)
+        }
 
         selectAnimal = -1
         selectTile = -1
@@ -1192,7 +1195,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         botRotation = 0
 
         allButtonsAllowed = true
-        animationsEnabled = true
+        animationsEnabled = false
         isPlayerHuman = true
         animationSpeed = 1.0
 
@@ -1259,9 +1262,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         adjustAreas()
         if(isHuman()) {
-            unlock()
+            //unlock()
         } else {
-            lock()
+            //lock()
             rootService.bot.makeTurn(game.playerQueue.peek().type)
         }
     }
@@ -1329,7 +1332,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 checkNotNull(tile)
                 var hexView = tileMap.forward(tile)
                 grid[0,0] = hexView
-                println("current Index: $index")
+                //println("current Index: $index")
                 addGreyHexagon(hexView, index)
 
                 tile = game.playerQueue.elementAt(index).board[Triple(0,1,-1)]
@@ -1518,6 +1521,108 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
+    override fun refreshAfterBotTurn(coordinatesTile: Triple<Int, Int, Int>, coordinatesWildlife: Triple<Int?, Int?, Int?>) {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        val playerID = getPlayerId()
+        val currentNatureTokenCount = listOf(natureTokenCountOneSide, natureTokenCountTwoSide,
+            natureTokenCountThreeSide, natureTokenCountFourSide).elementAt(playerID)
+        selectTile = game.selectedChoice.first
+        selectAnimal = game.selectedChoice.second
+
+        tileShop.elementAt(selectTile).isVisible = true
+        animalShop.elementAt(selectAnimal).isVisible = true
+
+        println("Start of Bot Turn '"+game.playerQueue.peek().name+"' Turn")
+        println("Selected Tile (ID): "+game.selectedChoice.first.toString())
+        println("Selected Animal (ID): "+game.selectedChoice.second.toString())
+
+        customChoiceActive = if(selectAnimal != selectTile) true else false
+        if(customChoiceActive) {
+            customChoiceButton.visual = ColorVisual(256, 181, 0).apply {
+                style.borderRadius = BorderRadius(10)
+            }
+            customChoiceButton.font = Font(size = 16, color = Color(0, 0, 0))
+        }
+
+        //Wenn die Scale Animationen nicht hinterherkommen schmiert BGW ab und damit dass Spiel
+        //also lieber nicht anzeigen lassen was ausgewählt ist, anstatt dass das Spiel crashed
+
+        //scaleTile(true, tileShop.elementAt(game.selectedChoice.first))
+        //scaleAnimal(true, tileShop.elementAt(game.selectedChoice.second))
+
+        playAnimation(
+            DelayAnimation(duration = (2000 / animationSpeed).toInt()).apply {
+                onFinished = {
+                    placeTileBot(coordinatesTile, tileShop.elementAt(game.selectedChoice.first))
+                    playAnimation(
+                        DelayAnimation(duration = (2000 / animationSpeed).toInt()).apply {
+                            onFinished = {
+                                if(coordinatesWildlife.third != null) {
+                                    val coordinatesNotNull = Triple(requireNotNull(coordinatesWildlife.first),
+                                        requireNotNull(coordinatesWildlife.second),
+                                        requireNotNull(coordinatesWildlife.third))
+                                    placeWildLifeBot(coordinatesNotNull)
+                                    currentNatureTokenCount.text = game.playerQueue.peek().natureTokens.toString()
+                                } else {
+                                    println("Reject Wildlife")
+                                }
+                                playAnimation(
+                                    DelayAnimation(duration = (2000 / animationSpeed).toInt()).apply {
+                                        onFinished = {
+                                            println("End Bot '"+game.playerQueue.peek().name+"' Turn")
+                                            println("-----------------------------")
+                                            rootService.gameService.changeTurn()
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+        )
+    }
+
+    private fun placeTileBot(index: Triple<Int, Int, Int>, chosenTile: Label) {
+        println("Place Tile at: "+index.third.toString()+", "+index.second.toString())
+
+        val game = rootService.currentGame
+        checkNotNull(game)
+        val playerID = getPlayerId()
+        val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(playerID)
+
+        val x = index.third
+        val y = index.second
+        val greyTile = currentArea[x,y]
+        checkNotNull(greyTile)
+
+        greyTile.visual = chosenTile.visual
+        greyTile.rotation = 60.0 * requireNotNull(game.playerQueue.peek().board[Triple(((x + y)*(-1)), y, x)]?.rotation)
+        chosenTile.isVisible = false
+        tileMap.add(game.choices[game.selectedChoice.first].first to greyTile)
+        greyTile.choiceHex = false
+        greyTile.isVisible = true
+    }
+
+    private fun placeWildLifeBot(index: Triple<Int, Int, Int>) {
+        println("Place Wildlife at: "+index.third.toString()+", "+index.second.toString())
+
+        val game = rootService.currentGame
+        checkNotNull(game)
+        val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(getPlayerId())
+
+        val tile = currentArea[index.third, index.second]
+        checkNotNull(tile)
+        val newVisual = getTileWithAnimal(tileMap.backward(tile))
+        tile.visual = newVisual
+        tile.isDisabled = true
+
+        animalShop[game.selectedChoice.second].visual = Visual.EMPTY
+
+        updateNatureTokenCount()
+    }
+
     override fun refreshAfterChangeTurn(lastTurn: Boolean) {
         val game = rootService.currentGame
         checkNotNull(game)
@@ -1541,9 +1646,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         zoomOnNextPlayer()
         changeGreyVisibility(true, player)
 
-        println("player ${game.playerQueue.peek().name} has ${game.playerQueue.peek().natureTokens} nature tokens")
+        //println("player ${game.playerQueue.peek().name} has ${game.playerQueue.peek().natureTokens} nature tokens")
         customChoiceButton.isDisabled = game.playerQueue.peek().natureTokens == 0
-        println("custom Choice disabled: ${customChoiceButton.isDisabled}")
+        //println("custom Choice disabled: ${customChoiceButton.isDisabled}")
 
         enableShopButtons()
         enableShopOnclick()
@@ -1573,14 +1678,16 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
         if(isHuman()) {
-            unlock()
+            //unlock()
         } else {
             disableAllForNetworkBotTurn()
-            lock()
+            //lock()
             rootService.bot.makeTurn(game.playerQueue.peek().type)
         }
 
         if(rootService.currentGame?.isLocal == false) { disableOnlineGameFeatures() }
+
+
     }
 
     /**
@@ -1625,7 +1732,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 ).apply {
                     onFinished = {
                         label.isVisible = true
-                        println("label was moved")
+                        //println("label was moved")
                     }
                 }
             )
@@ -1776,16 +1883,16 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private fun addGreyHexagon(tileView: HexagonViewExtended, playerIndex: Int = 0) {
         val game = rootService.currentGame
         checkNotNull(game)
-        println("index in addHexagons: $playerIndex")
+        //println("index in addHexagons: $playerIndex")
 
         val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(player)
-        println("area selected")
+        //println("area selected")
 
         val nbhs = listOf(Pair(1, -1), Pair(1, 0), Pair(0, 1), Pair(-1, 1), Pair(-1, 0), Pair(0, -1))
 
         val tile = tileMap.backward(tileView)
         checkNotNull(tile)
-        println("tile being processed: ${tile.id}")
+        //println("tile being processed: ${tile.id}")
         val tilePos = game.playerQueue.elementAt(playerIndex).board.entries.find { it.value == tile }?.key
         checkNotNull(tilePos)
         val tileViewPos = Pair(tilePos.third, tilePos.second)
@@ -1965,7 +2072,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             checkNotNull(x)
             checkNotNull(y)
             val greyTile = currentArea[x, y]
-            println("X: $selectedGridX, Y: $selectedGridY, Coordinates: $coordinates")
+            //println("X: $selectedGridX, Y: $selectedGridY, Coordinates: $coordinates")
             checkNotNull(greyTile)
 
             greyTile.visual = chosenTile.visual
