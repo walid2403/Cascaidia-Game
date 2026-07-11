@@ -1,5 +1,6 @@
 package gui
 
+import entity.PlayerType
 import service.Refreshable
 import service.RootService
 import tools.aqua.bgw.animation.DelayAnimation
@@ -127,7 +128,7 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
             } else if(lobbyCodeInput.text.isBlank()) {
                 showWarning("You must enter a lobby code to enter a lobby.")
             } else {
-                //TODO("über das Network der Lobby joinen")
+                rootService.networkService.joinGame(nameInput.text, getPlayerType(playerType), lobbyCodeInput.text)
             }
         }
     }
@@ -221,6 +222,15 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
         return newType
     }
 
+    private fun getPlayerType(playerTypeInt: Int): PlayerType {
+        return when (playerTypeInt) {
+            0 -> PlayerType.HUMAN
+            1 -> PlayerType.EASY_BOT
+            2 -> PlayerType.HARD_BOT
+            else -> throw IllegalArgumentException("Only numbers between 0 and 3 are valid")
+        }
+    }
+
     /**
      * This function sets the text of [warning] to [text] and makes [warning] visible for 3 seconds
      */
@@ -235,7 +245,7 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
         )
     }
 
-    override fun refreshAfterGameConfigUpdate(playerList: List<String>, scoringCards: List<Boolean?>) {
+    override fun refreshAfterJoinGame(lobbyCode: String) {
         app.showMenuScene(JoinOnlineLobbyScene(app,rootService, nameInput.text, playerType))
     }
 

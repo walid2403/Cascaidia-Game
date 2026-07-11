@@ -48,6 +48,8 @@ class CascadiaNetworkClient(
                 CreateGameResponseStatus.SUCCESS -> {
                     networkService.updateConnectionState(ConnectionState.WAITING_FOR_GUESTS)
                     sessionID = response.sessionID
+
+                    networkService.triggerRefresh("createGame")
                 }
                 else -> disconnectAndError(response.status)
             }
@@ -75,6 +77,8 @@ class CascadiaNetworkClient(
                     players.add(Pair(playerName, playerType!!))
                     sessionID = response.sessionID
                     networkService.updateConnectionState(ConnectionState.WAITING_FOR_INIT)
+
+                    networkService.triggerRefresh("joinGame")
                 }
                 else -> disconnectAndError(response.status)
             }

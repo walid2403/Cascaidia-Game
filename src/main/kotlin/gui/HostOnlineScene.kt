@@ -1,5 +1,6 @@
 package gui
 
+import entity.PlayerType
 import service.Refreshable
 import service.RootService
 import tools.aqua.bgw.components.uicomponents.Button
@@ -20,7 +21,7 @@ import tools.aqua.bgw.visual.Visual
  * @param app The [SopraApplication] of this game
  * @param rootService The [RootService] instance to access the other service methods and entity layer
  */
-class HostOnlineScene(private val app: SopraApplication,private val rootService: RootService) :
+class HostOnlineScene(private val app: SopraApplication, private val rootService: RootService) :
     MenuScene(1920, 1080), Refreshable  {
 
     private val sceneWidth = 1920
@@ -100,14 +101,14 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
         text = "Next",
         font = Font( size = 20,fontWeight = Font.FontWeight.BOLD)).apply {
         visual = ColorVisual(color = Color(0x99acff)).apply { style.borderRadius = BorderRadius(8) }
-        isDisabled = true
+        isDisabled = false
         onMouseClicked = {
             var name = nameInput.text
             if(name.isBlank()) {
                 warning.text = "Enter a name before opening the lobby."
                 warning.isVisible = true
             } else {
-                TODO("über Network die Lobby eröffnen")
+                rootService.networkService.hostGame(name, getPlayerType(playerType), lobbyInput.text)
             }
         }
     }
@@ -234,11 +235,21 @@ class HostOnlineScene(private val app: SopraApplication,private val rootService:
         return newType
     }
 
+    private fun getPlayerType(playerTypeInt: Int): PlayerType {
+        return when (playerTypeInt) {
+            0 -> PlayerType.HUMAN
+            1 -> PlayerType.EASY_BOT
+            2 -> PlayerType.HARD_BOT
+            else -> throw IllegalArgumentException("Only numbers between 0 and 3 are valid")
+        }
+    }
+
     override fun refreshAfterConnectionError(errorMessage: String) {
         warning.text = errorMessage
         warning.isVisible = true
     }
+
     override fun refreshAfterHostGame(lobbyCode: String) {
-        app.showMenuScene(HostOnlineLobbyScene(app,rootService, nameInput.text, playerType))
+        app.showMenuScene(HostOnlineLobbyScene(app, rootService, nameInput.text, playerType))
     }
 }

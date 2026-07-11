@@ -112,6 +112,11 @@ interface Refreshable {
     fun refreshAfterHostGame(lobbyCode: String) {}
 
     /**
+     * Perform refreshes necessary after a network game has been started
+     */
+    fun refreshAfterJoinGame(lobbyCode: String) {}
+
+    /**
      * Perform refreshes necessary after a chat message has been received
      */
     fun refreshAfterChatMessage(messageSender: String, message: String) {}

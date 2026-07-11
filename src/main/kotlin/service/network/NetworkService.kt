@@ -1,6 +1,7 @@
 package service.network
 
 import edu.udo.cs.sopra.ntf.*
+import entity.Player
 import entity.PlayerType
 import entity.WildlifeToken
 import service.AbstractRefreshingService
@@ -33,10 +34,13 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
      *
      * @throws IllegalStateException if already connected to another game or connection attempt fails
      */
-    fun hostGame(secret: String, name: String, sessionID: String?) {
-        if (!connect(secret, name)) {
+    fun hostGame(name: String, playerType: PlayerType, sessionID: String, secret: String = "wildlife") {
+        if (!connect(name, secret)) {
             error("Connection failed")
         }
+
+        client?.playerType = playerType
+
         updateConnectionState(ConnectionState.CONNECTED)
 
         if (sessionID.isNullOrBlank()) {
@@ -45,6 +49,23 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
             client?.createGame(gameID, sessionID, "Welcome!")
         }
         updateConnectionState(ConnectionState.WAITING_FOR_HOST_CONFIRMATION)
+    }
+
+    fun triggerRefresh(refresh: String) {
+        when (refresh) {
+            "createGame" -> {
+                val sessionID = client?.sessionID
+
+                checkNotNull(sessionID)
+                onAllRefreshables { refreshAfterHostGame(sessionID) }
+            }
+            "joinGame" -> {
+                val sessionID = client?.sessionID
+
+                checkNotNull(sessionID)
+                onAllRefreshables { refreshAfterJoinGame(sessionID) }
+            }
+        }
     }
 
     /**
@@ -70,10 +91,13 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
      *
      * @throws IllegalStateException if already connected to another game or connection attempt fails
      */
-    fun joinGame(name: String, sessionID: String, secret: String = "wildlife") {
-        if (!connect(secret, name)) {
+    fun joinGame(name: String, playerType: PlayerType, sessionID: String, secret: String = "wildlife") {
+        if (!connect(name, secret)) {
             error("Connection failed")
         }
+
+        client?.playerType = playerType
+
         updateConnectionState(ConnectionState.CONNECTED)
 
         client?.joinGame(sessionID, "Hello!")
