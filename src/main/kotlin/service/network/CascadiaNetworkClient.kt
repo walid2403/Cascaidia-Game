@@ -97,6 +97,8 @@ class CascadiaNetworkClient(
             { "not awaiting any guests."}
 
             players.add(Pair(notification.sender, PlayerType.NETWORK))
+
+            networkService.triggerRefresh("playerJoined")
         }
     }
 

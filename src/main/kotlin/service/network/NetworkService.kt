@@ -65,6 +65,13 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
                 checkNotNull(sessionID)
                 onAllRefreshables { refreshAfterJoinGame(sessionID) }
             }
+            "playerJoined" -> {
+                val playerName = client?.players?.last()?.first
+
+                checkNotNull(playerName)
+
+                onAllRefreshables { refreshAfterPlayerJoined(playerName) }
+            }
         }
     }
 
