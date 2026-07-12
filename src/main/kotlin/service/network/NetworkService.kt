@@ -80,11 +80,13 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
                 onAllRefreshables { refreshAfterGameConfigUpdate(playerNames, scoringCards) }
             }
             "playerJoined" -> {
-                val playerName = client?.players?.last()?.first
+                val playerNames = client?.players?.map {it.first}
+                checkNotNull(playerNames) { "After joining a game the names should not be empty" }
 
-                checkNotNull(playerName)
+                val scoringCards = client?.scoringCards?.toList()
+                checkNotNull(scoringCards)
 
-                onAllRefreshables { refreshAfterPlayerJoined(playerName) }
+                onAllRefreshables { refreshAfterGameConfigUpdate(playerNames, scoringCards) }
             }
         }
     }

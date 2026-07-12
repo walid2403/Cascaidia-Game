@@ -1110,6 +1110,9 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
                     if (players.size > 1) {
                         p2Input.text = players[1]
                         p2Icon.visual = getVisual(players[1])
+
+                        p2Icon.isVisible = true
+                        p2Input.isVisible = true
                         downButtonP1.isVisible = true
                     } else {
                         p2Icon.isVisible = false
@@ -1123,6 +1126,10 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
                         p3Input.text = players[2]
                         p3Icon.visual = getVisual(players[2])
                         downButtonP2.isVisible = true
+
+                        p3Icon.isVisible = true
+                        p3Input.isVisible = true
+
                     } else {
                         p3Icon.isVisible = false
                         p3Input.isVisible = false
@@ -1135,6 +1142,9 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
                         p4Input.text = players[3]
                         p4Icon.visual = getVisual(players[3])
                         downButtonP3.isVisible = true
+
+                        p4Icon.isVisible = true
+                        p4Input.isVisible = true
                     } else {
                         p4Icon.isVisible = false
                         p4Input.isVisible = false

@@ -50,6 +50,8 @@ class CascadiaNetworkClient(
                     networkService.updateConnectionState(ConnectionState.WAITING_FOR_GUESTS)
                     sessionID = response.sessionID
 
+                    players.add(Pair(playerName, playerType!!))
+
                     networkService.triggerRefresh("createGame")
                 }
                 else -> disconnectAndError(response.status)
@@ -87,8 +89,7 @@ class CascadiaNetworkClient(
     }
 
     /**
-     * Handle a [PlayerJoinedNotification] sent by the server. As War only supports two players,
-     * this will immediately start the hosted game (and send the init message to the opponent).
+     * Handle a [PlayerJoinedNotification] sent by the server.
      *
      * @throws IllegalStateException if not currently expecting any guests to join.
      */
