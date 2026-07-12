@@ -115,6 +115,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                     this.font = Font(size = 16, color = Color(0, 0, 0))
                     customChoiceActive = true
                     enableShopOnclick()
+
+                    rootService.networkService.sendUseNatureToken()
                 }
             }
         }
@@ -976,6 +978,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         } else {
             scaleTile(selectTile != -1, tile)
         }
+
+        rootService.networkService.sendSelectHabitatTile(index)
     }
 
     private fun chooseAnimal(index: Int, animal: Label) {
@@ -999,6 +1003,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 }
             }
         }
+
+        rootService.networkService.sendSelectWildlife(index)
     }
 
 //    private fun deactivateRotateButtons() {
@@ -1406,9 +1412,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     override fun refreshAfterChatMessage(messageSender: String, message: String) {
+        println("Sender: $messageSender, Message: $message")
         if(!chatOpened) chatButton.visual = ImageVisual("chat_icon_redDot.png")
         if(message.isNotBlank() && messageSender.isNotBlank()) {
-            chatView.items.add(0, messageSender+": "+message)
+            chatView.items.add(0, "$messageSender: $message")
         }
     }
 

@@ -266,9 +266,15 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         }
     }
 
-    fun sendPlace(habCoords: Pair<Int, Int>, tokenCoords: Pair<Int, Int>?, habRotation: Int) {
-        val message: PlaceMessage = PlaceMessage(
-            habCoords, tokenCoords, habRotation
+    fun sendPlace(habCoords: Triple<Int, Int, Int>, tokenCoords: Triple<Int, Int, Int>?, habRotation: Int) {
+        val wildlifeCoords = if (tokenCoords != null) {
+            Pair(tokenCoords.third, tokenCoords.second)
+        } else {
+            null
+        }
+
+        val message = PlaceMessage(
+            Pair(habCoords.third, habCoords.second), wildlifeCoords, habRotation
         )
 
         client?.sendGameActionMessage(message)
@@ -379,6 +385,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     }
 
     fun receiveChatMessage(message: ChatMessage, messageSender: String) {
+        println("Messenger: $messageSender, Message: ${message.message}")
         onAllRefreshables { refreshAfterChatMessage(messageSender, message.message) }
     }
 
