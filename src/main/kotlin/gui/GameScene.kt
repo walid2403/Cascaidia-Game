@@ -1801,12 +1801,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         //saveGameState()
 
 
-        if(isHuman()) {
-            //unlock()
-        } else {
+        if(!isHuman()) {
             disableAllForNetworkBotTurn()
-            //lock()
-            rootService.bot.makeTurn(game.playerQueue.peek().type)
+            if(game.playerQueue.peek().type == PlayerType.EASY_BOT ||
+                game.playerQueue.peek().type == PlayerType.HARD_BOT ) {
+                rootService.bot.makeTurn(game.playerQueue.peek().type)
+            }
         }
 
         updateRoundCounter()
