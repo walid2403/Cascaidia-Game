@@ -245,10 +245,9 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
 
     private val elk = Label(
         width = iconSize + 15, height = iconSize + 15,
-        posX = (paneWidth)/2 + 90 - (iconSize + 15)/2, posY = 30,
-        font = Font(size = 40)
+        posX = (paneWidth)/2 + 90 - (iconSize + 15)/2, posY = 30
     ).apply {
-        visual = ImageVisual("tokens/elk.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/elk.png")
         onMouseClicked = {
             showScoreCards(elkCardA, elkCardB)
         }
@@ -256,10 +255,9 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
 
      val hawk = Label(
         width = iconSize + 15, height = iconSize + 15,
-        posX = elk.posX - 2*iconDistance - 2*(iconSize + 15), posY = 30,
-        font = Font(size = 40)
+        posX = elk.posX - 2*iconDistance - 2*(iconSize + 15), posY = 30
     ).apply {
-        visual = ImageVisual("tokens/hawk.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/hawk.png")
         onMouseClicked = {
             showScoreCards(hawkCardA, hawkCardB)
         }
@@ -267,10 +265,9 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
 
     private val salmon = Label(
         width = iconSize + 15, height = iconSize + 15,
-        posX = elk.posX - iconDistance - (iconSize + 15), posY = 30,
-        font = Font(size = 40)
+        posX = elk.posX - iconDistance - (iconSize + 15), posY = 30
     ).apply {
-        visual = ImageVisual("tokens/salmon.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/salmon.png")
         onMouseClicked = {
             showScoreCards(salmonCardA, salmonCardB)
         }
@@ -278,9 +275,9 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
 
     private val fox = Label(
         width = iconSize + 15, height = iconSize + 15,
-        posX = elk.posX + iconDistance + iconSize + 15, posY = 30,        font = Font(size = 40)
+        posX = elk.posX + iconDistance + iconSize + 15, posY = 30
     ).apply {
-        visual = ImageVisual("tokens/fox.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/fox.png")
 
         onMouseClicked = {
             showScoreCards(foxCardA, foxCardB)
@@ -289,10 +286,9 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
 
     private val bear = Label(
         width = iconSize + 15, height = iconSize + 15,
-        posX = elk.posX + 2*iconDistance + 2*(iconSize + 15), posY = 30,
-        font = Font(size = 40)
+        posX = elk.posX + 2*iconDistance + 2*(iconSize + 15), posY = 30
     ).apply {
-        visual = ImageVisual("tokens/bear.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/bear.png")
         onMouseClicked = {
             showScoreCards(bearCardA, bearCardB)
         }

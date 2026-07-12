@@ -226,8 +226,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
         posX = (paneWidth)/2 + 90 - (iconSize + 15)/2,
         posY = 30,
         width = iconSize + 15,
-        height = iconSize + 15,
-        visual = ImageVisual("tokens/elk.png", iconSize, iconSize)
+        height = iconSize + 15
     ).apply {
         visual = ImageVisual("tokens/elk.png")
         onMouseClicked = {
@@ -239,8 +238,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
         posX = elkIcon.posX - 2*iconDistance - 2*(iconSize + 15),
         posY = 30,
         width = iconSize + 15,
-        height = iconSize + 15,
-        visual = ImageVisual("tokens/hawk.png", iconSize, iconSize)
+        height = iconSize + 15
     ).apply {
         visual = ImageVisual("tokens/hawk.png")
         onMouseClicked = {
@@ -252,9 +250,9 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
         posX = elkIcon.posX - iconDistance - (iconSize + 15),
         posY = 30,
         width = iconSize + 15,
-        height = iconSize + 15,
-        visual = ImageVisual("tokens/salmon.png", iconSize, iconSize)
+        height = iconSize + 15
     ).apply {
+        visual = ImageVisual("tokens/salmon.png")
         onMouseClicked = {
             showScoreCards(salmonCardA, salmonCardB)
         }
@@ -264,8 +262,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
         posX = elkIcon.posX + iconDistance + iconSize + 15,
         posY = 30,
         width = iconSize + 15,
-        height = iconSize + 15,
-        visual = ImageVisual("tokens/fox.png", iconSize, iconSize)
+        height = iconSize + 15
     ).apply {
         visual = ImageVisual("tokens/fox.png")
         onMouseClicked = {
@@ -277,8 +274,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
         posX = elkIcon.posX + 2*iconDistance + 2*(iconSize + 15),
         posY = 30,
         width = iconSize + 15,
-        height = iconSize + 15,
-        visual = ImageVisual("tokens/bear.png", iconSize, iconSize)
+        height = iconSize + 15
     ).apply {
         visual = ImageVisual("tokens/bear.png")
         onMouseClicked = {
