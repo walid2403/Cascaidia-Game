@@ -88,7 +88,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private var playerListAtStart = mutableListOf<Player>()
 
     //Hintergrundbild
-    private val logo = Label(posX = 0,posY = 0,width = 1920,height = 1080,visual = ImageVisual("backgrounds/CascadiaHintergrund2.png"))
+    private val logo = Label(posX = 0,posY = 0,width = 1920,height = 1080,visual = ImageVisual("backgrounds/CascadiaHintergrund.png"))
 
     //Graue Box um Auswahl
     private val grayBox = Label(width = 950, height = 300, posX = 485, posY = -40).apply {
