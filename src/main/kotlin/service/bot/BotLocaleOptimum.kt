@@ -73,7 +73,7 @@ class BotLocaleOptimum(private val rootService: RootService) {
         }
         return freePlaces
     }
-    fun rotatedTile(tile: Tile, steps: Int): Tile{
+    private fun rotatedTile(tile: Tile, steps: Int): Tile{
         val copy= Tile(tile)
         var numOfSteps = steps%6
         if(numOfSteps<0){
@@ -150,45 +150,44 @@ class BotLocaleOptimum(private val rootService: RootService) {
             when(animal){
                 WildlifeToken.BEAR->{
                     if(isTypeA){
-                        if(sameNeighbours==1) points +=25
-                        else if(sameNeighbours==0) points +=5
-                        else points -=50
+                        if(sameNeighbours==1) points +=4
+                        else points +=0
                     }else{
-                        if(sameNeighbours==2) points +=17
-                        else if (sameNeighbours==1) points +=10
-                        else if(sameNeighbours==0) points +=5
-                        else points -=50
+                        if(sameNeighbours==2) points +=10
+                        else points +=0
                     }
                 }
 
                 WildlifeToken.ELK->{
                     if(isTypeA){
-                        if (sameNeighbours==0) points +=5
-                        else if (sameNeighbours==1) points +=15
-                        else if (sameNeighbours==2) points-=5
-                        else points -=50
+                        if (sameNeighbours==0) points +=0
+                        else if (sameNeighbours==1) points +=2
+                        else points +=5
                     }else{
-                        points+= sameNeighbours*10
+                        if (sameNeighbours==0) points +=2
+                        else if (sameNeighbours==1) points +=5
+                        else if (sameNeighbours==2) points +=9
+                        else points+= 19
                     }
                 }
 
                 WildlifeToken.SALMON->{
                     if (isTypeA){
-                        if(sameNeighbours==1) points+=25
-                        else if (sameNeighbours==2) points +=10
-                        else if (sameNeighbours==0) points +=5
-                        else points-=50
+                        if(sameNeighbours==1) points+=5
+                        else if (sameNeighbours==2) points +=8
+                        else if (sameNeighbours==0) points +=2
+                        else points+=0
                     }else{
-                        if(sameNeighbours==1)points +=20
-                        else if(sameNeighbours==2)points+=5
-                        else if(sameNeighbours==0) points +=5
-                        else points-=50
+                        if(sameNeighbours==1)points +=4
+                        else if(sameNeighbours==2)points+=9
+                        else if(sameNeighbours==0) points +=2
+                        else points+=0
                     }
                 }
 
                 WildlifeToken.HAWK->{
-                    if(haveSameNeighbours)points-=50
-                    else points+=20
+                    if(!haveSameNeighbours)points+=2
+                    else points+=0
                 }
 
                 WildlifeToken.FOX->{
@@ -201,7 +200,7 @@ class BotLocaleOptimum(private val rootService: RootService) {
                     }
                     if(isTypeA){
                         val differentAnimals=neighbourAnimals.distinct()
-                        points+= differentAnimals.size*5
+                        points+= differentAnimals.size
                     }else{
                         var numCouple=0
                         val alreadyCount=mutableListOf<WildlifeToken>()
@@ -213,7 +212,7 @@ class BotLocaleOptimum(private val rootService: RootService) {
                             }
                             alreadyCount.add(oneAnimal)
                         }
-                        points+=numCouple*10
+                        points+=numCouple*3
                     }
                 }
             }
@@ -309,10 +308,7 @@ class BotLocaleOptimum(private val rootService: RootService) {
                 return
             }
         }
-        //rootService.playerActionService.selectColumn(bestIndex)
-        println("Selecting column $bestIndex")
         rootService.playerActionService.selectColumn(bestIndex)
-        println("Selected choice afterwards: ${currentGame.selectedChoice}")
     }
     private fun placeBestPlace(currentGame: CascadiaGame, player: Player){
         val chosenTile= currentGame.choices[currentGame.selectedChoice.first].first
