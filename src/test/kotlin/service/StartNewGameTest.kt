@@ -4,6 +4,7 @@ package service
 
 import entity.GameState
 import entity.PlayerType
+import entity.WildlifeToken
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.*
 
@@ -14,6 +15,7 @@ class StartNewGameTest {
 
     private lateinit var rootService: RootService
     private lateinit var gameService: GameService
+    private var refreshWasCalled = false
 
     /**
      * Initialize service to set up the test environment. This function is executed before every test.
@@ -22,7 +24,17 @@ class StartNewGameTest {
     fun setUp() {
         rootService = RootService()
         gameService = rootService.gameService
-    }
+        refreshWasCalled = false
+
+        val refreshable = object : Refreshable {
+            override fun refreshAfterStartGame(){
+                    refreshWasCalled = true
+                }
+            }
+        rootService.addRefreshable(refreshable)
+        }
+
+
     private fun getValidPlayers() = listOf(Pair("Mert", PlayerType.HUMAN), Pair("Noman", PlayerType.EASY_BOT))
     private fun getValidScoringCards() = listOf(true, false, true, false, true)
 
@@ -43,10 +55,10 @@ class StartNewGameTest {
         assertEquals(4, game.choices.size,
             "There should be 4 wildlife tokens in the stack")
         assertEquals(39, game.tileStack.size,
-            "There should be 39 habitattiles tokens in the supply")
+            "There should be 39 habitat tiles tokens in the supply")
 
         assertTrue(game.wildlifeTokens.size == 96){
-            "wildlifetoken sollten 96 sein, da 4 im Shop sind"
+            "wildlife token sollten 96 sein, da 4 im Shop sind"
         }
 
         for(player in game.playerQueue){
@@ -62,6 +74,11 @@ class StartNewGameTest {
                 player.board.containsKey(Triple(0,1,-1))
             }
         }
+
+        assertTrue(refreshWasCalled, "Refreshable sollte aufgerufen worden sein")
+        assertEquals(1, rootService.history.prevMoves.size,
+            "Historie sollte genau den Startzustand enthalten")
+        assertTrue(rootService.history.undoneMoves.isEmpty(), "Redo-Historie muss leer sein")
     }
 
     /**
@@ -141,5 +158,82 @@ class StartNewGameTest {
                 scoringCards = listOf(true, false, true, false, true, false),
             )
         }
+    }
+
+    /**
+     * Testet, dass eine Exception geworfen wird, wenn ein Spielername leer ist
+     * oder nur aus Leerzeichen besteht.
+     */
+    @Test
+    fun `test throws exception if player name is blank`() {
+        assertFailsWith<IllegalArgumentException>("Sollte bei leerem Namen fehlschlagen") {
+            gameService.startNewGame(
+                listOf(Pair("", PlayerType.HUMAN), Pair("Noman", PlayerType.EASY_BOT)),
+                getValidScoringCards()
+            )
+        }
+
+        assertFailsWith<IllegalArgumentException>("Sollte bei Namen nur aus Leerzeichen fehlschlagen") {
+            gameService.startNewGame(
+                listOf(Pair("   ", PlayerType.HUMAN), Pair("Noman", PlayerType.EASY_BOT)),
+                getValidScoringCards()
+            )
+        }
+    }
+
+    /**
+     * Tests if the game is initialized correctly when a network player is present.
+     */
+    @Test
+    fun `start network game sets isLocal to false`() {
+        gameService.startNewGame(
+            listOf(Pair("Mert", PlayerType.HUMAN), Pair("NetPlayer", PlayerType.NETWORK)),
+            getValidScoringCards()
+        )
+
+        val game = rootService.currentGame
+        assertNotNull(game)
+        assertFalse(game.isLocal, "Das Spiel sollte als Netzwerkspiel (isLocal = false) markiert sein")
+    }
+
+    /**
+     * Tests if the game is initialized correctly with optional parameters.
+     */
+    @Test
+    fun `start game with optional parameters`() {
+        val customWildlifeBag = listOf(
+            WildlifeToken.HAWK,
+            WildlifeToken.BEAR,
+            WildlifeToken.ELK,
+            WildlifeToken.SALMON,
+            WildlifeToken.FOX,
+            WildlifeToken.HAWK,
+            WildlifeToken.BEAR,
+            WildlifeToken.ELK,
+            WildlifeToken.SALMON,
+            WildlifeToken.FOX
+        )
+        val customTileIDs = List(10) { 1 } // Nutzt die Zeile mit Index 1 aus tiles.csv
+
+        // 10 führt zum Start-Board Index 0, 20 führt zum Start-Board Index 1.
+        val customStartingTiles = listOf(10, 20)
+
+        gameService.startNewGame(
+            getValidPlayers(),
+            getValidScoringCards(),
+            customStartingTiles,
+            customTileIDs,
+            customWildlifeBag
+        )
+
+        val game = rootService.currentGame
+        assertNotNull(game)
+
+        // sollten genau 6 von den 10 übergebenen übrig bleiben.
+        assertEquals(6, game.wildlifeTokens.size,
+            "Der übergebene Tierbeutel wurde überschrieben (vermutlich Überpopulation!)")
+
+        assertEquals(6, game.tileStack.size,
+            "Die übergebenen TileIDs wurden nicht korrekt verwendet")
     }
 }
