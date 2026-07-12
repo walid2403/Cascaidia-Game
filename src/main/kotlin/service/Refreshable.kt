@@ -66,9 +66,10 @@ interface Refreshable {
     /**
      * Perform refreshes necessary after a tile has been rotated
      *
-     * @param right Has the tile been rotated in the right direction? ([Boolean])
+     * @param amount How often should the tile be rotated, negative values mean a rotation in the left direction,
+     * positive values a rotation in the right direction ([Int])
      */
-    fun refreshAfterRotate(right: Boolean) {}
+    fun refreshAfterRotate(amount: Int) {}
 
     /**
      * Perform refreshes necessary after a tile has been placed
@@ -87,5 +88,46 @@ interface Refreshable {
     /**
      * Perform refreshes necessary after the game has ended
      */
-    fun refreshAfterEndGame(scores: List<List<Int>>) {}
+    fun refreshAfterEndGame(scores: List<Pair<String,List<Int>>>) {}
+
+    /**
+     * Perform refreshes necessary after the game has been saved
+     */
+    fun refreshAfterSaveGame() {}
+
+    // Network specific refreshes:
+    /**
+     * Perform refreshes necessary after a player couldn't join a game
+     */
+    fun refreshAfterConnectionError(errorMessage: String) {}
+
+    /**
+     * Perform refreshes necessary after the game config has been updated
+     */
+    fun refreshAfterGameConfigUpdate(playerList: List<String>, scoringCards: List<Boolean?>) {}
+
+    /**
+     * Perform refreshes necessary after a network game has been started
+     */
+    fun refreshAfterHostGame(lobbyCode: String) {}
+
+    /**
+     * Perform refreshes necessary after a chat message has been received
+     */
+    fun refreshAfterChatMessage(messageSender: String, message: String) {}
+
+    /**
+     * Perform refreshes necessary after a nature token has been used
+     */
+    fun refreshAfterUnlockSelection() {}
+
+    /**
+     * Perform refreshes necessary after a nature token has been used
+     */
+    fun refreshAfterSelectWildlife(wildlifeIndex: Int) {}
+
+    /**
+     * Perform refreshes necessary after a nature token has been used
+     */
+    fun refreshAfterSelectTile(tileIndex: Int) {}
 }
