@@ -201,7 +201,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
         val message = GameInitMessage(
             tileList, reorderList.map { scoringCards[it] },
-            game.playerQueue.map { NetPlayer(it.name, it.board[Triple(0,0,0)]?.id ?: 0) }, wildlifeList
+            game.playerQueue.map { NetPlayer(it.name, (it.board[Triple(0,0,0)]?.id ?: 0) / 10) }, wildlifeList
         )
 
         if (game.playerQueue.peek().type == PlayerType.NETWORK) updateConnectionState(ConnectionState.WAITING_FOR_PLAYER_TURN)
@@ -385,6 +385,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     }
 
     fun receiveChatMessage(message: ChatMessage, messageSender: String) {
+        println("Messenger: $messageSender, Message: ${message.message}")
         onAllRefreshables { refreshAfterChatMessage(messageSender, message.message) }
     }
 
