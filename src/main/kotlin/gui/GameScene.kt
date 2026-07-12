@@ -679,7 +679,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         text = ">", font = Font(size = 30)).apply {
             onMouseClicked = {
                 rootService.networkService.sendChatMessage(messageInput.text)
-                refreshAfterChatMessage(rootService.currentGame?.playerQueue?.peek()?.name.toString(),
+                refreshAfterChatMessage("Me",
                         messageInput.text)
                 messageInput.text = ""
             }
