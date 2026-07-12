@@ -438,7 +438,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(10) }
         onMouseClicked = {
-            rootService.playerActionService.undo()
+            if(rootService.history.prevMoves.size > 1) {
+                rootService.playerActionService.undo()
+            }
         }
     }
     private val redo = Button(width = 130, height = 60, posX = 190, posY = 985, text = "Redo",
@@ -946,6 +948,21 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         redo.isDisabled = true
         undo.isDisabled = true
         endTurn.isDisabled = true
+        greyAllButtons()
+    }
+
+    private fun greyAllButtons() {
+        listOf(redo, undo, endTurn, customChoiceButton, changeWildlifeButton, clearOverpopulationButton).forEach {
+            it.visual = ColorVisual(0,0, 0, 127).apply { style.borderRadius = BorderRadius(10) }
+            it.font = Font(size = 16, color = Color(255, 255, 255, 127))
+        }
+    }
+
+    private fun makeButtonsBlack() {
+        listOf(undo, endTurn, customChoiceButton, changeWildlifeButton).forEach {
+            it.visual = ColorVisual(0,0, 0, 256).apply { style.borderRadius = BorderRadius(10) }
+            it.font = Font(size = 16, color = Color(255, 255, 255, 256))
+        }
     }
 
     private fun disableOnlineGameFeatures() {
@@ -1005,7 +1022,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     private fun enableShopButtons() {
-        listOf(customChoiceButton, changeWildlifeButton, clearOverpopulationButton).forEach { it.isDisabled = false }
+        listOf(customChoiceButton, changeWildlifeButton).forEach { it.isDisabled = false }
     }
 
     private fun disableGreyHexagonOnClicks() {
@@ -1231,6 +1248,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         resetGame()
 
+        makeButtonsBlack()
         createTileView()
         initializeShop()
 
@@ -1539,10 +1557,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         customChoiceActive = if(selectAnimal != selectTile) true else false
         if(customChoiceActive) {
-            customChoiceButton.visual = ColorVisual(256, 181, 0).apply {
+            customChoiceButton.visual = ColorVisual(256, 181, 127).apply {
                 style.borderRadius = BorderRadius(10)
             }
-            customChoiceButton.font = Font(size = 16, color = Color(0, 0, 0))
+            customChoiceButton.font = Font(size = 16, color = Color(0, 0, 0, 127))
         }
 
         //Wenn die Scale Animationen nicht hinterherkommen schmiert BGW ab und damit dass Spiel
@@ -1631,6 +1649,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         undo.isDisabled = false
         endTurn.isDisabled = false
         app.pauseMenu.saveAndExitButton.isDisabled = false
+        makeButtonsBlack()
 
         botRotation = 0
         disableAllTilesOnclick()
@@ -1686,8 +1705,18 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
 
         if(rootService.currentGame?.isLocal == false) { disableOnlineGameFeatures() }
+    }
 
-
+    private fun checkRedoButton() {
+        if(rootService.history.undoneMoves.isNotEmpty()) {
+            redo.isDisabled = false
+            redo.visual = ColorVisual(0,0,0,256).apply { style.borderRadius = BorderRadius(10) }
+            redo.font = Font(size = 16, color = Color(255, 255, 255, 256))
+        } else {
+            redo.isDisabled = true
+            redo.visual = ColorVisual(0,0,0,127).apply { style.borderRadius = BorderRadius(10) }
+            redo.font = Font(size = 16, color = Color(255, 255, 255, 127))
+        }
     }
 
     /**
@@ -1955,12 +1984,14 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         if (game.playerQueue.peek().natureTokens < 1) return
 
-        changeWildlifeButton.visual = ColorVisual(0,0,0,255).apply {
-            style.borderRadius = BorderRadius(10)
-        }
-        changeWildlifeButton.font = Font(size = 16, color = Color(255, 255, 255, 255))
+        if(game.playerQueue.peek().type == PlayerType.HUMAN) {
+            changeWildlifeButton.visual = ColorVisual(0, 0, 0, 255).apply {
+                style.borderRadius = BorderRadius(10)
+            }
+            changeWildlifeButton.font = Font(size = 16, color = Color(255, 255, 255, 255))
 
-        changeWildlifeButton.isDisabled = false
+            changeWildlifeButton.isDisabled = false
+        }
     }
 
     private fun checkExterminateButton() {
@@ -1977,12 +2008,14 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         if (choices.count {it == choices[0]} != 3 && choices.count {it == choices[1]} != 3) return
 
-        clearOverpopulationButton.visual = ColorVisual(0,0,0,255).apply {
-            style.borderRadius = BorderRadius(10)
-        }
-        clearOverpopulationButton.font = Font(size = 16, color = Color(255, 255, 255, 255))
+        if(game.playerQueue.peek().type == PlayerType.HUMAN) {
+            clearOverpopulationButton.visual = ColorVisual(0, 0, 0, 255).apply {
+                style.borderRadius = BorderRadius(10)
+            }
+            clearOverpopulationButton.font = Font(size = 16, color = Color(255, 255, 255, 255))
 
-        clearOverpopulationButton.isDisabled = false
+            clearOverpopulationButton.isDisabled = false
+        }
     }
 
 
@@ -1999,6 +2032,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     override fun refreshAfterUndo() {
         createGame()
+        checkRedoButton()
     }
 
     override fun refreshAfterSelectColumn(index: Int) {
@@ -2017,6 +2051,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     override fun refreshAfterRedo() {
         refreshAfterStartGame()
+        checkRedoButton()
     }
 
 
@@ -2131,10 +2166,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     override fun refreshAfterUnlockSelection() {
-        customChoiceButton.visual = ColorVisual(256, 181, 0).apply {
+        customChoiceButton.visual = ColorVisual(256, 181, 0,256).apply {
             style.borderRadius = BorderRadius(10)
         }
-        customChoiceButton.font = Font(size = 16, color = Color(0, 0, 0))
+        customChoiceButton.font = Font(size = 16, color = Color(0, 0, 0, 256))
         customChoiceActive = true
         updateNatureTokenCount()
     }

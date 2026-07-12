@@ -127,16 +127,21 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
                 count--
             }
         }
+        println("Bot changed Wildlife")
         rootService.playerActionService.changeWildlife(indices)
     }
 
     private fun randomBotNatureTokenFreeSelection() {
         val tileIndex = Random.nextInt(4)
         val wildlifeIndex = Random.nextInt(4)
+        println("Bot made Custom Choice")
         rootService.playerActionService.freeSelection(tileIndex, wildlifeIndex)
     }
 
-    private fun randomBotClearSemipopulation() = rootService.gameService.exterminate(true)
+    private fun randomBotClearSemipopulation() {
+        println("Bot cleared Semipopulation")
+        rootService.gameService.exterminate(true)
+    }
 
     private fun randomBotMakeSelection() {
         val index = Random.nextInt(4)
