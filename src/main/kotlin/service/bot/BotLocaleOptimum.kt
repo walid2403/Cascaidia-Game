@@ -10,9 +10,9 @@ import service.*
  */
 class BotLocaleOptimum(private val rootService: RootService) {
     //store the 6 possible moves from one hexagon to its 6 neighboring hexagons.
-    private val directionX = intArrayOf(0, 1, 1, 0, -1, -1)
-    private val directionY = intArrayOf(-1, -1, 0, 1, 1, 0)
-    private val directionZ = intArrayOf(1, 0, -1, -1, 0, 1)
+    private val directionX = intArrayOf(0, -1, -1, 0, 1, 1)
+    private val directionY = intArrayOf(-1, 0, 1, 1, 0, -1)
+    private val directionZ = intArrayOf(1, 1, 0, -1, -1, 0)
 
     /** this plays one bot turn: handles overpopulation, then picks the best scoring
      * option
@@ -309,7 +309,10 @@ class BotLocaleOptimum(private val rootService: RootService) {
                 return
             }
         }
+        //rootService.playerActionService.selectColumn(bestIndex)
+        println("Selecting column $bestIndex")
         rootService.playerActionService.selectColumn(bestIndex)
+        println("Selected choice afterwards: ${currentGame.selectedChoice}")
     }
     private fun placeBestPlace(currentGame: CascadiaGame, player: Player){
         val chosenTile= currentGame.choices[currentGame.selectedChoice.first].first
