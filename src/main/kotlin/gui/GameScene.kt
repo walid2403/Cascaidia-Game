@@ -113,6 +113,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                     this.font = Font(size = 16, color = Color(0, 0, 0))
                     customChoiceActive = true
                     enableShopOnclick()
+
+                    rootService.networkService.sendUseNatureToken()
                 }
             }
         }
@@ -966,6 +968,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         } else {
             scaleTile(selectTile != -1, tile)
         }
+
+        rootService.networkService.sendSelectHabitatTile(index)
     }
 
     private fun chooseAnimal(index: Int, animal: Label) {
@@ -989,6 +993,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 }
             }
         }
+
+        rootService.networkService.sendSelectWildlife(index)
     }
 
 //    private fun deactivateRotateButtons() {
