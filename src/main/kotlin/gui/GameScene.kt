@@ -24,12 +24,16 @@ import tools.aqua.bgw.animation.FadeAnimation
 import tools.aqua.bgw.animation.MovementAnimation
 import tools.aqua.bgw.components.gamecomponentviews.HexagonView
 import tools.aqua.bgw.components.uicomponents.ComboBox
+import tools.aqua.bgw.components.uicomponents.ListView
+import tools.aqua.bgw.components.uicomponents.Orientation
+import tools.aqua.bgw.components.uicomponents.TextField
 import tools.aqua.bgw.net.common.response.SpectatorJoinGameResponse
 import tools.aqua.bgw.util.Coordinate
 import tools.aqua.bgw.visual.Visual
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
+import kotlin.math.ceil
 import kotlin.math.min
 
 //-------------------------------------------------------------
@@ -373,7 +377,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
-    private val confirm = Button(width = 120, height = 60, posX = 1410, posY = 985, text = "Confirm",
+    private val confirm = Button(width = 120, height = 60, posX = 1350, posY = 985, text = "Confirm",
         font = Font(size = 16, color = Color(255, 255, 255, 255)),
         visual = ColorVisual(0,0, 0).apply {
             style.borderRadius = BorderRadius(10)
@@ -387,7 +391,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
-    private val rotateTileLeft = Button(width = 60, height = 60, posX = 1325, posY = 985, text = "->",
+    private val rotateTileLeft = Button(width = 60, height = 60, posX = 1265, posY = 985, text = "->",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
         isVisible = false
@@ -396,7 +400,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
-    private val rotateTileRight = Button(width = 60, height = 60, posX = 1240, posY = 985, text = "<-",
+    private val rotateTileRight = Button(width = 60, height = 60, posX = 1180, posY = 985, text = "<-",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
         isVisible = false
@@ -410,7 +414,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     private var zoomFactor = 4.32
 
-    private val zoomIn = Button(width = 60, height = 60, posX = 1325, posY = 900, text = "+",
+    private val zoomIn = Button(width = 60, height = 60, posX = 1597.5, posY = 985, text = "+",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
         onMouseClicked = {
@@ -419,7 +423,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
-    private val zoomOut = Button(width = 60, height = 60, posX = 1240, posY = 900, text = "-",
+    private val zoomOut = Button(width = 60, height = 60, posX = 1512.5, posY = 985, text = "-",
         font = Font(size = 16, color = Color(255, 255, 255, 255))).apply {
         visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(30) }
         onMouseClicked = {
@@ -649,6 +653,53 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
+    //Chat
+    private var chatOpened = false
+    private var newMessage = false
+
+    private val chatButton = Button(width = 70, height = 60, posX = 1710, posY = 35).apply {
+        onMouseClicked = {
+            if(!chatOpened) {
+                openChat()
+            } else {
+                closeChat()
+            }
+        }
+    }
+    private val chatView = ListView<String>(posX = 1455, posY = 80, width = 240, height = 175,
+        visual = ColorVisual(200,200,200).apply { style.borderRadius = BorderRadius(10) },
+        font = Font(size = 20))
+    private val chatBoxBackground = Label(posX = 1450, posY = 35, width = 250, height = 225,
+        visual = ColorVisual(120,120,120).apply { style.borderRadius = BorderRadius(10) })
+    private val messageInput = TextField(posX = 1455, posY = 40, width = 195, height = 35,
+        visual = ColorVisual(200,200,200).apply { style.borderRadius = BorderRadius(17.5) },
+        prompt = "Message:", font = Font(size = 20))
+    private val sendButton = Button(posX = 1660, posY = 40, width = 35, height = 35,
+        visual = ColorVisual(200,200,200).apply { style.borderRadius = BorderRadius(17.5) },
+        text = ">", font = Font(size = 30)).apply {
+            onMouseClicked = {
+                rootService.networkService.sendChatMessage(messageInput.text)
+                refreshAfterChatMessage("Me",
+                        messageInput.text)
+                messageInput.text = ""
+            }
+    }
+
+
+//    private val chat = Pane<ComponentView>(posX = 1450, posY = 35, width = 250, height = 225,
+//        visual = ColorVisual(120,120,120).apply { style.borderRadius = BorderRadius(10) }).apply {
+//        this.isVisible = false
+//    }
+
+
+    //Anzeigen über EndTurn Button
+    private val roundCounterHex = HexagonView(posX = 1723, posY = 780, size = 80,
+        visual = ColorVisual(170, 170, 170, 127), orientation = HexOrientation.POINTY_TOP)
+    private val roundCounterText = Label(posX = 1742, posY = 800, width = 100, height = 40, font = Font(size = 25))
+    private val roundCounterLabel1 = Label(posX = 1742, posY = 840, width = 100, height = 40, text = "Rounds", font = Font(size = 25))
+    private val roundCounterLabel2 = Label(posX = 1742, posY = 880, width = 100, height = 40, text = "left", font = Font(size = 25))
+
+
 
     //Testweise
 //    private val hex = HexagonViewExtended(size = 14.0, visual = ImageVisual("tiles/clear/tile2.png"))
@@ -677,6 +728,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             //hex
         ).forEach { world.add(it) }
 
+        //chat.add(chatView)
+
+
         addComponents(
             cameraPane,
             grayBox, customChoiceButton, changeWildlifeButton, clearOverpopulationButton, pineCone1, pineCone2,
@@ -694,7 +748,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             bearScoringCard, elkScoringCard, salmonScoringCard, hawkScoringCard, foxScoringCard,
             zoomIn, zoomOut,
             tileChoice1, tileChoice2, tileChoice3, tileChoice4,
-            animationSpeedControl
+            animationSpeedControl, roundCounterHex, roundCounterText, roundCounterLabel1, roundCounterLabel2,
+            chatButton,
+            chatBoxBackground, chatView, messageInput, sendButton
+            //chat
         )
     }
 
@@ -865,7 +922,16 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         return Pair(x, y)
     }
 
+    private fun openChat() {
+        chatOpened = true
+        listOf(chatBoxBackground, chatView, messageInput, sendButton).forEach { it.isVisible = true }
+        chatButton.visual = ImageVisual("chat_icon.png")
+    }
 
+    private fun closeChat() {
+        chatOpened = false
+        listOf(chatBoxBackground, chatView, messageInput, sendButton).forEach { it.isVisible = false }
+    }
 
 
 
@@ -1201,6 +1267,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             it.scale(1.0)
         }
 
+        chatOpened = false
+        newMessage = false
+        chatView.items.clear()
+        listOf(chatBoxBackground, chatView, messageInput, sendButton).forEach { it.isVisible = false }
+        messageInput.text = ""
+        chatButton.visual = ImageVisual("chat_icon.png")
         selectAnimal = -1
         selectTile = -1
         animationSpeed = 1.0
@@ -1260,7 +1332,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         for(tile in game.playerQueue.peek().board){
             addGreyHexagon(tileMap.forward(tile.value))
         }
-        setNames()                                                                  //-> anpassen
+        setNames()
+        updateRoundCounter()
         setNatureTokenCounts()                                                      //-> anpassen 
         adjustAreas()
         changeGreyVisibility(true, 0)
@@ -1287,6 +1360,18 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
+    private fun updateRoundCounter() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+
+        //+1 weil eigentlich -3 aber 4 Tiles sind im Shop
+        val roundsLeft = ceil((game.tileStack.size + 1).toDouble() / game.playerQueue.size.toDouble()).toInt()
+        //roundCounterText.text = "${roundsLeft.toString()}\nRounds\nleft"
+        roundCounterText.text = roundsLeft.toString()
+        println(game.tileStack.size)
+        println(game.playerQueue.size)
+    }
+
     private fun setNames() {
         val game = rootService.currentGame
         checkNotNull(game)
@@ -1311,6 +1396,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     override fun refreshAfterSelectWildlife(wildlifeIndex: Int) {
         chooseAnimal(wildlifeIndex, animalShop.elementAt(wildlifeIndex))
+    }
+
+    override fun refreshAfterChatMessage(messageSender: String, message: String) {
+        if(!chatOpened) chatButton.visual = ImageVisual("chat_icon_redDot.png")
+        if(message.isNotBlank() && messageSender.isNotBlank()) {
+            chatView.items.add(0, messageSender+": "+message)
+        }
     }
 
     private fun loadPlayerBoards() {
@@ -1703,6 +1795,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             //lock()
             rootService.bot.makeTurn(game.playerQueue.peek().type)
         }
+
+        updateRoundCounter()
 
         if(rootService.currentGame?.isLocal == false) { disableOnlineGameFeatures() }
     }
@@ -2159,10 +2253,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         val newCount = game.playerQueue.peek().natureTokens - removeManually
         tokenCount.text = "$newCount"
-    }
-
-    override fun refreshAfterChatMessage(messageSender: String, message: String) {
-
     }
 
     override fun refreshAfterUnlockSelection() {
