@@ -385,7 +385,6 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     }
 
     fun receiveChatMessage(message: ChatMessage, messageSender: String) {
-        println("Messenger: $messageSender, Message: ${message.message}")
         onAllRefreshables { refreshAfterChatMessage(messageSender, message.message) }
     }
 
