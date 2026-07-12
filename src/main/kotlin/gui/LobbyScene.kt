@@ -350,10 +350,9 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val elk = Label(
         width = iconSize + 15, height = iconSize + 15,
-        posX = (paneWidth)/2 + 90 - (iconSize + 15)/2, posY = 30,
-        font = Font(size = 40)
+        posX = (paneWidth)/2 + 90 - (iconSize + 15)/2, posY = 30
     ).apply {
-        visual = ImageVisual("tokens/elk.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/elk.png")
         onMouseClicked = {
             showScoreCards(elkCardA, elkCardB)
             warning.isVisible = false
@@ -362,10 +361,9 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val hawk = Label(
         width = iconSize + 15, height = iconSize + 15,
-        posX = elk.posX - 2*iconDistance - 2*(iconSize + 15), posY = 30,
-        font = Font(size = 40)
+        posX = elk.posX - 2*iconDistance - 2*(iconSize + 15), posY = 30
     ).apply {
-        visual = ImageVisual("tokens/hawk.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/hawk.png")
         onMouseClicked = {
             showScoreCards(hawkCardA, hawkCardB)
             warning.isVisible = false
@@ -374,10 +372,9 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val salmon = Label(
         width = iconSize + 15, height = iconSize + 15,
-        posX = elk.posX - iconDistance - (iconSize + 15), posY = 30,
-        font = Font(size = 40)
+        posX = elk.posX - iconDistance - (iconSize + 15), posY = 30
     ).apply {
-        visual = ImageVisual("tokens/salmon.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/salmon.png")
         onMouseClicked = {
             showScoreCards(salmonCardA, salmonCardB)
             warning.isVisible = false
@@ -386,9 +383,9 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val fox = Label(
         width = iconSize + 15, height = iconSize + 15,
-        posX = elk.posX + iconDistance + iconSize + 15, posY = 30,        font = Font(size = 40)
+        posX = elk.posX + iconDistance + iconSize + 15, posY = 30
     ).apply {
-        visual = ImageVisual("tokens/fox.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/fox.png")
 
         onMouseClicked = {
             showScoreCards(foxCardA, foxCardB)
@@ -398,10 +395,9 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val bear = Label(
         width = iconSize + 15, height = iconSize + 15,
-        posX = elk.posX + 2*iconDistance + 2*(iconSize + 15), posY = 30,
-        font = Font(size = 40)
+        posX = elk.posX + 2*iconDistance + 2*(iconSize + 15), posY = 30
     ).apply {
-        visual = ImageVisual("tokens/bear.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/bear.png")
         onMouseClicked = {
             showScoreCards(bearCardA, bearCardB)
             warning.isVisible = false
