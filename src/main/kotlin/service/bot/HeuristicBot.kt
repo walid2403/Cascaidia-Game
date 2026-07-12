@@ -18,12 +18,12 @@ class HeuristicBot(private val rootService: RootService) {
 
     //die 6 Richtungen eines Hexagons im Uhrzeigersinn
     private val directions = listOf(
-        Triple(0,-1,1), //Richtung 0: Oben-Rechts
-        Triple(1,-1,0), //Richtung 1: Rechts
-        Triple(1,0,-1), //Richtung 2: Unten-Rechts
-        Triple(0,1,-1), //Richtung 3: Unten-Links
-        Triple(-1,1,0), //Richtung 4: Links
-        Triple(-1,0,1)  //Richtung 5: Oben-Links
+        Triple(1,-1,0), //Richtung 0: Oben-Rechts
+        Triple(1,0,-1), //Richtung 1: Rechts
+        Triple(0,1,-1), //Richtung 2: Unten-Rechts
+        Triple(-1,1,0), //Richtung 3: Unten-Links
+        Triple(-1,0,1), //Richtung 4: Links
+        Triple(0,-1,1)  //Richtung 5: Oben-Links
     )
 
     /**
@@ -70,7 +70,7 @@ class HeuristicBot(private val rootService: RootService) {
 
             else -> {
                 // Falls das Spiel auf etwas anderes wartet (z.B. Zug-Ende), leiten wir das Ende ein
-                currentGame.gameState = GameState.END_OF_TURN
+                rootService.gameService.changeTurn()
             }
         }
     }
