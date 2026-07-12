@@ -692,7 +692,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 //    }
 
 
-
     //Anzeigen über EndTurn Button
     private val roundCounterHex = HexagonView(posX = 1723, posY = 780, size = 80,
         visual = ColorVisual(170, 170, 170, 127), orientation = HexOrientation.POINTY_TOP)
