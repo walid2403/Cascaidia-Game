@@ -9,8 +9,10 @@ import kotlin.random.Random
  */
 class Bot (private val rootService: RootService) : AbstractRefreshingService() {
 
-    private var coordinatesTile: Triple<Int?, Int?, Int?> = Triple(null, null, null)
-    private var coordinatesWildlifeToken: Triple<Int?, Int?, Int?> = Triple(null, null, null)
+    var coordinatesTile: Triple<Int?, Int?, Int?> = Triple(null, null, null)
+    var coordinatesWildlifeToken: Triple<Int?, Int?, Int?> = Triple(null, null, null)
+
+    private val hardBot = BotLocaleOptimum(rootService, this)
 
     private fun resetCoordinates() {
         coordinatesTile = Triple(null, null, null)
@@ -29,8 +31,17 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
                 randomBotTurn()
             }
 
-            PlayerType.HARD_BOT -> {}
+            PlayerType.HARD_BOT -> {
+                resetCoordinates()
+                while(rootService.currentGame?.gameState != GameState.END_OF_TURN) {
+                    hardBot.makeTurn()
+                }
+            }
         }
+
+        val coordinatesTileNotNull = Triple(requireNotNull(coordinatesTile.first),
+            requireNotNull(coordinatesTile.second), requireNotNull(coordinatesTile.third))
+        onAllRefreshables { refreshAfterBotTurn(coordinatesTileNotNull, coordinatesWildlifeToken) }
     }
 
     private fun randomBotTurn() {
@@ -63,10 +74,6 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
             }
             newLegalTurns(legalTurns)
         }
-
-        val coordinatesTileNotNull = Triple(requireNotNull(coordinatesTile.first),
-            requireNotNull(coordinatesTile.second), requireNotNull(coordinatesTile.third))
-        onAllRefreshables { refreshAfterBotTurn(coordinatesTileNotNull, coordinatesWildlifeToken) }
 
         //rootService.gameService.changeTurn()
     }

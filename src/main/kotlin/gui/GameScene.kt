@@ -83,6 +83,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private val shop = arrayOfNulls<HexagonViewExtended>(4)
     private var selectedGridX: Int? = null
     private var selectedGridY: Int? = null
+//    private var wildlifePosX: Int? = null
+//    private var wildlifePosY: Int? = null
 
     //Liste wird bei refreshAfterStartGame mit der Startreihenfolge befüllt
     private var playerListAtStart = mutableListOf<Player>()
@@ -375,6 +377,14 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             if(game.gameState == GameState.PLAYED_TILE || game.gameState == GameState.END_OF_TURN) {
                 //disableAllOnclicks()
                 rootService.gameService.changeTurn()
+
+//                //Message für die Netzwerk-schicht, welche an andere schlechtere Teams übergeben wird
+//                val wildLifeCoordinates = if(wildlifePosX == null || wildlifePosY == null) null
+//                    else Pair(requireNotNull(wildlifePosX), requireNotNull(wildlifePosY))
+//                val habitatCoordinates = Pair(requireNotNull(selectedGridX), requireNotNull(selectedGridY))
+//                val s = (requireNotNull(selectedGridX) + requireNotNull(selectedGridY)) * (-1)
+//                val rotation = requireNotNull(game.playerQueue.peek().board[Triple(s, selectedGridY, selectedGridX)]?.rotation)
+//                rootService.networkService.sendPlace(habitatCoordinates, wildLifeCoordinates,rotation)
             }
         }
     }
@@ -1297,6 +1307,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         selectedGridX = null
         selectedGridY = null
+//        wildlifePosX = null
+//        wildlifePosY = null
     }
 
 
@@ -1371,8 +1383,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         val roundsLeft = ceil((game.tileStack.size + 1).toDouble() / game.playerQueue.size.toDouble()).toInt()
         //roundCounterText.text = "${roundsLeft.toString()}\nRounds\nleft"
         roundCounterText.text = roundsLeft.toString()
-        println(game.tileStack.size)
-        println(game.playerQueue.size)
     }
 
     private fun setNames() {
@@ -1790,12 +1800,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         //saveGameState()
 
 
-        if(isHuman()) {
-            //unlock()
-        } else {
+        if(!isHuman()) {
             disableAllForNetworkBotTurn()
-            //lock()
-            rootService.bot.makeTurn(game.playerQueue.peek().type)
+            if(game.playerQueue.peek().type == PlayerType.EASY_BOT ||
+                game.playerQueue.peek().type == PlayerType.HARD_BOT ) {
+                rootService.bot.makeTurn(game.playerQueue.peek().type)
+            }
         }
 
         updateRoundCounter()
@@ -2190,47 +2200,48 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
     override fun refreshAfterPlaceTile(index: Triple<Int, Int, Int>) {
-        if(!isHuman()) {
-            val game = rootService.currentGame
-            checkNotNull(game)
+//        if(!isHuman()) {
+//            val game = rootService.currentGame
+//            checkNotNull(game)
+//
+//
+//            val chosenTile = tileShop[selectTile]
+//            val playerID = getPlayerId()
+//            val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(playerID)
+//
+//            val coordinates = convertCoordinates(index)
+//            selectedGridX = coordinates.first
+//            selectedGridY = coordinates.second
+//            checkNotNull(selectedGridY)
+//            checkNotNull(selectedGridX)
+//            val x = selectedGridX
+//            val y = selectedGridY
+//            checkNotNull(x)
+//            checkNotNull(y)
+//            val greyTile = currentArea[x, y]
+//            //println("X: $selectedGridX, Y: $selectedGridY, Coordinates: $coordinates")
+//            checkNotNull(greyTile)
+//
+//            greyTile.visual = chosenTile.visual
+//            greyTile.rotate(botRotation*60)
+//            chosenTile.isVisible = false
+//            tileMap.add(game.choices[selectTile].first to greyTile)
+//
+//            changeGreyVisibility(false, playerID, greyTile)
+//
+//            greyTile.isDisabled = false
+//            greyTile.onMouseClicked = { onClickForTiles(greyTile) }
+//            greyTile.choiceHex = false
+//
+//            confirm.isDisabled = false
+//        }
 
-
-            val chosenTile = tileShop[selectTile]
-            val playerID = getPlayerId()
-            val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(playerID)
-
-            val coordinates = convertCoordinates(index)
-            selectedGridX = coordinates.first
-            selectedGridY = coordinates.second
-            checkNotNull(selectedGridY)
-            checkNotNull(selectedGridX)
-            val x = selectedGridX
-            val y = selectedGridY
-            checkNotNull(x)
-            checkNotNull(y)
-            val greyTile = currentArea[x, y]
-            //println("X: $selectedGridX, Y: $selectedGridY, Coordinates: $coordinates")
-            checkNotNull(greyTile)
-
-            greyTile.visual = chosenTile.visual
-            greyTile.rotate(botRotation*60)
-            chosenTile.isVisible = false
-            tileMap.add(game.choices[selectTile].first to greyTile)
-
-            changeGreyVisibility(false, playerID, greyTile)
-
-            greyTile.isDisabled = false
-            greyTile.onMouseClicked = { onClickForTiles(greyTile) }
-            greyTile.choiceHex = false
-
-            confirm.isDisabled = false
+        if(isHuman()) {
+            confirm.isVisible = false
+            rotateTileRight.isVisible = false
+            rotateTileLeft.isVisible = false
+            enableCurrentPlayerTilesOnClick()
         }
-        
-
-        confirm.isVisible = false
-        rotateTileRight.isVisible = false
-        rotateTileLeft.isVisible = false
-        enableCurrentPlayerTilesOnClick()
 
         //TODO("eig. wird das Tile jetzt zu früh (nach select statt nach place Tile) ins Grid gepackt. Macht anders nur keinen Sinn?")
 
@@ -2242,17 +2253,24 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     override fun refreshAfterPlaceWildlife(index: Triple<Int, Int, Int>) {
         val game = rootService.currentGame
         checkNotNull(game)
-        val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(getPlayerId())
 
-        val tile = currentArea[index.third, index.second]
-        checkNotNull(tile)
-        val newVisual = getTileWithAnimal(tileMap.backward(tile))
-        tile.visual = newVisual
-        tile.isDisabled = true
+//        wildlifePosX = index.third
+//        wildlifePosY = index.second
 
-        animalShop[selectAnimal].visual = Visual.EMPTY
+        if(isHuman()) {
+            val currentArea =
+                listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(getPlayerId())
 
-        updateNatureTokenCount()
+            val tile = currentArea[index.third, index.second]
+            checkNotNull(tile)
+            val newVisual = getTileWithAnimal(tileMap.backward(tile))
+            tile.visual = newVisual
+            tile.isDisabled = true
+
+            animalShop[selectAnimal].visual = Visual.EMPTY
+
+            updateNatureTokenCount()
+        }
     }
 
     private fun updateNatureTokenCount(removeManually: Int = 0) {
