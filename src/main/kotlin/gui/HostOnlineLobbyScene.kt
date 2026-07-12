@@ -38,7 +38,6 @@ import tools.aqua.bgw.visual.Visual
  */
 class HostOnlineLobbyScene(private val app: SopraApplication,
                            private val rootService: RootService,
-                           private val playerName: String = "Name",
                            private val lobbyCode: String = "Code"
 ) : MenuScene(1920, 1080), Refreshable  {
 
@@ -75,6 +74,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
     private val cardBX = 505
 
     private var playerType: PlayerType = PlayerType.HUMAN
+    private var playerName: String = "Name"
 
     private val logo = Label(
         posX = 0,
@@ -394,7 +394,11 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
     ).apply {
         onMouseClicked ={
             if (!isChecked){
+                this.isChecked = true
                 checkBox("checkBoxSalmonA")
+            } else {
+                this.isChecked = false
+                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
             }
         }
     }
@@ -410,7 +414,11 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
     ).apply {
         onMouseClicked ={
             if (!isChecked){
+                this.isChecked = true
                 checkBox("checkBoxSalmonB")
+            } else {
+                this.isChecked = false
+                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
             }
         }
     }
@@ -426,7 +434,11 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
     ).apply {
         onMouseClicked ={
             if (!isChecked){
+                this.isChecked = true
                 checkBox("checkBoxHawkA")
+            } else {
+                this.isChecked = false
+                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
             }
         }
     }
@@ -442,7 +454,11 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
     ).apply {
         onMouseClicked ={
             if (!isChecked){
+                this.isChecked = true
                 checkBox("checkBoxHawkB")
+            } else {
+                this.isChecked = false
+                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
             }
         }
     }
@@ -458,7 +474,11 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
     ).apply {
         onMouseClicked ={
             if (!isChecked){
+                this.isChecked = true
                 checkBox("checkBoxBearA")
+            } else {
+                this.isChecked = false
+                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
             }
         }
     }
@@ -474,7 +494,11 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
     ).apply {
         onMouseClicked ={
             if (!isChecked){
+                this.isChecked = true
                 checkBox("checkBoxBearB")
+            } else {
+                this.isChecked = false
+                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
             }
         }
     }
@@ -490,7 +514,11 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
     ).apply {
         onMouseClicked ={
             if (!isChecked){
+                this.isChecked = true
                 checkBox("checkBoxFoxA")
+            } else {
+                this.isChecked = false
+                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
             }
         }
     }
@@ -506,7 +534,11 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
     ).apply {
         onMouseClicked ={
             if (!isChecked){
+                this.isChecked = true
                 checkBox("checkBoxFoxB")
+            } else {
+                this.isChecked = false
+                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
             }
         }
     }
@@ -522,7 +554,11 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
     ).apply {
         onMouseClicked ={
             if (!isChecked){
+                this.isChecked = true
                 checkBox("checkBoxElkA")
+            } else {
+                this.isChecked = false
+                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
             }
         }
     }
@@ -538,7 +574,11 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
     ).apply {
         onMouseClicked ={
             if (!isChecked){
+                this.isChecked = true
                 checkBox("checkBoxElkB")
+            } else {
+                this.isChecked = false
+                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
             }
         }
     }
@@ -804,16 +844,15 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
      * this animal, otherwise card B. Order of animals: bear, elk, salmon, hawk, fox
      */
 
-    private fun getScoreCards(final: Boolean): List<Boolean?> {
+    private fun getScoreCards(): List<Boolean?> {
         val scoreCards = listOf(Pair(checkBoxBearA, checkBoxBearB), Pair(checkBoxElkA, checkBoxElkB),
-            Pair(checkBoxSalmonA, checkBoxSalmonB), Pair(checkBoxHawkA, checkBoxHawkB),
-            Pair(checkBoxFoxA, checkBoxFoxB))
+            Pair(checkBoxFoxA, checkBoxFoxB), Pair(checkBoxHawkA, checkBoxHawkB),
+            Pair(checkBoxSalmonA, checkBoxSalmonB))
 
         val res = mutableListOf<Boolean?>()
 
         scoreCards.forEach {
-            if (final) res.add(it.first.isChecked)
-            else if (it.first.isChecked) {
+            if (it.first.isChecked) {
                 res.add(true)
             }
             else if (it.second.isChecked) {
@@ -861,7 +900,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
             orderOfTypes[i].visual = sortedList[i].second
         }
 
-        rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards(false))
+        rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
     }
 
     /**
@@ -922,7 +961,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
             "checkBoxBearB" -> checkBoxBearA.isChecked = false
         }
 
-        rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards(false))
+        rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
     }
 
     /**
@@ -979,7 +1018,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
             else -> throw IllegalArgumentException("Invalid button for this function: $button")
         }
 
-        rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards(false))
+        rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
 
         playAnimation(
             ParallelAnimation(
@@ -1034,7 +1073,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
             pair.second.isChecked = randomizerList[1]
         }
 
-        rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards(false))
+        rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
     }
 
     /**
@@ -1062,7 +1101,9 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
     override fun refreshAfterHostGame(lobbyCode: String, playerName: String, playerType: PlayerType) {
         lobbyCodeLabel.text = "Lobby Code: $lobbyCode"
         p1Input.text = playerName
+        this.playerName = playerName
         this.playerType = playerType
+        p1Icon.visual = getVisual(playerName)
     }
 
     /**

@@ -27,8 +27,7 @@ import tools.aqua.bgw.visual.Visual
  * @param playerName The [String] that was entered in the [JoinOnlineScene]
  * @param playerType The [Int] corresponding to the [PlayerType] selected in [JoinOnlineScene]
  */
-class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootService: RootService,
-                            private val playerName: String = "Name", private val playerType: PlayerType = PlayerType.HUMAN) :
+class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootService: RootService) :
     MenuScene(1920, 1080), Refreshable  {
 
     private val sceneWidth = 1920
@@ -49,6 +48,10 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
     private val nameHeight = 65
     private val nameY = paneHeight/2 - 170
     private val nameDistance = 35
+
+    private var playerType: PlayerType = PlayerType.HUMAN
+    private var playerName: String = "Name"
+
 
     private var panelsOut = false
 
@@ -684,24 +687,24 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
             var boxB = checkBoxFoxB
             when (i) {
                 0 -> {
-                    boxA = checkBoxHawkA
-                    boxB = checkBoxHawkB
+                    boxA = checkBoxBearA
+                    boxB = checkBoxBearB
                 }
                 1 -> {
-                    boxA = checkBoxSalmonA
-                    boxB = checkBoxSalmonB
-                }
-                2 -> {
                     boxA = checkBoxElkA
                     boxB = checkBoxElkB
                 }
-                3 -> {
+                2 -> {
                     boxA = checkBoxFoxA
                     boxB = checkBoxFoxB
                 }
+                3 -> {
+                    boxA = checkBoxHawkA
+                    boxB = checkBoxHawkB
+                }
                 4 -> {
-                    boxA = checkBoxBearA
-                    boxB = checkBoxBearB
+                    boxA = checkBoxSalmonA
+                    boxB = checkBoxSalmonB
                 }
             }
             if(selection[i] == true) {
@@ -790,6 +793,11 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
         } else {
             throw IllegalArgumentException("All 4 Lobby Slots are already occupied. No new player can join.")
         }
+    }
+
+    override fun refreshAfterJoinGame(lobbyCode: String, playerName: String, playerType: PlayerType) {
+        this.playerName = playerName
+        this.playerType = playerType
     }
 
     private fun addNewPlayer(name: String, nameField: Label, icon: Label) {
