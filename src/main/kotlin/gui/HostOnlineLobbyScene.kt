@@ -1,5 +1,6 @@
 package gui
 
+import entity.Player
 import entity.PlayerType
 import service.Refreshable
 import service.RootService
@@ -38,7 +39,6 @@ import tools.aqua.bgw.visual.Visual
 class HostOnlineLobbyScene(private val app: SopraApplication,
                            private val rootService: RootService,
                            private val playerName: String = "Name",
-                           private val playerType: PlayerType = PlayerType.HUMAN,
                            private val lobbyCode: String = "Code"
 ) : MenuScene(1920, 1080), Refreshable  {
 
@@ -74,6 +74,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
     private val cardAX = 245
     private val cardBX = 505
 
+    private var playerType: PlayerType = PlayerType.HUMAN
 
     private val logo = Label(
         posX = 0,
@@ -1056,6 +1057,12 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
 
     override fun refreshAfterGameConfigUpdate(playerList: List<String>, scoringCards: List<Boolean?>) {
         updatePlayers(playerList)
+    }
+
+    override fun refreshAfterHostGame(lobbyCode: String, playerName: String, playerType: PlayerType) {
+        lobbyCodeLabel.text = "Lobby Code: $lobbyCode"
+        p1Input.text = playerName
+        this.playerType = playerType
     }
 
     /**

@@ -250,6 +250,6 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
     }
 
     override fun refreshAfterHostGame(lobbyCode: String, playerName: String, playerType: PlayerType) {
-        app.showMenuScene(HostOnlineLobbyScene(app, rootService, playerName, playerType, lobbyCode))
+        app.showMenuScene(app.hostOnlineLobbyScene)
     }
 }
