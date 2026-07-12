@@ -162,7 +162,7 @@ class CascadiaNetworkClient(
     @GameActionReceiver
     fun onSelectReceived(message: SelectMessage, sender: String) {
         BoardGameApplication.runOnGUIThread {
-
+            networkService.receiveSelect(message)
         }
     }
 
@@ -173,7 +173,7 @@ class CascadiaNetworkClient(
     @GameActionReceiver
     fun onPlaceReceived(message: PlaceMessage, sender: String) {
         BoardGameApplication.runOnGUIThread {
-
+            networkService.receivePlace(message)
         }
     }
 
@@ -184,7 +184,7 @@ class CascadiaNetworkClient(
     @GameActionReceiver
     fun onWipeWildlifeReceived(message: WipeWildlifeMessage, sender: String) {
         BoardGameApplication.runOnGUIThread {
-
+            networkService.receiveExterminate(message)
         }
     }
 
@@ -195,7 +195,7 @@ class CascadiaNetworkClient(
     @GameActionReceiver
     fun onUseNatureTokenReceived(message: UseNatureTokenMessage, sender: String) {
         BoardGameApplication.runOnGUIThread {
-
+            networkService.receiveUseNatureToken()
         }
     }
 
@@ -206,7 +206,7 @@ class CascadiaNetworkClient(
     @GameActionReceiver
     fun onRotationReceived(message: RotationMessage, sender: String) {
         BoardGameApplication.runOnGUIThread {
-
+            networkService.receiveRotation(message)
         }
     }
 
@@ -217,7 +217,7 @@ class CascadiaNetworkClient(
     @GameActionReceiver
     fun onSelectWildlifeReceived(message: SelectWildlifeMessage, sender: String) {
         BoardGameApplication.runOnGUIThread {
-
+            networkService.receiveSelectWildlife(message)
         }
     }
 
@@ -228,7 +228,7 @@ class CascadiaNetworkClient(
     @GameActionReceiver
     fun onSelectHabitatTileReceived(message: SelectHabitatTileMessage, sender: String) {
         BoardGameApplication.runOnGUIThread {
-
+            networkService.receiveSelectHabitatTile(message)
         }
     }
 
@@ -239,7 +239,7 @@ class CascadiaNetworkClient(
     @GameActionReceiver
     fun onChatReceived(message: ChatMessage, sender: String) {
         BoardGameApplication.runOnGUIThread {
-
+            networkService.receiveChatMessage(message, sender)
         }
     }
 
