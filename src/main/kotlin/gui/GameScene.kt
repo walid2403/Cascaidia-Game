@@ -83,8 +83,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private val shop = arrayOfNulls<HexagonViewExtended>(4)
     private var selectedGridX: Int? = null
     private var selectedGridY: Int? = null
-    private var wildlifePosX: Int? = null
-    private var wildlifePosY: Int? = null
+//    private var wildlifePosX: Int? = null
+//    private var wildlifePosY: Int? = null
 
     //Liste wird bei refreshAfterStartGame mit der Startreihenfolge befüllt
     private var playerListAtStart = mutableListOf<Player>()
@@ -376,13 +376,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 //disableAllOnclicks()
                 rootService.gameService.changeTurn()
 
-                //Message für die Netzwerk-schicht, welche an andere schlechtere Teams übergeben wird
-                val wildLifeCoordinates = if(wildlifePosX == null || wildlifePosY == null) null
-                    else Pair(requireNotNull(wildlifePosX), requireNotNull(wildlifePosY))
-                val habitatCoordinates = Pair(requireNotNull(selectedGridX), requireNotNull(selectedGridY))
-                val s = (requireNotNull(selectedGridX) + requireNotNull(selectedGridY)) * (-1)
-                val rotation = requireNotNull(game.playerQueue.peek().board[Triple(s, selectedGridY, selectedGridX)]?.rotation)
-                rootService.networkService.sendPlace(habitatCoordinates, wildLifeCoordinates,rotation)
+//                //Message für die Netzwerk-schicht, welche an andere schlechtere Teams übergeben wird
+//                val wildLifeCoordinates = if(wildlifePosX == null || wildlifePosY == null) null
+//                    else Pair(requireNotNull(wildlifePosX), requireNotNull(wildlifePosY))
+//                val habitatCoordinates = Pair(requireNotNull(selectedGridX), requireNotNull(selectedGridY))
+//                val s = (requireNotNull(selectedGridX) + requireNotNull(selectedGridY)) * (-1)
+//                val rotation = requireNotNull(game.playerQueue.peek().board[Triple(s, selectedGridY, selectedGridX)]?.rotation)
+//                rootService.networkService.sendPlace(habitatCoordinates, wildLifeCoordinates,rotation)
             }
         }
     }
@@ -1301,8 +1301,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         selectedGridX = null
         selectedGridY = null
-        wildlifePosX = null
-        wildlifePosY = null
+//        wildlifePosX = null
+//        wildlifePosY = null
     }
 
 
@@ -2249,8 +2249,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         val game = rootService.currentGame
         checkNotNull(game)
 
-        wildlifePosX = index.third
-        wildlifePosY = index.second
+//        wildlifePosX = index.third
+//        wildlifePosY = index.second
 
         val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(getPlayerId())
 
