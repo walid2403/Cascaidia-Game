@@ -1211,9 +1211,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             }
             tileMap.add(tile to hexagon)
         }
-        tileMap.entries.forEach {
-           //entry -> println("value: ${entry.first.id}, coordinates: ${entry.second}")
-        }
     }
 
     private fun onClickForTiles(tile: HexagonViewExtended) {
@@ -1334,7 +1331,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
         setNames()
         updateRoundCounter()
-        setNatureTokenCounts()                                                      //-> anpassen 
+        setNatureTokenCounts()                                                      //-> anpassen
         adjustAreas()
         changeGreyVisibility(true, 0)
         changeGreyVisibility(false, 1)
@@ -1748,7 +1745,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         scaleArea()
 
         deactivateTileButtons()
-        //player++
         player = (player + 1)%game.playerQueue.size
 
         customChoiceActive = false
@@ -2023,7 +2019,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         nbhs.forEach { nbh ->
             var nbhTileView = currentArea[tileViewPos.first + nbh.first, tileViewPos.second + nbh.second]
             if (nbhTileView == null) {
-                nbhTileView = HexagonViewExtended(tileView.size, ColorVisual(170, 170, 170, 127))
+                nbhTileView = HexagonViewExtended(tileView.size, ColorVisual(170, 170, 170, 0.8))
                 nbhTileView.apply {
                     onMouseClicked = {
                         if(selectTile != -1 && selectAnimal != -1) {
@@ -2045,10 +2041,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
-    private fun changeGreyVisibility(visible: Boolean, player: Int, exception: HexagonViewExtended? = null) {
+    private fun changeGreyVisibility(visible: Boolean, player: Int, keepVisibleException: HexagonViewExtended? = null) {
         listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(player).components.filter {
             it.choiceHex }.forEach {
-                if(exception == null || it != exception) {
+                if(keepVisibleException == null || it != keepVisibleException) {
                     it.isVisible = visible
                 }
             }
@@ -2133,6 +2129,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         if(!isHuman()) {
             selectTile = index
             selectAnimal = index
+            disableGreyHexagonOnClicks()
+            scaleAnimal(true, animalShop[index])
+            scaleTile(true, tileShop[index])
         } else {
             placeChosenTile()
             disableShopOnclick()
@@ -2155,6 +2154,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             checkNotNull(game)
             selectTile = game.selectedChoice.first
             selectAnimal = game.selectedChoice.second
+            disableGreyHexagonOnClicks()
+            scaleAnimal(true, animalShop[selectAnimal])
+            scaleTile(true, tileShop[selectTile])
         } else {
             placeChosenTile()
             disableShopOnclick()
@@ -2208,6 +2210,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             greyTile.rotate(botRotation*60)
             chosenTile.isVisible = false
             tileMap.add(game.choices[selectTile].first to greyTile)
+
+            changeGreyVisibility(false, playerID, greyTile)
 
             greyTile.isDisabled = false
             greyTile.onMouseClicked = { onClickForTiles(greyTile) }

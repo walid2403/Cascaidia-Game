@@ -1054,25 +1054,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
         bearCardB.resize(194, 370)
     }
 
-    private fun setScoreCards(scoreCards: List<Boolean?>) {
-        val scoreCardBoxes = listOf(Pair(checkBoxBearA, checkBoxBearB), Pair(checkBoxSalmonA, checkBoxSalmonB),
-            Pair(checkBoxHawkA, checkBoxHawkB), Pair(checkBoxFoxA, checkBoxFoxB), Pair(checkBoxElkA, checkBoxElkB))
-
-        scoreCards.forEachIndexed { i, it ->
-            if (it == null) {
-                scoreCardBoxes[i].first.isChecked = false
-                scoreCardBoxes[i].second.isChecked = false
-            }
-            else {
-                scoreCardBoxes[i].first.isChecked = it
-                scoreCardBoxes[i].second.isChecked = !it
-            }
-        }
-    }
-
     override fun refreshAfterGameConfigUpdate(playerList: List<String>, scoringCards: List<Boolean?>) {
         updatePlayers(playerList)
-        setScoreCards(scoringCards)
     }
 
     /**
@@ -1080,6 +1063,29 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
      */
     override fun refreshAfterStartGame() {
         app.hideMenuScene()
+    }
+
+    override fun refreshAfterPlayerJoined(playerName: String) {
+        if(!p1Input.isVisible) {
+            addNewPlayer(playerName, p1Input, p1Icon)
+        } else if (!p2Input.isVisible) {
+            addNewPlayer(playerName, p2Input, p2Icon)
+        } else if(!p3Input.isVisible) {
+            addNewPlayer(playerName, p3Input, p3Icon)
+        } else if(!p4Input.isVisible) {
+            addNewPlayer(playerName, p4Input, p4Icon)
+        } else {
+            throw IllegalArgumentException("All 4 Lobby Slots are already occupied. No new player can join.")
+        }
+    }
+
+    private fun addNewPlayer(name: String, nameField: Label, icon: Label) {
+        nameField.text = name
+        icon.visual = ImageVisual("icons/NetworkIcon.png").apply {
+            style.borderRadius = BorderRadius(8)
+        }
+        nameField.isVisible = true
+        icon.isVisible = true
     }
 
     /**

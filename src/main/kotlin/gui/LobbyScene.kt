@@ -11,7 +11,6 @@ import tools.aqua.bgw.components.uicomponents.Label
 import tools.aqua.bgw.components.uicomponents.TextField
 import tools.aqua.bgw.components.uicomponents.UIComponent
 import tools.aqua.bgw.core.Alignment
-import tools.aqua.bgw.core.BoardGameApplication.Companion.runOnGUIThread
 import tools.aqua.bgw.core.Color
 import tools.aqua.bgw.core.MenuScene
 import tools.aqua.bgw.style.BorderRadius
@@ -820,17 +819,13 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
                 )
             ).apply {
                 onFinished = {
-                    runOnGUIThread {
-                        tabLabel.apply {
-                            visual = ImageVisual("assets/StartGameTab.png").apply {
-                                style.borderRadius = BorderRadius(15)
-                            }
-                            onMouseClicked = {
-                                if(checkStartReady()) {
-                                    println("startGame called on")
-                                    rootService.gameService.startNewGame(getFinalPlayers(), getFinalScoreCards())
-                                    //app.hideMenuScene()
-                                }
+                    tabLabel.apply {
+                        visual = ImageVisual("assets/StartGameTab.png").apply {
+                            style.borderRadius = BorderRadius(15)
+                        }
+                        onMouseClicked = {
+                            if(checkStartReady()) {
+                                rootService.gameService.startNewGame(getFinalPlayers(), getFinalScoreCards())
                             }
                         }
                     }
