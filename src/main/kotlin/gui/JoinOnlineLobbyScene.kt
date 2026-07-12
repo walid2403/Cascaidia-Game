@@ -1,5 +1,6 @@
 package gui
 
+import entity.Player
 import entity.PlayerType
 import service.Refreshable
 import service.RootService
@@ -27,9 +28,9 @@ import tools.aqua.bgw.visual.Visual
  * @param playerName The [String] that was entered in the [JoinOnlineScene]
  * @param playerType The [Int] corresponding to the [PlayerType] selected in [JoinOnlineScene]
  */
-class JoinOnlineLobbyScene (private val app: SopraApplication,
-                            private val rootService: RootService, private val playerName: String,
-                            private val playerType: Int) : MenuScene(1920, 1080), Refreshable  {
+class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootService: RootService,
+                            private val playerName: String = "Name", private val playerType: PlayerType = PlayerType.HUMAN) :
+    MenuScene(1920, 1080), Refreshable  {
 
     private val sceneWidth = 1920
     private val sceneHeight = 1080
@@ -148,7 +149,6 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         height = nameHeight,
         posX = (paneWidth - nameWidth)/2,
         posY = nameY + nameHeight + nameDistance,
-        text = "",
         font = Font(size = 28, color = Color.DARK_GRAY),
         visual = ColorVisual(204, 212, 209).apply { style.borderRadius = BorderRadius(8) }
     )
@@ -610,18 +610,6 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
     }
 
     /**
-     * This function updates the games configurations (players, their order, and the selected scorecards) after a
-     * GameConfigMessage
-     * @param playerList [List] [String] containing the players' names in the order they are set to play in
-     * @param scoringCards [List] [Boolean] contains a Boolean for each animal type, if true card A is selected,
-     * card B otherwise. Order of Booleans: hawk, salmon, elk, fox, bear
-     */
-    override fun refreshAfterGameConfigUpdate(playerList: List<String>, scoringCards: List<Boolean?>) {
-        updatePlayers(playerList)
-        updateScoreCards(scoringCards)
-    }
-
-    /**
      * This function fills the [String]s in [players] into the corresponding player name [Label] and the player's
      * player type into the player's player icon [Label]
      * @param players [List] [String] containing the players' names in the order they are set to play in
@@ -644,6 +632,9 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
                     if (players.size > 1) {
                         p2Input.text = players[1]
                         p2Icon.visual = getVisual(players[1])
+
+                        p2Icon.isVisible = true
+                        p2Input.isVisible = true
                     } else {
                         p2Icon.isVisible = false
                         p2Input.isVisible = false
@@ -653,6 +644,9 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
                     if (players.size > 2) {
                         p3Input.text = players[2]
                         p3Icon.visual = getVisual(players[2])
+
+                        p3Icon.isVisible = true
+                        p3Input.isVisible = true
                     } else {
                         p3Icon.isVisible = false
                         p3Input.isVisible = false
@@ -662,6 +656,9 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
                     if (players.size > 3) {
                         p4Input.text = players[3]
                         p4Icon.visual = getVisual(players[3])
+
+                        p4Icon.isVisible = true
+                        p4Input.isVisible = true
                     } else {
                         p4Icon.isVisible = false
                         p4Input.isVisible = false
@@ -729,19 +726,21 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
      * This function returns the [ImageVisual] corresponding to the [playerType], if the parameter [name] is identical
      * to the [playerName] of the local player and the NetworkIcon otherwise
      */
+
     private fun getVisual(name: String): ImageVisual {
         return if (name == playerName) {
-            when (playerType) {
-                0 -> ImageVisual("HumanIcon3.png").apply {
+            when(playerType) {
+                PlayerType.HUMAN -> ImageVisual("icons/HumanIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
-                1 -> ImageVisual("EasyBotIcon3.png").apply {
+                PlayerType.EASY_BOT -> ImageVisual("icons/EasyBotIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
-                2 -> ImageVisual("HardBotIcon3.png").apply {
+                PlayerType.HARD_BOT -> ImageVisual("icons/HardBotIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
-                else -> throw IllegalArgumentException("Invalid playerType: $playerType")
+                else -> throw IllegalArgumentException("Player type must be PlayerType Object and can't be NETWORK, " +
+                        "$playerType not supported")
             }
         } else {
             ImageVisual("icons/NetworkIcon.png").apply {
@@ -759,6 +758,18 @@ class JoinOnlineLobbyScene (private val app: SopraApplication,
         hawkCardB.resize(183, 397)
         elkCardA.resize(209, 403)
         elkCardB.resize(209, 403)
+    }
+
+    /**
+     * This function updates the games configurations (players, their order, and the selected scorecards) after a
+     * GameConfigMessage
+     * @param playerList [List] [String] containing the players' names in the order they are set to play in
+     * @param scoringCards [List] [Boolean] contains a Boolean for each animal type, if true card A is selected,
+     * card B otherwise. Order of Booleans: hawk, salmon, elk, fox, bear
+     */
+    override fun refreshAfterGameConfigUpdate(playerList: List<String>, scoringCards: List<Boolean?>) {
+        updatePlayers(playerList)
+        updateScoreCards(scoringCards)
     }
 
     override fun refreshAfterStartGame() {

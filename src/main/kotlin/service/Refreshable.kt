@@ -1,5 +1,6 @@
 package service
 
+import entity.PlayerType
 import entity.Tile
 import entity.WildlifeToken
 
@@ -112,7 +113,7 @@ interface Refreshable {
     /**
      * Perform refreshes necessary after a network game has been started
      */
-    fun refreshAfterHostGame(lobbyCode: String) {}
+    fun refreshAfterHostGame(lobbyCode: String, playerName: String, playerType: PlayerType) {}
 
     /**
      * Perform refreshes necessary after a network game has been started

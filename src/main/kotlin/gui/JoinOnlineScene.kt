@@ -246,7 +246,7 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
     }
 
     override fun refreshAfterJoinGame(lobbyCode: String) {
-        app.showMenuScene(JoinOnlineLobbyScene(app,rootService, nameInput.text, playerType))
+        app.showMenuScene(JoinOnlineLobbyScene(app, rootService))
     }
 
     override fun refreshAfterConnectionError(errorMessage: String) {

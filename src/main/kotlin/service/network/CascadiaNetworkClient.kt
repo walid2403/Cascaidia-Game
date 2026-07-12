@@ -28,6 +28,7 @@ class CascadiaNetworkClient(
     var sessionID: String? = null
 
     var playerType: PlayerType? = null
+    var scoringCards = MutableList<Boolean?>(5) { null }
 
     var players = mutableListOf<Pair<String, PlayerType>>()
 
@@ -243,6 +244,16 @@ class CascadiaNetworkClient(
         }
     }
 
+    /**
+     * Handle a [NetPlayer] sent by the server (Dummy function for warning)
+     */
+    @Suppress("UNUSED_PARAMETER", "unused")
+    @GameActionReceiver
+    fun onPlayerReceived(message: NetPlayer, sender: String) {
+        BoardGameApplication.runOnGUIThread {
+            println("For some reason $sender sent a NetPlayer object...")
+        }
+    }
 
     private fun disconnectAndError(message: Any) {
         networkService.disconnect()

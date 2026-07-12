@@ -1,5 +1,6 @@
 package gui
 
+import entity.PlayerType
 import tools.aqua.bgw.core.BoardGameApplication
 import service.RootService
 import service.Refreshable
@@ -26,9 +27,9 @@ class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
 
     private val scoreScene = ScoreScene(this@SopraApplication, rootService)
 
-    val joinOnlineLobbyScene = JoinOnlineLobbyScene(this@SopraApplication, rootService, "name", 0)
+    val joinOnlineLobbyScene = JoinOnlineLobbyScene(this@SopraApplication, rootService)
 
-    val hostOnlineLobbyScene = HostOnlineLobbyScene(this@SopraApplication, rootService, "Name", 0)
+    val hostOnlineLobbyScene = HostOnlineLobbyScene(this@SopraApplication, rootService)
 
     val hostOnlineScene = HostOnlineScene(this@SopraApplication, rootService)
     val joinOnlineScene = JoinOnlineScene(this@SopraApplication, rootService)

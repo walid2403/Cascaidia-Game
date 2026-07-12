@@ -55,15 +55,29 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         when (refresh) {
             "createGame" -> {
                 val sessionID = client?.sessionID
-
                 checkNotNull(sessionID)
-                onAllRefreshables { refreshAfterHostGame(sessionID) }
+
+                val playerName = client?.playerName
+                checkNotNull(playerName)
+
+                val playerType = client?.playerType
+                checkNotNull(playerType)
+
+                onAllRefreshables { refreshAfterHostGame(sessionID, playerName, playerType) }
             }
             "joinGame" -> {
                 val sessionID = client?.sessionID
-
                 checkNotNull(sessionID)
+
                 onAllRefreshables { refreshAfterJoinGame(sessionID) }
+
+                val playerNames = client?.players?.map {it.first}
+                checkNotNull(playerNames) { "After joining a game the names should not be empty" }
+
+                val scoringCards = client?.scoringCards?.toList()
+                checkNotNull(scoringCards)
+
+                onAllRefreshables { refreshAfterGameConfigUpdate(playerNames, scoringCards) }
             }
             "playerJoined" -> {
                 val playerName = client?.players?.last()?.first
@@ -155,7 +169,13 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
      *
      * @throws IllegalStateException if [connectionState] != [ConnectionState.WAITING_FOR_GUEST]
      */
-    fun startNewHostedGame(playerNames : List<Pair<String, PlayerType>>, scoringCards : List<Boolean>) {
+    fun startNewHostedGame() {
+        val playerNames = client?.players?.toList()
+        checkNotNull(playerNames) { "Player names must be entered" }
+
+        check(client?.scoringCards?.all {it != null} ?: false)
+        val scoringCards = client?.scoringCards as List<Boolean>
+
         check(connectionState == ConnectionState.WAITING_FOR_GUESTS && playerNames.size in 2..4)
         { "currently not prepared to start a new hosted game." }
 
@@ -315,6 +335,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     }
 
     fun sendGameConfig(playerList: List<String>, scoringCards: List<Boolean?>) {
+        client?.scoringCards = scoringCards.toMutableList()
         client?.sendGameActionMessage(GameConfigMessage(playerList, scoringCards))
     }
 

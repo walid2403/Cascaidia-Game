@@ -35,8 +35,11 @@ import tools.aqua.bgw.visual.Visual
  * @param playerName The [String] that was entered in the [HostOnlineScene]
  * @param playerType The [Int] corresponding to the [PlayerType] selected in [HostOnlineScene]
  */
-class HostOnlineLobbyScene(private val app: SopraApplication, private val rootService: RootService,
-                           private val playerName: String, private val playerType: Int
+class HostOnlineLobbyScene(private val app: SopraApplication,
+                           private val rootService: RootService,
+                           private val playerName: String = "Name",
+                           private val playerType: PlayerType = PlayerType.HUMAN,
+                           private val lobbyCode: String = "Code"
 ) : MenuScene(1920, 1080), Refreshable  {
 
     private val sceneWidth = 1920
@@ -161,18 +164,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         width = nameHeight,
         posX = p1Input.posX - nameHeight - 20,
         posY = p1Input.posY,
-        visual = when(playerType) {
-            0 -> ImageVisual("icons/HumanIcon3.png").apply {
-                style.borderRadius = BorderRadius(8)
-            }
-            1 -> ImageVisual("icons/EasyBotIcon3.png").apply {
-                style.borderRadius = BorderRadius(8)
-            }
-            2 -> ImageVisual("icons/HardBotIcon3.png").apply {
-                style.borderRadius = BorderRadius(8)
-            }
-            else -> throw IllegalArgumentException("Player type must be between 0 and 2, $playerType not supported")
-        }
+        visual = getVisual(playerName)
     )
 
     private val p2Input = Label(
@@ -592,14 +584,14 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         }
     }
 
-    private val lobbyCode = Label(
+    private val lobbyCodeLabel = Label(
         posX = 35,
         posY = paneHeight - 70,
         width = 500,
         height = 40,
         alignment = Alignment.TOP_LEFT,
         font = Font(24.0, family = "Canva Sans"),
-        text = "Lobby Code: ",
+        text = "Lobby Code: $lobbyCode",
     )
 
     private val warning = Label(
@@ -620,7 +612,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
     init {
 
         listOf(p1Input,p2Input,p3Input,p4Input, downButtonP1, downButtonP2, downButtonP3, shuffleButton,
-            exitButton, p1Icon, p2Icon, p3Icon, p4Icon, lobbyCode).forEach { hostPanel.add(it) }
+            exitButton, p1Icon, p2Icon, p3Icon, p4Icon, lobbyCodeLabel).forEach { hostPanel.add(it) }
 
         listOf(bear,elk,hawk,salmon,fox,
             bearCardA,bearCardB,elkCardA,elkCardB,foxCardA,foxCardB,
@@ -710,7 +702,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
                 }
                 onMouseClicked = {
                     if(allScoreCardsSelected() && enoughPlayers()) {
-                        rootService.gameService.startNewGame(getFinalPlayerList(), getFinalScoreCards())
+                        rootService.networkService.startNewHostedGame()
                     } else {
                         warning.isVisible = true
                         playAnimation(
@@ -798,9 +790,9 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
     private fun getPlayerType(icon: Label): PlayerType {
         return when(icon.visual) {
-            ImageVisual("HumanIcon3.png") -> PlayerType.HUMAN
-            ImageVisual("EasyBotIcon3.png") -> PlayerType.EASY_BOT
-            ImageVisual("HardBotIcon3.png") -> PlayerType.HARD_BOT
+            ImageVisual("icons/HumanIcon3.png") -> PlayerType.HUMAN
+            ImageVisual("icons/EasyBotIcon3.png") -> PlayerType.EASY_BOT
+            ImageVisual("icons/HardBotIcon3.png") -> PlayerType.HARD_BOT
             ImageVisual("icons/NetworkIcon.png") -> PlayerType.NETWORK
             else -> throw IllegalArgumentException("Unknown player type")
         }
@@ -811,14 +803,24 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
      * this animal, otherwise card B. Order of animals: bear, elk, salmon, hawk, fox
      */
 
-    private fun getFinalScoreCards(): List<Boolean> {
-        val list: MutableList<Boolean> = mutableListOf()
-        list.add(0, checkBoxBearA.isChecked)
-        list.add(1, checkBoxElkA.isChecked)
-        list.add(2, checkBoxSalmonA.isChecked)
-        list.add(3, checkBoxHawkA.isChecked)
-        list.add(4, checkBoxFoxA.isChecked)
-        return list.toList()
+    private fun getScoreCards(final: Boolean): List<Boolean?> {
+        val scoreCards = listOf(Pair(checkBoxBearA, checkBoxBearB), Pair(checkBoxElkA, checkBoxElkB),
+            Pair(checkBoxSalmonA, checkBoxSalmonB), Pair(checkBoxHawkA, checkBoxHawkB),
+            Pair(checkBoxFoxA, checkBoxFoxB))
+
+        val res = mutableListOf<Boolean?>()
+
+        scoreCards.forEach {
+            if (final) res.add(it.first.isChecked)
+            else if (it.first.isChecked) {
+                res.add(true)
+            }
+            else if (it.second.isChecked) {
+                res.add(false)
+            }
+            else res.add(null)
+        }
+        return res
     }
 
     /**
@@ -857,6 +859,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
             orderOfNames[i].text = sortedList[i].first
             orderOfTypes[i].visual = sortedList[i].second
         }
+
+        rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards(false))
     }
 
     /**
@@ -916,6 +920,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
             "checkBoxBearA" -> checkBoxBearB.isChecked = false
             "checkBoxBearB" -> checkBoxBearA.isChecked = false
         }
+
+        rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards(false))
     }
 
     /**
@@ -972,6 +978,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
             else -> throw IllegalArgumentException("Invalid button for this function: $button")
         }
 
+        rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards(false))
+
         playAnimation(
             ParallelAnimation(
                 MovementAnimation(
@@ -1024,6 +1032,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
             pair.first.isChecked = randomizerList[0]
             pair.second.isChecked = randomizerList[1]
         }
+
+        rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards(false))
     }
 
     /**
@@ -1044,12 +1054,25 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
         bearCardB.resize(194, 370)
     }
 
-    override fun refreshAfterGameConfigUpdate(playerList: List<String>, scoringCards: List<Boolean?>) {
-        updatePlayers(playerList)
+    private fun setScoreCards(scoreCards: List<Boolean?>) {
+        val scoreCardBoxes = listOf(Pair(checkBoxBearA, checkBoxBearB), Pair(checkBoxSalmonA, checkBoxSalmonB),
+            Pair(checkBoxHawkA, checkBoxHawkB), Pair(checkBoxFoxA, checkBoxFoxB), Pair(checkBoxElkA, checkBoxElkB))
+
+        scoreCards.forEachIndexed { i, it ->
+            if (it == null) {
+                scoreCardBoxes[i].first.isChecked = false
+                scoreCardBoxes[i].second.isChecked = false
+            }
+            else {
+                scoreCardBoxes[i].first.isChecked = it
+                scoreCardBoxes[i].second.isChecked = !it
+            }
+        }
     }
 
-    override fun refreshAfterHostGame(lobbyCode: String) {
-        this.lobbyCode.text = "Lobby Code: $lobbyCode"
+    override fun refreshAfterGameConfigUpdate(playerList: List<String>, scoringCards: List<Boolean?>) {
+        updatePlayers(playerList)
+        setScoreCards(scoringCards)
     }
 
     /**
@@ -1130,17 +1153,18 @@ class HostOnlineLobbyScene(private val app: SopraApplication, private val rootSe
 
     private fun getVisual(name: String): ImageVisual {
         return if (name == playerName) {
-             when (playerType) {
-                0 -> ImageVisual("HumanIcon3.png").apply {
+            when(playerType) {
+                PlayerType.HUMAN -> ImageVisual("icons/HumanIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
-                1 -> ImageVisual("EasyBotIcon3.png").apply {
+                PlayerType.EASY_BOT -> ImageVisual("icons/EasyBotIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
-                2 -> ImageVisual("HardBotIcon3.png").apply {
+                PlayerType.HARD_BOT -> ImageVisual("icons/HardBotIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
-                else -> throw IllegalArgumentException("Invalid playerType: $playerType")
+                else -> throw IllegalArgumentException("Player type must be PlayerType Object and can't be NETWORK, " +
+                        "$playerType not supported")
             }
         } else {
             ImageVisual("icons/NetworkIcon.png").apply {
