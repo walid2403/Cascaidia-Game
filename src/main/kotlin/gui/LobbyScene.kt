@@ -723,26 +723,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         }
     }
 
-    private val startLabel = Label(
-        posX = 700 - 8, posY = 620 - 130,
-        width = 142.0, height = 130.0,
-        text = "",
-        font = Font(size = 22, color = Color.BLACK)
-    ).apply {
-        visual = ColorVisual(160, 150, 210).apply { style.borderRadius = BorderRadius(15) }
-        this.isVisible = false
-    }
-
-    private val startButton = Label(
-        posX = 750 - 8, posY = 620 - 100,
-        width = 80.0, height = 50.0,
-        text = "▶",
-        font = Font(size = 40, color = Color.BLACK)
-    ).apply {
-        visual = ColorVisual(160, 150, 210).apply { style.borderRadius = BorderRadius(8) }
-        this.isVisible = false
-    }
-
     /**
      * Informs the player why he is not able to start the game. Is invisible unless 'start game' is clicked but not all
      * conditions to start playing are met.
@@ -772,7 +752,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         ).forEach { hostPanel.add(it) }
 
         listOf(
-            startLabel, startButton, bear, elk, hawk, salmon, fox,
+            bear, elk, hawk, salmon, fox,
             bearCardA, bearCardB, elkCardA, elkCardB, foxCardA, foxCardB,
             hawkCardA, hawkCardB, salmonCardA, salmonCardB,
             checkBoxHawkA, checkBoxHawkB, checkBoxElkA, checkBoxElkB, checkBoxBearA, checkBoxBearB, checkBoxFoxA,

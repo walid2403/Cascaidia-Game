@@ -79,6 +79,7 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
         onMouseClicked = {
             playerType = changePlayerType(true, playerType)
             warning.isVisible = false
+            warning.text = ""
         }
     }
 
@@ -92,6 +93,7 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
         onMouseClicked = {
             playerType = changePlayerType(false, playerType)
             warning.isVisible = false
+            warning.text = ""
         }
     }
 
@@ -126,6 +128,7 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
         }
         onTextChanged = {
             warning.isVisible = false
+            warning.text = ""
         }
     }
 
@@ -140,6 +143,7 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
         }
         onTextChanged = {
             warning.isVisible = false
+            warning.text = ""
         }
     }
 
@@ -190,6 +194,7 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
         }
     ).apply {
         isVisible = false
+        text = ""
     }
 
     init {
@@ -250,6 +255,6 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
     }
 
     override fun refreshAfterHostGame(lobbyCode: String, playerName: String, playerType: PlayerType) {
-        app.showMenuScene(app.hostOnlineLobbyScene)
+        app.showMenuScene(HostOnlineLobbyScene(app, rootService, lobbyCode))
     }
 }
