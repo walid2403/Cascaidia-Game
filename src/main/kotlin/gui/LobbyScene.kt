@@ -781,18 +781,27 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         listOf(hawkCardA, hawkCardB, foxCardA, foxCardB, salmonCardA, salmonCardB, elkCardA, elkCardB, bearCardA,
             bearCardB).forEach { it.isVisible = false }
 
-        listOf(p1Icon, p2Icon, p3Icon, p4Icon).forEach { icon ->
-            icon.isVisible = true
-            icon.visual = ImageVisual("icons/HumanIcon.png")
+        listOf(p1Icon, p2Icon).forEach {
+            it.isVisible = true
+            it.visual = ImageVisual("icons/HumanIcon.png")
         }
 
-        listOf(noP1, noP2, noP3, noP4).forEach {
+        listOf(p3Icon, p4Icon).forEach {
             it.isVisible = false
+            it.visual = ImageVisual("icons/HumanIcon.png")
         }
 
-        listOf(p1Input, p2Input, p3Input, p4Input).forEach { it.text = ""
-        it.isDisabled = false
-        it.isVisible = true}
+        noP1.isVisible = false
+        noP2.isVisible = false
+        noP3.isVisible = true
+        noP4.isVisible = true
+
+        listOf(p1Input, p2Input).forEach { it.text = ""
+        it.isVisible = true
+        it.isDisabled = false}
+        listOf(p3Input, p4Input).forEach { it.text = ""
+        it.isVisible = false
+        it.isDisabled = true}
 
         p1Type = 0
         p2Type = 0
