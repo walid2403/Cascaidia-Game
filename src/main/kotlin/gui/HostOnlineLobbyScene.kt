@@ -1,6 +1,5 @@
 package gui
 
-import entity.Player
 import entity.PlayerType
 import service.Refreshable
 import service.RootService
@@ -33,12 +32,9 @@ import tools.aqua.bgw.visual.Visual
  *
  * @param app The [SopraApplication] of the game
  * @param [rootService] The [RootService] instance to access the other service methods and entity layer
- * @param playerName The [String] that was entered in the [HostOnlineScene]
- * @param playerType The [Int] corresponding to the [PlayerType] selected in [HostOnlineScene]
  */
 class HostOnlineLobbyScene(private val app: SopraApplication,
                            private val rootService: RootService,
-                           private val lobbyCode: String = "Code"
 ) : MenuScene(1920, 1080), Refreshable  {
 
     private val sceneWidth = 1920
@@ -601,7 +597,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
     ).apply {
         onMouseClicked = {
             rootService.networkService.disconnect()
-            app.showMenuScene(HostOnlineScene(app,rootService))
+            resetScene()
+            app.showMenuScene(app.hostOnlineScene)
         }
     }
 
@@ -629,7 +626,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
         height = 40,
         alignment = Alignment.TOP_LEFT,
         font = Font(24.0, family = "Canva Sans"),
-        text = "Lobby Code: $lobbyCode",
+        text = "",
     )
 
     private val warning = Label(
@@ -671,6 +668,44 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
             )
     }
 
+    private fun resetScene() {
+        warning.text = ""
+        warning.isVisible = false
+
+        listOf(checkBoxSalmonA, checkBoxSalmonB, checkBoxElkA, checkBoxElkB, checkBoxBearA, checkBoxBearB, checkBoxFoxA,
+            checkBoxFoxB, checkBoxHawkA, checkBoxHawkB).forEach { it.isChecked = false }
+
+        listOf(hawkCardA, hawkCardB, foxCardA, foxCardB, salmonCardA, salmonCardB, elkCardA, elkCardB, bearCardA,
+            bearCardB).forEach { it.isVisible = false }
+
+        listOf(p1Input, p2Input, p3Input, p4Input).forEach { name ->
+            name.text = ""
+            name.isVisible = false
+        }
+
+        listOf(p1Icon, p2Icon, p3Icon, p4Icon).forEach { icon ->
+            icon.isVisible = false
+            icon.visual = ImageVisual("icons/NetworkIcon.png")
+        }
+
+        listOf(downButtonP1, downButtonP2, downButtonP3).forEach { it.isVisible = false }
+
+        hostPanel.posX = paneX.toDouble()
+        sidePanel.posX = paneX.toDouble()
+        tabLabel.posX = paneX + paneWidth - tabWidth + 80.0
+        tabLabel.apply {
+            visual = ImageVisual("assets/FoldOutTab.png").apply {
+                style.borderRadius = BorderRadius(15.0)
+            }
+            onMouseClicked = {
+                expandPanel()
+                resizeScoreCards()
+                hawkCardA.isVisible = true
+                hawkCardB.isVisible = true
+            }
+        }
+    }
+
     /**
      * This function moves the side panel containing the scorecard selection and images to the right and
      * the main panel to the left. The onClick action for the Tab [tabLabel] is changed to startGame
@@ -705,25 +740,6 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
             ).apply {
                 onFinished = {
                     updateTab()
-//                    runOnGUIThread {
-//                        tabLabel.apply {
-//                            visual = ImageVisual("StartGameTab.png").apply {
-//                                style.borderRadius = BorderRadius(15)
-//                            }
-//                            onMouseClicked = {
-//                                if(allScoreCardsSelected() && enoughPlayers()) {
-//                                    rootService.gameService.startNewGame(getFinalPlayerList(), getFinalScoreCards())
-//                                } else {
-//                                    val delay = DelayAnimation(5000)
-//                                    playAnimation(delay).apply {
-//                                        onFinished = {
-//                                            warning.isVisible = false
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
                 }
             }
         )
@@ -786,53 +802,6 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
             //warning.isVisible = true
             warning.text = "You need at least 2 players to play."
             return false
-        }
-    }
-
-    /**
-     * This function returns a [List] of [Pair]s of [String] and [PlayerType] containing the name and type of all
-     * occupied player slots.
-     */
-
-    private fun getFinalPlayerList(): List<Pair<String, PlayerType>> {
-        val list: MutableList<Pair<String, PlayerType>> = mutableListOf()
-        var type = PlayerType.HUMAN
-        var name = ""
-        for(i in 0..3) {
-            when (i) {
-                0 -> {
-                    type = getPlayerType(orderOfTypes[0])
-                    name = orderOfNames[0].text
-                }
-                1 -> {
-                    type = getPlayerType(orderOfTypes[1])
-                    name = orderOfNames[1].text
-                }
-                2 -> {
-                    type = getPlayerType(orderOfTypes[2])
-                    name = orderOfNames[2].text
-                }
-                3 -> {
-                    type = getPlayerType(orderOfTypes[3])
-                    name = orderOfNames[3].text
-                }
-            }
-            if(name != "") list.add(Pair(name,type))
-        }
-        return list.toList()
-    }
-
-    /**
-     * This function returns the [PlayerType] corresponding to the [ImageVisual] saved in the given [Label] [icon]
-     */
-
-    private fun getPlayerType(icon: Label): PlayerType {
-        return when(icon.visual) {
-            ImageVisual("icons/HumanIcon3.png") -> PlayerType.HUMAN
-            ImageVisual("icons/EasyBotIcon3.png") -> PlayerType.EASY_BOT
-            ImageVisual("icons/HardBotIcon3.png") -> PlayerType.HARD_BOT
-            ImageVisual("icons/NetworkIcon.png") -> PlayerType.NETWORK
-            else -> throw IllegalArgumentException("Unknown player type")
         }
     }
 
@@ -1101,12 +1070,15 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
         this.playerName = playerName
         this.playerType = playerType
         p1Icon.visual = getVisual(playerName)
+        p1Icon.isVisible = true
+        p1Input.isVisible = true
     }
 
     /**
      * Closes the MenuScene when called.
      */
     override fun refreshAfterStartGame() {
+        resetScene()
         app.hideMenuScene()
     }
 

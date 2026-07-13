@@ -688,7 +688,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     ).apply {
         visual = Visual.EMPTY
         onMouseClicked = {
-            app.showMenuScene(MainMenuScene(app, rootService))
+            resetScene()
+            app.showMenuScene(app.mainMenuScene)
         }
     }
 
@@ -770,6 +771,45 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         )
     }
 
+    private fun resetScene() {
+        warning.text = ""
+        warning.isVisible = false
+
+        listOf(checkBoxSalmonA, checkBoxSalmonB, checkBoxElkA, checkBoxElkB, checkBoxBearA, checkBoxBearB, checkBoxFoxA,
+            checkBoxFoxB, checkBoxHawkA, checkBoxHawkB).forEach { it.isChecked = false }
+
+        listOf(hawkCardA, hawkCardB, foxCardA, foxCardB, salmonCardA, salmonCardB, elkCardA, elkCardB, bearCardA,
+            bearCardB).forEach { it.isVisible = false }
+
+        listOf(p1Icon, p2Icon, p3Icon, p4Icon).forEach { icon ->
+            icon.isVisible = false
+            icon.visual = ImageVisual("icons/HumanIcon.png")
+        }
+
+        listOf(p1Input, p2Input, p3Input, p4Input).forEach { it.text = "" }
+
+        p1Type = 0
+        p2Type = 0
+        p3Type = 0
+        p4Type = 0
+
+        hostPanel.posX = paneX.toDouble()
+        sidePanel.posX = paneX.toDouble()
+        tabLabel.posX = paneX + paneWidth - tabWidth + 80.0
+        tabLabel.apply {
+            visual = ImageVisual("assets/FoldOutTab.png").apply {
+                style.borderRadius = BorderRadius(15.0)
+            }
+            onMouseClicked = {
+                expandPanel()
+                resizeScoreCards()
+                hawkCardA.isVisible = true
+                hawkCardB.isVisible = true
+            }
+        }
+
+    }
+
     /**
      * This function moves the side panel containing the scorecard selection and images to the right and
      * the main panel to the left. The onClick action for the Tab [tabLabel] is changed to startGame
@@ -802,6 +842,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
                         onMouseClicked = {
                             if(checkStartReady()) {
                                 rootService.gameService.startNewGame(getFinalPlayers(), getFinalScoreCards())
+                                resetScene()
                             }
                         }
                     }
@@ -1151,10 +1192,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         list.add(4, checkBoxFoxA.isChecked)
         return list.toList()
     }
-
-//    override fun refreshAfterStartGame() {
-//        app.hideMenuScene()
-//    }
 }
 
 

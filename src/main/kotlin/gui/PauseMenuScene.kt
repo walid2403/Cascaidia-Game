@@ -70,7 +70,7 @@ class PauseMenuScene (private val app: SopraApplication, private val rootService
     ).apply {
         onMouseClicked ={
             if (rootService.currentGame?.isLocal == false) rootService.networkService.disconnect() // Böse aber muss so wegen nullability
-            app.showMenuScene(MainMenuScene(app,rootService))
+            app.showMenuScene(app.mainMenuScene)
         }
     }
 

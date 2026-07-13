@@ -325,7 +325,7 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
         }
     ).apply {
         onMouseClicked = {
-            app.showMenuScene(MainMenuScene(app, rootService))
+            app.showMenuScene(app.mainMenuScene)
         }
     }
 

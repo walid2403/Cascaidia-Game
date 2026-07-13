@@ -58,7 +58,7 @@ class MainMenuScene(private val app: SopraApplication,private val rootService: R
         visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(15) }
 
         onMouseClicked = {
-            app.showMenuScene(LobbyScene(app,rootService))
+            app.showMenuScene(app.lobbyScene)
         }
     }
 
@@ -127,7 +127,7 @@ class MainMenuScene(private val app: SopraApplication,private val rootService: R
     ).apply {
         visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(15) }
         onMouseClicked = {
-            app.showMenuScene(HostOnlineScene(app,rootService))
+            app.showMenuScene(app.hostOnlineScene)
         }
     }
     val joinButton = Button(
@@ -140,7 +140,7 @@ class MainMenuScene(private val app: SopraApplication,private val rootService: R
         visual = ColorVisual(192, 192, 192).apply { style.borderRadius = BorderRadius(15) }
 
         onMouseClicked = {
-            app.showMenuScene(JoinOnlineScene(app, rootService))
+            app.showMenuScene(app.joinOnlineScene)
         }
 
     }

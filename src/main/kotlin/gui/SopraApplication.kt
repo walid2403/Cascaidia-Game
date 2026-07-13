@@ -1,6 +1,5 @@
 package gui
 
-import entity.PlayerType
 import tools.aqua.bgw.core.BoardGameApplication
 import service.RootService
 import service.Refreshable
@@ -21,7 +20,7 @@ class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
      */
     val gameScene = GameScene(this@SopraApplication,rootService)
 
-    private val mainMenuScene = MainMenuScene(this@SopraApplication,rootService)
+    val mainMenuScene = MainMenuScene(this@SopraApplication,rootService)
 
     val pauseMenu = PauseMenuScene(this@SopraApplication,rootService)
 

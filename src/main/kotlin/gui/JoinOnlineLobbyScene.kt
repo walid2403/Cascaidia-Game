@@ -24,8 +24,6 @@ import tools.aqua.bgw.visual.Visual
  * as well as the host's current scoreCard selection.
  * @param app The [SopraApplication] of the game
  * @param [rootService] The [RootService] instance to access the other service methods and entity layer
- * @param playerName The [String] that was entered in the [JoinOnlineScene]
- * @param playerType The [Int] corresponding to the [PlayerType] selected in [JoinOnlineScene]
  */
 class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootService: RootService) :
     MenuScene(1920, 1080), Refreshable  {
@@ -122,7 +120,8 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
         visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
-            app.showMenuScene(JoinOnlineScene(app, rootService))
+            resetScene()
+            app.showMenuScene(app.joinOnlineScene)
         }
     }
 
@@ -542,7 +541,25 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
             checkBoxSalmonA,
             checkBoxSalmonB
         )
+    }
 
+    private fun resetScene() {
+
+        listOf(checkBoxSalmonA, checkBoxSalmonB, checkBoxElkA, checkBoxElkB, checkBoxBearA, checkBoxBearB, checkBoxFoxA,
+            checkBoxFoxB, checkBoxHawkA, checkBoxHawkB).forEach { it.isChecked = false }
+
+        listOf(p1Input, p2Input, p3Input, p4Input).forEach { name ->
+            name.text = ""
+            name.isVisible = false
+        }
+
+        listOf(p1Icon, p2Icon, p3Icon, p4Icon).forEach { icon ->
+            icon.isVisible = false
+            icon.visual = ImageVisual("icons/NetworkIcon.png")
+        }
+
+        panelsOut = false
+        movePanelsIn()
     }
 
     /**
@@ -785,6 +802,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
     }
 
     override fun refreshAfterStartGame() {
+        resetScene()
         app.hideMenuScene()
     }
 

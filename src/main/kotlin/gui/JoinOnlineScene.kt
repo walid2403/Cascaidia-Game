@@ -57,7 +57,8 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
     ).apply {
         onMouseClicked = {
             rootService.networkService.disconnect()
-            app.showMenuScene(MainMenuScene(app,rootService))
+            resetScene()
+            app.showMenuScene(app.mainMenuScene)
         }
     }
 
@@ -201,6 +202,14 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
         )
     }
 
+    private fun resetScene() {
+        lobbyCodeInput.text = ""
+        nameInput.text = ""
+        warning.isVisible = false
+        playerType = 0
+        playerTypeIcon.visual = ImageVisual("icons/HumanIcon2.png")
+    }
+
     private fun changePlayerType(leftButton: Boolean, playerType: Int): Int {
         val newType = if (leftButton) {
             (playerType + 2) % 3
@@ -248,7 +257,8 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
     }
 
     override fun refreshAfterJoinGame(lobbyCode: String, playerName: String, playerType: PlayerType) {
-        app.showMenuScene(JoinOnlineLobbyScene(app, rootService))
+        resetScene()
+        app.showMenuScene(app.joinOnlineLobbyScene)
     }
 
     override fun refreshAfterConnectionError(errorMessage: String) {

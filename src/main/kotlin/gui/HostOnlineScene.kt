@@ -55,7 +55,8 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
         visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
-            app.showMenuScene(MainMenuScene(app,rootService))
+            resetScene()
+            app.showMenuScene(app.mainMenuScene)
         }
     }
 
@@ -215,6 +216,14 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
         )
     }
 
+    private fun resetScene() {
+        lobbyInput.text = ""
+        nameInput.text = ""
+        warning.isVisible = false
+        playerType = 0
+        playerTypeIcon.visual = ImageVisual("icons/HumanIcon2.png")
+    }
+
     /**
      * This function adjusts the playerType and the players icon according to if the left or right button was pressed
      */
@@ -255,6 +264,7 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
     }
 
     override fun refreshAfterHostGame(lobbyCode: String, playerName: String, playerType: PlayerType) {
-        app.showMenuScene(HostOnlineLobbyScene(app, rootService, lobbyCode))
+        resetScene()
+        app.showMenuScene(app.hostOnlineLobbyScene)
     }
 }
