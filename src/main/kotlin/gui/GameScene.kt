@@ -33,6 +33,7 @@ import tools.aqua.bgw.visual.Visual
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
+import kotlin.collections.iterator
 import kotlin.math.ceil
 import kotlin.math.min
 
@@ -91,7 +92,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private var playerListAtStart = mutableListOf<Player>()
 
     //Hintergrundbild
-    private val logo = Label(posX = 0,posY = 0,width = 1920,height = 1080,visual = ImageVisual("backgrounds/CascadiaHintergrund.png"))
+    private val logo = Label(posX = 0,posY = 0,width = 1920,height = 1080,visual = ImageVisual("backgrounds/CascadiaHintergrund2.png"))
 
     //Graue Box um Auswahl
     private val grayBox = Label(width = 950, height = 300, posX = 485, posY = -40).apply {
@@ -1758,6 +1759,23 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         val game = rootService.currentGame
         checkNotNull(game)
 
+        //TODO("wenn einfach direkt changeTurn aufgerufen wird klappt es auch aber man sieht den Spielzug nicht, nur wenn man über die Minimap bei den anderen guckt.")
+        //TODO("Aber das könnte so zu Problemen führen wenn wir einen Delay haben und die anderen nicht")
+        if(game.playerQueue.elementAt(game.playerQueue.size-1).type == PlayerType.NETWORK) {
+            playAnimation(
+                DelayAnimation(duration = (1000 / animationSpeed).toInt()).apply {
+                    onFinished = { changeTurn() }
+                }
+            )
+        } else {
+            changeTurn()
+        }
+    }
+
+    private fun changeTurn() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+
         redo.isDisabled = false
         undo.isDisabled = false
         endTurn.isDisabled = false
@@ -1777,19 +1795,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         zoomOnNextPlayer()
         changeGreyVisibility(true, player)
 
-        //println("player ${game.playerQueue.peek().name} has ${game.playerQueue.peek().natureTokens} nature tokens")
         customChoiceButton.isDisabled = game.playerQueue.peek().natureTokens == 0
-        //println("custom Choice disabled: ${customChoiceButton.isDisabled}")
 
         enableShopButtons()
         enableShopOnclick()
         checkRemoveWildlifeButton()
         checkExterminateButton()
-
         setPlayerNameAtBottom(null)
-
-        //load new visual into Shop Label of the Tile selected by the last player, then move it back into the Shop
-        //position and make it visible again
 
         if (selectTile != -1) {
             tileShop[selectTile].visual = getShopVisual(selectTile)
@@ -1815,10 +1827,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         initializeCamerasOnSide()
 
-        //refreshShop()       //Game Ende testen wenn TileStack leer ist oder zu wenig animal Tokens
-        //saveGameState()
-
-
         if(!isHuman()) {
             disableAllForNetworkBotTurn()
             if(game.playerQueue.peek().type == PlayerType.EASY_BOT ||
@@ -1828,7 +1836,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
 
         updateRoundCounter()
-
         if(rootService.currentGame?.isLocal == false) { disableOnlineGameFeatures() }
     }
 
@@ -2223,6 +2230,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         checkNotNull(game)
 
         if(game.playerQueue.peek().type == PlayerType.NETWORK) {
+            println("Place Tile: "+index.third.toString()+", "+index.second.toString())
             val game = rootService.currentGame
             checkNotNull(game)
 
@@ -2231,26 +2239,14 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             val playerID = getPlayerId()
             val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(playerID)
 
-            val coordinates = convertCoordinates(index)
-            selectedGridX = coordinates.first
-            selectedGridY = coordinates.second
-            checkNotNull(selectedGridY)
-            checkNotNull(selectedGridX)
-            val x = selectedGridX
-            val y = selectedGridY
-            checkNotNull(x)
-            checkNotNull(y)
-            val greyTile = currentArea[x, y]
-            checkNotNull(greyTile)
+            println("Player: "+playerID.toString())
 
-            greyTile.visual = chosenTile.visual
-            greyTile.rotate(botRotation*60)
+            val hexagon = HexagonViewExtended(currentArea[0,0]?.size ?: 14.0, chosenTile.visual)
+            currentArea[index.third, index.second] = hexagon
+
             chosenTile.isVisible = false
-            tileMap.add(game.choices[game.selectedChoice.first].first to greyTile)
-
-            changeGreyVisibility(false, playerID, greyTile)
-
-            greyTile.choiceHex = false
+            tileMap.add(game.choices[game.selectedChoice.first].first to hexagon)
+            hexagon.choiceHex = false
         }
 
         if(isHuman()) {
