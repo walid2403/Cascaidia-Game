@@ -241,7 +241,6 @@ class CascadiaNetworkClient(
     @GameActionReceiver
     fun onChatReceived(message: ChatMessage, sender: String) {
         BoardGameApplication.runOnGUIThread {
-            println("Test")
             networkService.receiveChatMessage(message, sender)
         }
     }

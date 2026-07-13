@@ -1416,7 +1416,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     override fun refreshAfterChatMessage(messageSender: String, message: String) {
-        println("Sender: $messageSender, Message: $message")
         if(!chatOpened) chatButton.visual = ImageVisual("chat_icon_redDot.png")
         if(message.isNotBlank() && messageSender.isNotBlank()) {
             chatView.items.add(0, "$messageSender: $message")
