@@ -343,12 +343,12 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     }
 
     fun sendGameConfig(playerList: List<String>, scoringCards: List<Boolean?>) {
+        client?.players?.sortBy { playerList.indexOf(it.first) }
         client?.scoringCards = scoringCards.toMutableList()
         client?.sendGameActionMessage(GameConfigMessage(playerList, scoringCards))
     }
 
     fun receiveGameConfig(message: GameConfigMessage) {
-        println("Players: ${message.players}, Scoring Cards: ${message.scoringCards}")
         onAllRefreshables { refreshAfterGameConfigUpdate(message.players, message.scoringCards) }
     }
 
