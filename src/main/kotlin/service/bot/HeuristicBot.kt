@@ -6,7 +6,7 @@ import entity.Tile
 import entity.WildlifeToken
 import service.RootService
 
-class HeuristicBot(private val rootService: RootService) {
+class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
 
     fun makeTurn() {
         val currentGame = rootService.currentGame
@@ -90,6 +90,7 @@ class HeuristicBot(private val rootService: RootService) {
         }
 
         if (bestPosition != null) {
+            bot.coordinatesTile = bestPosition
             rootService.playerActionService.placeTile(bestPosition)
         } else { //falls keine freien Plätze mehr gibt
             currentGame.gameState = GameState.END_OF_TURN
@@ -157,6 +158,7 @@ class HeuristicBot(private val rootService: RootService) {
 
         //3.Tier platzieren
         if(bestPosition != null){
+            bot.coordinatesWildlifeToken = bestPosition
             rootService.playerActionService.placeWildlife(bestPosition)
         } else {
             currentGame.gameState = GameState.END_OF_TURN
