@@ -13,6 +13,7 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
     var coordinatesWildlifeToken: Triple<Int?, Int?, Int?> = Triple(null, null, null)
 
     private val hardBot = BotLocaleOptimum(rootService, this)
+    private val heuristicBot = HeuristicBot(rootService, this)
 
     private fun resetCoordinates() {
         coordinatesTile = Triple(null, null, null)
@@ -28,7 +29,9 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
         when (playerType) {
             PlayerType.EASY_BOT -> {
                 resetCoordinates()
-                randomBotTurn()
+                while(rootService.currentGame?.gameState != GameState.END_OF_TURN) {
+                    heuristicBot.makeTurn()
+                }
             }
 
             PlayerType.HARD_BOT -> {
