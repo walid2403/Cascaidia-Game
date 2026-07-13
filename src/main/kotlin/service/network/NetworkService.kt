@@ -357,7 +357,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     }
 
     fun sendSelectWildlife(wildlifeIndex: Int) {
-        client?.sendGameActionMessage(SelectWildlifeMessage(wildlifeIndex))
+//        client?.sendGameActionMessage(SelectWildlifeMessage(wildlifeIndex))
     }
 
     fun receiveSelectWildlife(message: SelectWildlifeMessage) {
@@ -376,7 +376,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     }
 
     fun sendSelectHabitatTile(tileIndex: Int) {
-        client?.sendGameActionMessage(SelectHabitatTileMessage(tileIndex))
+//        client?.sendGameActionMessage(SelectHabitatTileMessage(tileIndex))
     }
 
     fun receiveSelectHabitatTile(message: SelectHabitatTileMessage) {
