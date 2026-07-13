@@ -75,14 +75,23 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             currentGame.choices[index] = Pair(currentPair.first,newToken)
         }
 
-        for (wildeLifeToken in alteTierToken) {
-            currentGame.wildlifeTokens.push(wildeLifeToken)
+        if (currentGame.choices.map {it.second}.distinct().size == 1) {
+            rootService.gameService.exterminate(false, natureToken = true)
+        } else {
+            for (wildeLifeToken in alteTierToken) {
+                currentGame.wildlifeTokens.push(wildeLifeToken)
+            }
+
+            currentGame.wildlifeTokens.shuffle()
+
+            currentPlayer.natureTokens--
+
+            if (currentGame.playerQueue.peek().type != PlayerType.NETWORK && !currentGame.isLocal) {
+                rootService.networkService.sendExterminate(indices, true)
+            }
+
+            onAllRefreshables { refreshAfterChangeWildlife(indices) }
         }
-
-        currentGame.wildlifeTokens.shuffle()
-
-        currentPlayer.natureTokens--
-        onAllRefreshables { refreshAfterChangeWildlife(indices) }
 
     }
 
@@ -135,6 +144,9 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         currentGame.selectedChoice = Pair(tileIndex,wildlifeIndex)
         currentGame.gameState = GameState.MADE_CHOICE
 
+        if (currentPlayer.type != PlayerType.NETWORK && !currentGame.isLocal) {
+            rootService.networkService.sendSelect(true)
+        }
 
         onAllRefreshables { refreshAfterFreeSelection() }
 
@@ -169,6 +181,10 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         currentGame.selectedChoice = Pair(index,index)
         currentGame.gameState = GameState.MADE_CHOICE
 
+        if (currentGame.playerQueue.peek().type != PlayerType.NETWORK && !currentGame.isLocal) {
+            rootService.networkService.sendSelect(false)
+        }
+
         onAllRefreshables { refreshAfterSelectColumn(index) }
 
     }
@@ -182,7 +198,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      *
      * @throws IllegalStateException if the [GameState] is not `MADE_CHOICE`.
      */
-    fun rotateTile(right: Boolean) {
+    fun rotateTile(right: Boolean?, targetRotation: Int? = null) {
         val game = rootService.currentGame ?: error("No current game")
 
         check(game.gameState == GameState.MADE_CHOICE) {
@@ -197,21 +213,44 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
         val selectedTile = game.choices[tileIndex].first
 
-        if (right) {
-            selectedTile.rotation = (selectedTile.rotation + 1) % 6
+        if (right != null) {
+            if (right) {
+                selectedTile.rotation = (selectedTile.rotation + 1) % 6
 
-            if (selectedTile.habs.isNotEmpty()) {
-                val lastHabitat = selectedTile.habs.removeAt(selectedTile.habs.lastIndex)
-                selectedTile.habs.add(0, lastHabitat)
-            }
-        } else {
-            selectedTile.rotation = (selectedTile.rotation + 5) % 6
+                if (selectedTile.habs.isNotEmpty()) {
+                    val lastHabitat = selectedTile.habs.removeAt(selectedTile.habs.lastIndex)
+                    selectedTile.habs.add(0, lastHabitat)
+                }
 
-            if (selectedTile.habs.isNotEmpty()) {
-                val firstHabitat = selectedTile.habs.removeAt(0)
-                selectedTile.habs.add(firstHabitat)
+                onAllRefreshables { refreshAfterRotate(1) }
+            } else {
+                selectedTile.rotation = (selectedTile.rotation + 5) % 6
+
+                if (selectedTile.habs.isNotEmpty()) {
+                    val firstHabitat = selectedTile.habs.removeAt(0)
+                    selectedTile.habs.add(firstHabitat)
+                }
+
+                onAllRefreshables { refreshAfterRotate(-1) }
             }
+        } else if (targetRotation != null) {
+            val rightTimes = targetRotation - selectedTile.rotation
+            val leftTimes = selectedTile.rotation - targetRotation
+
+            selectedTile.rotation = targetRotation
+
+            var amount = rightTimes
+
+            if (leftTimes < rightTimes) {
+                amount = leftTimes * (-1)
+            }
+
+            onAllRefreshables { refreshAfterRotate(amount) }
         }
+
+        game.tileRotation = selectedTile.rotation
+
+        rootService.networkService.sendRotation()
     }
 
     /**
@@ -230,6 +269,8 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      */
     fun placeTile(index: Triple<Int, Int, Int>) {
         val game = rootService.currentGame ?: error("No current game")
+
+        game.tileCoordinates = index
 
         check(game.gameState == GameState.MADE_CHOICE) {
             "Tile can only be placed after a choice was made."
@@ -296,6 +337,9 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      */
     fun placeWildlife(index: Triple<Int, Int, Int>) {
         val game = rootService.currentGame ?: error("No current game")
+
+        game.tokenCoordinates = index
+
         val currentPlayer = game.playerQueue.peek()
         check(game.gameState == GameState.PLAYED_TILE) {
             "Wildlife can only be placed in PLAYED_TILE state"
@@ -323,8 +367,6 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         onAllRefreshables {
             refreshAfterPlaceWildlife(index)
         }
-
-
     }
 
     /**

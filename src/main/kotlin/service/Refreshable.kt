@@ -1,5 +1,9 @@
 package service
 
+import entity.PlayerType
+import entity.Tile
+import entity.WildlifeToken
+
 /**
  * This interface provides a mechanism for the service layer classes to communicate
  * (usually to the GUI classes) that certain changes have been made to the entity
@@ -66,9 +70,10 @@ interface Refreshable {
     /**
      * Perform refreshes necessary after a tile has been rotated
      *
-     * @param right Has the tile been rotated in the right direction? ([Boolean])
+     * @param amount How often should the tile be rotated, negative values mean a rotation in the left direction,
+     * positive values a rotation in the right direction ([Int])
      */
-    fun refreshAfterRotate(right: Boolean) {}
+    fun refreshAfterRotate(amount: Int) {}
 
     /**
      * Perform refreshes necessary after a tile has been placed
@@ -108,7 +113,17 @@ interface Refreshable {
     /**
      * Perform refreshes necessary after a network game has been started
      */
-    fun refreshAfterHostGame(lobbyCode: String) {}
+    fun refreshAfterHostGame(lobbyCode: String, playerName: String, playerType: PlayerType) {}
+
+    /**
+     * Perform refreshes necessary after a network game has been started
+     */
+    fun refreshAfterJoinGame(lobbyCode: String, playerName: String, playerType: PlayerType) {}
+
+    /**
+     * Perform refreshes necessary after a network game has been started
+     */
+    fun refreshAfterPlayerJoined(playerName: String) {}
 
     /**
      * Perform refreshes necessary after a chat message has been received
@@ -118,5 +133,18 @@ interface Refreshable {
     /**
      * Perform refreshes necessary after a nature token has been used
      */
-    fun refreshAfterUseNatureToken() {}
+    fun refreshAfterUnlockSelection() {}
+
+    /**
+     * Perform refreshes necessary after a nature token has been used
+     */
+    fun refreshAfterSelectWildlife(wildlifeIndex: Int) {}
+
+    /**
+     * Perform refreshes necessary after a nature token has been used
+     */
+    fun refreshAfterSelectTile(tileIndex: Int) {}
+
+    fun refreshAfterBotTurn(coordinatesTile: Triple<Int, Int, Int>,
+                            coordinatesWildlife: Triple<Int?, Int?, Int?>) {}
 }
