@@ -73,6 +73,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private var changeAnimalsArray = booleanArrayOf(false,false,false,false)
     private var player = -1
     private var botRotation = 0
+    var fromScoringScene = false
 
     private var allButtonsAllowed = true
     var animationsEnabled = false
@@ -1300,6 +1301,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         animationsEnabled = false
         isPlayerHuman = true
         animationSpeed = 1.0
+        fromScoringScene = false
 
         animalShop.forEach { animal -> animal.visual = Visual.EMPTY }
         tileShop.forEach { tile -> tile.visual = Visual.EMPTY }
@@ -1367,11 +1369,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         showPlayerAreasAtStart()
 
         adjustAreas()
-        if(isHuman()) {
-            //unlock()
-        } else {
-            //lock()
-            rootService.bot.makeTurn(game.playerQueue.peek().type)
+
+        if(!isHuman()) {
+            disableAllForNetworkBotTurn()
+            if(game.playerQueue.peek().type == PlayerType.EASY_BOT ||
+                game.playerQueue.peek().type == PlayerType.HARD_BOT ) {
+                rootService.bot.makeTurn(game.playerQueue.peek().type)
+            }
         }
     }
 
@@ -1514,6 +1518,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         val x = serviceCoordinates.third
         val y = serviceCoordinates.second
         return Pair(x, y)
+    }
+
+    fun disableForEndScreen() {
+
     }
 
 

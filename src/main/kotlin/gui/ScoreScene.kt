@@ -702,17 +702,17 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
         return when(table) {
             wildlifeTableTopHalf -> {
                 when(index) {
-                    1 -> ImageVisual("tokens/bear.png", entryWidth, entryHeight, offsetX = -15)
-                    2 -> ImageVisual("tokens/elk.png", entryWidth, entryHeight, offsetX = -15)
-                    3 -> ImageVisual("tokens/salmon.png", entryWidth, entryHeight, offsetX = -15)
-                    4 -> ImageVisual("tokens/hawk.png", entryWidth, entryHeight, offsetX = -15)
+                    1 -> ImageVisual("tokens/bear.png")
+                    2 -> ImageVisual("tokens/elk.png")
+                    3 -> ImageVisual("tokens/salmon.png")
+                    4 -> ImageVisual("tokens/hawk.png")
                     else -> throw IllegalArgumentException("index $index in table ${table.name} " +
                             "does not contain an image" )
                 }
             }
             wildlifeTableBottomHalf -> {
                 when(index) {
-                    0 -> ImageVisual("tokens/fox.png", entryWidth, entryHeight, offsetX = -15)
+                    0 -> ImageVisual("tokens/fox.png")
                     else -> throw IllegalArgumentException("index $index in table ${table.name} " +
                             "does not contain an image" )
                 }
@@ -720,18 +720,18 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
             habitatTableTopHalf -> {
                 when(index) {
                     //will be replaced with different/correct images, ignore duplicate warning for now
-                    1 -> ImageVisual("tiles/scoreSceneTiles/mountain.png", entryWidth, entryHeight)
-                    2 -> ImageVisual("tiles/scoreSceneTiles/forest.png", entryWidth, entryHeight)
-                    3 -> ImageVisual("tiles/scoreSceneTiles/desert.png", entryWidth, entryHeight)
-                    4 -> ImageVisual("tiles/scoreSceneTiles/swamp.png", entryWidth, entryHeight)
+                    1 -> ImageVisual("tiles/scoreSceneTiles/mountain.png")
+                    2 -> ImageVisual("tiles/scoreSceneTiles/forest.png")
+                    3 -> ImageVisual("tiles/scoreSceneTiles/desert.png")
+                    4 -> ImageVisual("tiles/scoreSceneTiles/swamp.png")
                     else -> throw IllegalArgumentException("index $index in table ${table.name} " +
                             "does not contain an image" )
                 }
             }
             habitatTableBottomHalf -> {
                 when(index) {
-                    0 -> ImageVisual("tiles/scoreSceneTiles/lake.png", entryWidth, entryHeight)
-                    2 -> ImageVisual("tokens/pinecone.png", entryWidth, entryHeight, offsetX = -15)
+                    0 -> ImageVisual("tiles/scoreSceneTiles/lake.png")
+                    2 -> ImageVisual("tokens/pinecone.png")
                     else -> throw IllegalArgumentException("index $index in table ${table.name} " +
                             "does not contain an image" )
                 }
