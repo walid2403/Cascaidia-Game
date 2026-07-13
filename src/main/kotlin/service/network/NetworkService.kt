@@ -211,6 +211,8 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         if (game.playerQueue.peek().type == PlayerType.NETWORK) updateConnectionState(ConnectionState.WAITING_FOR_PLAYER_TURN)
         else updateConnectionState(ConnectionState.PLACING)
         client?.sendGameActionMessage(message)
+
+        onAllRefreshables { refreshAfterStartGame() }
     }
 
     /**
@@ -302,6 +304,8 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
             rootService.playerActionService.placeWildlife(tokenCoords)
         }
+
+        rootService.gameService.changeTurn()
     }
 
     fun sendExterminate(indices: List<Int>, natureToken: Boolean) {

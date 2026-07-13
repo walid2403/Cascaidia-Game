@@ -93,7 +93,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
 
         rootService.history.prevMoves.push(CascadiaGame(game))
 
-        onAllRefreshables { refreshAfterStartGame() }
+        if (game.isLocal) onAllRefreshables { refreshAfterStartGame() }
 
     }
 
