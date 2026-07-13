@@ -242,6 +242,8 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
         if (game.playerQueue.peek().type == PlayerType.NETWORK) updateConnectionState(ConnectionState.WAITING_FOR_PLAYER_TURN)
         else updateConnectionState(ConnectionState.PLACING)
+
+        onAllRefreshables { refreshAfterStartGame() }
     }
 
     fun sendSelect(unlockedChoices: Boolean) {
