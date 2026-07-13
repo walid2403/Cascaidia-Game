@@ -2219,41 +2219,39 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
     override fun refreshAfterPlaceTile(index: Triple<Int, Int, Int>) {
-//        if(!isHuman()) {
-//            val game = rootService.currentGame
-//            checkNotNull(game)
-//
-//
-//            val chosenTile = tileShop[selectTile]
-//            val playerID = getPlayerId()
-//            val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(playerID)
-//
-//            val coordinates = convertCoordinates(index)
-//            selectedGridX = coordinates.first
-//            selectedGridY = coordinates.second
-//            checkNotNull(selectedGridY)
-//            checkNotNull(selectedGridX)
-//            val x = selectedGridX
-//            val y = selectedGridY
-//            checkNotNull(x)
-//            checkNotNull(y)
-//            val greyTile = currentArea[x, y]
-//            //println("X: $selectedGridX, Y: $selectedGridY, Coordinates: $coordinates")
-//            checkNotNull(greyTile)
-//
-//            greyTile.visual = chosenTile.visual
-//            greyTile.rotate(botRotation*60)
-//            chosenTile.isVisible = false
-//            tileMap.add(game.choices[selectTile].first to greyTile)
-//
-//            changeGreyVisibility(false, playerID, greyTile)
-//
-//            greyTile.isDisabled = false
-//            greyTile.onMouseClicked = { onClickForTiles(greyTile) }
-//            greyTile.choiceHex = false
-//
-//            confirm.isDisabled = false
-//        }
+        val game = rootService.currentGame
+        checkNotNull(game)
+
+        if(game.playerQueue.peek().type == PlayerType.NETWORK) {
+            val game = rootService.currentGame
+            checkNotNull(game)
+
+
+            val chosenTile = tileShop[game.selectedChoice.first]
+            val playerID = getPlayerId()
+            val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(playerID)
+
+            val coordinates = convertCoordinates(index)
+            selectedGridX = coordinates.first
+            selectedGridY = coordinates.second
+            checkNotNull(selectedGridY)
+            checkNotNull(selectedGridX)
+            val x = selectedGridX
+            val y = selectedGridY
+            checkNotNull(x)
+            checkNotNull(y)
+            val greyTile = currentArea[x, y]
+            checkNotNull(greyTile)
+
+            greyTile.visual = chosenTile.visual
+            greyTile.rotate(botRotation*60)
+            chosenTile.isVisible = false
+            tileMap.add(game.choices[game.selectedChoice.first].first to greyTile)
+
+            changeGreyVisibility(false, playerID, greyTile)
+
+            greyTile.choiceHex = false
+        }
 
         if(isHuman()) {
             confirm.isVisible = false
@@ -2276,7 +2274,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 //        wildlifePosX = index.third
 //        wildlifePosY = index.second
 
-        if(isHuman()) {
+        if(isHuman() || game.playerQueue.peek().type == PlayerType.NETWORK) {
             val currentArea =
                 listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(getPlayerId())
 
@@ -2286,7 +2284,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             tile.visual = newVisual
             tile.isDisabled = true
 
-            animalShop[selectAnimal].visual = Visual.EMPTY
+            animalShop[game.selectedChoice.second].visual = Visual.EMPTY
 
             updateNatureTokenCount()
         }
