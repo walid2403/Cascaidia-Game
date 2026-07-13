@@ -85,7 +85,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
                 onAllRefreshables { refreshAfterGameConfigUpdate(playerNames, scoringCards) }
             }
-            "playerJoined" -> {
+            "playerChanged" -> {
                 val playerNames = client?.players?.map {it.first}
                 checkNotNull(playerNames) { "After joining a game the names should not be empty" }
 
@@ -93,6 +93,10 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
                 checkNotNull(scoringCards)
 
                 onAllRefreshables { refreshAfterGameConfigUpdate(playerNames, scoringCards) }
+            }
+            "error" -> {
+                println(client?.errorMessage)
+                onAllRefreshables { refreshAfterConnectionError(client?.errorMessage ?: "") }
             }
         }
     }
@@ -207,6 +211,8 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         if (game.playerQueue.peek().type == PlayerType.NETWORK) updateConnectionState(ConnectionState.WAITING_FOR_PLAYER_TURN)
         else updateConnectionState(ConnectionState.PLACING)
         client?.sendGameActionMessage(message)
+
+        onAllRefreshables { refreshAfterStartGame() }
     }
 
     /**
@@ -298,6 +304,8 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
             rootService.playerActionService.placeWildlife(tokenCoords)
         }
+
+        rootService.gameService.changeTurn()
     }
 
     fun sendExterminate(indices: List<Int>, natureToken: Boolean) {
@@ -353,7 +361,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     }
 
     fun sendSelectWildlife(wildlifeIndex: Int) {
-        client?.sendGameActionMessage(SelectWildlifeMessage(wildlifeIndex))
+//        client?.sendGameActionMessage(SelectWildlifeMessage(wildlifeIndex))
     }
 
     fun receiveSelectWildlife(message: SelectWildlifeMessage) {
@@ -372,7 +380,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     }
 
     fun sendSelectHabitatTile(tileIndex: Int) {
-        client?.sendGameActionMessage(SelectHabitatTileMessage(tileIndex))
+//        client?.sendGameActionMessage(SelectHabitatTileMessage(tileIndex))
     }
 
     fun receiveSelectHabitatTile(message: SelectHabitatTileMessage) {

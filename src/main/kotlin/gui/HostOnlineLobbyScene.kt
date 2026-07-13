@@ -600,6 +600,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
         visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
+            rootService.networkService.disconnect()
             app.showMenuScene(HostOnlineScene(app,rootService))
         }
     }

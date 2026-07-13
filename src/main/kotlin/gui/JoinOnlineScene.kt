@@ -56,6 +56,7 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
         visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
+            rootService.networkService.disconnect()
             app.showMenuScene(MainMenuScene(app,rootService))
         }
     }
