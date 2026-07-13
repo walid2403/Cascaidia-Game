@@ -1,6 +1,7 @@
 package service.network
 
 import edu.udo.cs.sopra.ntf.*
+import entity.Player
 import entity.PlayerType
 import entity.WildlifeToken
 import service.AbstractRefreshingService
@@ -33,10 +34,13 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
      *
      * @throws IllegalStateException if already connected to another game or connection attempt fails
      */
-    fun hostGame(secret: String, name: String, sessionID: String?) {
-        if (!connect(secret, name)) {
+    fun hostGame(name: String, playerType: PlayerType, sessionID: String, secret: String = "wildlife") {
+        if (!connect(name, secret)) {
             error("Connection failed")
         }
+
+        client?.playerType = playerType
+
         updateConnectionState(ConnectionState.CONNECTED)
 
         if (sessionID.isNullOrBlank()) {
@@ -45,6 +49,52 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
             client?.createGame(gameID, sessionID, "Welcome!")
         }
         updateConnectionState(ConnectionState.WAITING_FOR_HOST_CONFIRMATION)
+    }
+
+    fun triggerRefresh(refresh: String) {
+        when (refresh) {
+            "createGame" -> {
+                val sessionID = client?.sessionID
+                checkNotNull(sessionID)
+
+                val playerName = client?.playerName
+                checkNotNull(playerName)
+
+                val playerType = client?.playerType
+                checkNotNull(playerType)
+
+                onAllRefreshables { refreshAfterHostGame(sessionID, playerName, playerType) }
+            }
+            "joinGame" -> {
+                val sessionID = client?.sessionID
+                checkNotNull(sessionID)
+
+                val playerName = client?.playerName
+                checkNotNull(playerName)
+
+                val playerType = client?.playerType
+                checkNotNull(playerType)
+
+                onAllRefreshables { refreshAfterJoinGame(sessionID, playerName, playerType) }
+
+                val playerNames = client?.players?.map {it.first}
+                checkNotNull(playerNames) { "After joining a game the names should not be empty" }
+
+                val scoringCards = client?.scoringCards?.toList()
+                checkNotNull(scoringCards)
+
+                onAllRefreshables { refreshAfterGameConfigUpdate(playerNames, scoringCards) }
+            }
+            "playerJoined" -> {
+                val playerNames = client?.players?.map {it.first}
+                checkNotNull(playerNames) { "After joining a game the names should not be empty" }
+
+                val scoringCards = client?.scoringCards?.toList()
+                checkNotNull(scoringCards)
+
+                onAllRefreshables { refreshAfterGameConfigUpdate(playerNames, scoringCards) }
+            }
+        }
     }
 
     /**
@@ -70,10 +120,13 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
      *
      * @throws IllegalStateException if already connected to another game or connection attempt fails
      */
-    fun joinGame(name: String, sessionID: String, secret: String = "wildlife") {
-        if (!connect(secret, name)) {
+    fun joinGame(name: String, playerType: PlayerType, sessionID: String, secret: String = "wildlife") {
+        if (!connect(name, secret)) {
             error("Connection failed")
         }
+
+        client?.playerType = playerType
+
         updateConnectionState(ConnectionState.CONNECTED)
 
         client?.joinGame(sessionID, "Hello!")
@@ -124,7 +177,13 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
      *
      * @throws IllegalStateException if [connectionState] != [ConnectionState.WAITING_FOR_GUEST]
      */
-    fun startNewHostedGame(playerNames : List<Pair<String, PlayerType>>, scoringCards : List<Boolean>) {
+    fun startNewHostedGame() {
+        val playerNames = client?.players?.toList()
+        checkNotNull(playerNames) { "Player names must be entered" }
+
+        check(client?.scoringCards?.all {it != null} ?: false)
+        val scoringCards = client?.scoringCards as List<Boolean>
+
         check(connectionState == ConnectionState.WAITING_FOR_GUESTS && playerNames.size in 2..4)
         { "currently not prepared to start a new hosted game." }
 
@@ -142,7 +201,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
         val message = GameInitMessage(
             tileList, reorderList.map { scoringCards[it] },
-            game.playerQueue.map { NetPlayer(it.name, it.board[Triple(0,0,0)]?.id ?: 0) }, wildlifeList
+            game.playerQueue.map { NetPlayer(it.name, (it.board[Triple(0,0,0)]?.id ?: 0) / 10) }, wildlifeList
         )
 
         if (game.playerQueue.peek().type == PlayerType.NETWORK) updateConnectionState(ConnectionState.WAITING_FOR_PLAYER_TURN)
@@ -214,7 +273,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
             null
         }
 
-        val message: PlaceMessage = PlaceMessage(
+        val message = PlaceMessage(
             Pair(habCoords.third, habCoords.second), wildlifeCoords, habRotation
         )
 
@@ -284,6 +343,8 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     }
 
     fun sendGameConfig(playerList: List<String>, scoringCards: List<Boolean?>) {
+        client?.players?.sortBy { playerList.indexOf(it.first) }
+        client?.scoringCards = scoringCards.toMutableList()
         client?.sendGameActionMessage(GameConfigMessage(playerList, scoringCards))
     }
 

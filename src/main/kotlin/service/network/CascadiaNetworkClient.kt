@@ -13,7 +13,6 @@ import tools.aqua.bgw.net.common.response.*
  * [BoardGameClient] implementation for network communication.
  *
  * @param playerName the name of the player using this client.
- * @param playerType The Typ of the player connected locally
  * @param host the host to connect to.
  * @param secret the secret to use for the connection.
  * @property networkService the [NetworkService] to potentially forward received messages to.
@@ -29,6 +28,7 @@ class CascadiaNetworkClient(
     var sessionID: String? = null
 
     var playerType: PlayerType? = null
+    var scoringCards = MutableList<Boolean?>(5) { null }
 
     var players = mutableListOf<Pair<String, PlayerType>>()
 
@@ -49,6 +49,10 @@ class CascadiaNetworkClient(
                 CreateGameResponseStatus.SUCCESS -> {
                     networkService.updateConnectionState(ConnectionState.WAITING_FOR_GUESTS)
                     sessionID = response.sessionID
+
+                    players.add(Pair(playerName, playerType!!))
+
+                    networkService.triggerRefresh("createGame")
                 }
                 else -> disconnectAndError(response.status)
             }
@@ -76,6 +80,8 @@ class CascadiaNetworkClient(
                     players.add(Pair(playerName, playerType!!))
                     sessionID = response.sessionID
                     networkService.updateConnectionState(ConnectionState.WAITING_FOR_INIT)
+
+                    networkService.triggerRefresh("joinGame")
                 }
                 else -> disconnectAndError(response.status)
             }
@@ -83,8 +89,7 @@ class CascadiaNetworkClient(
     }
 
     /**
-     * Handle a [PlayerJoinedNotification] sent by the server. As War only supports two players,
-     * this will immediately start the hosted game (and send the init message to the opponent).
+     * Handle a [PlayerJoinedNotification] sent by the server.
      *
      * @throws IllegalStateException if not currently expecting any guests to join.
      */
@@ -94,6 +99,8 @@ class CascadiaNetworkClient(
             { "not awaiting any guests."}
 
             players.add(Pair(notification.sender, PlayerType.NETWORK))
+
+            networkService.triggerRefresh("playerJoined")
         }
     }
 
@@ -119,7 +126,7 @@ class CascadiaNetworkClient(
     }
 
     /**
-     * handle a [NetWarGameInitMessage] sent by the server
+     * handle a [GameInitMessage] sent by the server
      */
     @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
@@ -136,7 +143,7 @@ class CascadiaNetworkClient(
     }
 
     /**
-     * handle a [NetWarDrawCardMessage] sent by the server
+     * Handle a [GameConfigMessage] sent by the server
      */
     @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
@@ -147,6 +154,105 @@ class CascadiaNetworkClient(
             players.sortBy {message.players.indexOf(it.first)}
 
             networkService.receiveGameConfig(message)
+        }
+    }
+
+    /**
+     * Handle a [SelectMessage] sent by the server
+     */
+    @Suppress("UNUSED_PARAMETER", "unused")
+    @GameActionReceiver
+    fun onSelectReceived(message: SelectMessage, sender: String) {
+        BoardGameApplication.runOnGUIThread {
+            networkService.receiveSelect(message)
+        }
+    }
+
+    /**
+     * Handle a [PlaceMessage] sent by the server
+     */
+    @Suppress("UNUSED_PARAMETER", "unused")
+    @GameActionReceiver
+    fun onPlaceReceived(message: PlaceMessage, sender: String) {
+        BoardGameApplication.runOnGUIThread {
+            networkService.receivePlace(message)
+        }
+    }
+
+    /**
+     * Handle a [WipeWildlifeMessage] sent by the server
+     */
+    @Suppress("UNUSED_PARAMETER", "unused")
+    @GameActionReceiver
+    fun onWipeWildlifeReceived(message: WipeWildlifeMessage, sender: String) {
+        BoardGameApplication.runOnGUIThread {
+            networkService.receiveExterminate(message)
+        }
+    }
+
+    /**
+     * Handle a [UseNatureTokenMessage] sent by the server
+     */
+    @Suppress("UNUSED_PARAMETER", "unused")
+    @GameActionReceiver
+    fun onUseNatureTokenReceived(message: UseNatureTokenMessage, sender: String) {
+        BoardGameApplication.runOnGUIThread {
+            networkService.receiveUseNatureToken()
+        }
+    }
+
+    /**
+     * Handle a [RotationMessage] sent by the server
+     */
+    @Suppress("UNUSED_PARAMETER", "unused")
+    @GameActionReceiver
+    fun onRotationReceived(message: RotationMessage, sender: String) {
+        BoardGameApplication.runOnGUIThread {
+            networkService.receiveRotation(message)
+        }
+    }
+
+    /**
+     * Handle a [SelectWildlifeMessage] sent by the server
+     */
+    @Suppress("UNUSED_PARAMETER", "unused")
+    @GameActionReceiver
+    fun onSelectWildlifeReceived(message: SelectWildlifeMessage, sender: String) {
+        BoardGameApplication.runOnGUIThread {
+            networkService.receiveSelectWildlife(message)
+        }
+    }
+
+    /**
+     * Handle a [SelectHabitatTileMessage] sent by the server
+     */
+    @Suppress("UNUSED_PARAMETER", "unused")
+    @GameActionReceiver
+    fun onSelectHabitatTileReceived(message: SelectHabitatTileMessage, sender: String) {
+        BoardGameApplication.runOnGUIThread {
+            networkService.receiveSelectHabitatTile(message)
+        }
+    }
+
+    /**
+     * Handle a [ChatMessage] sent by the server
+     */
+    @Suppress("UNUSED_PARAMETER", "unused")
+    @GameActionReceiver
+    fun onChatReceived(message: ChatMessage, sender: String) {
+        BoardGameApplication.runOnGUIThread {
+            networkService.receiveChatMessage(message, sender)
+        }
+    }
+
+    /**
+     * Handle a [NetPlayer] sent by the server (Dummy function for warning)
+     */
+    @Suppress("UNUSED_PARAMETER", "unused")
+    @GameActionReceiver
+    fun onPlayerReceived(message: NetPlayer, sender: String) {
+        BoardGameApplication.runOnGUIThread {
+            println("For some reason $sender sent a NetPlayer object...")
         }
     }
 

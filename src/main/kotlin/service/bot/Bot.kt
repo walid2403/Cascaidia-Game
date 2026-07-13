@@ -7,7 +7,17 @@ import kotlin.random.Random
 /**
  * Eine Klasse, in der alle Aufrufe der Bot Methoden gebündelt sind
  */
-class Bot (private val rootService: RootService) {
+class Bot (private val rootService: RootService) : AbstractRefreshingService() {
+
+    var coordinatesTile: Triple<Int?, Int?, Int?> = Triple(null, null, null)
+    var coordinatesWildlifeToken: Triple<Int?, Int?, Int?> = Triple(null, null, null)
+
+    private val hardBot = BotLocaleOptimum(rootService, this)
+
+    private fun resetCoordinates() {
+        coordinatesTile = Triple(null, null, null)
+        coordinatesWildlifeToken = Triple(null, null, null)
+    }
 
     /**
      * Die Schnittstelle für die GUI
@@ -17,11 +27,21 @@ class Bot (private val rootService: RootService) {
         require(playerType != PlayerType.NETWORK) { "Die Methode sollte nur für Bot Züge aufgerufen werden" }
         when (playerType) {
             PlayerType.EASY_BOT -> {
+                resetCoordinates()
                 randomBotTurn()
             }
 
-            PlayerType.HARD_BOT -> {}
+            PlayerType.HARD_BOT -> {
+                resetCoordinates()
+                while(rootService.currentGame?.gameState != GameState.END_OF_TURN) {
+                    hardBot.makeTurn()
+                }
+            }
         }
+
+        val coordinatesTileNotNull = Triple(requireNotNull(coordinatesTile.first),
+            requireNotNull(coordinatesTile.second), requireNotNull(coordinatesTile.third))
+        onAllRefreshables { refreshAfterBotTurn(coordinatesTileNotNull, coordinatesWildlifeToken) }
     }
 
     private fun randomBotTurn() {
@@ -55,7 +75,7 @@ class Bot (private val rootService: RootService) {
             newLegalTurns(legalTurns)
         }
 
-        rootService.gameService.changeTurn()
+        //rootService.gameService.changeTurn()
     }
 
     private fun newLegalTurns(legalTurns: MutableList<TurnOptions>) {
@@ -114,16 +134,21 @@ class Bot (private val rootService: RootService) {
                 count--
             }
         }
+        println("Bot changed Wildlife")
         rootService.playerActionService.changeWildlife(indices)
     }
 
     private fun randomBotNatureTokenFreeSelection() {
         val tileIndex = Random.nextInt(4)
         val wildlifeIndex = Random.nextInt(4)
+        println("Bot made Custom Choice")
         rootService.playerActionService.freeSelection(tileIndex, wildlifeIndex)
     }
 
-    private fun randomBotClearSemipopulation() = rootService.gameService.exterminate(true)
+    private fun randomBotClearSemipopulation() {
+        println("Bot cleared Semipopulation")
+        rootService.gameService.exterminate(true)
+    }
 
     private fun randomBotMakeSelection() {
         val index = Random.nextInt(4)
@@ -143,6 +168,7 @@ class Bot (private val rootService: RootService) {
             }
         }
         val position = Random.nextInt(possiblePositions.size)
+        coordinatesTile = possiblePositions[position]
         rootService.playerActionService.placeTile(possiblePositions[position])
     }
 
@@ -160,6 +186,7 @@ class Bot (private val rootService: RootService) {
             return
         }
         val position = Random.nextInt(possiblePositions.size)
+        coordinatesWildlifeToken = possiblePositions[position]
         rootService.playerActionService.placeWildlife(possiblePositions[position])
     }
 
