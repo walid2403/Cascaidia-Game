@@ -36,6 +36,10 @@ class CascadiaGame(val scoringCards: List<Boolean>, val isLocal: Boolean) {
     val choices: MutableList<Pair<Tile, WildlifeToken>> = mutableListOf()
     var selectedChoice: Pair<Int, Int> = Pair(-1, -1)
 
+    var tileCoordinates: Triple<Int, Int, Int> = Triple(0, 0, 0)
+    var tileRotation: Int = 0
+    var tokenCoordinates: Triple<Int, Int, Int>? = null
+
     var gameState: GameState = GameState.START_OF_TURN
 
     val playerQueue: Queue<Player> = ArrayDeque()
