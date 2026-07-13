@@ -475,7 +475,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         posY = 985,
         width = 200,
         height = 60,
-        items = listOf(1.0, 0.5, 2.0, 5.0, 10.0),
+        items = listOf(1.0, 0.5, 2.0, 5.0, 100.0),
         disallowUnselect = true,
         formatFunction = { "Animation Speed: $it" },
         font = Font(size = 16, color = Color.WHITE),
@@ -1790,11 +1790,22 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         //load new visual into Shop Label of the Tile selected by the last player, then move it back into the Shop
         //position and make it visible again
-        tileShop[selectTile].visual = getShopVisual(selectTile)
-        moveLabelToShop(selectTile)
 
-        animalShop[selectAnimal].visual = createAnimalView(game.choices[selectAnimal].second)
-        scaleAnimal(false, animalShop[selectAnimal])
+        if (selectTile != -1) {
+            tileShop[selectTile].visual = getShopVisual(selectTile)
+            moveLabelToShop(selectTile)
+
+            animalShop[selectAnimal].visual = createAnimalView(game.choices[selectAnimal].second)
+            scaleAnimal(false, animalShop[selectAnimal])
+        } else {
+            for (i in 0..3) {
+                tileShop[i].visual = getShopVisual(i)
+                moveLabelToShop(i)
+
+                animalShop[i].visual = createAnimalView(game.choices[i].second)
+                scaleAnimal(false, animalShop[i])
+            }
+        }
 
         selectTile = -1
         selectAnimal = -1
