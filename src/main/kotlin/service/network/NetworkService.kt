@@ -94,6 +94,10 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
                 onAllRefreshables { refreshAfterGameConfigUpdate(playerNames, scoringCards) }
             }
+            "error" -> {
+                println(client?.errorMessage)
+                onAllRefreshables { refreshAfterConnectionError(client?.errorMessage ?: "") }
+            }
         }
     }
 
