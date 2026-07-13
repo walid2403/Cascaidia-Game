@@ -2,6 +2,7 @@ package service
 
 import entity.*
 import service.bot.Bot
+import service.network.NetworkService
 
 
 /**
@@ -16,6 +17,7 @@ class RootService {
     val gameService = GameService(this)
     val playerActionService = PlayerActionService(this)
     val bot = Bot(this)
+    val networkService = NetworkService(this)
 
     var currentGame : CascadiaGame ?= null
     val history = CascadiaGames()
@@ -39,6 +41,17 @@ class RootService {
     fun addRefreshable(newRefreshable: Refreshable) {
         gameService.addRefreshable(newRefreshable)
         playerActionService.addRefreshable(newRefreshable)
+        bot.addRefreshable(newRefreshable)
+        networkService.addRefreshable(newRefreshable)
+    }
+
+    /**
+     * Adds all provided [newRefreshables] to all services connected
+     *      * to this root service
+     */
+
+    fun addRefreshables(vararg newRefreshables: Refreshable) {
+        newRefreshables.forEach { addRefreshable(it) }
     }
 }
 

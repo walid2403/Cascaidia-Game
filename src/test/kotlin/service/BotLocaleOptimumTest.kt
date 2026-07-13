@@ -29,7 +29,7 @@ class BotLocaleOptimumTest {
     private fun currentPlayer() = currentGame().playerQueue.peek()
     @Test
     fun `bot makes a market selection without crashing`() {
-        val bot = BotLocaleOptimum(rootService)
+        val bot = BotLocaleOptimum(rootService, rootService.bot)
         bot.makeTurn()
         assertEquals(GameState.MADE_CHOICE, currentGame().gameState)
     }
