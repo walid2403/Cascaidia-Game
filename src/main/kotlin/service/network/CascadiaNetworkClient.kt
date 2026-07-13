@@ -7,6 +7,7 @@ import tools.aqua.bgw.net.client.BoardGameClient
 import tools.aqua.bgw.net.client.NetworkLogging
 import tools.aqua.bgw.net.common.annotations.GameActionReceiver
 import tools.aqua.bgw.net.common.notification.PlayerJoinedNotification
+import tools.aqua.bgw.net.common.notification.PlayerLeftNotification
 import tools.aqua.bgw.net.common.response.*
 
 /**
@@ -100,7 +101,20 @@ class CascadiaNetworkClient(
 
             players.add(Pair(notification.sender, PlayerType.NETWORK))
 
-            networkService.triggerRefresh("playerJoined")
+            networkService.triggerRefresh("playerChanged")
+        }
+    }
+
+    /**
+     * Handle a [PlayerLeftNotification] sent by the server.
+     *
+     * @throws IllegalStateException if not currently expecting any guests to join.
+     */
+    override fun onPlayerLeft(notification: PlayerLeftNotification) {
+        BoardGameApplication.runOnGUIThread {
+            players.removeAll {it.first == notification.sender}
+
+            networkService.triggerRefresh("playerChanged")
         }
     }
 

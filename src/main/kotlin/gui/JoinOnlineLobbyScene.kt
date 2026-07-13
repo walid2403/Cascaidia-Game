@@ -485,6 +485,16 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
         isVisible = false
     }
 
+    private val lobbyCodeLabel = Label(
+        posX = 35,
+        posY = paneHeight - 70,
+        width = 500,
+        height = 40,
+        alignment = Alignment.TOP_LEFT,
+        font = Font(24.0, family = "Canva Sans"),
+        text = "Lobby Code: UNKNOWN",
+    )
+
     init {
         addComponents(
             backgroundImage,
@@ -503,6 +513,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
             p3Icon,
             p4Icon,
             waitingToStart,
+            lobbyCodeLabel,
         )
         scoreCardSelectionPane.addAll(
             foxIcon,
@@ -794,6 +805,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
     override fun refreshAfterJoinGame(lobbyCode: String, playerName: String, playerType: PlayerType) {
         this.playerName = playerName
         this.playerType = playerType
+        this.lobbyCodeLabel.text = "Lobby Code: $lobbyCode"
     }
 
     private fun addNewPlayer(name: String, nameField: Label, icon: Label) {
