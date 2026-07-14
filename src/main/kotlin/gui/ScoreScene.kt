@@ -635,54 +635,61 @@ class ScoreScene(private val app: SopraApplication) : MenuScene(1920, 1080), Ref
 
     private fun setUpScoreTables() {
         for (i in 0..4) {
-            wildlifeTableTopHalf[0,i] = Label(
+            wildlifeTableTopHalf[0, i] = Label(
                 width = entryWidth,
                 height = entryHeight,
             ).apply {
-                if(i in 1..4) {
+                if (i in 1..4) {
                     visual = fillInScoreTableImages(wildlifeTableTopHalf, i)
                 } else {
                     visual = ColorVisual(153, 172, 255)
                     text = "👤"
                 }
             }
-            habitatTableTopHalf[0,i] = Label(
+            habitatTableTopHalf[0, i] = Label(
                 width = entryWidth,
                 height = entryHeight,
-                ).apply {
-                if(i in 1..4) {
+            ).apply {
+                if (i in 1..4) {
                     visual = fillInScoreTableImages(habitatTableTopHalf, i)
                 } else {
                     visual = ColorVisual(153, 172, 255)
                     text = "👤"
                 }
             }
-            if(i <= 1){
-                wildlifeTableBottomHalf[0,i] = Label(
-                    width = entryWidth,
-                    height = entryHeight,
-                ).apply {
-                    if(i == 0) {
-                        visual = fillInScoreTableImages(wildlifeTableBottomHalf, i)
-                    } else {
-                        visual = ColorVisual(153, 172, 255)
-                        text = "W"
-                    }
-                }
-            }
-            if (i <=2) {
-                habitatTableBottomHalf[0,i] = Label(
-                    width = entryWidth,
-                    height = entryHeight,
-                ).apply {
-                    if(i == 1) {
-                        visual = ColorVisual(153, 172, 255)
-                        text = "H"
-                    } else {
-                        visual = fillInScoreTableImages(habitatTableBottomHalf, i)
-                    }
-                }
-            }
+        }
+        wildlifeTableBottomHalf[0, 0] = Label(
+            width = entryWidth,
+            height = entryHeight,
+        ).apply {
+            visual = fillInScoreTableImages(wildlifeTableBottomHalf, 0)
+        }
+
+        wildlifeTableBottomHalf[0, 1] = Label(
+            width = entryWidth,
+            height = entryHeight,
+        ).apply {
+            visual = ColorVisual(153, 172, 255)
+            text = "W"
+        }
+        habitatTableBottomHalf[0, 0] = Label(
+            width = entryWidth,
+            height = entryHeight,
+        ).apply {
+            visual = fillInScoreTableImages(habitatTableBottomHalf, 0)
+        }
+        habitatTableBottomHalf[0, 1] = Label(
+            width = entryWidth,
+            height = entryHeight,
+        ).apply {
+            visual = ColorVisual(153, 172, 255)
+            text = "H"
+        }
+        habitatTableBottomHalf[0, 2] = Label(
+            width = entryWidth,
+            height = entryHeight,
+        ).apply {
+            visual = fillInScoreTableImages(habitatTableBottomHalf, 2)
         }
     }
 

@@ -41,7 +41,8 @@ class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
         rootService.addRefreshables(
             this,
             gameScene,
-            mainMenuScene, pauseMenu, scoreScene, joinOnlineLobbyScene, hostOnlineLobbyScene, hostOnlineScene, joinOnlineScene, lobbyScene,
+            mainMenuScene, pauseMenu, scoreScene, joinOnlineLobbyScene, hostOnlineLobbyScene, hostOnlineScene,
+            joinOnlineScene, lobbyScene,
         )
         this.showGameScene(gameScene)
         this.showMenuScene(mainMenuScene )

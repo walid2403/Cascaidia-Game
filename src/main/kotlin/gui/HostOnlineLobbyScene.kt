@@ -390,7 +390,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
                 checkBox("checkBoxSalmonA")
             } else {
                 this.isChecked = false
-                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
+                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text},
+                    getScoreCards())
             }
         }
     }
@@ -410,7 +411,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
                 checkBox("checkBoxSalmonB")
             } else {
                 this.isChecked = false
-                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
+                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text},
+                    getScoreCards())
             }
         }
     }
@@ -430,7 +432,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
                 checkBox("checkBoxHawkA")
             } else {
                 this.isChecked = false
-                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
+                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text},
+                    getScoreCards())
             }
         }
     }
@@ -450,7 +453,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
                 checkBox("checkBoxHawkB")
             } else {
                 this.isChecked = false
-                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
+                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text},
+                    getScoreCards())
             }
         }
     }
@@ -470,7 +474,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
                 checkBox("checkBoxBearA")
             } else {
                 this.isChecked = false
-                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
+                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text},
+                    getScoreCards())
             }
         }
     }
@@ -490,7 +495,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
                 checkBox("checkBoxBearB")
             } else {
                 this.isChecked = false
-                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
+                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text},
+                    getScoreCards())
             }
         }
     }
@@ -510,7 +516,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
                 checkBox("checkBoxFoxA")
             } else {
                 this.isChecked = false
-                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
+                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text},
+                    getScoreCards())
             }
         }
     }
@@ -530,7 +537,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
                 checkBox("checkBoxFoxB")
             } else {
                 this.isChecked = false
-                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
+                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text},
+                    getScoreCards())
             }
         }
     }
@@ -550,7 +558,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
                 checkBox("checkBoxElkA")
             } else {
                 this.isChecked = false
-                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
+                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text},
+                    getScoreCards())
             }
         }
     }
@@ -570,7 +579,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
                 checkBox("checkBoxElkB")
             } else {
                 this.isChecked = false
-                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
+                rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text},
+                    getScoreCards())
             }
         }
     }
@@ -672,7 +682,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
         warning.text = ""
         warning.isVisible = false
 
-        listOf(checkBoxSalmonA, checkBoxSalmonB, checkBoxElkA, checkBoxElkB, checkBoxBearA, checkBoxBearB, checkBoxFoxA,
+        listOf(checkBoxSalmonA, checkBoxSalmonB, checkBoxElkA, checkBoxElkB, checkBoxBearA, checkBoxBearB,checkBoxFoxA,
             checkBoxFoxB, checkBoxHawkA, checkBoxHawkB).forEach { it.isChecked = false }
 
         listOf(hawkCardA, hawkCardB, foxCardA, foxCardB, salmonCardA, salmonCardB, elkCardA, elkCardB, bearCardA,
@@ -845,7 +855,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
 
         //sort list so that unused/empty player slots are at the end of the list. fill the list with temporary values
         //to start and then overwrite with the correct ones
-        val sortedList: MutableList<Pair<String, Visual>> = mutableListOf(Pair("", ImageVisual("icons/NetworkIcon.png")),
+        val sortedList: MutableList<Pair<String, Visual>> =
+            mutableListOf(Pair("", ImageVisual("icons/NetworkIcon.png")),
             Pair("", ImageVisual("icons/NetworkIcon.png")), Pair("", ImageVisual("icons/NetworkIcon.png")),
             Pair("", ImageVisual("icons/NetworkIcon.png")))
         var endOfList = 3
@@ -867,7 +878,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
             orderOfTypes[i].visual = sortedList[i].second
         }
 
-        rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
+        rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text},
+            getScoreCards())
     }
 
     /**
@@ -928,7 +940,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
             "checkBoxBearB" -> checkBoxBearA.isChecked = false
         }
 
-        rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
+        rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text},
+            getScoreCards())
     }
 
     /**
@@ -985,12 +998,14 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
             else -> throw IllegalArgumentException("Invalid button for this function: $button")
         }
 
-        rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
+        rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text},
+            getScoreCards())
 
         switchAnimation(name1, name2, typeIcon1, typeIcon2, pos1, pos2)
     }
 
-    private fun switchAnimation(name1: Label, name2: Label, typeIcon1: Label, typeIcon2: Label, pos1: Double, pos2: Double) {
+    private fun switchAnimation(name1: Label, name2: Label, typeIcon1: Label, typeIcon2: Label,
+                                pos1: Double, pos2: Double) {
         playAnimation(
             ParallelAnimation(
                 MovementAnimation(
@@ -1044,7 +1059,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
             pair.second.isChecked = randomizerList[1]
         }
 
-        rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
+        rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text},
+            getScoreCards())
     }
 
     /**
