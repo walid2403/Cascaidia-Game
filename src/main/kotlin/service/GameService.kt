@@ -1230,11 +1230,11 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         }
 
         if (game.gameState == GameState.PLAYED_TILE) {
-            game.wildlifeTokens.push(game.choices[game.selectedChoice.second].second)
-            game.wildlifeTokens.shuffle()
+            if (currentPlayer.type != PlayerType.NETWORK) {
+                game.wildlifeTokens.push(game.choices[game.selectedChoice.second].second)
+                game.wildlifeTokens.shuffle()
 
-            if (currentPlayer.type != PlayerType.NETWORK && !game.isLocal) {
-                rootService.networkService.sendExterminate(listOf(), false)
+                if (!game.isLocal) rootService.networkService.sendExterminate(listOf(), false)
             }
         }
 
