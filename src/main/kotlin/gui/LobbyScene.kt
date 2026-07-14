@@ -805,8 +805,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
         p1Type = 0
         p2Type = 0
-        p3Type = 0
-        p4Type = 0
+        p3Type = 3
+        p4Type = 3
 
         hostPanel.posX = paneX.toDouble()
         sidePanel.posX = paneX.toDouble()
@@ -945,28 +945,9 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private fun changePlayerType(playerNum: Int, leftButton: Boolean, playerType: Int, changeType: Boolean): Int {
 
-        val newType: Int = if(changeType) {
-            if (leftButton) {
-                (playerType + 3) % 4
-            } else {
-                (playerType + 1)%4
-            }
-        } else {
-            playerType
-        }
+        val newType = calculateNewType(playerType, leftButton, changeType)
 
-
-        val newVisual = when (newType) {
-            0 -> ImageVisual("icons/HumanIcon.png")
-
-            1 -> ImageVisual("icons/EasyBotIcon.png")
-
-            2 -> ImageVisual("icons/HardBotIcon.png")
-
-            3 -> ImageVisual("icons/NotPlayingIcon.png")
-
-            else -> throw IllegalArgumentException("Only 4 possible visuals, $newType is invalid")
-        }
+        val newVisual = getNewPlayerVisual(newType)
 
         val leftLabel = when (playerNum) {
             1 -> p1Icon
@@ -988,6 +969,32 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         adjustIcons(leftLabel, rightLabel, newVisual, newType != 3)
 
         return newType
+    }
+
+    private fun calculateNewType(oldType: Int, leftButton: Boolean, changeType: Boolean): Int {
+        return if(changeType) {
+            if (leftButton) {
+                (oldType + 3) % 4
+            } else {
+                (oldType + 1)%4
+            }
+        } else {
+            oldType
+        }
+    }
+
+    private fun getNewPlayerVisual(playerType: Int): ImageVisual {
+        return when (playerType) {
+            0 -> ImageVisual("icons/HumanIcon.png")
+
+            1 -> ImageVisual("icons/EasyBotIcon.png")
+
+            2 -> ImageVisual("icons/HardBotIcon.png")
+
+            3 -> ImageVisual("icons/NotPlayingIcon.png")
+
+            else -> throw IllegalArgumentException("Only 4 possible visuals, $playerType is invalid")
+        }
     }
 
     /**

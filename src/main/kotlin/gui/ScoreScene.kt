@@ -1,7 +1,6 @@
 package gui
 
 import service.Refreshable
-import service.RootService
 import tools.aqua.bgw.components.StaticComponentView
 import tools.aqua.bgw.components.layoutviews.Pane
 import tools.aqua.bgw.components.uicomponents.Button
@@ -18,10 +17,8 @@ import tools.aqua.bgw.components.layoutviews.GridPane
  * ranking, the habitat score table and the wildlife score table. The player can go back to the [MainMenuScene] to
  * start a new game or exit the application entirely from here.
  * @param app The [SopraApplication] of this game
- * @param rootService The [RootService] instance to access the other service methods and entity layer
  */
-class ScoreScene(private val app: SopraApplication,private val rootService: RootService) :
-    MenuScene(1920, 1080), Refreshable {
+class ScoreScene(private val app: SopraApplication) : MenuScene(1920, 1080), Refreshable {
 
     private val sceneWidth = 1920
     private val sceneHeight = 1080
@@ -462,117 +459,13 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
         for (i in 0..3) {
 
             var totalScore = 0
-            //Namen in die oberste Zeile füllen
-            wildlifeTableTopHalf[i+1, 0] = Label (
-                width = entryWidth,
-                height = entryHeight,
-                visual = ColorVisual(153, 172, 255)
-            ).apply {
-                if (i in scores.indices) {
-                    text = scores[i].first
-                } else {
-                    isVisible = false
-                }
-            }
-
-            //Namen in die oberste Zeile füllen
-            habitatTableTopHalf[i+1, 0] = Label (
-                width = entryWidth,
-                height = entryHeight,
-                visual = ColorVisual(153, 172, 255)
-            ).apply {
-                if (i in scores.indices) {
-                    text = scores[i].first
-                } else {
-                    isVisible = false
-                }
-            }
-
-            var wildlifeSum = 0
-            for (j in 5..9) {
-
-                val score = Label(
-                    width = entryWidth,
-                    height = entryHeight,
-                    visual = ColorVisual(181, 181, 181)
-                ).apply {
-                    if (i in scores.indices) {
-                        text = "" + scores[i].second[j]
-                    } else {
-                        isVisible = false
-                    }
-                }
-                when (j) {
-                    9 -> wildlifeTableBottomHalf[i+1, 0] = score
-                    else -> wildlifeTableTopHalf[i+1, j+1-5] = score
-                }
-                if (i in scores.indices) {
-                    wildlifeSum += scores[i].second[j]
-                }
-            }
+            val wildlifeSum = fillWildlifeTable(i, scores)
+            val habitatSum = fillHabitatTable(i, scores)
 
             totalScore += wildlifeSum
 
-            wildlifeTableBottomHalf[i+1, 1] = Label(
-                width = entryWidth,
-                height = entryHeight,
-                visual = ColorVisual(181, 181, 181)
-            ).apply {
-                if (i in scores.indices) {
-                    text = "" + wildlifeSum
-                } else {
-                    isVisible = false
-                }
-            }
-
-            var habitatSum = 0
-            for (j in 0..4) {
-                val score = Label(
-                    width = entryWidth,
-                    height = entryHeight,
-                    visual = ColorVisual(181, 181, 181)
-                ).apply {
-                    if (i in scores.indices) {
-                        text = "" + scores[i].second[j] + "  |  " + scores[i].second[j+10]
-                    } else {
-                        isVisible = false
-                    }
-                }
-                when(j) {
-                    4 -> habitatTableBottomHalf[i+1, 0] = score
-                    else -> habitatTableTopHalf[i+1, j+1] = score
-                }
-                if (i in scores.indices) {
-                    habitatSum += scores[i].second[j] + scores[i].second[j+10]
-                }
-            }
-
             totalScore += habitatSum
 
-            habitatTableBottomHalf[i+1, 1] = Label(
-                width = entryWidth,
-                height = entryHeight,
-                visual = ColorVisual(181, 181, 181)
-            ).apply {
-                if (i in scores.indices) {
-                    text = "" + habitatSum
-                } else {
-                    isVisible = false
-                }
-            }
-
-            // left over natureTokens
-            habitatTableBottomHalf[i+1, 2] = Label(
-                width = entryWidth,
-                height = entryHeight,
-                visual = ColorVisual(181, 181, 181)
-            ).apply {
-                if (i in scores.indices) {
-                    text = "" + scores[i].second[15]
-                } else {
-                    isVisible = false
-                }
-            }
             if (i in scores.indices) {
                 totalScore += scores[i].second[15]
                 playersTotalScore.add(Pair(scores[i].first, totalScore))
@@ -581,83 +474,160 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
         setMainScores(playersTotalScore)
     }
 
+    private fun fillWildlifeTable(index: Int, scores: List<Pair<String, List<Int>>>): Int {
+        wildlifeTableTopHalf[index+1, 0] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ColorVisual(153, 172, 255)
+        ).apply {
+            if (index in scores.indices) {
+                text = scores[index].first
+            } else {
+                isVisible = false
+            }
+        }
+
+        var wildlifeSum = 0
+
+        for (j in 5..9) {
+
+            val score = Label(
+                width = entryWidth,
+                height = entryHeight,
+                visual = ColorVisual(181, 181, 181)
+            ).apply {
+                if (index in scores.indices) {
+                    text = "" + scores[index].second[j]
+                } else {
+                    isVisible = false
+                }
+            }
+            when (j) {
+                9 -> wildlifeTableBottomHalf[index+1, 0] = score
+                else -> wildlifeTableTopHalf[index+1, j+1-5] = score
+            }
+            wildlifeSum +=  if (index in scores.indices) {
+                scores[index].second[j]
+            } else {
+                0
+            }
+        }
+
+        wildlifeTableBottomHalf[index+1, 1] = Label(
+            width = entryWidth,
+            height = entryHeight,
+            visual = ColorVisual(181, 181, 181)
+        ).apply {
+            if (index in scores.indices) {
+                text = "" + wildlifeSum
+            } else {
+                isVisible = false
+            }
+        }
+
+        return wildlifeSum
+    }
+
+    private fun fillHabitatTable(index: Int, scores: List<Pair<String, List<Int>>>): Int {
+        habitatTableTopHalf[index+1, 0] = Label (
+            width = entryWidth,
+            height = entryHeight,
+            visual = ColorVisual(153, 172, 255)
+        ).apply {
+            if (index in scores.indices) {
+                text = scores[index].first
+            } else {
+                isVisible = false
+            }
+        }
+
+        var habitatSum = 0
+
+        for (j in 0..4) {
+            val score = Label(
+                width = entryWidth,
+                height = entryHeight,
+                visual = ColorVisual(181, 181, 181)
+            ).apply {
+                if (index in scores.indices) {
+                    text = "" + scores[index].second[j] + "  |  " + scores[index].second[j+10]
+                } else {
+                    isVisible = false
+                }
+            }
+            when(j) {
+                4 -> habitatTableBottomHalf[index+1, 0] = score
+                else -> habitatTableTopHalf[index+1, j+1] = score
+            }
+            if (index in scores.indices) {
+                habitatSum += scores[index].second[j] + scores[index].second[j+10]
+            }
+
+            habitatTableBottomHalf[index+1, 1] = Label(
+                width = entryWidth,
+                height = entryHeight,
+                visual = ColorVisual(181, 181, 181)
+            ).apply {
+                if (index in scores.indices) {
+                    text = "" + habitatSum
+                } else {
+                    isVisible = false
+                }
+            }
+
+            habitatTableBottomHalf[index+1, 2] = Label(
+                width = entryWidth,
+                height = entryHeight,
+                visual = ColorVisual(181, 181, 181)
+            ).apply {
+                if (index in scores.indices) {
+                    text = "" + scores[index].second[15]
+                } else {
+                    isVisible = false
+                }
+            }
+        }
+        return habitatSum
+    }
+
     private fun setMainScores(namesAndScores: MutableList<Pair<String, Int>>) {
 
         val playersAndScores = namesAndScores.sortedByDescending{it.second}
 
-        firstPlaceScoreTotal.apply {
-            isVisible = true
-            text = "" + playersAndScores[0].second
-            visual = ColorVisual(255, 207, 0).apply {
-                style.borderRadius = BorderRadius(34)
-            }
-        }
-        firstPlaceName.apply {
-            isVisible = true
-            text = playersAndScores[0].first
-            visual = ColorVisual(255, 207, 0).apply {
-                style.borderRadius = BorderRadius(34)
-            }
-        }
+        setNameAndTotalScore(playersAndScores[0].first, playersAndScores[0].second,
+            firstPlaceName, firstPlaceScoreTotal, true)
 
-        secondPlaceScoreTotal.apply {
-            isVisible = true
-            text = "" + playersAndScores[1].second
-            if(playersAndScores[1].second == playersAndScores[0].second) {
-                visual =  ColorVisual(255, 207, 0).apply {
-                    style.borderRadius = BorderRadius(34)
-                }
-            }
-        }
-        secondPlaceName.apply {
-            isVisible = true
-            text = playersAndScores[1].first
-            if(playersAndScores[1].second == playersAndScores[0].second) {
-                visual =  ColorVisual(255, 207, 0).apply {
-                    style.borderRadius = BorderRadius(34)
-                }
-            }
-        }
+        setNameAndTotalScore(playersAndScores[1].first, playersAndScores[1].second, secondPlaceName,
+            secondPlaceScoreTotal, playersAndScores[1].second == playersAndScores[0].second)
+
 
         if(playersAndScores.size > 2) {
-            thirdPlaceScoreTotal.apply {
-                isVisible = true
-                text = "" + playersAndScores[2].second
-                if(playersAndScores[2].second == playersAndScores[0].second) {
-                    visual =  ColorVisual(255, 207, 0).apply {
-                        style.borderRadius = BorderRadius(34)
-                    }
-                }
-            }
-            thirdPlaceName.apply {
-                isVisible = true
-                text = playersAndScores[2].first
-                if(playersAndScores[2].second == playersAndScores[0].second) {
-                    visual =  ColorVisual(255, 207, 0).apply {
-                        style.borderRadius = BorderRadius(34)
-                    }
-                }
-            }
+            setNameAndTotalScore(playersAndScores[2].first, playersAndScores[2].second, thirdPlaceName,
+                thirdPlaceScoreTotal, playersAndScores[2].second == playersAndScores[0].second)
         }
 
         if(playersAndScores.size > 3) {
-            fourthPlaceScoreTotal.apply {
-                isVisible = true
-                text = "" + playersAndScores[3].second
+            setNameAndTotalScore(playersAndScores[3].first, playersAndScores[3].second, fourthPlaceName,
+                fourthPlaceScoreTotal, playersAndScores[3].second == playersAndScores[0].second)
+        }
+    }
 
-                if(playersAndScores[3].second == playersAndScores[0].second) {
-                    visual =  ColorVisual(255, 207, 0).apply {
-                        style.borderRadius = BorderRadius(34)
-                    }
+    private fun setNameAndTotalScore(name: String, score: Int, nameLabel: Label, scoreLabel: Label, winner: Boolean) {
+        nameLabel.apply {
+            text = name
+            isVisible = true
+            if(winner) {
+                visual = ColorVisual(255, 207, 0).apply {
+                    style.borderRadius = BorderRadius(34)
                 }
             }
-            fourthPlaceName.apply {
-                isVisible = true
-                text = playersAndScores[3].first
-                if(playersAndScores[3].second == playersAndScores[0].second) {
-                    visual =  ColorVisual(255, 207, 0).apply {
-                        style.borderRadius = BorderRadius(34)
-                    }
+        }
+        scoreLabel.apply {
+            text = "" + score
+            isVisible = true
+            if(winner) {
+                visual = ColorVisual(255, 207, 0).apply {
+                    style.borderRadius = BorderRadius(34)
                 }
             }
         }
@@ -719,42 +689,57 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
     private fun fillInScoreTableImages(table: GridPane<Label>, index: Int): ImageVisual {
         return when(table) {
             wildlifeTableTopHalf -> {
-                when(index) {
-                    1 -> ImageVisual("tokens/bear.png")
-                    2 -> ImageVisual("tokens/elk.png")
-                    3 -> ImageVisual("tokens/salmon.png")
-                    4 -> ImageVisual("tokens/hawk.png")
-                    else -> throw IllegalArgumentException("index $index in table ${table.name} " +
-                            "does not contain an image" )
-                }
+                wildlifeTableTopHalfImage(index)
             }
             wildlifeTableBottomHalf -> {
-                when(index) {
-                    0 -> ImageVisual("tokens/fox.png")
-                    else -> throw IllegalArgumentException("index $index in table ${table.name} " +
-                            "does not contain an image" )
-                }
+               wildlifeTableBottomHalfImage(index)
             }
             habitatTableTopHalf -> {
-                when(index) {
-                    //will be replaced with different/correct images, ignore duplicate warning for now
-                    1 -> ImageVisual("tiles/scoreSceneTiles/mountain.png")
-                    2 -> ImageVisual("tiles/scoreSceneTiles/forest.png")
-                    3 -> ImageVisual("tiles/scoreSceneTiles/desert.png")
-                    4 -> ImageVisual("tiles/scoreSceneTiles/swamp.png")
-                    else -> throw IllegalArgumentException("index $index in table ${table.name} " +
-                            "does not contain an image" )
-                }
+                habitatTableTopHalfImage(index)
             }
             habitatTableBottomHalf -> {
-                when(index) {
-                    0 -> ImageVisual("tiles/scoreSceneTiles/lake.png")
-                    2 -> ImageVisual("tokens/pinecone.png")
-                    else -> throw IllegalArgumentException("index $index in table ${table.name} " +
-                            "does not contain an image" )
-                }
+                habitatTableBottomHalfImage(index)
             }
             else -> throw IllegalArgumentException("invalid table given: ${table.name}" )
+        }
+    }
+
+    private fun wildlifeTableTopHalfImage(index: Int): ImageVisual {
+        return when(index) {
+            1 -> ImageVisual("tokens/bear.png")
+            2 -> ImageVisual("tokens/elk.png")
+            3 -> ImageVisual("tokens/salmon.png")
+            4 -> ImageVisual("tokens/hawk.png")
+            else -> throw IllegalArgumentException("index $index in wildlifeTableTopHalf " +
+                    "does not contain an image" )
+        }
+    }
+
+    private fun wildlifeTableBottomHalfImage(index: Int): ImageVisual {
+        return when(index) {
+            0 -> ImageVisual("tokens/fox.png")
+            else -> throw IllegalArgumentException("index $index in wildlifeTableBottomHalf " +
+                    "does not contain an image" )
+        }
+    }
+
+    private fun habitatTableTopHalfImage(index: Int): ImageVisual {
+        return when(index) {
+            1 -> ImageVisual("tiles/scoreSceneTiles/mountain.png")
+            2 -> ImageVisual("tiles/scoreSceneTiles/forest.png")
+            3 -> ImageVisual("tiles/scoreSceneTiles/desert.png")
+            4 -> ImageVisual("tiles/scoreSceneTiles/swamp.png")
+            else -> throw IllegalArgumentException("index $index in habitatTableTopHalf " +
+                    "does not contain an image" )
+        }
+    }
+
+    private fun habitatTableBottomHalfImage(index: Int): ImageVisual {
+        return when(index) {
+            0 -> ImageVisual("tiles/scoreSceneTiles/lake.png")
+            2 -> ImageVisual("tokens/pinecone.png")
+            else -> throw IllegalArgumentException("index $index in habitatTableBottomHalf " +
+                    "does not contain an image" )
         }
     }
 }

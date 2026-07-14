@@ -818,7 +818,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     /**
      * Reduziert die Größe der Tiles in den HexagonGrids, sobald diese größer werden als der Bereich
-     * @param areaIndex von dem Typ [Int], gibt den Index (1-4) des aktuellen Spielers und damit Spielbereich an
      */
     private fun scaleArea() {
         val game = rootService.currentGame
@@ -1476,34 +1475,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
-    private fun loadStartTiles() {
-        val game = rootService.currentGame
-        checkNotNull(game)
-
-        listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).forEachIndexed { index, grid ->
-            if(index < game.playerQueue.size) {
-                var tile = game.playerQueue.elementAt(index).board[Triple(0,0,0)]
-                checkNotNull(tile)
-                var hexView = tileMap.forward(tile)
-                grid[0,0] = hexView
-                //println("current Index: $index")
-                addGreyHexagon(hexView, index)
-
-                tile = game.playerQueue.elementAt(index).board[Triple(0,1,-1)]
-                checkNotNull(tile)
-                hexView = tileMap.forward(tile)
-                grid[0,1] = hexView
-                addGreyHexagon(hexView, index)
-
-                tile = game.playerQueue.elementAt(index).board[Triple(-1,1,0)]
-                checkNotNull(tile)
-                hexView = tileMap.forward(tile)
-                grid[-1,1] = hexView
-                addGreyHexagon(hexView, index)
-            }
-        }
-    }
-
     private fun showPlayerAreasAtStart() {
         val game = rootService.currentGame
         checkNotNull(game)
@@ -2019,45 +1990,54 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     private fun getTileWithAnimal(tile: Tile): ImageVisual {
         var path = "tilesWithWildlife/"
-        path += when(tile.id) {
+
+        path += getHabitatPath(tile.id)
+
+        path += getPlacedWildlifePath(tile.occupant)
+
+        val rotation = adjustForStartTileRotation(tile.id)
+
+        return ImageVisual("$path.png", rotation = rotation)
+    }
+
+    private fun getHabitatPath(id: Int): String {
+        return when(id) {
             0,1,2,3,4,5,420 -> "PF"
             6,7,8,9,10,16,120 -> "WF"
             11,12,13,14,15,500 -> "F"
             17,18,19,20,21,200 -> "W"
             22,23,24,25,26,27,510 -> "WP"
             28,29,30,31,32,300 -> "P"
-            33 -> "WM"
             34,35,36,37,38,400 -> "R"
             39,40,41,42,43,44,320 -> "RW"
             45,46,47,48,49,50,520 -> "MR"
-            51,63 -> "FM"
-            52,53,54 -> "PM"
             55,58,59,60,61,62,220 -> "RF"
-            56,57,110 -> "RP"
-            64,65,66,67 -> "RP"
+            56,57,64,65,66,67,110 -> "RP"
             68,69,70,71,72,100 -> "M"
-            73,74 -> "PM"
-            75,76,77,78,81,410 -> "WM"
-            79,210 -> "PM"
-            80,82,83,84,310 -> "FM"
+            33, 75,76,77,78,81,410 -> "WM"
+            52,53,54,73,74,79,210 -> "PM"
+            51,63, 80,82,83,84,310 -> "FM"
 
-            else -> throw IllegalArgumentException("Invalid tile id: ${tile.id}")
+            else -> throw IllegalArgumentException("Invalid tile id: $id")
         }
+    }
 
-        if(tile.occupant != null) {
-            path += when(tile.occupant) {
+    private fun getPlacedWildlifePath(wildlife: WildlifeToken?): String {
+        return if(wildlife != null) {
+            when(wildlife) {
                 WildlifeToken.ELK -> "_E"
                 WildlifeToken.FOX -> "_F"
                 WildlifeToken.BEAR -> "_B"
                 WildlifeToken.HAWK -> "_H"
                 WildlifeToken.SALMON -> "_S"
-                else -> throw IllegalArgumentException("Invalid tile occupant: ${tile.occupant}")
             }
         } else {
-            throw IllegalArgumentException("Tile has no occupant! Tile ID: {$tile.id")
+            throw IllegalArgumentException("Tile has no occupant!")
         }
+    }
 
-        val rotation = when(tile.id) {
+    private fun adjustForStartTileRotation (id: Int): Int {
+        return when(id) {
             110 -> 300
             120 -> 60
             210 -> 300
@@ -2070,7 +2050,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             520 -> 240
             else -> 0
         }
-        return ImageVisual("$path.png", rotation = rotation)
     }
 
     private fun addGreyHexagon(tileView: HexagonViewExtended, playerIndex: Int = 0) {

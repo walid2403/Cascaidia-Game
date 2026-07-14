@@ -782,7 +782,8 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
         val fox = (checkBoxFoxA.isChecked || checkBoxFoxB.isChecked)
         val salmon = (checkBoxSalmonA.isChecked || checkBoxSalmonB.isChecked)
         val elk = (checkBoxElkA.isChecked || checkBoxElkB.isChecked)
-        if(!(bear && hawk && fox && salmon && elk)) {
+        val allSelected = bear && hawk && fox && salmon && elk
+        if(!allSelected) {
             //warning.isVisible = true
             warning.text = "You need to select a Score Card for each animal type to play."
             return false
@@ -986,6 +987,10 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
 
         rootService.networkService.sendGameConfig(orderOfNames.filter {!it.text.isBlank()}.map {it.text}, getScoreCards())
 
+        switchAnimation(name1, name2, typeIcon1, typeIcon2, pos1, pos2)
+    }
+
+    private fun switchAnimation(name1: Label, name2: Label, typeIcon1: Label, typeIcon2: Label, pos1: Double, pos2: Double) {
         playAnimation(
             ParallelAnimation(
                 MovementAnimation(
