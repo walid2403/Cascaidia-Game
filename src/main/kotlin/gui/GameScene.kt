@@ -172,7 +172,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                     enableShopOnclick()
                     customChoiceButton.isDisabled = false
                     enableCurrentPlayerTilesOnClick()
-                    enableGreyHexagonOnClicks()
+                    if(game.playerQueue.peek().type == PlayerType.HUMAN) enableGreyHexagonOnClicks()
                 }
                 changeWildlifeActive = !changeWildlifeActive
             }
@@ -471,6 +471,14 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
+    private val showScoreScene = Button(width = 400, height = 60, posX = 760, posY = 985, text = "Go Back To Scoring Screen",
+        font = Font(size = 25, color = Color(255, 255, 255))).apply {
+        visual = ColorVisual(0,0, 0).apply { style.borderRadius = BorderRadius(10) }
+        onMouseClicked = {
+            app.showMenuScene(app.scoreScene)
+        }
+    }
+
     private val animationSpeedControl = ComboBox<Double>(
         posX = 354,
         posY = 985,
@@ -509,10 +517,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             setPlayerNameAtBottom(0)
         }
         onMouseExited = {
-            zoomIn.isVisible = true
-            zoomOut.isVisible = true
-            showOtherPlayer(getPlayerId())
-            setPlayerNameAtBottom(null)
+            if(!fromScoringScene) {
+                zoomIn.isVisible = true
+                zoomOut.isVisible = true
+                showOtherPlayer(getPlayerId())
+                setPlayerNameAtBottom(null)
+            }
         }
     }
     private val lableAboveCamTwo = Label(posX = 55, posY = 295, width = 245, height = 130).apply {
@@ -523,10 +533,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             setPlayerNameAtBottom(1)
         }
         onMouseExited = {
-            zoomIn.isVisible = true
-            zoomOut.isVisible = true
-            showOtherPlayer(getPlayerId())
-            setPlayerNameAtBottom(null)
+            if(!fromScoringScene) {
+                zoomIn.isVisible = true
+                zoomOut.isVisible = true
+                showOtherPlayer(getPlayerId())
+                setPlayerNameAtBottom(null)
+            }
         }
     }
     private val lableAboveCamThree = Label(posX = 55, posY = 525, width = 245, height = 130).apply {
@@ -537,10 +549,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             setPlayerNameAtBottom(2)
         }
         onMouseExited = {
-            zoomIn.isVisible = true
-            zoomOut.isVisible = true
-            showOtherPlayer(getPlayerId())
-            setPlayerNameAtBottom(null)
+            if(!fromScoringScene) {
+                zoomIn.isVisible = true
+                zoomOut.isVisible = true
+                showOtherPlayer(getPlayerId())
+                setPlayerNameAtBottom(null)
+            }
         }
     }
     private val lableAboveCamFour = Label(posX = 55, posY = 755, width = 245, height = 130).apply {
@@ -551,10 +565,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             setPlayerNameAtBottom(3)
         }
         onMouseExited = {
-            zoomIn.isVisible = true
-            zoomOut.isVisible = true
-            showOtherPlayer(getPlayerId())
-            setPlayerNameAtBottom(null)
+            if(!fromScoringScene) {
+                zoomIn.isVisible = true
+                zoomOut.isVisible = true
+                showOtherPlayer(getPlayerId())
+                setPlayerNameAtBottom(null)
+            }
         }
     }
 
@@ -764,7 +780,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             tileChoice1, tileChoice2, tileChoice3, tileChoice4,
             animationSpeedControl, roundCounterHex, roundCounterText, roundCounterLabel1, roundCounterLabel2,
             chatButton,
-            chatBoxBackground, chatView, messageInput, sendButton
+            chatBoxBackground, chatView, messageInput, sendButton, showScoreScene
             //chat
         )
     }
@@ -1282,6 +1298,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             it.scale(1.0)
         }
 
+        showScoreScene.isVisible = false
+        zoomIn.isVisible = false
+        zoomOut.isVisible = false
         chatOpened = false
         newMessage = false
         chatView.items.clear()
@@ -1310,8 +1329,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         selectedGridX = null
         selectedGridY = null
-//        wildlifePosX = null
-//        wildlifePosY = null
+
+        if(requireNotNull(rootService.currentGame).isLocal) {
+            chatButton.isVisible = false
+            closeChat()
+        } else {
+            chatButton.isVisible = true
+        }
     }
 
 
@@ -1321,6 +1345,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         playerListAtStart = game.playerQueue.toMutableList()
 
+        showVisualForEndScreen(true)
         createGame()
 
         if(!isHuman()) { disableAllForNetworkBotTurn() }
@@ -1344,7 +1369,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         loadScoreCards(game.scoringCards)
 
-        //loadStartTiles()xx
         initializeCamerasOnSide()
         loadPlayerBoards()                                                          //-> anpassen
         for(tile in game.playerQueue.peek().board){
@@ -1354,7 +1378,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         updateRoundCounter()
         setNatureTokenCounts()                                                      //-> anpassen
         adjustAreas()
-        changeGreyVisibility(true, 0)
+
+        if(game.playerQueue.peek().type == PlayerType.HUMAN) changeGreyVisibility(true, 0)
+        else changeGreyVisibility(false, 0)
         changeGreyVisibility(false, 1)
         changeGreyVisibility(false, 2)
         changeGreyVisibility(false, 3)
@@ -1520,8 +1546,15 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         return Pair(x, y)
     }
 
-    fun disableForEndScreen() {
-
+    fun showVisualForEndScreen(visible: Boolean) {
+        fromScoringScene = true
+        listOf(customChoiceButton, changeWildlifeButton, clearOverpopulationButton, pineCone1, pineCone2, grayBox,
+            chatBoxBackground, chatView, chatButton, messageInput, sendButton,
+            zoomIn, zoomOut, undo, redo, animationSpeedControl, endTurn, playerName, pause,
+            roundCounterHex, roundCounterText, roundCounterLabel1, roundCounterLabel2).forEach { it.isVisible = visible }
+        tileShop.forEach { it.isVisible = visible }
+        animalShop.forEach { it.isVisible = visible }
+        showScoreScene.isVisible = true
     }
 
 
@@ -1599,7 +1632,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         activatesTileButtons()
         changeGreyVisibility(false, playerID, greyTile)
-        //deactivateRotateButtons()
 
         greyTile.isDisabled = false
         greyTile.onMouseClicked = { onClickForTiles(greyTile) }
@@ -1793,7 +1825,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         resetCustomChoice()
 
         zoomOnNextPlayer()
-        changeGreyVisibility(true, player)
+        if(game.playerQueue.peek().type == PlayerType.HUMAN) changeGreyVisibility(true, player)
 
         customChoiceButton.isDisabled = game.playerQueue.peek().natureTokens == 0
 

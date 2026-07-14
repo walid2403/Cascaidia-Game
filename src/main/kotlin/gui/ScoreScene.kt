@@ -313,6 +313,23 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
         }
     }
 
+    val showGameScene = Button(
+        width = 280,
+        height = 70,
+        posX = 40,
+        posY = 40,
+        text = "Show Boards",
+        font = Font(size = 30),
+        visual = ColorVisual(181, 181, 181).apply {
+            style.borderRadius = BorderRadius(10.0)
+        }
+    ).apply {
+        onMouseClicked = {
+            app.gameScene.showVisualForEndScreen(false)
+            app.hideMenuScene()
+        }
+    }
+
     val newGameButton = Button(
         width = 280,
         height = 70,
@@ -388,7 +405,8 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
             habitatScorePane,
             mainScoreTabOverlay,
             wildlifeScoreTabOverlay,
-            habitatScoreTabOverlay
+            habitatScoreTabOverlay,
+            showGameScene
         )
         mainScorePane.addAll(
             firstPlaceName,

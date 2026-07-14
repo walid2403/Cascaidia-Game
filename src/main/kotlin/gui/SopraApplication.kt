@@ -24,7 +24,7 @@ class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
 
     val pauseMenu = PauseMenuScene(this@SopraApplication,rootService)
 
-    private val scoreScene = ScoreScene(this@SopraApplication, rootService)
+    val scoreScene = ScoreScene(this@SopraApplication, rootService)
 
     val joinOnlineLobbyScene = JoinOnlineLobbyScene(this@SopraApplication, rootService)
 
