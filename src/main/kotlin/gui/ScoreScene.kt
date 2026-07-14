@@ -309,6 +309,7 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
         }
     ).apply {
         onMouseClicked = {
+            if (rootService.currentGame?.isLocal ?: false) rootService.networkService.disconnect()
             app.exit()
         }
     }
@@ -342,6 +343,7 @@ class ScoreScene(private val app: SopraApplication,private val rootService: Root
         }
     ).apply {
         onMouseClicked = {
+            if (rootService.currentGame?.isLocal ?: false) rootService.networkService.disconnect()
             app.showMenuScene(app.mainMenuScene)
         }
     }

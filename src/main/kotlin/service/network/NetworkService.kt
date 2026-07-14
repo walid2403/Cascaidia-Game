@@ -1,6 +1,7 @@
 package service.network
 
 import edu.udo.cs.sopra.ntf.*
+import entity.GameState
 import entity.Player
 import entity.PlayerType
 import entity.WildlifeToken
@@ -297,7 +298,16 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
             message.habitatCoordinates.second, message.habitatCoordinates.first)
 
         rootService.playerActionService.placeTile(habCoords)
-        game.playerQueue.peek().board[habCoords]?.rotation = message.habitatRotation
+        rootService.playerActionService.rotateTile(null, message.habitatRotation, habCoords)
+//        game.playerQueue.peek().board[habCoords]?.rotation = message.habitatRotation
+//
+//        for (i in 1..message.habitatRotation) {
+//            val hab = game.playerQueue.peek().board[habCoords]?.habs?.removeLast()
+//            checkNotNull(hab)
+//            game.playerQueue.peek().board[habCoords]?.habs?.add(1, hab)
+//        }
+
+        onAllRefreshables { refreshAfterPlaceTile(habCoords) }
 
         if (message.wildlifeCoordinates != null) {
             val tokenCoords: Triple<Int, Int, Int> = Triple(
@@ -305,9 +315,11 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
                 message.wildlifeCoordinates!!.second, message.wildlifeCoordinates!!.first)
 
             rootService.playerActionService.placeWildlife(tokenCoords)
-        }
 
-        rootService.gameService.changeTurn()
+            rootService.gameService.changeTurn()
+        } else {
+            game.choices[game.selectedChoice.second] = Pair(game.choices[game.selectedChoice.second].first, game.wildlifeTokens.pop())
+        }
     }
 
     fun sendExterminate(indices: List<Int>, natureToken: Boolean) {
@@ -315,7 +327,6 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         checkNotNull(game) { "No running game found" }
 
         val wildlifeList = game.wildlifeTokens.peekAll().map { NetWildlife.valueOf(it.name) }.reversed().toMutableList()
-        wildlifeList.addAll(game.choices.map { NetWildlife.valueOf(it.second.name) }.reversed())
 
         val message = WipeWildlifeMessage(
             natureToken, game.playerQueue.peek().natureTokens, indices, wildlifeList
@@ -330,22 +341,26 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
         if (message.usedNatureToken) game.playerQueue.peek().natureTokens--
 
-        check(game.playerQueue.peek().natureTokens == message.natureTokenAmount) { "Difference in Nature Tokens detected" }
+//        check(game.playerQueue.peek().natureTokens == message.natureTokenAmount) { "Difference in Nature Tokens detected" }
 
         val wildlifeBag = message.wildlifeBag.toMutableList()
 
-        for (i in game.choices.indices) {
-            game.choices[i] = Pair(game.choices[i].first, WildlifeToken.valueOf(wildlifeBag.removeLast().name))
+        message.wipedWildlifeIndices.sorted().forEach {
+            game.choices[it] = Pair(game.choices[it].first, game.wildlifeTokens.pop())
         }
 
         game.wildlifeTokens.clear()
         game.wildlifeTokens.pushAll(wildlifeBag.map {WildlifeToken.valueOf(it.name) })
 
         onAllRefreshables { refreshAfterChangeWildlife(message.wipedWildlifeIndices) }
+
+        if (message.wipedWildlifeIndices.isEmpty() && game.gameState == GameState.PLAYED_TILE) {
+            rootService.gameService.changeTurn()
+        }
     }
 
     fun sendUseNatureToken() {
-        client?.sendGameActionMessage(UseNatureTokenMessage())
+//        client?.sendGameActionMessage(UseNatureTokenMessage())
     }
 
     fun receiveUseNatureToken() {
@@ -374,7 +389,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         val game = rootService.currentGame
         checkNotNull(game) { "No running game found" }
 
-        client?.sendGameActionMessage(RotationMessage(game.choices[game.selectedChoice.first].first.rotation))
+//        client?.sendGameActionMessage(RotationMessage(game.choices[game.selectedChoice.first].first.rotation))
     }
 
     fun receiveRotation(message: RotationMessage) {

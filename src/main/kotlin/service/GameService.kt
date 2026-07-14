@@ -395,7 +395,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * or if there are not at least 3 tokens of the same type or
      * if there are 3 and the current gameState is not [GameState.START_OF_TURN]
      */
-    fun exterminate(playerTrigger: Boolean, natureToken : Boolean = false) {
+    fun exterminate(playerTrigger: Boolean) {
         val game = rootService.currentGame ?: error("No current game")
 //        check(
 //            game.gameState == GameState.START_OF_TURN ||
@@ -461,10 +461,15 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             for (token in game.removedTokens) {
                 game.wildlifeTokens.push(token)
             }
-            game.wildlifeTokens.shuffle()
             game.removedTokens.clear()
 
-            rootService.networkService.sendExterminate(affectedIndices, natureToken)
+            if (game.playerQueue.peek().type != PlayerType.NETWORK) {
+                game.wildlifeTokens.shuffle()
+
+                if (!game.isLocal) {
+                    rootService.networkService.sendExterminate(affectedIndices, false)
+                }
+            }
 
 //            refreshing only at the final resolved state
 //            onAllRefreshables {
@@ -1218,24 +1223,27 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val checkCondition = game.gameState == GameState.PLAYED_TILE || game.gameState == GameState.END_OF_TURN
         check(checkCondition) { "Current Turn can not be ended" }
 
-        val currentPlayer = game.playerQueue.poll()
-        game.playerQueue.add(currentPlayer)
+        val currentPlayer = game.playerQueue.peek()
 
         if (currentPlayer.type != PlayerType.NETWORK && !game.isLocal) {
             rootService.networkService.sendPlace(game.tileCoordinates, game.tokenCoordinates, game.tileRotation)
         }
 
-        game.tokenCoordinates = null
-        game.tileRotation = 0
+        if (game.gameState == GameState.PLAYED_TILE) {
+            game.wildlifeTokens.push(game.choices[game.selectedChoice.second].second)
+            game.wildlifeTokens.shuffle()
 
-        val nextPlayer = game.playerQueue.peek()
+            if (currentPlayer.type != PlayerType.NETWORK && !game.isLocal) {
+                rootService.networkService.sendExterminate(listOf(), false)
+            }
+        }
+
+        val nextPlayer = game.playerQueue.elementAt(1)
 
         if (nextPlayer.board.size == 23) {
             calculateScores()
             return
         }
-
-        game.gameState = GameState.START_OF_TURN
 
         val newTile = game.tileStack.pop()  //hier kann davon ausgegangen werden, dass immer ein Tile da ist
         val newWildlifeToken = game.wildlifeTokens.pop()
@@ -1246,6 +1254,13 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         game.choices[game.selectedChoice.second] = Pair(tokenChoice.first, newWildlifeToken)
 
         exterminate(false)
+
+        game.playerQueue.add(game.playerQueue.poll())
+
+        game.tokenCoordinates = null
+        game.tileRotation = 0
+
+        game.gameState = GameState.START_OF_TURN
 
         game.selectedChoice = Pair(-1, -1)
 

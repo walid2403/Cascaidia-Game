@@ -92,7 +92,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private var playerListAtStart = mutableListOf<Player>()
 
     //Hintergrundbild
-    private val logo = Label(posX = 0,posY = 0,width = 1920,height = 1080,visual = ImageVisual("backgrounds/CascadiaHintergrund2.png"))
+    private val logo = Label(posX = 0,posY = 0,width = 1920,height = 1080,visual = ImageVisual("backgrounds/CascadiaHintergrund.png"))
 
     //Graue Box um Auswahl
     private val grayBox = Label(width = 950, height = 300, posX = 485, posY = -40).apply {
@@ -2262,7 +2262,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         checkNotNull(game)
 
         if(game.playerQueue.peek().type == PlayerType.NETWORK) {
-            println("Place Tile: "+index.third.toString()+", "+index.second.toString())
+            println("Place Tile: " + index.third.toString() + ", " + index.second.toString())
             val game = rootService.currentGame
             checkNotNull(game)
 
@@ -2271,9 +2271,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             val playerID = getPlayerId()
             val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(playerID)
 
-            println("Player: "+playerID.toString())
+            println("Player: $playerID")
 
             val hexagon = HexagonViewExtended(currentArea[0,0]?.size ?: 14.0, chosenTile.visual)
+            hexagon.rotation = (game.playerQueue.peek().board[index]?.rotation ?: 0) * 60.0
             currentArea[index.third, index.second] = hexagon
 
             chosenTile.isVisible = false

@@ -642,9 +642,9 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
      */
 
     private fun updatePlayers(players: List<String>) {
-        if(players.size !in 2..4) {
-            throw IllegalArgumentException("Invalid number of players: ${players.size}")
-        }
+//        if(players.size !in 2..4) {
+//            throw IllegalArgumentException("Invalid number of players: ${players.size}")
+//        }
         if (!duplicateFree(players)) {
             throw IllegalArgumentException("Duplicate names are not allowed")
         }
