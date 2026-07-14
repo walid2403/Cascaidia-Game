@@ -317,8 +317,6 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
             rootService.playerActionService.placeWildlife(tokenCoords)
 
             rootService.gameService.changeTurn()
-        } else {
-            game.choices[game.selectedChoice.second] = Pair(game.choices[game.selectedChoice.second].first, game.wildlifeTokens.pop())
         }
     }
 
