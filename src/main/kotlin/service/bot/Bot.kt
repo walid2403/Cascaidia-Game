@@ -9,10 +9,16 @@ import kotlin.random.Random
  */
 class Bot (private val rootService: RootService) : AbstractRefreshingService() {
 
+    /**
+     * Wichtig: Beide müssen in jedem Bot gesetzt werden!
+     */
     var coordinatesTile: Triple<Int?, Int?, Int?> = Triple(null, null, null)
     var coordinatesWildlifeToken: Triple<Int?, Int?, Int?> = Triple(null, null, null)
 
-    private val hardBot = BotLocaleOptimum(rootService, this)
+    /**
+     * Hier eine Kopie von eurem Bot erstellen
+     */
+    private val greedyBot = BotLocaleOptimum(rootService, this)
     private val heuristicBot = HeuristicBot(rootService, this)
 
     private fun resetCoordinates() {
@@ -26,18 +32,30 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
     fun makeTurn(playerType: PlayerType) {
         require(playerType != PlayerType.HUMAN) { "Die Methode sollte nur für Bot Züge aufgerufen werden" }
         require(playerType != PlayerType.NETWORK) { "Die Methode sollte nur für Bot Züge aufgerufen werden" }
+        resetCoordinates()
         when (playerType) {
             PlayerType.EASY_BOT -> {
-                resetCoordinates()
+                randomBotTurn()
+            }
+            PlayerType.HEURISTIC_BOT -> {
                 while(rootService.currentGame?.gameState != GameState.END_OF_TURN) {
                     heuristicBot.makeTurn()
                 }
             }
-
-            PlayerType.HARD_BOT -> {
-                resetCoordinates()
+            PlayerType.GREEDY_BOT -> {
                 while(rootService.currentGame?.gameState != GameState.END_OF_TURN) {
-                    hardBot.makeTurn()
+                    greedyBot.makeTurn()
+                }
+            }
+            PlayerType.MONTE_BOT -> {
+                //Hier euren Zug aufrufen. Wenn ihr den ganzen Zug direkt macht, dann wie bei EASY_BOT, sonst wie bei Rest
+            }
+            PlayerType.NEURAL_BOT -> {
+
+            }
+            PlayerType.HARD_BOT -> {
+                while(rootService.currentGame?.gameState != GameState.END_OF_TURN) {
+                    greedyBot.makeTurn()
                 }
             }
         }

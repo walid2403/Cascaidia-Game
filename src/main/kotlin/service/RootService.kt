@@ -54,3 +54,4 @@ class RootService {
         newRefreshables.forEach { addRefreshable(it) }
     }
 }
+

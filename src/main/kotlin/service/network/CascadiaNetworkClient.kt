@@ -14,6 +14,7 @@ import tools.aqua.bgw.net.common.response.*
  * [BoardGameClient] implementation for network communication.
  *
  * @param playerName the name of the player using this client.
+ * @param playerType The Typ of the player connected locally
  * @param host the host to connect to.
  * @param secret the secret to use for the connection.
  * @property networkService the [NetworkService] to potentially forward received messages to.
