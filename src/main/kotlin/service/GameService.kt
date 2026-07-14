@@ -485,12 +485,13 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @throws IllegalStateException if there is no current game or
      *                               if not every player has 20 habitat tiles
      */
-    fun calculateScores() {
+    fun calculateScores(botCall: Boolean = false) : List<Pair<String,List<Int>>> {
         val scores = mutableListOf<Pair<String, MutableList<Int>>>()
         val currentGame = rootService.currentGame
         checkNotNull(currentGame) { "Es existiert kein Spiel" }
 
         for (player in currentGame.playerQueue) {
+            if (botCall && player != currentGame.playerQueue.peek()) continue
             val playerScore = mutableListOf<Int>()
             val nodes = createGraph(player.board)
             playerScore.addAll(createCorridorScores(nodes))
@@ -515,15 +516,20 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             scores.add(Pair(player.name, playerScore))
         }
 
-        calculateHabitatCorridorMajority(scores, currentGame)
+        if (!botCall) {
+            calculateHabitatCorridorMajority(scores, currentGame)
+        }
 
         scores.forEachIndexed { index, score ->
             score.second.add(currentGame.playerQueue.elementAt(index).natureTokens)
         }
 
-        onAllRefreshables {
-            refreshAfterEndGame(scores)
+        if (!botCall) {
+            onAllRefreshables {
+                refreshAfterEndGame(scores)
+            }
         }
+        return scores
     }
 
     private fun createGraph(board: Map<Triple<Int, Int, Int>, Tile>): List<Node> {
