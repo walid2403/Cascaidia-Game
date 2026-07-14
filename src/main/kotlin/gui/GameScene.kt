@@ -92,7 +92,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private var playerListAtStart = mutableListOf<Player>()
 
     //Hintergrundbild
-    private val logo = Label(posX = 0,posY = 0,width = 1920,height = 1080,visual = ImageVisual("backgrounds/CascadiaHintergrund2.png"))
+    private val logo = Label(posX = 0,posY = 0,width = 1920,height = 1080,visual = ImageVisual("backgrounds/CascadiaHintergrund.png"))
 
     //Graue Box um Auswahl
     private val grayBox = Label(width = 950, height = 300, posX = 485, posY = -40).apply {
@@ -1298,8 +1298,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
 
         showScoreScene.isVisible = false
-        zoomIn.isVisible = false
-        zoomOut.isVisible = false
+        zoomIn.isVisible = true
+        zoomOut.isVisible = true
         chatOpened = false
         newMessage = false
         chatView.items.clear()
@@ -1419,18 +1419,32 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         val game = rootService.currentGame
         checkNotNull(game)
 
+//        for(i in game.playerQueue.indices) {
+//            val playerIndex = getPlayerIdForPlayer(game.playerQueue.elementAt(i))
+//            listOf(nameOneSide, nameTwoSide, nameThreeSide, nameFourSide).elementAt(playerIndex).text = game.playerQueue.elementAt(i).name
+//        }
+
         for(i in game.playerQueue.indices) {
-            val playerIndex = getPlayerIdForPlayer(game.playerQueue.elementAt(i))
-            listOf(nameOneSide, nameTwoSide, nameThreeSide, nameFourSide).elementAt(playerIndex).text = game.playerQueue.elementAt(i).name
+            listOf(nameOneSide, nameTwoSide, nameThreeSide, nameFourSide
+            ).elementAt(i).text = game.playerQueue.elementAt(i).name
         }
     }
 
     private fun setNatureTokenCounts() {
+//        listOf(natureTokenCountOneSide, natureTokenCountTwoSide, natureTokenCountThreeSide, natureTokenCountFourSide
+//        ).forEachIndexed { index, tokenCount ->
+//            if(index < playerListAtStart.size)
+//                tokenCount.text =  playerListAtStart[index].natureTokens.toString()
+//            }
+
+        val game = rootService.currentGame
+        checkNotNull(game)
+
         listOf(natureTokenCountOneSide, natureTokenCountTwoSide, natureTokenCountThreeSide, natureTokenCountFourSide
         ).forEachIndexed { index, tokenCount ->
-            if(index < playerListAtStart.size)
-                tokenCount.text =  playerListAtStart[index].natureTokens.toString()
-            }
+            if(index < game.playerQueue.size)
+                tokenCount.text = game.playerQueue.elementAt(index).natureTokens.toString()
+        }
     }
 
     override fun refreshAfterSelectTile(tileIndex: Int) {
