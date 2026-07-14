@@ -14,7 +14,7 @@ import service.RootService
  * normaler Zug zu schlecht bewertet wird.
  * * @property rootService Referenz auf den Haupt-Service für den Zugriff auf den Spielstatus.
  */
-class HeuristicBot(private val rootService: RootService) {
+class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
 
     //die 6 Richtungen eines Hexagons im Uhrzeigersinn
     private val directions = listOf(
@@ -81,7 +81,8 @@ class HeuristicBot(private val rootService: RootService) {
      * eine Heuristik basierend auf dem potenziellen Punktgewinn, ob der Tausch sinnvoll ist.
      *
      * @param player Der KI-Spieler, dessen Board für die Punkte-Evaluierung herangezogen wird.
-     * @param isStartOfTurn Gibt an, ob wir uns im START_OF_TURN befinden (erlaubt freiwilliges Wischen bei 3 gleichen).
+     * @param isStartOfTurn Gibt an, ob wir uns im START_OF_TURN befinden
+     * (erlaubt freiwilliges Wischen bei 3 gleichen).
      * @return true, wenn der Markt wegen Überpopulation modifiziert wurde und der Zug pausiert,
      * false, wenn keine Überpopulation vorliegt oder kein Tausch durchgeführt wurde.
      */
@@ -159,30 +160,39 @@ class HeuristicBot(private val rootService: RootService) {
     ): Int{
         var score = 0
 
-        //wir prüfen alle 6 Kanten
+        // Wie viele Schritte nach RECHTS müssen wir von der AKTUELLEN
+        // Rotation aus machen, um die Test-Rotation zu erreichen?
+        val additionalTurns = (testRotation - newTile.rotation + 6) % 6
+
+        // 2. Wir prüfen alle 6 Kanten
         for(dirIndex in 0..5){
             val offset = directions[dirIndex]
-            //alle NachbarTile vom newTile suchen
-            val neighborPos = Triple(position.first+offset.first, position.second+offset.second
-                , position.third+offset.third)
+            val neighborPos = Triple(position.first+offset.first, position.second+offset.second,
+                position.third+offset.third)
             val neighborTile = player.board[neighborPos]
 
             if(neighborTile != null){
-                //1. welche Kante von unserem Plättchen zeigt in diese Richtung?
-                val myEdgeIndex = (dirIndex - testRotation + 6) % 6 //art vom Tile im Index (z.B. Wald)
-                val myHabitat = newTile.habs[myEdgeIndex] // z.B. im Index x gibt ein Berg
+                // 3. Welches Habitat landet nach unseren Drehungen an dieser Kante?
+                // Da rotateTile(true) nach rechts verschiebt, ziehen wir turnsNeeded ab.
+                val myEdgeIndex = (dirIndex - additionalTurns + 6) % 6
+                val myHabitat = newTile.habs[myEdgeIndex]
 
-                //2.welche Kante des Nachbarn Zeigt zu uns zurück
-                val neighborDirIndex = (dirIndex + 3) % 6 //wenn dirIndex 0 ist, ist sein nachbar 3
-                val neighborHabitat = neighborTile.habs[neighborDirIndex] // z.B. im Index x gibt es auch ein Berg
+                // 4. Welche Kante des Nachbarn zeigt zu uns zurück?
+                val neighborDirIndex = (dirIndex + 3) % 6
 
-                //3.wenn die Landschaften exakt zusammenpassen -> Volle Punkte
+                // 5. KEINE Rotation vom Nachbarn abziehen! Das Framework hat
+                // das Array des Nachbarn beim Legen bereits physisch rotiert.
+                val neighborHabitat = neighborTile.habs[neighborDirIndex]
+
+                // 6. Wenn die Landschaften exakt zusammenpassen -> Volle Punkte
                 if(myHabitat == neighborHabitat){
                     score += 15
                 }
             }
         }
-        score += newTile.possibles.size //je mehr WildlifeToken die Liste enthält, desto besser
+
+        // Bonuspunkte für Flexibilität (viele mögliche Tiere)
+        score += newTile.possibles.size
         return score
     }
 
@@ -220,14 +230,15 @@ class HeuristicBot(private val rootService: RootService) {
 
         }
 
-        //Berechnen, wie oft wir im Uhrzeigersinn drehen müssen
-        val currentRot = selectedTile.rotation //falls currentRot == 4
-        val turnsNeeded = (bestRotation - currentRot + 6) % 6 //muss 4 Mal umgedreht werden
+        // SICHERER RE-FIX: Wir berechnen die exakte Anzahl an Rechts-Drehungen,
+        // die nötig sind, um von der jetzigen Rotation zur target-Rotation zu kommen.
+        val currentRotation = selectedTile.rotation
+        val turnsNeeded = (bestRotation - currentRotation + 6) % 6
 
         for(i in 0 until turnsNeeded){
             rootService.playerActionService.rotateTile(true)
         }
-
+        bot.coordinatesTile = bestPosition
         rootService.playerActionService.placeTile(bestPosition)
 
     }
@@ -287,8 +298,10 @@ class HeuristicBot(private val rootService: RootService) {
             evaluateWildlifePosition(position, selectedWildlife, player)
         }
 
+
         //3.Tier platzieren
         if(bestPosition != null){
+            bot.coordinatesWildlifeToken = bestPosition
             rootService.playerActionService.placeWildlife(bestPosition)
             currentGame.gameState = GameState.END_OF_TURN
         } else {
@@ -319,7 +332,7 @@ class HeuristicBot(private val rootService: RootService) {
 
         //Jetzt verteilen wir Punkte je nach Tierart
         return when(wildlife) {
-            WildlifeToken.BEAR -> scoreBear(neighborAnimals, isTypeA)
+            WildlifeToken.BEAR -> scoreBear(neighborAnimals, isTypeA, position, player)
             WildlifeToken.ELK -> scoreElk(neighborAnimals, isTypeA)
             WildlifeToken.SALMON -> scoreSalmon(neighborAnimals, isTypeA)
             WildlifeToken.HAWK -> scoreHawk(neighborAnimals, isTypeA, position, player)
@@ -338,14 +351,7 @@ class HeuristicBot(private val rootService: RootService) {
         player: Player
     ): List<WildlifeToken> {
         // Da fast alle Tiere auf ihre Nachbarn achten, berechnen wir die hier einmal zentral
-        val neighborPositions = listOf(
-            Triple(position.first, position.second - 1, position.third + 1),
-            Triple(position.first + 1, position.second - 1, position.third),
-            Triple(position.first + 1, position.second, position.third - 1),
-            Triple(position.first, position.second + 1, position.third - 1),
-            Triple(position.first - 1, position.second + 1, position.third),
-            Triple(position.first - 1, position.second, position.third + 1)
-        )
+        val neighborPositions = getNeighborPositions(position)
 
         // Wir sammeln alle Tiere, die direkt angrenzen (das brauchen wir für die Bewertung)
         val neighborAnimals = mutableListOf<WildlifeToken>()
@@ -358,28 +364,88 @@ class HeuristicBot(private val rootService: RootService) {
         return neighborAnimals
     }
 
+    /** gibt eine liste zurück, die die Nachbarn platz enthält */
+    private fun getNeighborPositions(position: Triple<Int, Int, Int>): List<Triple<Int, Int, Int>> {
+        return listOf(
+            Triple(position.first, position.second - 1, position.third + 1),
+            Triple(position.first + 1, position.second - 1, position.third),
+            Triple(position.first + 1, position.second, position.third - 1),
+            Triple(position.first, position.second + 1, position.third - 1),
+            Triple(position.first - 1, position.second + 1, position.third),
+            Triple(position.first - 1, position.second, position.third + 1)
+        )
+    }
+
     /**
      * Bär-Bewertung. Typ A belohnt Paare (genau 1 Nachbar), Typ B Dreiergruppen (genau 2 Nachbarn).
      * Mehr als die angestrebte Nachbarzahl wird stark bestraft, um zu große Cluster zu vermeiden.
      */
-    private fun scoreBear(neighborAnimals: List<WildlifeToken>, isTypeA: Boolean): Int {
+    private fun scoreBear(neighborAnimals: List<WildlifeToken>, isTypeA: Boolean,
+                          position: Triple<Int, Int, Int>,
+                          player : Player): Int {
         val bearNeighbors = neighborAnimals.count { it == WildlifeToken.BEAR }
-        return if (isTypeA) {
-            // === BÄR TYP A (Paare) ===
-            when (bearNeighbors) {
-                1 -> 50    // PERFEKT! Wir bilden genau ein Paar.
-                0 -> 10    // Okay, wir fangen ein neues Paar an.
-                else -> -100 // SCHLECHT! 2 oder mehr Bären.
+
+        if (isTypeA) {
+            // === BÄR TYP A (Genau Paare) ===
+            if (bearNeighbors == 0) return 10
+            if (bearNeighbors > 1) return -100 // 2+ Nachbarn sind sofort schlecht (3+ Gruppe)
+
+            // Wir haben genau 1 Bären als direkten Nachbarn.
+            // ABER: Hat dieser Bär vielleicht schon einen ANDEREN Bären?
+            val neighborBearPos = getNeighborPositions(position).first { pos ->
+                player.board[pos]?.occupant == WildlifeToken.BEAR
             }
+
+            // Wir zählen die Bären, die an unseren zukünftigen Partner grenzen
+            val neighborsOfNeighborCount = getNeighborAnimals(neighborBearPos, player)
+                .count { it == WildlifeToken.BEAR }
+
+            if (neighborsOfNeighborCount > 0) {
+                return -100 // KATASTROPHE: Der Nachbar ist schon in einer Beziehung! Wir würden eine 3er-Gruppe bauen.
+            }
+
+            return 50 // PERFEKT: Beide Bären sind noch Single, wir bilden ein sauberes Paar.
+
         } else {
-            // === BÄR TYP B (Dreiergruppen) ===
-            when (bearNeighbors) {
-                2 -> 50    // PERFEKT! Der 3. Bär macht die Gruppe komplett.
-                1 -> 20    // Gut, wir erweitern zu einem Zweier-Grüppchen.
-                0 -> 10    // Okay, wir fangen eine neue Gruppe an.
-                else -> -100 // SCHLECHT! Zu viele Bären auf einem Haufen.
+            // === BÄR TYP B (Genau 3er Gruppen) ===
+            if (bearNeighbors == 0) return 10
+            if (bearNeighbors > 2) return -100 // 4er Gruppe vermeiden
+
+            if (bearNeighbors == 1) {
+                // Wir berühren 1 Bären. Hat der schon Nachbarn?
+                val neighborBearPos = getNeighborPositions(position).first { pos ->
+                    player.board[pos]?.occupant == WildlifeToken.BEAR
+                }
+                val neighborsOfNeighborCount = getNeighborAnimals(neighborBearPos, player)
+                    .count { it == WildlifeToken.BEAR }
+
+                return when (neighborsOfNeighborCount) {
+                    0 -> 20 // Wir machen aus einem Single-Bär ein 2er Grüppchen.
+                    1 -> 50 // PERFEKT: Er hat schon einen, wir sind der 3. Bär, der die Gruppe abschließt!
+                    else -> -100 // Er hat schon 2 oder mehr. Wenn wir uns anlegen, werden es 4+ Bären.
+                }
+            }
+
+            if (bearNeighbors == 2) {
+                // Wir füllen eine Lücke zwischen 2 Bären. Wenn diese beiden noch ANDERE Bären
+                // außerhalb unserer direkten Reichweite berühren, wird die Gruppe zu groß.
+                val neighborBearPositions = getNeighborPositions(position).filter { pos ->
+                    player.board[pos]?.occupant == WildlifeToken.BEAR
+                }
+
+                for (nbPos in neighborBearPositions) {
+                    val bearsConnectedToNeighbor = getNeighborPositions(nbPos).filter { p ->
+                        player.board[p]?.occupant == WildlifeToken.BEAR
+                    }
+                    // Zähle Bären, die NICHT zu den direkten Nachbarn unseres Feldes gehören
+                    val outsideBears = bearsConnectedToNeighbor.count { it !in neighborBearPositions }
+
+                    if (outsideBears > 0) return -100 // Gruppe würde auf 4+ wachsen!
+                }
+                return 50 // PERFEKT: Wir schließen die Lücke und bilden genau eine 3er-Gruppe.
             }
         }
+        return 0
     }
 
     /**
@@ -469,6 +535,10 @@ class HeuristicBot(private val rootService: RootService) {
      * Typ B: 20 Punkte pro angrenzendem Paar gleicher Tiere.
      */
     private fun scoreFox(neighborAnimals: List<WildlifeToken>, isTypeA: Boolean): Int {
+        //Fox dürfen nicht neben einander sein
+        if (WildlifeToken.FOX in neighborAnimals) {
+            return -100
+        }
         if (isTypeA) {
             // === FUCHS TYP A (Verschiedene Tiere) ===
             val uniqueNeighborsCount = neighborAnimals.distinct().size
