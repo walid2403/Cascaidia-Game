@@ -548,12 +548,12 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
         listOf(checkBoxSalmonA, checkBoxSalmonB, checkBoxElkA, checkBoxElkB, checkBoxBearA, checkBoxBearB, checkBoxFoxA,
             checkBoxFoxB, checkBoxHawkA, checkBoxHawkB).forEach { it.isChecked = false }
 
-        listOf(p1Input, p2Input, p3Input, p4Input).forEach { name ->
+        listOf(p3Input, p4Input).forEach { name ->
             name.text = ""
             name.isVisible = false
         }
 
-        listOf(p1Icon, p2Icon, p3Icon, p4Icon).forEach { icon ->
+        listOf(p3Icon, p4Icon).forEach { icon ->
             icon.isVisible = false
             icon.visual = ImageVisual("icons/NetworkIcon.png")
         }

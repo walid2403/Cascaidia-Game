@@ -106,7 +106,7 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
         visual = ColorVisual(color = Color(0x99acff)).apply { style.borderRadius = BorderRadius(8) }
         isDisabled = false
         onMouseClicked = {
-            var name = nameInput.text
+            val name = nameInput.text
             if(name.isBlank()) {
                 warning.text = "Enter a name before opening the lobby."
                 warning.isVisible = true

@@ -24,7 +24,7 @@ class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
 
     val pauseMenu = PauseMenuScene(this@SopraApplication,rootService)
 
-    val scoreScene = ScoreScene(this@SopraApplication, rootService)
+    val scoreScene = ScoreScene(this@SopraApplication)
 
     val joinOnlineLobbyScene = JoinOnlineLobbyScene(this@SopraApplication, rootService)
 
@@ -41,7 +41,8 @@ class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
         rootService.addRefreshables(
             this,
             gameScene,
-            mainMenuScene, pauseMenu, scoreScene, joinOnlineLobbyScene, hostOnlineLobbyScene, hostOnlineScene, joinOnlineScene, lobbyScene,
+            mainMenuScene, pauseMenu, scoreScene, joinOnlineLobbyScene, hostOnlineLobbyScene, hostOnlineScene,
+            joinOnlineScene, lobbyScene,
         )
         this.showGameScene(gameScene)
         this.showMenuScene(mainMenuScene )
