@@ -118,7 +118,7 @@ interface Refreshable {
     /**
      * Perform refreshes necessary after a network game has been started
      */
-    fun refreshAfterJoinGame(lobbyCode: String) {}
+    fun refreshAfterJoinGame(lobbyCode: String, playerName: String, playerType: PlayerType) {}
 
     /**
      * Perform refreshes necessary after a network game has been started

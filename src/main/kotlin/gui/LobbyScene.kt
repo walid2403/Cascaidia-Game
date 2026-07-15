@@ -11,7 +11,6 @@ import tools.aqua.bgw.components.uicomponents.Label
 import tools.aqua.bgw.components.uicomponents.TextField
 import tools.aqua.bgw.components.uicomponents.UIComponent
 import tools.aqua.bgw.core.Alignment
-import tools.aqua.bgw.core.BoardGameApplication.Companion.runOnGUIThread
 import tools.aqua.bgw.core.Color
 import tools.aqua.bgw.core.MenuScene
 import tools.aqua.bgw.style.BorderRadius
@@ -351,10 +350,9 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val elk = Label(
         width = iconSize + 15, height = iconSize + 15,
-        posX = (paneWidth)/2 + 90 - (iconSize + 15)/2, posY = 30,
-        font = Font(size = 40)
+        posX = (paneWidth)/2 + 90 - (iconSize + 15)/2, posY = 30
     ).apply {
-        visual = ImageVisual("tokens/elk.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/elk.png")
         onMouseClicked = {
             showScoreCards(elkCardA, elkCardB)
             warning.isVisible = false
@@ -363,10 +361,9 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val hawk = Label(
         width = iconSize + 15, height = iconSize + 15,
-        posX = elk.posX - 2*iconDistance - 2*(iconSize + 15), posY = 30,
-        font = Font(size = 40)
+        posX = elk.posX - 2*iconDistance - 2*(iconSize + 15), posY = 30
     ).apply {
-        visual = ImageVisual("tokens/hawk.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/hawk.png")
         onMouseClicked = {
             showScoreCards(hawkCardA, hawkCardB)
             warning.isVisible = false
@@ -375,10 +372,9 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val salmon = Label(
         width = iconSize + 15, height = iconSize + 15,
-        posX = elk.posX - iconDistance - (iconSize + 15), posY = 30,
-        font = Font(size = 40)
+        posX = elk.posX - iconDistance - (iconSize + 15), posY = 30
     ).apply {
-        visual = ImageVisual("tokens/salmon.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/salmon.png")
         onMouseClicked = {
             showScoreCards(salmonCardA, salmonCardB)
             warning.isVisible = false
@@ -387,9 +383,9 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val fox = Label(
         width = iconSize + 15, height = iconSize + 15,
-        posX = elk.posX + iconDistance + iconSize + 15, posY = 30,        font = Font(size = 40)
+        posX = elk.posX + iconDistance + iconSize + 15, posY = 30
     ).apply {
-        visual = ImageVisual("tokens/fox.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/fox.png")
 
         onMouseClicked = {
             showScoreCards(foxCardA, foxCardB)
@@ -399,10 +395,9 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private val bear = Label(
         width = iconSize + 15, height = iconSize + 15,
-        posX = elk.posX + 2*iconDistance + 2*(iconSize + 15), posY = 30,
-        font = Font(size = 40)
+        posX = elk.posX + 2*iconDistance + 2*(iconSize + 15), posY = 30
     ).apply {
-        visual = ImageVisual("tokens/bear.png", iconSize, iconSize)
+        visual = ImageVisual("tokens/bear.png")
         onMouseClicked = {
             showScoreCards(bearCardA, bearCardB)
             warning.isVisible = false
@@ -728,26 +723,6 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         }
     }
 
-    private val startLabel = Label(
-        posX = 700 - 8, posY = 620 - 130,
-        width = 142.0, height = 130.0,
-        text = "",
-        font = Font(size = 22, color = Color.BLACK)
-    ).apply {
-        visual = ColorVisual(160, 150, 210).apply { style.borderRadius = BorderRadius(15) }
-        this.isVisible = false
-    }
-
-    private val startButton = Label(
-        posX = 750 - 8, posY = 620 - 100,
-        width = 80.0, height = 50.0,
-        text = "▶",
-        font = Font(size = 40, color = Color.BLACK)
-    ).apply {
-        visual = ColorVisual(160, 150, 210).apply { style.borderRadius = BorderRadius(8) }
-        this.isVisible = false
-    }
-
     /**
      * Informs the player why he is not able to start the game. Is invisible unless 'start game' is clicked but not all
      * conditions to start playing are met.
@@ -777,7 +752,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         ).forEach { hostPanel.add(it) }
 
         listOf(
-            startLabel, startButton, bear, elk, hawk, salmon, fox,
+            bear, elk, hawk, salmon, fox,
             bearCardA, bearCardB, elkCardA, elkCardB, foxCardA, foxCardB,
             hawkCardA, hawkCardB, salmonCardA, salmonCardB,
             checkBoxHawkA, checkBoxHawkB, checkBoxElkA, checkBoxElkB, checkBoxBearA, checkBoxBearB, checkBoxFoxA,
@@ -820,17 +795,13 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
                 )
             ).apply {
                 onFinished = {
-                    runOnGUIThread {
-                        tabLabel.apply {
-                            visual = ImageVisual("assets/StartGameTab.png").apply {
-                                style.borderRadius = BorderRadius(15)
-                            }
-                            onMouseClicked = {
-                                if(checkStartReady()) {
-                                    println("startGame called on")
-                                    rootService.gameService.startNewGame(getFinalPlayers(), getFinalScoreCards())
-                                    //app.hideMenuScene()
-                                }
+                    tabLabel.apply {
+                        visual = ImageVisual("assets/StartGameTab.png").apply {
+                            style.borderRadius = BorderRadius(15)
+                        }
+                        onMouseClicked = {
+                            if(checkStartReady()) {
+                                rootService.gameService.startNewGame(getFinalPlayers(), getFinalScoreCards())
                             }
                         }
                     }

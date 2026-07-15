@@ -221,11 +221,9 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
     }
     //calculating total points corridor+animals
     private fun allPoints(board: Map<Triple<Int, Int, Int>, Tile>,scoringCards: List<Boolean>): Int{
-        var points= calculateCorridorPoints(board)
         for( tier in WildlifeToken.entries){
             points += calculateAnimalPoints(board, tier, scoringCards[tier.ordinal])
         }
-        return points
     }
     //chooses one of the given pairs
     private fun chooseBestPair(currentGame: CascadiaGame, player: Player){

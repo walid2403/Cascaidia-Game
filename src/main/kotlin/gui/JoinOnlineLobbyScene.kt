@@ -1,6 +1,5 @@
 package gui
 
-import entity.Player
 import entity.PlayerType
 import service.Refreshable
 import service.RootService
@@ -28,8 +27,7 @@ import tools.aqua.bgw.visual.Visual
  * @param playerName The [String] that was entered in the [JoinOnlineScene]
  * @param playerType The [Int] corresponding to the [PlayerType] selected in [JoinOnlineScene]
  */
-class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootService: RootService,
-                            private val playerName: String = "Name", private val playerType: PlayerType = PlayerType.HUMAN) :
+class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootService: RootService) :
     MenuScene(1920, 1080), Refreshable  {
 
     private val sceneWidth = 1920
@@ -50,6 +48,10 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
     private val nameHeight = 65
     private val nameY = paneHeight/2 - 170
     private val nameDistance = 35
+
+    private var playerType: PlayerType = PlayerType.HUMAN
+    private var playerName: String = "Name"
+
 
     private var panelsOut = false
 
@@ -227,8 +229,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
         posX = (paneWidth)/2 + 90 - (iconSize + 15)/2,
         posY = 30,
         width = iconSize + 15,
-        height = iconSize + 15,
-        visual = ImageVisual("tokens/elk.png", iconSize, iconSize)
+        height = iconSize + 15
     ).apply {
         visual = ImageVisual("tokens/elk.png")
         onMouseClicked = {
@@ -240,8 +241,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
         posX = elkIcon.posX - 2*iconDistance - 2*(iconSize + 15),
         posY = 30,
         width = iconSize + 15,
-        height = iconSize + 15,
-        visual = ImageVisual("tokens/hawk.png", iconSize, iconSize)
+        height = iconSize + 15
     ).apply {
         visual = ImageVisual("tokens/hawk.png")
         onMouseClicked = {
@@ -253,9 +253,9 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
         posX = elkIcon.posX - iconDistance - (iconSize + 15),
         posY = 30,
         width = iconSize + 15,
-        height = iconSize + 15,
-        visual = ImageVisual("tokens/salmon.png", iconSize, iconSize)
+        height = iconSize + 15
     ).apply {
+        visual = ImageVisual("tokens/salmon.png")
         onMouseClicked = {
             showScoreCards(salmonCardA, salmonCardB)
         }
@@ -265,8 +265,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
         posX = elkIcon.posX + iconDistance + iconSize + 15,
         posY = 30,
         width = iconSize + 15,
-        height = iconSize + 15,
-        visual = ImageVisual("tokens/fox.png", iconSize, iconSize)
+        height = iconSize + 15
     ).apply {
         visual = ImageVisual("tokens/fox.png")
         onMouseClicked = {
@@ -278,8 +277,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
         posX = elkIcon.posX + 2*iconDistance + 2*(iconSize + 15),
         posY = 30,
         width = iconSize + 15,
-        height = iconSize + 15,
-        visual = ImageVisual("tokens/bear.png", iconSize, iconSize)
+        height = iconSize + 15
     ).apply {
         visual = ImageVisual("tokens/bear.png")
         onMouseClicked = {
@@ -487,6 +485,16 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
         isVisible = false
     }
 
+    private val lobbyCodeLabel = Label(
+        posX = 35,
+        posY = paneHeight - 70,
+        width = 500,
+        height = 40,
+        alignment = Alignment.TOP_LEFT,
+        font = Font(24.0, family = "Canva Sans"),
+        text = "Lobby Code: UNKNOWN",
+    )
+
     init {
         addComponents(
             backgroundImage,
@@ -505,6 +513,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
             p3Icon,
             p4Icon,
             waitingToStart,
+            lobbyCodeLabel,
         )
         scoreCardSelectionPane.addAll(
             foxIcon,
@@ -638,6 +647,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
                     } else {
                         p2Icon.isVisible = false
                         p2Input.isVisible = false
+                        p2Input.text = ""
                     }
                 }
                 3 -> {
@@ -650,6 +660,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
                     } else {
                         p3Icon.isVisible = false
                         p3Input.isVisible = false
+                        p3Input.text = ""
                     }
                 }
                 4 -> {
@@ -662,6 +673,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
                     } else {
                         p4Icon.isVisible = false
                         p4Input.isVisible = false
+                        p4Input.text = ""
                     }
                 }
             }
@@ -682,24 +694,24 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
             var boxB = checkBoxFoxB
             when (i) {
                 0 -> {
-                    boxA = checkBoxHawkA
-                    boxB = checkBoxHawkB
+                    boxA = checkBoxBearA
+                    boxB = checkBoxBearB
                 }
                 1 -> {
-                    boxA = checkBoxSalmonA
-                    boxB = checkBoxSalmonB
-                }
-                2 -> {
                     boxA = checkBoxElkA
                     boxB = checkBoxElkB
                 }
-                3 -> {
+                2 -> {
                     boxA = checkBoxFoxA
                     boxB = checkBoxFoxB
                 }
+                3 -> {
+                    boxA = checkBoxHawkA
+                    boxB = checkBoxHawkB
+                }
                 4 -> {
-                    boxA = checkBoxBearA
-                    boxB = checkBoxBearB
+                    boxA = checkBoxSalmonA
+                    boxB = checkBoxSalmonB
                 }
             }
             if(selection[i] == true) {
@@ -774,5 +786,34 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
 
     override fun refreshAfterStartGame() {
         app.hideMenuScene()
+    }
+
+    override fun refreshAfterPlayerJoined(playerName: String) {
+        if(!p1Input.isVisible) {
+            addNewPlayer(playerName, p1Input, p1Icon)
+        } else if (!p2Input.isVisible) {
+            addNewPlayer(playerName, p2Input, p2Icon)
+        } else if(!p3Input.isVisible) {
+            addNewPlayer(playerName, p3Input, p3Icon)
+        } else if(!p4Input.isVisible) {
+            addNewPlayer(playerName, p4Input, p4Icon)
+        } else {
+            throw IllegalArgumentException("All 4 Lobby Slots are already occupied. No new player can join.")
+        }
+    }
+
+    override fun refreshAfterJoinGame(lobbyCode: String, playerName: String, playerType: PlayerType) {
+        this.playerName = playerName
+        this.playerType = playerType
+        this.lobbyCodeLabel.text = "Lobby Code: $lobbyCode"
+    }
+
+    private fun addNewPlayer(name: String, nameField: Label, icon: Label) {
+        nameField.text = name
+        icon.visual = ImageVisual("icons/NetworkIcon.png").apply {
+            style.borderRadius = BorderRadius(8)
+        }
+        nameField.isVisible = true
+        icon.isVisible = true
     }
 }

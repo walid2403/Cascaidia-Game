@@ -8,10 +8,18 @@ import kotlin.random.Random
  * Eine Klasse, in der alle Aufrufe der Bot Methoden gebündelt sind
  */
 class Bot (private val rootService: RootService) : AbstractRefreshingService() {
-    private val hardBot = BotLocaleOptimum(rootService, this)
-    private val heuristicBot = HeuristicBot(rootService, this)
+
+    /**
+     * Wichtig: Beide müssen in jedem Bot gesetzt werden!
+     */
     var coordinatesTile: Triple<Int?, Int?, Int?> = Triple(null, null, null)
     var coordinatesWildlifeToken: Triple<Int?, Int?, Int?> = Triple(null, null, null)
+
+    /**
+     * Hier eine Kopie von eurem Bot erstellen
+     */
+    private val greedyBot = BotLocaleOptimum(rootService, this)
+    private val heuristicBot = HeuristicBot(rootService, this)
 
     private fun resetCoordinates() {
         coordinatesTile = Triple(null, null, null)
@@ -24,23 +32,40 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
     fun makeTurn(playerType: PlayerType) {
         require(playerType != PlayerType.HUMAN) { "Die Methode sollte nur für Bot Züge aufgerufen werden" }
         require(playerType != PlayerType.NETWORK) { "Die Methode sollte nur für Bot Züge aufgerufen werden" }
+        resetCoordinates()
         when (playerType) {
             PlayerType.EASY_BOT -> {
-                resetCoordinates()
-                while (rootService.currentGame?.gameState != GameState.END_OF_TURN) {
+                randomBotTurn()
+            }
+            PlayerType.HEURISTIC_BOT -> {
+                while(rootService.currentGame?.gameState != GameState.END_OF_TURN) {
                     heuristicBot.makeTurn()
                 }
             }
-
-
-            PlayerType.HARD_BOT -> {
-                resetCoordinates()
+            PlayerType.GREEDY_BOT -> {
                 while(rootService.currentGame?.gameState != GameState.END_OF_TURN) {
-                    hardBot.makeTurn()}
+                    greedyBot.makeTurn()
+                }
+            }
+            PlayerType.MONTE_BOT -> {
+                //Hier euren Zug aufrufen. Wenn ihr den ganzen Zug direkt macht, dann wie bei EASY_BOT, sonst wie bei Rest
+            }
+            PlayerType.NEURAL_BOT -> {
+
+            }
+            PlayerType.HARD_BOT -> {
+                while(rootService.currentGame?.gameState != GameState.END_OF_TURN) {
+                    greedyBot.makeTurn()
+                }
             }
         }
+
+        val coordinatesTileNotNull = Triple(requireNotNull(coordinatesTile.first),
+            requireNotNull(coordinatesTile.second), requireNotNull(coordinatesTile.third))
+        onAllRefreshables { refreshAfterBotTurn(coordinatesTileNotNull, coordinatesWildlifeToken) }
     }
-        private fun randomBotTurn() {
+
+    private fun randomBotTurn() {
         val currentGame = rootService.currentGame
         checkNotNull(currentGame) { "Es existiert kein Spiel" }
         val player = currentGame.playerQueue.peek()
@@ -70,10 +95,6 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
             }
             newLegalTurns(legalTurns)
         }
-
-        val coordinatesTileNotNull = Triple(requireNotNull(coordinatesTile.first),
-            requireNotNull(coordinatesTile.second), requireNotNull(coordinatesTile.third))
-        onAllRefreshables { refreshAfterBotTurn(coordinatesTileNotNull, coordinatesWildlifeToken) }
 
         //rootService.gameService.changeTurn()
     }

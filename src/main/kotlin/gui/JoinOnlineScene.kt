@@ -56,6 +56,7 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
         visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
+            rootService.networkService.disconnect()
             app.showMenuScene(MainMenuScene(app,rootService))
         }
     }
@@ -237,15 +238,16 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
     private fun showWarning(text: String) {
         warning.text = text
         warning.isVisible = true
-        playAnimation(DelayAnimation(3000).apply {
-            onFinished = {
-                warning.isVisible = false
+        playAnimation(
+            DelayAnimation(3000).apply {
+                onFinished = {
+                    warning.isVisible = false
+                }
             }
-        }
         )
     }
 
-    override fun refreshAfterJoinGame(lobbyCode: String) {
+    override fun refreshAfterJoinGame(lobbyCode: String, playerName: String, playerType: PlayerType) {
         app.showMenuScene(JoinOnlineLobbyScene(app, rootService))
     }
 

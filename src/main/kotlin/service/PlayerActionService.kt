@@ -75,14 +75,23 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             currentGame.choices[index] = Pair(currentPair.first,newToken)
         }
 
-        for (wildeLifeToken in alteTierToken) {
-            currentGame.wildlifeTokens.push(wildeLifeToken)
+        if (currentGame.choices.map {it.second}.distinct().size == 1) {
+            rootService.gameService.exterminate(false, natureToken = true)
+        } else {
+            for (wildeLifeToken in alteTierToken) {
+                currentGame.wildlifeTokens.push(wildeLifeToken)
+            }
+
+            currentGame.wildlifeTokens.shuffle()
+
+            currentPlayer.natureTokens--
+
+            if (currentGame.playerQueue.peek().type != PlayerType.NETWORK && !currentGame.isLocal) {
+                rootService.networkService.sendExterminate(indices, true)
+            }
+
+            onAllRefreshables { refreshAfterChangeWildlife(indices) }
         }
-
-        currentGame.wildlifeTokens.shuffle()
-
-        currentPlayer.natureTokens--
-        onAllRefreshables { refreshAfterChangeWildlife(indices) }
 
     }
 
@@ -135,6 +144,9 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         currentGame.selectedChoice = Pair(tileIndex,wildlifeIndex)
         currentGame.gameState = GameState.MADE_CHOICE
 
+        if (currentPlayer.type != PlayerType.NETWORK && !currentGame.isLocal) {
+            rootService.networkService.sendSelect(true)
+        }
 
         onAllRefreshables { refreshAfterFreeSelection() }
 
@@ -155,6 +167,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         val currentGame = checkNotNull(rootService.currentGame){"Es Wurde kein Spiel im RootService gefunden!"}
 
         //wirft automatisch ein IllegalStateException
+        println("GameState: ${currentGame.gameState}")
         check( currentGame.gameState == GameState.START_OF_TURN ||
                 currentGame.gameState == GameState.HAS_EXTERMINATED) {
             "Spieler darf Aktuell kein Combination auswählen"
@@ -168,6 +181,10 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
         currentGame.selectedChoice = Pair(index,index)
         currentGame.gameState = GameState.MADE_CHOICE
+
+        if (currentGame.playerQueue.peek().type != PlayerType.NETWORK && !currentGame.isLocal) {
+            rootService.networkService.sendSelect(false)
+        }
 
         onAllRefreshables { refreshAfterSelectColumn(index) }
 
@@ -231,6 +248,10 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
             onAllRefreshables { refreshAfterRotate(amount) }
         }
+
+        game.tileRotation = selectedTile.rotation
+
+        rootService.networkService.sendRotation()
     }
 
     /**
@@ -249,6 +270,8 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      */
     fun placeTile(index: Triple<Int, Int, Int>) {
         val game = rootService.currentGame ?: error("No current game")
+
+        game.tileCoordinates = index
 
         check(game.gameState == GameState.MADE_CHOICE) {
             "Tile can only be placed after a choice was made."
@@ -315,6 +338,9 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      */
     fun placeWildlife(index: Triple<Int, Int, Int>) {
         val game = rootService.currentGame ?: error("No current game")
+
+        game.tokenCoordinates = index
+
         val currentPlayer = game.playerQueue.peek()
         check(game.gameState == GameState.PLAYED_TILE) {
             "Wildlife can only be placed in PLAYED_TILE state"

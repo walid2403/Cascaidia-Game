@@ -93,7 +93,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
 
         rootService.history.prevMoves.push(CascadiaGame(game))
 
-        onAllRefreshables { refreshAfterStartGame() }
+        if (game.isLocal) onAllRefreshables { refreshAfterStartGame() }
 
     }
 
@@ -395,12 +395,12 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * or if there are not at least 3 tokens of the same type or
      * if there are 3 and the current gameState is not [GameState.START_OF_TURN]
      */
-    fun exterminate(playerTrigger: Boolean) {
+    fun exterminate(playerTrigger: Boolean, natureToken : Boolean = false) {
         val game = rootService.currentGame ?: error("No current game")
-        check(
-            game.gameState == GameState.START_OF_TURN ||
-                    game.gameState == GameState.HAS_EXTERMINATED
-        ) { "Extermination is not allowed in the current game state" }
+//        check(
+//            game.gameState == GameState.START_OF_TURN ||
+//                    game.gameState == GameState.HAS_EXTERMINATED
+//        ) { "Extermination is not allowed in the current game state" }
         if (playerTrigger && game.gameState != GameState.START_OF_TURN) {
             throw IllegalStateException("Player can only exterminate at the START_OF_TURN.")
         }
@@ -415,16 +415,22 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                 duplicatedToken = token
             }
         }
-        check(highestCount >= 3) {
-            "There are not at least three identical wildlife tokens"
-        }
-        if (playerTrigger) {
-            if (highestCount != 3) {
-                throw IllegalStateException("Player extermination requires exactly three identical wildlife tokens")
+
+        if (highestCount < 4) {
+            if (!playerTrigger) {
+                return
             }
-        } else {
-            if (highestCount < 4) throw IllegalStateException("Automatic extermination requires four identical wildlife tokens")
         }
+//        check(highestCount >= 3) {
+//            "There are not at least three identical wildlife tokens"
+//        }
+//        if (playerTrigger) {
+//            if (highestCount != 3) {
+//                throw IllegalStateException("Player extermination requires exactly three identical wildlife tokens")
+//            }
+//        } else {
+//            if (highestCount < 4) throw IllegalStateException("Automatic extermination requires four identical wildlife tokens")
+//        }
         val affectedIndices = mutableListOf<Int>()
         for (i in game.choices.indices) {
             if (game.choices[i].second == duplicatedToken) {
@@ -445,18 +451,19 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         if (playerTrigger) {
             game.gameState = GameState.HAS_EXTERMINATED
         }
-        onAllRefreshables { refreshAfterExterminate() }
 
         val remainingTokens = game.choices.map { it.second }
         if (remainingTokens.distinct().size == 1) {
             exterminate(false)
-            return
         } else {
             for (token in game.removedTokens) {
                 game.wildlifeTokens.push(token)
             }
             game.wildlifeTokens.shuffle()
             game.removedTokens.clear()
+
+            onAllRefreshables { refreshAfterExterminate() }
+            rootService.networkService.sendExterminate(affectedIndices, natureToken)
 
 //            refreshing only at the final resolved state
 //            onAllRefreshables {
@@ -478,12 +485,13 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @throws IllegalStateException if there is no current game or
      *                               if not every player has 20 habitat tiles
      */
-    fun calculateScores() {
+    fun calculateScores(botCall: Boolean = false) : List<Pair<String,List<Int>>> {
         val scores = mutableListOf<Pair<String, MutableList<Int>>>()
         val currentGame = rootService.currentGame
         checkNotNull(currentGame) { "Es existiert kein Spiel" }
 
         for (player in currentGame.playerQueue) {
+            if (botCall && player != currentGame.playerQueue.peek()) continue
             val playerScore = mutableListOf<Int>()
             val nodes = createGraph(player.board)
             playerScore.addAll(createCorridorScores(nodes))
@@ -508,15 +516,20 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             scores.add(Pair(player.name, playerScore))
         }
 
-        calculateHabitatCorridorMajority(scores, currentGame)
+        if (!botCall) {
+            calculateHabitatCorridorMajority(scores, currentGame)
+        }
 
         scores.forEachIndexed { index, score ->
             score.second.add(currentGame.playerQueue.elementAt(index).natureTokens)
         }
 
-        onAllRefreshables {
-            refreshAfterEndGame(scores)
+        if (!botCall) {
+            onAllRefreshables {
+                refreshAfterEndGame(scores)
+            }
         }
+        return scores
     }
 
     private fun createGraph(board: Map<Triple<Int, Int, Int>, Tile>): List<Node> {
@@ -1213,6 +1226,13 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val currentPlayer = game.playerQueue.poll()
         game.playerQueue.add(currentPlayer)
 
+        if (currentPlayer.type != PlayerType.NETWORK && !game.isLocal) {
+            rootService.networkService.sendPlace(game.tileCoordinates, game.tokenCoordinates, game.tileRotation)
+        }
+
+        game.tokenCoordinates = null
+        game.tileRotation = 0
+
         val nextPlayer = game.playerQueue.peek()
 
         if (nextPlayer.board.size == 23) {
@@ -1229,6 +1249,8 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         game.choices[game.selectedChoice.first] = Pair(newTile, tileChoice.second)
         val tokenChoice = game.choices[game.selectedChoice.second]
         game.choices[game.selectedChoice.second] = Pair(tokenChoice.first, newWildlifeToken)
+
+        exterminate(false)
 
         game.selectedChoice = Pair(-1, -1)
 

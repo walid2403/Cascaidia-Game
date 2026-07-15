@@ -7,12 +7,14 @@ import tools.aqua.bgw.net.client.BoardGameClient
 import tools.aqua.bgw.net.client.NetworkLogging
 import tools.aqua.bgw.net.common.annotations.GameActionReceiver
 import tools.aqua.bgw.net.common.notification.PlayerJoinedNotification
+import tools.aqua.bgw.net.common.notification.PlayerLeftNotification
 import tools.aqua.bgw.net.common.response.*
 
 /**
  * [BoardGameClient] implementation for network communication.
  *
  * @param playerName the name of the player using this client.
+ * @param playerType The Typ of the player connected locally
  * @param host the host to connect to.
  * @param secret the secret to use for the connection.
  * @property networkService the [NetworkService] to potentially forward received messages to.
@@ -22,7 +24,7 @@ class CascadiaNetworkClient(
     host: String,
     secret: String,
     var networkService: NetworkService,
-): BoardGameClient(playerName, host, secret, NetworkLogging.VERBOSE) {
+) : BoardGameClient(playerName, host, secret, NetworkLogging.VERBOSE) {
 
     /** the identifier of this game session; can be null if no session started yet. */
     var sessionID: String? = null
@@ -31,6 +33,8 @@ class CascadiaNetworkClient(
     var scoringCards = MutableList<Boolean?>(5) { null }
 
     var players = mutableListOf<Pair<String, PlayerType>>()
+
+    var errorMessage = ""
 
     /**
      * Handle a [CreateGameResponse] sent by the server. Will await the guest player when its
@@ -41,18 +45,43 @@ class CascadiaNetworkClient(
      * @throws IllegalStateException if status != success or currently not waiting for a game creation response.
      */
     override fun onCreateGameResponse(response: CreateGameResponse) {
-        BoardGameApplication.runOnGUIThread {
-            check(networkService.connectionState == ConnectionState.WAITING_FOR_HOST_CONFIRMATION)
-            { "unexpected CreateGameResponse" }
+        check(networkService.connectionState == ConnectionState.WAITING_FOR_HOST_CONFIRMATION) { "unexpected CreateGameResponse" }
 
-            when (response.status) {
-                CreateGameResponseStatus.SUCCESS -> {
-                    networkService.updateConnectionState(ConnectionState.WAITING_FOR_GUESTS)
-                    sessionID = response.sessionID
+        when (response.status) {
+            CreateGameResponseStatus.SUCCESS -> {
+                networkService.updateConnectionState(ConnectionState.WAITING_FOR_GUESTS)
+                sessionID = response.sessionID
 
-                    networkService.triggerRefresh("createGame")
+                players.add(Pair(playerName, playerType!!))
+
+                networkService.triggerRefresh("createGame")
+            }
+
+            else -> {
+                when (response.status) {
+                    CreateGameResponseStatus.GAME_ID_DOES_NOT_EXIST -> {
+                        errorMessage = "This game ID doesn't exist, no idea how you got to this point tbh"
+                    }
+
+                    CreateGameResponseStatus.ALREADY_ASSOCIATED_WITH_GAME -> {
+                        errorMessage = "You are already in a game, leave it to start a new one"
+                    }
+
+                    CreateGameResponseStatus.SERVER_ERROR -> {
+                        errorMessage = "Not your fault, the server broke, please come back later"
+                    }
+
+                    CreateGameResponseStatus.SESSION_WITH_ID_ALREADY_EXISTS -> {
+                        errorMessage =
+                            "This game ID is already in use, please use a different one or simply " + "leave the field blank"
+                    }
+
+                    else -> {
+
+                    }
                 }
-                else -> disconnectAndError(response.status)
+                networkService.triggerRefresh("error")
+                disconnectAndError(response.status)
             }
         }
     }
@@ -66,41 +95,72 @@ class CascadiaNetworkClient(
      * @throws IllegalStateException if status != success or currently not waiting for a join game response.
      */
     override fun onJoinGameResponse(response: JoinGameResponse) {
-        BoardGameApplication.runOnGUIThread {
-            check(networkService.connectionState == ConnectionState.WAITING_FOR_JOIN_CONFIRMATION)
-            { "unexpected JoinGameResponse" }
+        check(networkService.connectionState == ConnectionState.WAITING_FOR_JOIN_CONFIRMATION) { "unexpected JoinGameResponse" }
 
-            checkNotNull(playerType) { "A playerType is required before joining a game" }
+        checkNotNull(playerType) { "A playerType is required before joining a game" }
 
-            when (response.status) {
-                JoinGameResponseStatus.SUCCESS -> {
-                    players = response.opponents.map { Pair(it, PlayerType.NETWORK) }.toMutableList()
-                    players.add(Pair(playerName, playerType!!))
-                    sessionID = response.sessionID
-                    networkService.updateConnectionState(ConnectionState.WAITING_FOR_INIT)
+        when (response.status) {
+            JoinGameResponseStatus.SUCCESS -> {
+                players = response.opponents.map { Pair(it, PlayerType.NETWORK) }.toMutableList()
+                players.add(Pair(playerName, playerType!!))
+                sessionID = response.sessionID
+                networkService.updateConnectionState(ConnectionState.WAITING_FOR_INIT)
 
-                    networkService.triggerRefresh("joinGame")
+                networkService.triggerRefresh("joinGame")
+            }
+
+            else -> {
+                when (response.status) {
+                    JoinGameResponseStatus.PLAYER_NAME_ALREADY_TAKEN -> {
+                        errorMessage =
+                            "A player with your name already exists in the lobby, please change it in " + "order to join this game"
+                    }
+
+                    JoinGameResponseStatus.ALREADY_ASSOCIATED_WITH_GAME -> {
+                        errorMessage = "You are already in a game, leave it to start a new one"
+                    }
+
+                    JoinGameResponseStatus.SERVER_ERROR -> {
+                        errorMessage = "Not your fault, the server broke, please come back later"
+                    }
+
+                    JoinGameResponseStatus.INVALID_SESSION_ID -> {
+                        errorMessage =
+                            "This session ID is invalid, if the host has already started the lobby ask " + "him for the correct ID"
+                    }
+
+                    else -> {
+
+                    }
                 }
-                else -> disconnectAndError(response.status)
+                networkService.triggerRefresh("error")
+                disconnectAndError(response.status)
             }
         }
     }
 
     /**
-     * Handle a [PlayerJoinedNotification] sent by the server. As War only supports two players,
-     * this will immediately start the hosted game (and send the init message to the opponent).
+     * Handle a [PlayerJoinedNotification] sent by the server.
      *
      * @throws IllegalStateException if not currently expecting any guests to join.
      */
     override fun onPlayerJoined(notification: PlayerJoinedNotification) {
-        BoardGameApplication.runOnGUIThread {
-            check(networkService.connectionState == ConnectionState.WAITING_FOR_GUESTS )
-            { "not awaiting any guests."}
+        check(networkService.connectionState == ConnectionState.WAITING_FOR_GUESTS) { "not awaiting any guests." }
 
-            players.add(Pair(notification.sender, PlayerType.NETWORK))
+        players.add(Pair(notification.sender, PlayerType.NETWORK))
 
-            networkService.triggerRefresh("playerJoined")
-        }
+        networkService.triggerRefresh("playerChanged")
+    }
+
+    /**
+     * Handle a [PlayerLeftNotification] sent by the server.
+     *
+     * @throws IllegalStateException if not currently expecting any guests to join.
+     */
+    override fun onPlayerLeft(notification: PlayerLeftNotification) {
+        players.removeAll { it.first == notification.sender }
+
+        networkService.triggerRefresh("playerChanged")
     }
 
     /**
@@ -110,16 +170,42 @@ class CascadiaNetworkClient(
      * [IllegalStateException] otherwise.
      */
     override fun onGameActionResponse(response: GameActionResponse) {
-        BoardGameApplication.runOnGUIThread {
-            val acceptableStates = listOf(ConnectionState.WAITING_FOR_GUESTS, ConnectionState.WAITING_FOR_INIT,
-                ConnectionState.SELECTING, ConnectionState.PLACING, ConnectionState.WAITING_FOR_HOST_CONFIRMATION)
+        val acceptableStates = listOf(
+            ConnectionState.WAITING_FOR_GUESTS,
+            ConnectionState.WAITING_FOR_INIT,
+            ConnectionState.SELECTING,
+            ConnectionState.PLACING,
+            ConnectionState.WAITING_FOR_HOST_CONFIRMATION
+        )
 
-            check(networkService.connectionState in acceptableStates)
-            { "not currently playing in a network game."}
+        check(networkService.connectionState in acceptableStates) { "not currently playing in a network game." }
 
-            when (response.status) {
-                GameActionResponseStatus.SUCCESS -> {} // do nothing in this case
-                else -> disconnectAndError(response.status)
+        when (response.status) {
+            GameActionResponseStatus.SUCCESS -> {} // do nothing in this case
+            else -> {
+                when (response.status) {
+                    GameActionResponseStatus.INVALID_JSON -> {
+                        errorMessage = "This request included invalid json"
+                    }
+
+                    GameActionResponseStatus.NO_ASSOCIATED_GAME -> {
+                        errorMessage = "You are not in a game, join one or start a new one"
+                    }
+
+                    GameActionResponseStatus.SERVER_ERROR -> {
+                        errorMessage = "Not your fault, the server broke, please come back later"
+                    }
+
+                    GameActionResponseStatus.SPECTATOR_ONLY -> {
+                        errorMessage = "This action can only be performed by Spectators"
+                    }
+
+                    else -> {
+
+                    }
+                }
+                networkService.triggerRefresh("error")
+                disconnectAndError(response.status)
             }
         }
     }
@@ -130,15 +216,13 @@ class CascadiaNetworkClient(
     @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onInitReceived(message: GameInitMessage, sender: String) {
-        BoardGameApplication.runOnGUIThread {
-            checkNotNull(playerType) { "A playerType is required before initiating a game" }
+        checkNotNull(playerType) { "A playerType is required before initiating a game" }
 
-            networkService.startNewJoinedGame(
-                message = message,
-                playerName = playerName,
-                playerType = playerType!!,
-            )
-        }
+        networkService.startNewJoinedGame(
+            message = message,
+            playerName = playerName,
+            playerType = playerType!!,
+        )
     }
 
     /**
@@ -147,13 +231,12 @@ class CascadiaNetworkClient(
     @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onGameConfigReceived(message: GameConfigMessage, sender: String) {
-        BoardGameApplication.runOnGUIThread {
-            check(players.size == message.players.size) { "The player count seems to have changed" }
+        check(players.size == message.players.size) { "The player count seems to have changed" }
 
-            players.sortBy {message.players.indexOf(it.first)}
+        players.sortBy { message.players.indexOf(it.first) }
 
-            networkService.receiveGameConfig(message)
-        }
+        networkService.receiveGameConfig(message)
+
     }
 
     /**
@@ -162,9 +245,7 @@ class CascadiaNetworkClient(
     @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onSelectReceived(message: SelectMessage, sender: String) {
-        BoardGameApplication.runOnGUIThread {
-            networkService.receiveSelect(message)
-        }
+        networkService.receiveSelect(message)
     }
 
     /**
@@ -173,9 +254,7 @@ class CascadiaNetworkClient(
     @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onPlaceReceived(message: PlaceMessage, sender: String) {
-        BoardGameApplication.runOnGUIThread {
-            networkService.receivePlace(message)
-        }
+        networkService.receivePlace(message)
     }
 
     /**
@@ -184,9 +263,7 @@ class CascadiaNetworkClient(
     @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onWipeWildlifeReceived(message: WipeWildlifeMessage, sender: String) {
-        BoardGameApplication.runOnGUIThread {
-            networkService.receiveExterminate(message)
-        }
+        networkService.receiveExterminate(message)
     }
 
     /**
@@ -195,9 +272,7 @@ class CascadiaNetworkClient(
     @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onUseNatureTokenReceived(message: UseNatureTokenMessage, sender: String) {
-        BoardGameApplication.runOnGUIThread {
-            networkService.receiveUseNatureToken()
-        }
+        networkService.receiveUseNatureToken()
     }
 
     /**
@@ -206,9 +281,7 @@ class CascadiaNetworkClient(
     @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onRotationReceived(message: RotationMessage, sender: String) {
-        BoardGameApplication.runOnGUIThread {
-            networkService.receiveRotation(message)
-        }
+        networkService.receiveRotation(message)
     }
 
     /**
@@ -217,9 +290,7 @@ class CascadiaNetworkClient(
     @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onSelectWildlifeReceived(message: SelectWildlifeMessage, sender: String) {
-        BoardGameApplication.runOnGUIThread {
-            networkService.receiveSelectWildlife(message)
-        }
+        networkService.receiveSelectWildlife(message)
     }
 
     /**
@@ -228,9 +299,7 @@ class CascadiaNetworkClient(
     @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onSelectHabitatTileReceived(message: SelectHabitatTileMessage, sender: String) {
-        BoardGameApplication.runOnGUIThread {
-            networkService.receiveSelectHabitatTile(message)
-        }
+        networkService.receiveSelectHabitatTile(message)
     }
 
     /**
@@ -239,9 +308,7 @@ class CascadiaNetworkClient(
     @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onChatReceived(message: ChatMessage, sender: String) {
-        BoardGameApplication.runOnGUIThread {
-            networkService.receiveChatMessage(message, sender)
-        }
+        networkService.receiveChatMessage(message, sender)
     }
 
     /**
@@ -250,9 +317,7 @@ class CascadiaNetworkClient(
     @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onPlayerReceived(message: NetPlayer, sender: String) {
-        BoardGameApplication.runOnGUIThread {
-            println("For some reason $sender sent a NetPlayer object...")
-        }
+        println("For some reason $sender sent a NetPlayer object...")
     }
 
     private fun disconnectAndError(message: Any) {
