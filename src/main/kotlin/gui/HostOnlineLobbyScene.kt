@@ -682,6 +682,9 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
         warning.text = ""
         warning.isVisible = false
 
+        playerName = ""
+        playerType = PlayerType.HUMAN
+
         listOf(checkBoxSalmonA, checkBoxSalmonB, checkBoxElkA, checkBoxElkB, checkBoxBearA, checkBoxBearB,checkBoxFoxA,
             checkBoxFoxB, checkBoxHawkA, checkBoxHawkB).forEach { it.isChecked = false }
 
@@ -690,11 +693,15 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
 
         listOf(p1Input, p2Input, p3Input, p4Input).forEach { name ->
             name.text = ""
-            name.isVisible = false
+            if(name != p1Input) {
+                name.isVisible = false
+            }
         }
 
         listOf(p1Icon, p2Icon, p3Icon, p4Icon).forEach { icon ->
-            icon.isVisible = false
+            if(icon != p1Icon) {
+                icon.isVisible = false
+            }
             icon.visual = ImageVisual("icons/NetworkIcon.png")
         }
 

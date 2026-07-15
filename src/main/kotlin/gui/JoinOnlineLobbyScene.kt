@@ -545,16 +545,25 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
 
     private fun resetScene() {
 
+        playerName = ""
+        playerType = PlayerType.HUMAN
+
         listOf(checkBoxSalmonA, checkBoxSalmonB, checkBoxElkA, checkBoxElkB, checkBoxBearA, checkBoxBearB, checkBoxFoxA,
             checkBoxFoxB, checkBoxHawkA, checkBoxHawkB).forEach { it.isChecked = false }
 
-        listOf(p3Input, p4Input).forEach { name ->
+        //in der join Lobby sind immer mindestens der Host und man selber, player 1 und 2 müssen also nicht unsichtbar
+        //gemacht werden
+        listOf(p1Input, p2Input, p3Input, p4Input).forEach { name ->
             name.text = ""
-            name.isVisible = false
+            if(name != p1Input && name != p2Input) {
+                name.isVisible = false
+            }
         }
 
-        listOf(p3Icon, p4Icon).forEach { icon ->
-            icon.isVisible = false
+        listOf(p1Icon, p2Icon, p3Icon, p4Icon).forEach { icon ->
+            if(icon != p1Icon && icon != p2Icon) {
+                icon.isVisible = false
+            }
             icon.visual = ImageVisual("icons/NetworkIcon.png")
         }
 
