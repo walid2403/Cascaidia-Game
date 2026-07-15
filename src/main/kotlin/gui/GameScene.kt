@@ -1436,7 +1436,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 //        for(i in game.playerQueue.indices) {
 //            val playerIndex = getPlayerIdForPlayer(game.playerQueue.elementAt(i))
-//            listOf(nameOneSide, nameTwoSide, nameThreeSide, nameFourSide).elementAt(playerIndex).text = game.playerQueue.elementAt(i).name
+//            listOf(nameOneSide, nameTwoSide, nameThreeSide, nameFourSide).elementAt(playerIndex).text =
+//            game.playerQueue.elementAt(i).name
 //        }
 
         for(i in game.playerQueue.indices) {
@@ -1793,7 +1794,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         val game = rootService.currentGame
         checkNotNull(game)
 
-        //TODO("wenn einfach direkt changeTurn aufgerufen wird klappt es auch aber man sieht den Spielzug nicht, nur wenn man über die Minimap bei den anderen guckt.")
+        //TODO("wenn einfach direkt changeTurn aufgerufen wird klappt es auch aber man sieht den Spielzug nicht,
+        // nur wenn man über die Minimap bei den anderen guckt.")
         //TODO("Aber das könnte so zu Problemen führen wenn wir einen Delay haben und die anderen nicht")
         if(game.playerQueue.elementAt(game.playerQueue.size-1).type == PlayerType.NETWORK) {
             playAnimation(
@@ -2036,20 +2038,28 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         return when(id) {
             0,1,2,3,4,5,420 -> "PF"
             6,7,8,9,10,16,120 -> "WF"
-            11,12,13,14,15,500 -> "F"
-            17,18,19,20,21,200 -> "W"
             22,23,24,25,26,27,510 -> "WP"
-            28,29,30,31,32,300 -> "P"
-            34,35,36,37,38,400 -> "R"
             39,40,41,42,43,44,320 -> "RW"
             45,46,47,48,49,50,520 -> "MR"
             55,58,59,60,61,62,220 -> "RF"
             56,57,64,65,66,67,110 -> "RP"
-            68,69,70,71,72,100 -> "M"
             33, 75,76,77,78,81,410 -> "WM"
             52,53,54,73,74,79,210 -> "PM"
             51,63, 80,82,83,84,310 -> "FM"
+            11,12,13,14,15,500,17,18,19,20,21,200,28,29,30,31,32,300,34,35,36,37,38,400,68,69,70,71,72, 100 ->
+                getSingleHabitatPath(id)
 
+            else -> throw IllegalArgumentException("Invalid tile id: $id")
+        }
+    }
+
+    private fun getSingleHabitatPath(id: Int): String {
+        return when(id) {
+            11,12,13,14,15,500 -> "F"
+            17,18,19,20,21,200 -> "W"
+            28,29,30,31,32,300 -> "P"
+            34,35,36,37,38,400 -> "R"
+            68,69,70,71,72,100 -> "M"
             else -> throw IllegalArgumentException("Invalid tile id: $id")
         }
     }
