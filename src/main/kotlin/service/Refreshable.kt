@@ -1,5 +1,9 @@
 package service
 
+import entity.PlayerType
+import entity.Tile
+import entity.WildlifeToken
+
 /**
  * This interface provides a mechanism for the service layer classes to communicate
  * (usually to the GUI classes) that certain changes have been made to the entity
@@ -109,7 +113,17 @@ interface Refreshable {
     /**
      * Perform refreshes necessary after a network game has been started
      */
-    fun refreshAfterHostGame(lobbyCode: String) {}
+    fun refreshAfterHostGame(lobbyCode: String, playerName: String, playerType: PlayerType) {}
+
+    /**
+     * Perform refreshes necessary after a network game has been started
+     */
+    fun refreshAfterJoinGame(lobbyCode: String) {}
+
+    /**
+     * Perform refreshes necessary after a network game has been started
+     */
+    fun refreshAfterPlayerJoined(playerName: String) {}
 
     /**
      * Perform refreshes necessary after a chat message has been received
@@ -130,4 +144,7 @@ interface Refreshable {
      * Perform refreshes necessary after a nature token has been used
      */
     fun refreshAfterSelectTile(tileIndex: Int) {}
+
+    fun refreshAfterBotTurn(coordinatesTile: Triple<Int, Int, Int>,
+                            coordinatesWildlife: Triple<Int?, Int?, Int?>) {}
 }

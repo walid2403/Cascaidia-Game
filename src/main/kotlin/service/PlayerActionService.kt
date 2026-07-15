@@ -342,8 +342,6 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         onAllRefreshables {
             refreshAfterPlaceWildlife(index)
         }
-
-
     }
 
     /**
