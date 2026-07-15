@@ -167,7 +167,6 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         val currentGame = checkNotNull(rootService.currentGame){"Es Wurde kein Spiel im RootService gefunden!"}
 
         //wirft automatisch ein IllegalStateException
-        println("GameState: ${currentGame.gameState}")
         check( currentGame.gameState == GameState.START_OF_TURN ||
                 currentGame.gameState == GameState.HAS_EXTERMINATED) {
             "Spieler darf Aktuell kein Combination auswählen"
@@ -335,7 +334,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
         game.gameState = GameState.PLAYED_TILE
 
-        if (currentPlayer.type != PlayerType.NETWORK && !game.isLocal) onAllRefreshables { refreshAfterPlaceTile(Triple(x, y, z)) }
+        if (currentPlayer.type != PlayerType.NETWORK) onAllRefreshables { refreshAfterPlaceTile(Triple(x, y, z)) }
     }
 
     /**

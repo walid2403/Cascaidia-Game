@@ -1412,11 +1412,11 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         if(!isHuman()) {
             disableAllForNetworkBotTurn()
-            println(game.playerQueue.peek().type)
-            if(game.playerQueue.peek().type == PlayerType.GREEDY_BOT ||
-                game.playerQueue.peek().type == PlayerType.HEURISTIC_BOT ) {
+            if(game.playerQueue.peek().type != PlayerType.NETWORK) {
                 rootService.bot.makeTurn(game.playerQueue.peek().type)
             }
+        } else {
+           checkExterminateButton()
         }
     }
 
@@ -1700,7 +1700,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         tileShop.elementAt(selectTile).isVisible = true
         animalShop.elementAt(selectAnimal).isVisible = true
 
-        println("Start of Bot Turn '"+game.playerQueue.peek().name+"' Turn")
+        println("Start of Bot Turn '"+game.playerQueue.peek().name+"' Turn:")
         println("Selected Tile (ID): "+game.selectedChoice.first.toString())
         println("Selected Animal (ID): "+game.selectedChoice.second.toString())
 
@@ -1863,10 +1863,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         initializeCamerasOnSide()
 
+        tileShop.forEach { scaleTile(false, it) }
+        animalShop.forEach { scaleAnimal(false, it) }
+
         if(!isHuman()) {
             disableAllForNetworkBotTurn()
-            if(game.playerQueue.peek().type == PlayerType.GREEDY_BOT ||
-                game.playerQueue.peek().type == PlayerType.HEURISTIC_BOT ) {
+            if(game.playerQueue.peek().type != PlayerType.NETWORK) {
                 rootService.bot.makeTurn(game.playerQueue.peek().type)
             }
         }
@@ -2291,8 +2293,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             val chosenTile = tileShop[game.selectedChoice.first]
             val playerID = getPlayerId()
             val currentArea = listOf(playerOneArea, playerTwoArea, playerThreeArea, playerFourArea).elementAt(playerID)
-
-            println("Player: $playerID")
 
             val hexagon = HexagonViewExtended(currentArea[0,0]?.size ?: 14.0, chosenTile.visual)
             hexagon.rotation = (game.playerQueue.peek().board[index]?.rotation ?: 0) * 60.0
