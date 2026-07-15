@@ -47,7 +47,9 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
             placeBestPlace(currentGame,player)
         }else if (currentGame.gameState== GameState.PLAYED_TILE){
             placeBestAnimal(currentGame,player)
-        } //no need for END_OF_TURN
+        }else {
+            isFinished = true
+        }
     }
     private fun findNeighbor(position: Triple<Int,Int,Int>): List<Triple<Int,Int,Int>>{
         val neighbours= mutableListOf<Triple<Int,Int,Int>>()
