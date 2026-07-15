@@ -996,12 +996,10 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         } else {
             selectTile = index
             scaleDownOtherTiles(selectTile)
-            if(!customChoiceActive) {
-                scaleDownOtherAnimals(selectTile)
-            }
         }
 
         if(!customChoiceActive) {
+            scaleDownOtherAnimals(selectTile)
             scaleTile(selectTile != -1, tile)
             val animal = listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(index)
             selectAnimal = selectTile
