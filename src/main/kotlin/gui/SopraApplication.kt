@@ -7,6 +7,16 @@ import service.Refreshable
 /**
  * Represents the main application for the Cascadia board game.
  * The application initializes the [RootService] and displays the scenes.
+ * @property rootService ein Objekt des Typs [RootService], Verbindung zum RootService
+ * @property gameScene ein Objekt des Typs [GameScene], die GameScene des Spiels
+ * @property mainMenuScene ein Objekt des Typs [MainMenuScene], die MainMenuScene des Spiels
+ * @property pauseMenu ein Objekt des Typs [pauseMenu], die pauseMenuScene des Spiels
+ * @property scoreScene ein Objekt des Typs [scoreScene], die ScoreScene des Spiels
+ * @property joinOnlineLobbyScene ein Objekt des Typs [joinOnlineLobbyScene], die JoinOnlineLobbyScene des Spiels
+ * @property hostOnlineLobbyScene ein Objekt des Typs [hostOnlineLobbyScene], die HostOnlineLobbyScene des Spiels
+ * @property hostOnlineScene ein Objekt des Typs [hostOnlineScene], die HostOnlineScene des Spiels
+ * @property joinOnlineScene ein Objekt des Typs [joinOnlineScene], die JoinOnlineScene des Spiels
+ * @property lobbyScene ein Objekt des Typs [lobbyScene], die LobbyScene des Spiels
  */
 class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
 
@@ -46,8 +56,6 @@ class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
         )
         this.showGameScene(gameScene)
         this.showMenuScene(mainMenuScene )
-        //this.showMenuScene(scoreScene)
-        //this.showMenuScene(testing(this@SopraApplication, rootService))
     }
 
     override fun refreshAfterStartGame() {
