@@ -8,9 +8,10 @@ import kotlin.random.Random
  * Eine Klasse, in der alle Aufrufe der Bot Methoden gebündelt sind
  */
 class Bot (private val rootService: RootService) : AbstractRefreshingService() {
-
-    private var coordinatesTile: Triple<Int?, Int?, Int?> = Triple(null, null, null)
-    private var coordinatesWildlifeToken: Triple<Int?, Int?, Int?> = Triple(null, null, null)
+    private val hardBot = BotLocaleOptimum(rootService, this)
+    private val heuristicBot = HeuristicBot(rootService, this)
+    var coordinatesTile: Triple<Int?, Int?, Int?> = Triple(null, null, null)
+    var coordinatesWildlifeToken: Triple<Int?, Int?, Int?> = Triple(null, null, null)
 
     private fun resetCoordinates() {
         coordinatesTile = Triple(null, null, null)
@@ -26,14 +27,20 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
         when (playerType) {
             PlayerType.EASY_BOT -> {
                 resetCoordinates()
-                randomBotTurn()
+                while (rootService.currentGame?.gameState != GameState.END_OF_TURN) {
+                    heuristicBot.makeTurn()
+                }
             }
 
-            PlayerType.HARD_BOT -> {}
+
+            PlayerType.HARD_BOT -> {
+                resetCoordinates()
+                while(rootService.currentGame?.gameState != GameState.END_OF_TURN) {
+                    hardBot.makeTurn()}
+            }
         }
     }
-
-    private fun randomBotTurn() {
+        private fun randomBotTurn() {
         val currentGame = rootService.currentGame
         checkNotNull(currentGame) { "Es existiert kein Spiel" }
         val player = currentGame.playerQueue.peek()

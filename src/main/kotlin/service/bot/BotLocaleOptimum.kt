@@ -8,7 +8,7 @@ import service.*
  * score, it picks the option that gives the most points without
  * planning ahead
  */
-class BotLocaleOptimum(private val rootService: RootService) {
+class BotLocaleOptimum(private val rootService: RootService, private val bot: Bot) {
     //store the 6 possible moves from one hexagon to its 6 neighboring hexagons.
     private val directionX = intArrayOf(0, -1, -1, 0, 1, 1)
     private val directionY = intArrayOf(-1, 0, 1, 1, 0, -1)
@@ -27,12 +27,12 @@ class BotLocaleOptimum(private val rootService: RootService) {
         for( wildLife in WildlifeToken.entries){
             var count=0
             for( paar in currentGame.choices){
-               if ( paar.second==wildLife){
-                count++
-               }
+                if ( paar.second==wildLife){
+                    count++
+                }
             }
             if (count > maxNum){
-            maxNum = count
+                maxNum = count
             }
         }
         if(maxNum==4){
@@ -338,6 +338,8 @@ class BotLocaleOptimum(private val rootService: RootService) {
             rootService.playerActionService.rotateTile(true)
             i +=1
         }
+
+        bot.coordinatesTile = bestPlace
         rootService.playerActionService.placeTile(bestPlace)
     }
     private fun placeBestAnimal(currentGame: CascadiaGame, player: Player){
@@ -368,6 +370,8 @@ class BotLocaleOptimum(private val rootService: RootService) {
                 bestPlace=p
             }
         }
+
+        bot.coordinatesWildlifeToken = bestPlace
         rootService.playerActionService.placeWildlife(bestPlace)
     }
 
