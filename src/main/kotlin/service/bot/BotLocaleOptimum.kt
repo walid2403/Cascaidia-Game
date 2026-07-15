@@ -14,6 +14,7 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
     private val directionY = intArrayOf(-1, 0, 1, 1, 0, -1)
     private val directionZ = intArrayOf(1, 1, 0, -1, -1, 0)
 
+    var isFinished = false
     /** this plays one bot turn: handles overpopulation, then picks the best scoring
      * option
      */
@@ -221,11 +222,12 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
     }
     //calculating total points corridor+animals
     private fun allPoints(board: Map<Triple<Int, Int, Int>, Tile>,scoringCards: List<Boolean>): Int{
-        var points= calculateCorridorPoints(board)
+        /*var points= calculateCorridorPoints(board)
         for( tier in WildlifeToken.entries){
             points += calculateAnimalPoints(board, tier, scoringCards[tier.ordinal])
         }
-        return points
+        return points*/
+        return rootService.gameService.calculateScores(true).single().second.sum()
     }
     //chooses one of the given pairs
     private fun chooseBestPair(currentGame: CascadiaGame, player: Player){
@@ -242,7 +244,9 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
                     val rotatedTile= rotatedTile(tile,s)
                     val simulateBoard= player.board.toMutableMap()
                     simulateBoard[p]=rotatedTile
+                    player.board[p] = rotatedTile
                     val points=allPoints(simulateBoard,currentGame.scoringCards)
+                    player.board.remove(p)
                     if(points> bestPointsForThisTile){
                         bestPointsForThisTile=points
                     }
@@ -267,7 +271,9 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
                         val possibleRotatedTile = rotatedTile(tile, s)
                         val simulateBoard = player.board.toMutableMap()
                         simulateBoard[p] = possibleRotatedTile
+                        player.board[p] = possibleRotatedTile
                         val score = allPoints(simulateBoard, currentGame.scoringCards)
+                        player.board.remove(p)
                         if (score > bestScoreForThisTile) {
                             bestScoreForThisTile = score
                         }
@@ -290,7 +296,9 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
                         val simulatedTile = Tile(simulateBoard[p]!!)
                         simulatedTile.occupant = wildlife
                         simulateBoard[p] = simulatedTile
+                        player.board[p]!!.occupant = wildlife
                         val score = allPoints(simulateBoard, currentGame.scoringCards)
+                        player.board[p]!!.occupant = null
                         if (score > bestScoreWL) {
                             bestScoreWL = score
                         }
@@ -314,7 +322,8 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
         val chosenTile= currentGame.choices[currentGame.selectedChoice.first].first
         val freePlaces=findFreePlace(player.board)
         if(freePlaces.isEmpty()){
-            currentGame.gameState= GameState.END_OF_TURN
+            //currentGame.gameState= GameState.END_OF_TURN
+            isFinished = true
             return
         }
         var bestPlace=freePlaces[0]
@@ -325,7 +334,9 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
                 val rotatedTile= rotatedTile(chosenTile,s)
                 val simulateBoard= player.board.toMutableMap()
                 simulateBoard[p]=rotatedTile
+                player.board[p] = rotatedTile
                 val points= allPoints(simulateBoard,currentGame.scoringCards)
+                player.board.remove(p)
                 if(points>bestScore){
                     bestScore=points
                     bestPlace=p
@@ -353,7 +364,8 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
             }
         }
         if (possiblePlaces.isEmpty()){
-            currentGame.gameState= GameState.END_OF_TURN
+            //currentGame.gameState= GameState.END_OF_TURN
+            isFinished = true
             return
         }
         var bestPlace=possiblePlaces[0]
@@ -364,14 +376,22 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
             simulateTile.occupant=chosenToken
             simulateBoard[p]=simulateTile
 
+            player.board[p]!!.occupant = chosenToken
             val points=allPoints(simulateBoard,currentGame.scoringCards)
+            player.board[p]!!.occupant = null
             if(points>bestScore){
                 bestScore=points
                 bestPlace=p
             }
         }
+        if (bestScore < 0) {
+            //currentGame.gameState= GameState.END_OF_TURN
+            isFinished = true
+            return
+        }
 
         bot.coordinatesWildlifeToken = bestPlace
+        println(bestPlace)
         rootService.playerActionService.placeWildlife(bestPlace)
     }
 
