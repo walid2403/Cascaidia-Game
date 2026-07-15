@@ -335,7 +335,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
         game.gameState = GameState.PLAYED_TILE
 
-        if (currentPlayer.type != PlayerType.NETWORK && !game.isLocal) onAllRefreshables { refreshAfterPlaceTile(Triple(x, y, z)) }
+        if (currentPlayer.type != PlayerType.NETWORK) onAllRefreshables { refreshAfterPlaceTile(Triple(x, y, z)) }
     }
 
     /**
