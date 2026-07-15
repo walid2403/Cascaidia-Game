@@ -1,6 +1,7 @@
 package gui
 
 import service.Refreshable
+import service.RootService
 import tools.aqua.bgw.components.StaticComponentView
 import tools.aqua.bgw.components.layoutviews.Pane
 import tools.aqua.bgw.components.uicomponents.Button
@@ -18,7 +19,7 @@ import tools.aqua.bgw.components.layoutviews.GridPane
  * start a new game or exit the application entirely from here.
  * @param app The [SopraApplication] of this game
  */
-class ScoreScene(private val app: SopraApplication) : MenuScene(1920, 1080), Refreshable {
+class ScoreScene(private val app: SopraApplication, private val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
 
     private val sceneWidth = 1920
     private val sceneHeight = 1080

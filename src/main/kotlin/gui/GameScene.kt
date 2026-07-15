@@ -1412,6 +1412,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         if(!isHuman()) {
             disableAllForNetworkBotTurn()
+            println(game.playerQueue.peek().type)
             if(game.playerQueue.peek().type == PlayerType.GREEDY_BOT ||
                 game.playerQueue.peek().type == PlayerType.HEURISTIC_BOT ) {
                 rootService.bot.makeTurn(game.playerQueue.peek().type)

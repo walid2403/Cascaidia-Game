@@ -1211,10 +1211,10 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
                 PlayerType.HUMAN -> ImageVisual("icons/HumanIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
-                PlayerType.EASY_BOT -> ImageVisual("icons/EasyBotIcon3.png").apply {
+                PlayerType.GREEDY_BOT -> ImageVisual("icons/EasyBotIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
-                PlayerType.HARD_BOT -> ImageVisual("icons/HardBotIcon3.png").apply {
+                PlayerType.HEURISTIC_BOT -> ImageVisual("icons/HardBotIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
                 else -> throw IllegalArgumentException("Player type must be PlayerType Object and can't be NETWORK, " +

@@ -235,8 +235,8 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
     private fun getPlayerType(playerTypeInt: Int): PlayerType {
         return when (playerTypeInt) {
             0 -> PlayerType.HUMAN
-            1 -> PlayerType.EASY_BOT
-            2 -> PlayerType.HARD_BOT
+            1 -> PlayerType.GREEDY_BOT
+            2 -> PlayerType.HEURISTIC_BOT
             else -> throw IllegalArgumentException("Only numbers between 0 and 3 are valid")
         }
     }

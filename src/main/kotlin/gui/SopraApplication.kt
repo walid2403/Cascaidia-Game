@@ -18,13 +18,13 @@ class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
     /**
      * The main game scene displayed in the application.
      */
-    val gameScene = GameScene(this@SopraApplication,rootService)
+    val gameScene = GameScene(this@SopraApplication, rootService)
 
-    val mainMenuScene = MainMenuScene(this@SopraApplication,rootService)
+    val mainMenuScene = MainMenuScene(this@SopraApplication, rootService)
 
-    val pauseMenu = PauseMenuScene(this@SopraApplication,rootService)
+    val pauseMenu = PauseMenuScene(this@SopraApplication, rootService)
 
-    val scoreScene = ScoreScene(this@SopraApplication)
+    val scoreScene = ScoreScene(this@SopraApplication, rootService)
 
     val joinOnlineLobbyScene = JoinOnlineLobbyScene(this@SopraApplication, rootService)
 
