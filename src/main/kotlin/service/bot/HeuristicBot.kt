@@ -8,6 +8,8 @@ import service.RootService
 
 class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
 
+    var isFinished = false
+
     fun makeTurn() {
         val currentGame = rootService.currentGame
         checkNotNull(currentGame) { "Es existiert kein Spiel" }
@@ -50,7 +52,8 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
 
             else -> {
                 // Falls das Spiel auf etwas anderes wartet (z.B. Zug-Ende), leiten wir das Ende ein
-                currentGame.gameState = GameState.END_OF_TURN
+                //currentGame.gameState = GameState.END_OF_TURN
+                isFinished = true
             }
         }
     }
@@ -93,7 +96,8 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
             bot.coordinatesTile = bestPosition
             rootService.playerActionService.placeTile(bestPosition)
         } else { //falls keine freien Plätze mehr gibt
-            currentGame.gameState = GameState.END_OF_TURN
+            //currentGame.gameState = GameState.END_OF_TURN
+            isFinished = true   //sollte nie erreicht werden können
         }
     }
 
@@ -147,7 +151,8 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
 
         //Falls die Liste leer ist beenden wir den Zug (das Tier wird verworfen)
         if(possiblePositions.isEmpty()){ //muss updated !!!!!!!!!!!!!!!!!!!!!!!!
-            currentGame.gameState = GameState.END_OF_TURN
+            //currentGame.gameState = GameState.END_OF_TURN
+            isFinished = true
             return
         }
 
@@ -161,7 +166,8 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
             bot.coordinatesWildlifeToken = bestPosition
             rootService.playerActionService.placeWildlife(bestPosition)
         } else {
-            currentGame.gameState = GameState.END_OF_TURN
+            //currentGame.gameState = GameState.END_OF_TURN
+            isFinished = true
         }
     }
 
