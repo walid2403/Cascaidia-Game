@@ -18,6 +18,7 @@ import tools.aqua.bgw.components.layoutviews.GridPane
  * ranking, the habitat score table and the wildlife score table. The player can go back to the [MainMenuScene] to
  * start a new game or exit the application entirely from here.
  * @param app The [SopraApplication] of this game
+ * @param rootService ein Objekt des Typs [RootService], Verbindung zum RootService
  */
 class ScoreScene(private val app: SopraApplication, private val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
 
@@ -478,17 +479,7 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
     }
 
     private fun fillWildlifeTable(index: Int, scores: List<Pair<String, List<Int>>>): Int {
-        wildlifeTableTopHalf[index+1, 0] = Label (
-            width = entryWidth,
-            height = entryHeight,
-            visual = ColorVisual(153, 172, 255)
-        ).apply {
-            if (index in scores.indices) {
-                text = scores[index].first
-            } else {
-                isVisible = false
-            }
-        }
+        fillTables(index, scores, wildlifeTableTopHalf)
 
         var wildlifeSum = 0
 
@@ -531,8 +522,8 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
         return wildlifeSum
     }
 
-    private fun fillHabitatTable(index: Int, scores: List<Pair<String, List<Int>>>): Int {
-        habitatTableTopHalf[index+1, 0] = Label (
+    private fun fillTables(index: Int, scores: List<Pair<String, List<Int>>>, table: GridPane<Label>) {
+        table[index+1, 0] = Label (
             width = entryWidth,
             height = entryHeight,
             visual = ColorVisual(153, 172, 255)
@@ -543,6 +534,10 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
                 isVisible = false
             }
         }
+    }
+
+    private fun fillHabitatTable(index: Int, scores: List<Pair<String, List<Int>>>): Int {
+        fillTables(index, scores, habitatTableTopHalf)
 
         var habitatSum = 0
 
