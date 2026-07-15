@@ -1195,8 +1195,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     private fun getPlayerType(type: Int): PlayerType {
         return when (type) {
             0 -> PlayerType.HUMAN
-            1 -> PlayerType.EASY_BOT
-            2 -> PlayerType.HARD_BOT
+            1 -> PlayerType.GREEDY_BOT
+            2 -> PlayerType.HEURISTIC_BOT
             else -> throw IllegalArgumentException("Player $type is not valid")
         }
     }
