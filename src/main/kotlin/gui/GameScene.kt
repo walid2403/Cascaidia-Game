@@ -772,16 +772,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     private fun chooseTile(index: Int) {
-        //deactivateRotateButtons()
-        val tile = when (index) {
-            0 -> tileChoice1
-            1 -> tileChoice2
-            2 -> tileChoice3
-            3 -> tileChoice4
-            else -> throw IllegalArgumentException("Invalid index given: $index")
-        }
+        if(index !in 0..3) throw IllegalArgumentException("Invalid index given: $index")
 
-        adjustShopBasedOnCustomChoiceActive(customChoiceActive, tile, index)
+        adjustShopBasedOnCustomChoiceActive(customChoiceActive, tileShop[index], index)
         rootService.networkService.sendSelectHabitatTile(index)
 
         if(selectTile == index) {
