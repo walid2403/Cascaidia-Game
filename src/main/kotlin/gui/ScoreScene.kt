@@ -20,7 +20,8 @@ import tools.aqua.bgw.components.layoutviews.GridPane
  * @param app The [SopraApplication] of this game
  * @param rootService ein Objekt des Typs [RootService], Verbindung zum RootService
  */
-class ScoreScene(private val app: SopraApplication, private val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
+class ScoreScene(private val app: SopraApplication, private val rootService: RootService) :
+    MenuScene(1920, 1080), Refreshable {
 
     private val sceneWidth = 1920
     private val sceneHeight = 1080

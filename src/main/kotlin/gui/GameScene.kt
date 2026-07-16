@@ -783,20 +783,42 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         if(selectTile == index) {
             selectTile = -1
+
+            if(!customChoiceActive) {
+                scaleDownOtherAnimals(selectTile)
+                scaleTile(selectTile != -1, tile)
+                val animal = listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(index)
+                selectAnimal = selectTile
+                scaleAnimal(selectAnimal != -1, animal)
+            } else {
+                scaleTile(false, tile)
+            }
+
         } else {
             selectTile = index
             scaleDownOtherTiles(selectTile)
+
+            if(!customChoiceActive) {
+                scaleDownOtherAnimals(selectTile)
+                scaleTile(selectTile != -1, tile)
+                val animal = listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(index)
+                selectAnimal = selectTile
+                scaleAnimal(selectAnimal != -1, animal)
+            } else {
+                scaleTile(selectTile != -1, tile)
+            }
+
         }
 
-        if(!customChoiceActive) {
-            scaleDownOtherAnimals(selectTile)
-            scaleTile(selectTile != -1, tile)
-            val animal = listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(index)
-            selectAnimal = selectTile
-            scaleAnimal(selectAnimal != -1, animal)
-        } else {
-            scaleTile(selectTile != -1, tile)
-        }
+//        if(!customChoiceActive) {
+//            scaleDownOtherAnimals(selectTile)
+//            scaleTile(selectTile != -1, tile)
+//            val animal = listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(index)
+//            selectAnimal = selectTile
+//            scaleAnimal(selectAnimal != -1, animal)
+//        } else {
+//            scaleTile(selectTile != -1, tile)
+//        }
 
         rootService.networkService.sendSelectHabitatTile(index)
     }
@@ -1749,16 +1771,18 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 neighborHexagonTileView = HexagonViewExtended(tileView.size, ColorVisual(170, 170, 170, 0.8))
                 neighborHexagonTileView.apply {
                     onMouseClicked = {
-                        if(selectTile != -1 && selectAnimal != -1) {
-                            selectedGridX = tileViewPos.first + neighborHexagon.first
-                            selectedGridY = tileViewPos.second + neighborHexagon.second
+                        greyHexagonOnClick(tileViewPos, neighborHexagon)
 
-                            if (customChoiceActive) rootService.playerActionService.freeSelection(
-                                selectTile,
-                                selectAnimal
-                            )
-                            else rootService.playerActionService.selectColumn(selectTile)
-                        }
+//                        if(selectTile != -1 && selectAnimal != -1) {
+//                            selectedGridX = tileViewPos.first + neighborHexagon.first
+//                            selectedGridY = tileViewPos.second + neighborHexagon.second
+//
+//                            if (customChoiceActive) rootService.playerActionService.freeSelection(
+//                                selectTile,
+//                                selectAnimal
+//                            )
+//                            else rootService.playerActionService.selectColumn(selectTile)
+//                        }
                     }
                 }
 
@@ -1766,6 +1790,19 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 currentArea[tileViewPos.first + neighborHexagon.first,
                     tileViewPos.second + neighborHexagon.second] = neighborHexagonTileView
             }
+        }
+    }
+
+    private fun greyHexagonOnClick(tileViewPos: Pair<Int, Int>, neighborHexagon: Pair<Int,Int>) {
+        if(selectTile != -1 && selectAnimal != -1) {
+            selectedGridX = tileViewPos.first + neighborHexagon.first
+            selectedGridY = tileViewPos.second + neighborHexagon.second
+
+            if (customChoiceActive) rootService.playerActionService.freeSelection(
+                selectTile,
+                selectAnimal
+            )
+            else rootService.playerActionService.selectColumn(selectTile)
         }
     }
 
