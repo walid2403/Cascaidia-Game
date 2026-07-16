@@ -774,9 +774,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private fun chooseTile(index: Int) {
         if(index !in 0..3) throw IllegalArgumentException("Invalid index given: $index")
 
-        adjustShopBasedOnCustomChoiceActive(customChoiceActive, tileShop[index], index)
-        rootService.networkService.sendSelectHabitatTile(index)
-
         if(selectTile == index) {
             selectTile = -1
 
@@ -784,6 +781,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             selectTile = index
             scaleDownOtherTiles(selectTile)
         }
+
+        adjustShopBasedOnCustomChoiceActive(customChoiceActive, tileShop[index], index)
+        rootService.networkService.sendSelectHabitatTile(index)
 
 //        if(!customChoiceActive) {
 //            scaleDownOtherAnimals(selectTile)
