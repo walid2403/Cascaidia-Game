@@ -784,30 +784,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         if(selectTile == index) {
             selectTile = -1
 
-            if(!customChoiceActive) {
-                scaleDownOtherAnimals(selectTile)
-                scaleTile(selectTile != -1, tile)
-                val animal = listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(index)
-                selectAnimal = selectTile
-                scaleAnimal(selectAnimal != -1, animal)
-            } else {
-                scaleTile(false, tile)
-            }
+            adjustShopBasedOnCustomChoiceActive(customChoiceActive, tile, index)
 
         } else {
             selectTile = index
             scaleDownOtherTiles(selectTile)
 
-            if(!customChoiceActive) {
-                scaleDownOtherAnimals(selectTile)
-                scaleTile(selectTile != -1, tile)
-                val animal = listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(index)
-                selectAnimal = selectTile
-                scaleAnimal(selectAnimal != -1, animal)
-            } else {
-                scaleTile(selectTile != -1, tile)
-            }
-
+            adjustShopBasedOnCustomChoiceActive(customChoiceActive, tile, index)
         }
 
 //        if(!customChoiceActive) {
@@ -821,6 +804,18 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 //        }
 
         rootService.networkService.sendSelectHabitatTile(index)
+    }
+
+    private fun adjustShopBasedOnCustomChoiceActive(customChoiceActive: Boolean, tile: Label, index: Int) {
+        if(!customChoiceActive) {
+            scaleDownOtherAnimals(selectTile)
+            scaleTile(selectTile != -1, tile)
+            val animal = listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(index)
+            selectAnimal = selectTile
+            scaleAnimal(selectAnimal != -1, animal)
+        } else {
+            scaleTile(selectTile != -1, tile)
+        }
     }
 
     private fun chooseAnimal(index: Int, animal: Label) {
