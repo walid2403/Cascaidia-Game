@@ -29,7 +29,6 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
     private val paneHeight = 670
     private val tabHeight = 125
     private val tabWidth = 100
-    private val borderThickness = 4
     private val paneX = (sceneWidth-paneWidth)/2
     private val paneY = (sceneHeight-paneHeight)/2
     private var playerNum = 4
@@ -51,7 +50,7 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
         posY = paneY,
         width = paneWidth,
         height = paneHeight,
-        visual = ColorVisual(64, 98, 70).apply{
+        visual = ImageVisual("scoreScene/MainScoreBackground.png").apply{
             style.borderRadius = BorderRadius(35)
         }
     )
@@ -61,7 +60,7 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
         posY = paneY,
         width = paneWidth,
         height = paneHeight,
-        visual = ColorVisual(236, 142, 14).apply{
+        visual = ImageVisual("scoreScene/WildlifeScoreBackground.png").apply{
             style.borderRadius = BorderRadius(35)
         }
     ).apply {
@@ -73,137 +72,60 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
         posY = paneY,
         width = paneWidth,
         height = paneHeight,
-        visual = ColorVisual(173, 208, 75).apply{
+        visual = ImageVisual("scoreScene/HabitatScoreBackground.png").apply{
             style.borderRadius = BorderRadius(35)
         }
     ).apply {
         isVisible = false
     }
 
-    private val paneBorder = Label(
-        posX = paneX - borderThickness,
-        posY = paneY - borderThickness,
-        width = paneWidth + borderThickness*2,
-        height = paneHeight + borderThickness*2,
-        visual = ColorVisual(255, 255, 255).apply{
-            style.borderRadius = BorderRadius(35)
-        }
-    )
-
     private val mainScoreTab = Label(
-        posX = paneX + paneWidth - 30,
+        posX = paneX + paneWidth - 50,
         posY = paneY,
-        width = tabWidth,
+        width = tabWidth + 20,
         height = tabHeight,
-        visual = ColorVisual(64, 98, 70).apply {
+        visual = ImageVisual("scoreScene/MainTab.png").apply {
             style.borderRadius = BorderRadius(15.0)
         }
     ). apply {
         onMouseClicked = {
             wildlifeScorePane.isVisible = false
-            wildlifeScoreTabOverlay.isVisible = false
             habitatScorePane.isVisible = false
-            habitatScoreTabOverlay.isVisible = false
             mainScorePane.isVisible = true
-            mainScoreTabOverlay.isVisible = true
         }
     }
 
-    private val mainScoreTabOverlay = Label (
-        posX = paneX + paneWidth - 30,
-        posY = paneY,
-        width = borderThickness + 30,
-        height = tabHeight,
-        visual = ColorVisual(64, 98, 70)
-    )
-
-    private val mainTabBorder = Label(
-        posX = mainScoreTab.posX - borderThickness,
-        posY = mainScoreTab.posY - borderThickness,
-        width = tabWidth + borderThickness*2,
-        height = tabHeight + borderThickness*2,
-        visual = ColorVisual(255, 255, 255).apply{
-            style.borderRadius = BorderRadius(15)
-        }
-    )
-
     private val wildlifeScoreTab = Label(
         posX = paneX + paneWidth - 30,
-        posY = paneY + tabHeight + borderThickness*2,
+        posY = paneY + tabHeight,
         width = tabWidth,
         height = tabHeight,
-        visual = ColorVisual(236, 142, 14).apply {
+        visual = ImageVisual("scoreScene/WildlifeTab.png").apply {
             style.borderRadius = BorderRadius(15.0)
         }
     ). apply {
         onMouseClicked = {
             wildlifeScorePane.isVisible = true
-            wildlifeScoreTabOverlay.isVisible = true
             habitatScorePane.isVisible = false
-            habitatScoreTabOverlay.isVisible = false
             mainScorePane.isVisible = false
-            mainScoreTabOverlay.isVisible = false
         }
     }
-
-    private val wildlifeScoreTabOverlay = Label (
-        posX = wildlifeScorePane.posX + paneWidth,
-        posY = paneY + tabHeight + borderThickness*2,
-        width = borderThickness,
-        height = tabHeight,
-        visual = ColorVisual(236, 142, 14)
-    ).apply {
-        isVisible = false
-    }
-
-    private val wildlifeTabBorder = Label(
-        posX = wildlifeScoreTab.posX - borderThickness,
-        posY = wildlifeScoreTab.posY - borderThickness,
-        width = tabWidth + borderThickness*2,
-        height = tabHeight + borderThickness*2,
-        visual = ColorVisual(255, 255, 255).apply{
-            style.borderRadius = BorderRadius(15)
-        }
-    )
 
     private val habitatScoreTab = Label(
         posX = paneX + paneWidth - 30,
-        posY = paneY + tabHeight * 2 + borderThickness * 4,
+        posY = paneY + tabHeight * 2,
         width = tabWidth,
         height = tabHeight,
-        visual = ColorVisual(173, 208, 75).apply {
+        visual = ImageVisual("scoreScene/HabitatTab.png").apply {
             style.borderRadius = BorderRadius(15.0)
         }
     ). apply {
         onMouseClicked = {
             wildlifeScorePane.isVisible = false
-            wildlifeScoreTabOverlay.isVisible = false
             habitatScorePane.isVisible = true
-            habitatScoreTabOverlay.isVisible = true
             mainScorePane.isVisible = false
-            mainScoreTabOverlay.isVisible = false
         }
     }
-
-    private val habitatScoreTabOverlay = Label (
-        posX = paneX + paneWidth,
-        posY = paneY + tabHeight * 2 + borderThickness * 4,
-        width = borderThickness,
-        height = tabHeight,
-        visual = ColorVisual(173, 208, 75)
-    ).apply {
-        isVisible = false
-    }
-
-    private val habitatTabBorder = Label(
-        posX = habitatScoreTab.posX - borderThickness,
-        posY = habitatScoreTab.posY - borderThickness,
-        width = tabWidth + borderThickness*2,
-        height = tabHeight + borderThickness*2,
-        visual = ColorVisual(255, 255, 255).apply{
-            style.borderRadius = BorderRadius(15)
-        }
-    )
 
     //
     // Components for the mainScorePane
@@ -297,7 +219,7 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
         }
     )
 
-    val exitButton = Button(
+    private val exitButton = Button(
         width = 280,
         height = 70,
         posX = 80,
@@ -314,7 +236,7 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
         }
     }
 
-    val showGameScene = Button(
+    private val showGameScene = Button(
         width = 280,
         height = 70,
         posX = 40,
@@ -331,7 +253,7 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
         }
     }
 
-    val newGameButton = Button(
+    private val newGameButton = Button(
         width = 280,
         height = 70,
         posX = paneWidth-280-80,
@@ -395,19 +317,12 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
     init {
         addComponents(
             backgroundImage,
-            mainTabBorder,
-            wildlifeTabBorder,
-            habitatTabBorder,
             wildlifeScoreTab,
             habitatScoreTab,
             mainScoreTab,
-            paneBorder,
             mainScorePane,
             wildlifeScorePane,
             habitatScorePane,
-            mainScoreTabOverlay,
-            wildlifeScoreTabOverlay,
-            habitatScoreTabOverlay,
             showGameScene
         )
         mainScorePane.addAll(
@@ -641,8 +556,8 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
                 if (i in 1..4) {
                     visual = fillInScoreTableImages(wildlifeTableTopHalf, i)
                 } else {
-                    visual = ColorVisual(153, 172, 255)
-                    text = "👤"
+                    visual = ImageVisual("scoreScene/Person.png")
+                    //text = "👤"
                 }
             }
             habitatTableTopHalf[0, i] = Label(
@@ -652,8 +567,8 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
                 if (i in 1..4) {
                     visual = fillInScoreTableImages(habitatTableTopHalf, i)
                 } else {
-                    visual = ColorVisual(153, 172, 255)
-                    text = "👤"
+                    visual = ImageVisual("scoreScene/Person.png")
+                    //text = "👤"
                 }
             }
         }
@@ -668,8 +583,7 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
             width = entryWidth,
             height = entryHeight,
         ).apply {
-            visual = ColorVisual(153, 172, 255)
-            text = "W"
+            visual = ImageVisual("scoreScene/WildlifeSum.png")
         }
         habitatTableBottomHalf[0, 0] = Label(
             width = entryWidth,
@@ -681,8 +595,7 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
             width = entryWidth,
             height = entryHeight,
         ).apply {
-            visual = ColorVisual(153, 172, 255)
-            text = "H"
+            visual = ImageVisual("scoreScene/HabitatSum.png")
         }
         habitatTableBottomHalf[0, 2] = Label(
             width = entryWidth,
@@ -712,10 +625,10 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
 
     private fun wildlifeTableTopHalfImage(index: Int): ImageVisual {
         return when(index) {
-            1 -> ImageVisual("tokens/bear.png")
-            2 -> ImageVisual("tokens/elk.png")
-            3 -> ImageVisual("tokens/salmon.png")
-            4 -> ImageVisual("tokens/hawk.png")
+            1 -> ImageVisual("scoreScene/BearScore.png")
+            2 -> ImageVisual("scoreScene/ElkScore.png")
+            3 -> ImageVisual("scoreScene/SalmonScore.png")
+            4 -> ImageVisual("scoreScene/HawkScore.png")
             else -> throw IllegalArgumentException("index $index in wildlifeTableTopHalf " +
                     "does not contain an image" )
         }
@@ -723,7 +636,7 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
 
     private fun wildlifeTableBottomHalfImage(index: Int): ImageVisual {
         return when(index) {
-            0 -> ImageVisual("tokens/fox.png")
+            0 -> ImageVisual("scoreScene/FoxScore.png")
             else -> throw IllegalArgumentException("index $index in wildlifeTableBottomHalf " +
                     "does not contain an image" )
         }
@@ -731,10 +644,10 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
 
     private fun habitatTableTopHalfImage(index: Int): ImageVisual {
         return when(index) {
-            1 -> ImageVisual("tiles/scoreSceneTiles/mountain.png")
-            2 -> ImageVisual("tiles/scoreSceneTiles/forest.png")
-            3 -> ImageVisual("tiles/scoreSceneTiles/desert.png")
-            4 -> ImageVisual("tiles/scoreSceneTiles/swamp.png")
+            1 -> ImageVisual("scoreScene/MountainScore.png")
+            2 -> ImageVisual("scoreScene/ForestScore.png")
+            3 -> ImageVisual("scoreScene/PrairieScore.png")
+            4 -> ImageVisual("scoreScene/WetlandScore.png")
             else -> throw IllegalArgumentException("index $index in habitatTableTopHalf " +
                     "does not contain an image" )
         }
@@ -742,8 +655,8 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
 
     private fun habitatTableBottomHalfImage(index: Int): ImageVisual {
         return when(index) {
-            0 -> ImageVisual("tiles/scoreSceneTiles/lake.png")
-            2 -> ImageVisual("tokens/pinecone.png")
+            0 -> ImageVisual("scoreScene/RiverScore.png")
+            2 -> ImageVisual("scoreScene/NatureTokenScore.png")
             else -> throw IllegalArgumentException("index $index in habitatTableBottomHalf " +
                     "does not contain an image" )
         }

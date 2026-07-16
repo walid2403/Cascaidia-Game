@@ -784,18 +784,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         adjustShopBasedOnCustomChoiceActive(customChoiceActive, tileShop[index], index)
         rootService.networkService.sendSelectHabitatTile(index)
-
-//        if(!customChoiceActive) {
-//            scaleDownOtherAnimals(selectTile)
-//            scaleTile(selectTile != -1, tile)
-//            val animal = listOf(animalChoice1, animalChoice2, animalChoice3, animalChoice4).elementAt(index)
-//            selectAnimal = selectTile
-//            scaleAnimal(selectAnimal != -1, animal)
-//        } else {
-//            scaleTile(selectTile != -1, tile)
-//        }
-
-
     }
 
     private fun adjustShopBasedOnCustomChoiceActive(customChoiceActive: Boolean, tile: Label, index: Int) {
