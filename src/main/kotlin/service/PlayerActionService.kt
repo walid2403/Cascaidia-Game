@@ -208,7 +208,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             }
         }
 
-        val selectedTile: Tile = if (right != null) {
+        val selectedTile: Tile = if (targetTilePos == null) {
             val tileIndex = game.selectedChoice.first
 
             require(tileIndex in game.choices.indices) {
@@ -217,8 +217,6 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
             game.choices[tileIndex].first
         } else {
-            checkNotNull(targetTilePos)
-
             game.playerQueue.peek()?.board[targetTilePos] ?: error("No valid tile position was given")
         }
 

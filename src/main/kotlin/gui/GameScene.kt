@@ -1010,7 +1010,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             scaleTile(selectTile != -1, tile)
         }
 
-        rootService.networkService.sendSelectHabitatTile(index)
+        val player = rootService.currentGame?.playerQueue?.peek()
+        checkNotNull(player)
+
+        if (player.type != PlayerType.NETWORK && (rootService.currentGame?.isLocal == false)) {
+            rootService.networkService.sendSelectHabitatTile(index)
+        }
     }
 
     private fun chooseAnimal(index: Int, animal: Label) {
@@ -1035,7 +1040,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             }
         }
 
-        rootService.networkService.sendSelectWildlife(index)
+        val player = rootService.currentGame?.playerQueue?.peek()
+        checkNotNull(player)
+
+        if (player.type != PlayerType.NETWORK && (rootService.currentGame?.isLocal == false)) {
+            rootService.networkService.sendSelectWildlife(index)
+        }
     }
 
 //    private fun deactivateRotateButtons() {

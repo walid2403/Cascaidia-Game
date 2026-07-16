@@ -11,7 +11,7 @@ import service.RootService
 class NetworkService(private val rootService: RootService) : AbstractRefreshingService() {
 
     /** URL of the BGW net server hosted for SoPra participants */
-    private val serverAddress = "sopra.cs.tu-dortmund.de:80/bgw-net/connect"
+    private val serverAddress = "sopra.cs.tu-dortmund.de:80/bgw-net-test/connect"
 
     /** Name of the game as registered with the server */
     private val gameID = "Cascadia"
@@ -358,7 +358,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     }
 
     fun sendUseNatureToken() {
-//        client?.sendGameActionMessage(UseNatureTokenMessage())
+        client?.sendGameActionMessage(UseNatureTokenMessage("Very important message"))
     }
 
     fun receiveUseNatureToken() {
@@ -376,18 +376,18 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     }
 
     fun sendSelectWildlife(wildlifeIndex: Int) {
-//        client?.sendGameActionMessage(SelectWildlifeMessage(wildlifeIndex))
+        client?.sendGameActionMessage(SelectWildlifeMessage(wildlifeIndex))
     }
 
     fun receiveSelectWildlife(message: SelectWildlifeMessage) {
-        onAllRefreshables { refreshAfterSelectWildlife(message.wildlifeShopIndex) }
+        onAllRefreshables { refreshAfterSelectWildlife(message.wildlifeIndex) }
     }
 
     fun sendRotation() {
         val game = rootService.currentGame
         checkNotNull(game) { "No running game found" }
 
-//        client?.sendGameActionMessage(RotationMessage(game.choices[game.selectedChoice.first].first.rotation))
+        client?.sendGameActionMessage(RotationMessage(game.choices[game.selectedChoice.first].first.rotation))
     }
 
     fun receiveRotation(message: RotationMessage) {
@@ -395,11 +395,11 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     }
 
     fun sendSelectHabitatTile(tileIndex: Int) {
-//        client?.sendGameActionMessage(SelectHabitatTileMessage(tileIndex))
+        client?.sendGameActionMessage(SelectHabitatTileMessage(tileIndex))
     }
 
     fun receiveSelectHabitatTile(message: SelectHabitatTileMessage) {
-        onAllRefreshables { refreshAfterSelectTile(message.habitatShopIndex) }
+        onAllRefreshables { refreshAfterSelectTile(message.habitatIndex) }
     }
 
     fun sendChatMessage(message: String) {

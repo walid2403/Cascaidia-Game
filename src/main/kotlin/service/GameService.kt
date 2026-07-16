@@ -149,8 +149,8 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                 val board = startingTiles[startingTilesList[i] / 10 - 1]
 
                 player.board[Triple(0, 0, 0)] = board[0]
-                player.board[Triple(-1, 1, 0)] = board[1]
-                player.board[Triple(0, 1, -1)] = board[2]
+                player.board[Triple(0, 1, -1)] = board[1]
+                player.board[Triple(-1, 1, 0)] = board[2]
             }
         } else {
             startingTiles.shuffle()
@@ -162,8 +162,8 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                  *              tile2  tile3
                  */
                 player.board[Triple(0, 0, 0)] = board[0]
-                player.board[Triple(-1, 1, 0)] = board[1]
-                player.board[Triple(0, 1, -1)] = board[2]
+                player.board[Triple(0, 1, -1)] = board[1]
+                player.board[Triple(-1, 1, 0)] = board[2]
             }
         }
     }
@@ -451,6 +451,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         if (playerTrigger) {
             game.gameState = GameState.HAS_EXTERMINATED
         }
+
         onAllRefreshables { refreshAfterExterminate() }
 
         val remainingTokens = game.choices.map { it.second }
@@ -1259,8 +1260,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val tokenChoice = game.choices[game.selectedChoice.second]
         game.choices[game.selectedChoice.second] = Pair(tokenChoice.first, newWildlifeToken)
 
-        exterminate(false)
-
         game.playerQueue.add(game.playerQueue.poll())
 
         game.tokenCoordinates = null
@@ -1270,6 +1269,9 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
 
         game.selectedChoice = Pair(-1, -1)
 
+        exterminate(false)
+
+        for (i in 0..3) println(game.choices[i].second.name)
 
         if (nextPlayer.type == PlayerType.HUMAN && game.isLocal) {
             rootService.history.prevMoves.push(CascadiaGame(game))
