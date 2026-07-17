@@ -91,6 +91,33 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         }
     }
 
+    private val moreButton = Button(
+        width = 85,
+        height = 21,
+        posX = 629,
+        posY = 168,
+        visual = Visual.EMPTY
+    ).apply {
+        onMouseEntered = {
+            playerTypeOverview.isVisible = true
+        }
+        onMouseExited = {
+            playerTypeOverview.isVisible = false
+        }
+    }
+
+    private val playerTypeOverview = Label(
+        width = 460,
+        height = 742,
+        posX = paneX + paneWidth + 35,
+        posY = 169,
+        visual = ImageVisual("assets/PlayerTypeOverview.png").apply {
+            style.borderRadius = BorderRadius(51)
+        }
+    ).apply {
+        isVisible = false
+    }
+
     // type inference fails here, so explicit  ": TextField" is required
     // see https://discuss.kotlinlang.org/t/unexpected-type-checking-recursive-problem/6203/14
     private val p1Input: TextField = TextField(
@@ -100,7 +127,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         font = Font(size = 31)
 
     ).apply {
-        visual = ColorVisual(204, 212, 209).apply { style.borderRadius = BorderRadius(8) }
+        visual = ColorVisual(226, 226, 226).apply { style.borderRadius = BorderRadius(8) }
         onTextChanged = {
             //startButton.isDisabled = !(this.text.trim().isNotEmpty() && p2Input.text.trim().isNotEmpty())
             if (this.text.isBlank()) {
@@ -120,7 +147,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         font = Font(size = 31),
 
         ).apply {
-        visual = ColorVisual(204, 212, 209).apply { style.borderRadius = BorderRadius(8) }
+        visual = ColorVisual(226, 226, 226).apply { style.borderRadius = BorderRadius(8) }
         onTextChanged = {
             //startButton.isDisabled = !(p1Input.text.trim().isNotEmpty() && this.text.trim().isNotEmpty())
             if (this.text.isBlank()) {
@@ -139,7 +166,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         prompt = "Player3",
         font = Font(size = 31)
     ).apply {
-        visual = ColorVisual(204, 212, 209).apply { style.borderRadius = BorderRadius(8) }
+        visual = ColorVisual(226, 226, 226).apply { style.borderRadius = BorderRadius(8) }
         onTextChanged = {
             //wenn nichts in den ersten beiden Feldern drin steht, dann funktioniert der Start Button nicht
             //startButton.isDisabled = !(p1Input.text.trim().isNotEmpty() && p2Input.text.trim().isNotEmpty())
@@ -161,7 +188,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         prompt = "Player4",
         font = Font(size = 31)
     ).apply {
-        visual = ColorVisual(204, 212, 209).apply { style.borderRadius = BorderRadius(8) }
+        visual = ColorVisual(226, 226, 226).apply { style.borderRadius = BorderRadius(8) }
         onTextChanged = {
             //startButton.isDisabled = !(p1Input.text.trim().isNotEmpty() && p2Input.text.trim().isNotEmpty())
             if (this.text.isBlank()) {
@@ -175,11 +202,13 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     }
 
     //variables to adjust playerType icon correctly, will be adjusted by +/-1 when buttons are clicked
-    //0 = human, 1 = easy bot, 2 = hard bot, 3 = not playing. variables%4 will be used to determine shown icon
-    private var p1Type = 0
-    private var p2Type = 0
-    private var p3Type = 3
-    private var p4Type = 3
+    //0 = not playing, 1 = human, 2 = easy bot, 3 = hard bot, 4 = monte carlo bot, 5 = greedy bot,
+    //6 = heuristic bot, 7 = greedy heuristic bot, 8 = neural network
+    // variables will be used to determine shown icon
+    private var p1Type = 1
+    private var p2Type = 1
+    private var p3Type = 0
+    private var p4Type = 0
 
     private val p1TypeButtonLeft = Label(
         width = buttonWidth, height = buttonHeight,
@@ -749,7 +778,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
             p1Input, p2Input, p3Input, p4Input,
             shuffleButton, exitButton, p1TypeButtonLeft, p2TypeButtonLeft, p3TypeButtonLeft, p4TypeButtonLeft,
             p1TypeButtonRight, p2TypeButtonRight, p3TypeButtonRight, p4TypeButtonRight,
-            noP1, noP2, noP3, noP4, p1Icon, p2Icon, p3Icon, p4Icon,
+            noP1, noP2, noP3, noP4, p1Icon, p2Icon, p3Icon, p4Icon, moreButton
         ).forEach { hostPanel.add(it) }
 
         listOf(
@@ -767,13 +796,15 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
             sidePanel,
             tabLabel,
             hostPanel,
-            warning
+            warning,
+            playerTypeOverview
         )
     }
 
     private fun resetScene() {
         warning.text = ""
         warning.isVisible = false
+        playerTypeOverview.posX = paneX + paneWidth + 35.0
 
         listOf(checkBoxSalmonA, checkBoxSalmonB, checkBoxElkA, checkBoxElkB, checkBoxBearA, checkBoxBearB, checkBoxFoxA,
             checkBoxFoxB, checkBoxHawkA, checkBoxHawkB).forEach { it.isChecked = false }
@@ -847,6 +878,10 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
                 MovementAnimation(
                     tabLabel,
                     byX = movementDistance,
+                ),
+                MovementAnimation(
+                    playerTypeOverview,
+                    byX = -movementDistance,
                 )
             ).apply {
                 onFinished = {
@@ -965,8 +1000,8 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
             else -> throw IllegalArgumentException("Player $playerNum is not valid")
         }
 
-        nameEntryDisabled(newType == 3, playerNum)
-        adjustIcons(leftLabel, rightLabel, newVisual, newType != 3)
+        nameEntryDisabled(newType == 0, playerNum)
+        adjustIcons(leftLabel, rightLabel, newVisual, newType != 0)
 
         return newType
     }
@@ -974,9 +1009,9 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     private fun calculateNewType(oldType: Int, leftButton: Boolean, changeType: Boolean): Int {
         return if(changeType) {
             if (leftButton) {
-                (oldType + 3) % 4
+                (oldType + 8) % 9
             } else {
-                (oldType + 1)%4
+                (oldType + 1)%9
             }
         } else {
             oldType
@@ -985,15 +1020,25 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
 
     private fun getNewPlayerVisual(playerType: Int): ImageVisual {
         return when (playerType) {
-            0 -> ImageVisual("icons/HumanIcon.png")
+            0 -> ImageVisual("icons/NotPlayingIcon.png")
 
-            1 -> ImageVisual("icons/EasyBotIcon.png")
+            1 -> ImageVisual("icons/HumanIcon.png")
 
-            2 -> ImageVisual("icons/HardBotIcon.png")
+            2 -> ImageVisual("icons/EasyBotIcon.png")
 
-            3 -> ImageVisual("icons/NotPlayingIcon.png")
+            3 -> ImageVisual("icons/HardBotIcon.png")
 
-            else -> throw IllegalArgumentException("Only 4 possible visuals, $playerType is invalid")
+            4 -> ImageVisual("icons/MonteCarloBotIcon.png")
+
+            5 -> ImageVisual("icons/GreedyBotIcon.png")
+
+            6 -> ImageVisual("icons/HeuristicBotIcon.png")
+
+            7 -> ImageVisual("icons/GreedyHeuristicBotIcon.png")
+
+            8 -> ImageVisual("icons/NeuralNetworkBotIcon.png")
+
+            else -> throw IllegalArgumentException("Only 9 possible visuals, $playerType is invalid")
         }
     }
 
@@ -1021,7 +1066,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     /**
      * This function adjusts whether a player's text entry field is visible and entry is enabled.
      * @param disableEntry [Boolean], if true entry will be disabled and the field will be set to not visible
-     * @param playerNum [Int] number of the player who's text entry field will be adjusted
+     * @param playerNum [Int] number of the player whose text entry field will be adjusted
      */
 
     private fun nameEntryDisabled(disableEntry: Boolean, playerNum: Int) {
@@ -1103,12 +1148,12 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         val types = listOf(p1Type, p2Type, p3Type, p4Type)
         var counter = 0
         for(i in 0..3) {
-            if(names[i] == "" && types[i] != 3) {
+            if(names[i] == "" && types[i] != 0) {
                 ready = false
                 warning.text = "Enter a name for all participating players and set unused slots to 'not playing'."
                 warning.isVisible = true
             }
-            if(types[i] != 3) {
+            if(types[i] != 0) {
                 counter++
             }
         }
@@ -1169,10 +1214,10 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
      */
     private fun getFinalPlayerNames(): List<String> {
         val list = mutableListOf<String>()
-        if(p1Input.text != "" && p1Type != 3) list.add(p1Input.text)
-        if(p2Input.text != "" && p2Type != 3) list.add(p2Input.text)
-        if(p3Input.text != "" && p3Type != 3) list.add(p3Input.text)
-        if(p4Input.text != "" && p4Type != 3) list.add(p4Input.text)
+        if(p1Input.text != "" && p1Type != 0) list.add(p1Input.text)
+        if(p2Input.text != "" && p2Type != 0) list.add(p2Input.text)
+        if(p3Input.text != "" && p3Type != 0) list.add(p3Input.text)
+        if(p4Input.text != "" && p4Type != 0) list.add(p4Input.text)
         return list.toList()
     }
 
@@ -1182,10 +1227,10 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
      */
     private fun getFinalPlayerTypes(): List<PlayerType> {
         val list = mutableListOf<PlayerType>()
-        if(p1Input.text != "" && p1Type != 3) list.add(getPlayerType(p1Type))
-        if(p2Input.text != "" && p2Type != 3) list.add(getPlayerType(p2Type))
-        if(p3Input.text != "" && p3Type != 3) list.add(getPlayerType(p3Type))
-        if(p4Input.text != "" && p4Type != 3) list.add(getPlayerType(p4Type))
+        if(p1Input.text != "" && p1Type != 0) list.add(getPlayerType(p1Type))
+        if(p2Input.text != "" && p2Type != 0) list.add(getPlayerType(p2Type))
+        if(p3Input.text != "" && p3Type != 0) list.add(getPlayerType(p3Type))
+        if(p4Input.text != "" && p4Type != 0) list.add(getPlayerType(p4Type))
         return list.toList()
     }
 
@@ -1194,9 +1239,16 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
      */
     private fun getPlayerType(type: Int): PlayerType {
         return when (type) {
-            0 -> PlayerType.HUMAN
-            1 -> PlayerType.GREEDY_BOT
-            2 -> PlayerType.HEURISTIC_BOT
+//          TODO("Greedy Heuristic Bot wieder einkommentieren wenn der implementiert ist")
+            1 -> PlayerType.HUMAN
+            2 -> PlayerType.EASY_BOT
+            3 -> PlayerType.HARD_BOT
+            4 -> PlayerType.MONTE_BOT
+            5 -> PlayerType.GREEDY_BOT
+            6 -> PlayerType.HEURISTIC_BOT
+//            7 -> PlayerType.GREEDY_HEURISTIC_BOT
+            8 -> PlayerType.NEURAL_BOT
+
             else -> throw IllegalArgumentException("Player $type is not valid")
         }
     }

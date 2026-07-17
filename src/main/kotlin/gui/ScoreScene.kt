@@ -553,22 +553,20 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
                 width = entryWidth,
                 height = entryHeight,
             ).apply {
-                if (i in 1..4) {
-                    visual = fillInScoreTableImages(wildlifeTableTopHalf, i)
+                visual = if (i in 1..4) {
+                    fillInScoreTableImages(wildlifeTableTopHalf, i)
                 } else {
-                    visual = ImageVisual("scoreScene/Person.png")
-                    //text = "👤"
+                    ImageVisual("scoreScene/Person.png")
                 }
             }
             habitatTableTopHalf[0, i] = Label(
                 width = entryWidth,
                 height = entryHeight,
             ).apply {
-                if (i in 1..4) {
-                    visual = fillInScoreTableImages(habitatTableTopHalf, i)
+                visual = if (i in 1..4) {
+                    fillInScoreTableImages(habitatTableTopHalf, i)
                 } else {
-                    visual = ImageVisual("scoreScene/Person.png")
-                    //text = "👤"
+                    ImageVisual("scoreScene/Person.png")
                 }
             }
         }

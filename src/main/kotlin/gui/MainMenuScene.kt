@@ -201,7 +201,7 @@ class MainMenuScene(private val app: SopraApplication,private val rootService: R
             hardBotIcon2,
             logo,
             menuBackground,
-            exitButton
+            exitButton,
         )
         menuBackground.addAll(
             hostButton,

@@ -1215,15 +1215,33 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
     private fun getVisual(name: String): ImageVisual {
         return if (name == playerName) {
             when(playerType) {
+                //TODO("Greedy Heuristic Bot wieder rein kommentieren wenn der implementiert ist")
                 PlayerType.HUMAN -> ImageVisual("icons/HumanIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
-                PlayerType.GREEDY_BOT -> ImageVisual("icons/EasyBotIcon3.png").apply {
+                PlayerType.GREEDY_BOT -> ImageVisual("icons/GreedyBotIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
-                PlayerType.HEURISTIC_BOT -> ImageVisual("icons/HardBotIcon3.png").apply {
+                PlayerType.HEURISTIC_BOT -> ImageVisual("icons/HeuristicBotIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
+
+                PlayerType.EASY_BOT -> ImageVisual("icons/EasyBotIcon3.png").apply {
+                    style.borderRadius = BorderRadius(8)
+                }
+                PlayerType.HARD_BOT -> ImageVisual("icons/HardBotIcon3.png").apply {
+                    style.borderRadius = BorderRadius(8)
+                }
+                PlayerType.MONTE_BOT -> ImageVisual("icons/MonteCarloBotIcon3.png").apply {
+                    style.borderRadius = BorderRadius(8)
+                }
+//                PlayerType.GREEDY_HEURISTIC_BOT -> ImageVisual("icons/GreedyHeuristicBotIcon3.png").apply {
+//                    style.borderRadius = BorderRadius(8)
+//                }
+                PlayerType.NEURAL_BOT -> ImageVisual("icons/NeuralNetworkBotIcon3.png").apply {
+                    style.borderRadius = BorderRadius(8)
+                }
+
                 else -> throw IllegalArgumentException("Player type must be PlayerType Object and can't be NETWORK, " +
                         "$playerType not supported")
             }
