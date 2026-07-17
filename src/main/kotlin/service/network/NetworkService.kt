@@ -202,6 +202,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         val reorderList = listOf(0, 1, 4, 3, 2)
 
         val wildlifeList = game.wildlifeTokens.peekAll().map { NetWildlife.valueOf(it.name) }.reversed().toMutableList()
+        for (i in 0..10) wildlifeList[wildlifeList.lastIndex - i] = NetWildlife.ELK
         wildlifeList.addAll(game.choices.map { NetWildlife.valueOf(it.second.name) }.reversed())
 
         val message = GameInitMessage(

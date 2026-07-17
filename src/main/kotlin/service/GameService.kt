@@ -1260,6 +1260,8 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val tokenChoice = game.choices[game.selectedChoice.second]
         game.choices[game.selectedChoice.second] = Pair(tokenChoice.first, newWildlifeToken)
 
+        exterminate(false)
+
         game.playerQueue.add(game.playerQueue.poll())
 
         game.tokenCoordinates = null
@@ -1268,8 +1270,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         game.gameState = GameState.START_OF_TURN
 
         game.selectedChoice = Pair(-1, -1)
-
-        exterminate(false)
 
         for (i in 0..3) println(game.choices[i].second.name)
 
