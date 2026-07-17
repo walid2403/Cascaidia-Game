@@ -115,6 +115,9 @@ class MainMenuScene(private val app: SopraApplication,private val rootService: R
         isDisabled = true
         onMouseClicked = {
             rootService.gameService.loadGame(saveNameTextField.text)
+            this.isVisible = false
+            saveNameTextField.isVisible = false
+            saveNameTextField.text = ""
         }
     }
 
