@@ -20,6 +20,7 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
      */
     private val greedyBot = BotLocaleOptimum(rootService, this)
     private val heuristicBot = HeuristicBot(rootService, this)
+    private val monteCarloBot= FlatMonteCarlo(rootService,this)
 
     private fun resetCoordinates() {
         coordinatesTile = Triple(null, null, null)
@@ -51,16 +52,13 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
                 }
             }
             PlayerType.MONTE_BOT -> {
-                //Hier euren Zug aufrufen. Wenn ihr den ganzen Zug direkt macht, dann wie bei EASY_BOT, sonst wie bei Rest
+                monteCarloBot.turn()
             }
             PlayerType.NEURAL_BOT -> {
 
             }
             PlayerType.HARD_BOT -> {
-                greedyBot.isFinished = false
-                while(!greedyBot.isFinished) {
-                    greedyBot.makeTurn()
-                }
+                monteCarloBot.turn()
             }
         }
 
