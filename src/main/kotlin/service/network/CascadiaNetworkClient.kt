@@ -150,6 +150,7 @@ class CascadiaNetworkClient(
         players.add(Pair(notification.sender, PlayerType.NETWORK))
 
         networkService.triggerRefresh("playerChanged")
+        networkService.sendGameConfig(players.map {it.first}, scoringCards)
     }
 
     /**

@@ -11,7 +11,7 @@ import service.RootService
 class NetworkService(private val rootService: RootService) : AbstractRefreshingService() {
 
     /** URL of the BGW net server hosted for SoPra participants */
-    private val serverAddress = "sopra.cs.tu-dortmund.de:80/bgw-net-test/connect"
+    private val serverAddress = "sopra.cs.tu-dortmund.de:80/bgw-net/connect"
 
     /** Name of the game as registered with the server */
     private val gameID = "Cascadia"
@@ -201,8 +201,10 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
         val reorderList = listOf(0, 1, 4, 3, 2)
 
+        game.wildlifeTokens.popAll(11)
+        for (i in 0..10) game.wildlifeTokens.push(WildlifeToken.ELK)
+
         val wildlifeList = game.wildlifeTokens.peekAll().map { NetWildlife.valueOf(it.name) }.reversed().toMutableList()
-        for (i in 0..10) wildlifeList[wildlifeList.lastIndex - i] = NetWildlife.ELK
         wildlifeList.addAll(game.choices.map { NetWildlife.valueOf(it.second.name) }.reversed())
 
         val message = GameInitMessage(
@@ -356,6 +358,9 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         if (message.wipedWildlifeIndices.isEmpty() && game.gameState == GameState.PLAYED_TILE) {
             rootService.gameService.changeTurn()
         }
+
+
+        for (i in 0..3) println(game.choices[i].second.name)
     }
 
     fun sendUseNatureToken() {
