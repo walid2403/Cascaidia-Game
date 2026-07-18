@@ -16,6 +16,8 @@ import service.RootService
  */
 class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
 
+    var isFinished = false
+
     //die 6 Richtungen eines Hexagons im Uhrzeigersinn
     private val directions = listOf(
         Triple(1,-1,0), //Richtung 0: Oben-Rechts
@@ -70,7 +72,7 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
 
             else -> {
                 // Falls das Spiel auf etwas anderes wartet (z.B. Zug-Ende), leiten wir das Ende ein
-                rootService.gameService.changeTurn()
+                isFinished = true
             }
         }
     }
@@ -226,6 +228,8 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
                     bestPosition = position
                     bestRotation = rot
                 }
+                //currentGame.gameState = GameState.END_OF_TURN
+                isFinished = true
             }
 
         }
@@ -288,8 +292,9 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
             .map { it.key }
 
         //Falls die Liste leer ist beenden wir den Zug (das Tier wird verworfen)
-        if(possiblePositions.isEmpty()){
-            currentGame.gameState = GameState.END_OF_TURN
+        if(possiblePositions.isEmpty()){ //muss updated !!!!!!!!!!!!!!!!!!!!!!!!
+            //currentGame.gameState = GameState.END_OF_TURN
+            isFinished = true
             return
         }
 
@@ -305,7 +310,8 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
             rootService.playerActionService.placeWildlife(bestPosition)
             currentGame.gameState = GameState.END_OF_TURN
         } else {
-            currentGame.gameState = GameState.END_OF_TURN
+            //currentGame.gameState = GameState.END_OF_TURN
+            isFinished = true
         }
     }
 
