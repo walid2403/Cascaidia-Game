@@ -62,14 +62,9 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
                 greedyHeuristicBot.makeTurn()
             }
             PlayerType.HARD_BOT -> {
-                //monteCarloBot.turn()
                 greedyHeuristicBot.makeTurn()
             }
         }
-
-        val coordinatesTileNotNull = Triple(requireNotNull(coordinatesTile.first),
-            requireNotNull(coordinatesTile.second), requireNotNull(coordinatesTile.third))
-        onAllRefreshables { refreshAfterBotTurn(coordinatesTileNotNull, coordinatesWildlifeToken) }
     }
 
     private var isFinished = false
