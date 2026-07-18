@@ -783,7 +783,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
 
         adjustShopBasedOnCustomChoiceActive(customChoiceActive, tileShop[index], index)
-        rootService.networkService.sendSelectHabitatTile(index)
+
+        val player = rootService.currentGame?.playerQueue?.peek()
+        checkNotNull(player)
+
+        if (player.type != PlayerType.NETWORK && (rootService.currentGame?.isLocal == false)) {
+            rootService.networkService.sendSelectHabitatTile(index)
+        }
     }
 
     private fun adjustShopBasedOnCustomChoiceActive(customChoiceActive: Boolean, tile: Label, index: Int) {

@@ -2,6 +2,7 @@ package gui
 
 import entity.PlayerType
 import service.Refreshable
+import service.RootService
 import tools.aqua.bgw.animation.MovementAnimation
 import tools.aqua.bgw.animation.ParallelAnimation
 import tools.aqua.bgw.components.StaticComponentView
@@ -23,7 +24,7 @@ import tools.aqua.bgw.visual.Visual
  * as well as the host's current scoreCard selection.
  * @param app The [SopraApplication] of the game
  */
-class JoinOnlineLobbyScene (private val app: SopraApplication) :
+class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootService: RootService) :
     MenuScene(1920, 1080), Refreshable  {
 
     private val sceneWidth = 1920
@@ -56,7 +57,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication) :
         posY = 0,
         width = sceneWidth,
         height = sceneHeight,
-        visual = ImageVisual("backgrounds/GameConfigMenuBackground.png")
+        visual = ImageVisual("backgrounds/LoadingScreenBackground.png")
     )
 
     private val playerViewPane = Pane<StaticComponentView<*>>(
@@ -118,6 +119,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication) :
         visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
+            rootService.networkService.disconnect()
             resetScene()
             app.showMenuScene(app.joinOnlineScene)
         }

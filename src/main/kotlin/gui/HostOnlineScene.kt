@@ -36,7 +36,7 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
         posY = 0,
         width = 1920,
         height = 1080,
-        visual = ImageVisual("backgrounds/GameConfigMenuBackground.png")
+        visual = ImageVisual("backgrounds/LoadingScreenBackground.png")
     )
 
     private val menuBackground = Label(

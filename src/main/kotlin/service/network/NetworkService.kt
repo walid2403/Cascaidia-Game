@@ -41,6 +41,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         }
 
         client?.playerType = playerType
+        client?.isHost = true
 
         updateConnectionState(ConnectionState.CONNECTED)
 
@@ -108,6 +109,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
      * even if no connection is currently active.
      */
     fun disconnect() {
+        println("SessionID: ${client?.sessionID}, isOpen: ${client?.isOpen}")
         client?.apply {
             if (sessionID != null) leaveGame("Goodbye!")
             if (isOpen) disconnect()
@@ -201,8 +203,8 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
         val reorderList = listOf(0, 1, 4, 3, 2)
 
-        game.wildlifeTokens.popAll(11)
-        for (i in 0..10) game.wildlifeTokens.push(WildlifeToken.ELK)
+//        game.wildlifeTokens.popAll(11)
+//        for (i in 0..10) game.wildlifeTokens.push(WildlifeToken.ELK)
 
         val wildlifeList = game.wildlifeTokens.peekAll().map { NetWildlife.valueOf(it.name) }.reversed().toMutableList()
         wildlifeList.addAll(game.choices.map { NetWildlife.valueOf(it.second.name) }.reversed())
@@ -228,7 +230,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
      * @throws IllegalStateException if not currently waiting for an init message
      */
     fun startNewJoinedGame(message: GameInitMessage, playerName: String, playerType: PlayerType) {
-        check(connectionState == ConnectionState.WAITING_FOR_INIT)
+        check(connectionState in listOf(ConnectionState.WAITING_FOR_INIT, ConnectionState.WAITING_FOR_GUESTS))
         { "not waiting for game init message. " }
 
         val reorderList = listOf(0, 1, 4, 3, 2)

@@ -77,7 +77,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
         posY = 0,
         width = 1920,
         height = 1080,
-        visual = ImageVisual("backgrounds/GameConfigMenuBackground.png")
+        visual = ImageVisual("backgrounds/LoadingScreenBackground.png")
     )
     private val hostPanel = Pane<UIComponent>(
         posX = paneX, posY = paneY,

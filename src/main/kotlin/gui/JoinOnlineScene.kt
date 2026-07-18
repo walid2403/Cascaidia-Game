@@ -37,7 +37,7 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
         posY = 0,
         width = sceneWidth,
         height = sceneHeight,
-        visual = ImageVisual("backgrounds/GameConfigMenuBackground.png")
+        visual = ImageVisual("backgrounds/LoadingScreenBackground.png")
     )
 
     private val menuBackground = Label(

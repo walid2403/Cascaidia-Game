@@ -70,7 +70,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         posY = 0,
         width = sceneWidth,
         height = sceneHeight,
-        visual = ImageVisual("backgrounds/GameConfigMenuBackground.png")
+        visual = ImageVisual("backgrounds/LoadingScreenBackground.png")
     )
 
     private val hostPanel = Pane<UIComponent>(

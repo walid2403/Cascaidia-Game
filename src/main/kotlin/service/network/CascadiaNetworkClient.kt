@@ -34,6 +34,8 @@ class CascadiaNetworkClient(
 
     var players = mutableListOf<Pair<String, PlayerType>>()
 
+    var isHost = false
+
     var errorMessage = ""
 
     /**
@@ -104,7 +106,7 @@ class CascadiaNetworkClient(
                 players = response.opponents.map { Pair(it, PlayerType.NETWORK) }.toMutableList()
                 players.add(Pair(playerName, playerType!!))
                 sessionID = response.sessionID
-                networkService.updateConnectionState(ConnectionState.WAITING_FOR_INIT)
+                networkService.updateConnectionState(ConnectionState.WAITING_FOR_GUESTS)
 
                 networkService.triggerRefresh("joinGame")
             }
@@ -150,7 +152,9 @@ class CascadiaNetworkClient(
         players.add(Pair(notification.sender, PlayerType.NETWORK))
 
         networkService.triggerRefresh("playerChanged")
-        networkService.sendGameConfig(players.map {it.first}, scoringCards)
+        if (isHost) networkService.sendGameConfig(players.map {it.first}, scoringCards)
+
+        if (players.size == 4) networkService.updateConnectionState(ConnectionState.WAITING_FOR_INIT)
     }
 
     /**

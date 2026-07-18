@@ -36,7 +36,7 @@ class SopraApplication : BoardGameApplication("SoPra Game"), Refreshable {
 
     val scoreScene = ScoreScene(this@SopraApplication, rootService)
 
-    val joinOnlineLobbyScene = JoinOnlineLobbyScene(this@SopraApplication)
+    val joinOnlineLobbyScene = JoinOnlineLobbyScene(this@SopraApplication, rootService)
 
     val hostOnlineLobbyScene = HostOnlineLobbyScene(this@SopraApplication, rootService)
 
