@@ -109,7 +109,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     private val playerTypeOverview = Label(
         width = 460,
         height = 742,
-        posX = paneX + paneWidth + 35,
+        posX = paneX + paneWidth + 32,
         posY = 169,
         visual = ImageVisual("assets/PlayerTypeOverview.png").apply {
             style.borderRadius = BorderRadius(51)
@@ -804,7 +804,7 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
     private fun resetScene() {
         warning.text = ""
         warning.isVisible = false
-        playerTypeOverview.posX = paneX + paneWidth + 35.0
+        playerTypeOverview.posX = paneX + paneWidth + 32.0
 
         listOf(checkBoxSalmonA, checkBoxSalmonB, checkBoxElkA, checkBoxElkB, checkBoxBearA, checkBoxBearB, checkBoxFoxA,
             checkBoxFoxB, checkBoxHawkA, checkBoxHawkB).forEach { it.isChecked = false }
