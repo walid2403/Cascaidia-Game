@@ -6,7 +6,9 @@ import entity.Tile
 import entity.WildlifeToken
 import service.RootService
 
-class GreedyHeuristicBot(private val rootService: RootService, private val bot : Bot) {
+class GreedyHeuristicBot(private val rootService: RootService, private val bot : Bot, private val marginForNT: Int = 0,
+                         private val thresholdForExterminate: Int = 4, private val thresholdForChangeWildlife: Int = 2,
+                         private val dummy : Boolean = false) {
 
     private var chosenTileCoordinateNormal: Triple<Int, Int, Int>? = null
     private var chosenWildlifeCoordinateNormal: Triple<Int, Int, Int>? = null
@@ -15,9 +17,6 @@ class GreedyHeuristicBot(private val rootService: RootService, private val bot :
     private var chosenWildlifeCoordinateNT: Triple<Int, Int, Int>? = null
     private var chosenRotationNT: Int? = null
     private var freeSelection = false
-    var marginForNT = 0      //TODO ausprobieren
-    var thresholdForExterminate = 4 //TODO ausprobieren
-    var thresholdForChangeWildlife = 2 //TODO ausprobieren
 
     fun makeTurn() {
         val currentGame = rootService.currentGame
@@ -68,13 +67,13 @@ class GreedyHeuristicBot(private val rootService: RootService, private val bot :
         if (currentGame.playerQueue.peek().natureTokens == 0) {
             ntGain = -100
         }
-        println("Normal: $normalGain\n NT: $ntGain")
+        //println("Normal: $normalGain\n NT: $ntGain")
 
         if (currentGame.choices.groupBy { it.second }.entries.maxOf {it.value.size} >= 3 &&
             maxOf(ntGain, normalGain) < thresholdForExterminate &&
             currentGame.gameState == GameState.START_OF_TURN) {
             rootService.gameService.exterminate(true)
-            println("Has exterminated\n")
+            //println("Has exterminated\n")
             return
         }
 
@@ -115,35 +114,6 @@ class GreedyHeuristicBot(private val rootService: RootService, private val bot :
         return result
     }
 
-    /*private fun evaluateTile(game: CascadiaGame, tileChoiceIndex: Int, tileOptions: List<Triple<Int,Int,Int>>,
-                             result: Pair<Pair<Int, Int>, Triple<Int, Int, Int>>)
-    : Pair<Pair<Int, Int>, Triple<Int, Int, Int>> {
-        val board = game.playerQueue.peek().board
-        var bestScore = -1
-        for (tPosition in tileOptions) {
-            val tile = game.choices[tileChoiceIndex].first
-            repeat(6) {
-                val score = test(tile, WildlifeToken.BEAR, tPosition, Triple(-100,0,0), board)
-                if (score > bestScore) {
-                    bestScore = score
-                    chosenTileCoordinateNormal = tPosition
-                    chosenWildlifeCoordinateNormal = null
-                    chosenRotationNormal =  it
-                }
-                rotateTile(tile)
-            }
-        }
-        val normalBest = result.first
-        var currBest = normalBest.first
-        var currIndex = normalBest.second
-        if (currBest < bestScore) {
-            currBest = bestScore
-            currIndex = tileChoiceIndex
-        }
-        val normalAnswer = Pair(currBest, currIndex)
-        return Pair(normalAnswer, result.second)
-    }*/
-
     private fun setAttributes(normalSelection: Boolean, tPosition: Triple<Int, Int, Int>, wPosition: Triple<Int, Int, Int>?, rotation: Int) {
         chosenTileCoordinateNT = if (normalSelection) chosenTileCoordinateNT else tPosition
         chosenWildlifeCoordinateNT = if (normalSelection) chosenWildlifeCoordinateNT else wPosition
@@ -172,7 +142,7 @@ class GreedyHeuristicBot(private val rootService: RootService, private val bot :
                 val wildlifeOptions = possibleWildlifePositions(board, wildlife)
                 for (wPosition in wildlifeOptions) {
                     val score = test(wildlife, wPosition, board)
-                    val hScore = heuristicEvaluate(board, tPosition)
+                    val hScore = heuristicEvaluate(board, tPosition, dummy)
                     /*println("Score für tOption $tileChoiceIndex und wildlife $wildlife\n" +
                             "$score Position wildlife: $wPosition und Position tile: $tPosition und Rotation: $it\n")*/
                     if (score == bestScore && hScore > bestScoreHeuristic) {
@@ -185,7 +155,7 @@ class GreedyHeuristicBot(private val rootService: RootService, private val bot :
                     }
                 }
                 val score = test(wildlife, Triple(-100,0,0), board)
-                val hScore = heuristicEvaluate(board, tPosition)
+                val hScore = heuristicEvaluate(board, tPosition, dummy)
 
                 if (score == bestScore && hScore > bestScoreHeuristic) {
                     bestScoreHeuristic = hScore

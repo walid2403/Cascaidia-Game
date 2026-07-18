@@ -229,7 +229,7 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
                     bestRotation = rot
                 }
                 //currentGame.gameState = GameState.END_OF_TURN
-                isFinished = true
+                //isFinished = true
             }
 
         }

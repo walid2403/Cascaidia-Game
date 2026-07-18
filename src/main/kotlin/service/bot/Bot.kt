@@ -22,6 +22,7 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
     private val heuristicBot = HeuristicBot(rootService, this)
     private val monteCarloBot= FlatMonteCarlo(rootService,this)
     private val greedyHeuristicBot = GreedyHeuristicBot(rootService, this)
+    private val greedyHeuristicTest = GreedyHeuristicBot(rootService, this, dummy = true)
 
     private fun resetCoordinates() {
         coordinatesTile = Triple(null, null, null)
@@ -62,7 +63,7 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
                 greedyHeuristicBot.makeTurn()
             }
             PlayerType.HARD_BOT -> {
-                greedyHeuristicBot.makeTurn()
+                greedyHeuristicTest.makeTurn()
             }
         }
     }
@@ -160,19 +161,19 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
                 count--
             }
         }
-        println("Bot changed Wildlife")
+        //println("Bot changed Wildlife")
         rootService.playerActionService.changeWildlife(indices)
     }
 
     private fun randomBotNatureTokenFreeSelection() {
         val tileIndex = Random.nextInt(4)
         val wildlifeIndex = Random.nextInt(4)
-        println("Bot made Custom Choice")
+        //println("Bot made Custom Choice")
         rootService.playerActionService.freeSelection(tileIndex, wildlifeIndex)
     }
 
     private fun randomBotClearSemipopulation() {
-        println("Bot cleared Semipopulation")
+        //println("Bot cleared Semipopulation")
         rootService.gameService.exterminate(true)
     }
 
