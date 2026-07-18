@@ -14,6 +14,7 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
     private val directionY = intArrayOf(-1, 0, 1, 1, 0, -1)
     private val directionZ = intArrayOf(1, 1, 0, -1, -1, 0)
 
+    var isFinished = false
     /** this plays one bot turn: handles overpopulation, then picks the best scoring
      * option
      */
@@ -46,7 +47,9 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
             placeBestPlace(currentGame,player)
         }else if (currentGame.gameState== GameState.PLAYED_TILE){
             placeBestAnimal(currentGame,player)
-        } //no need for END_OF_TURN
+        }else {
+            isFinished = true
+        }
     }
     private fun findNeighbor(position: Triple<Int,Int,Int>): List<Triple<Int,Int,Int>>{
         val neighbours= mutableListOf<Triple<Int,Int,Int>>()
@@ -331,7 +334,8 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
         val chosenTile= currentGame.choices[currentGame.selectedChoice.first].first
         val freePlaces=findFreePlace(player.board)
         if(freePlaces.isEmpty()){
-            currentGame.gameState= GameState.END_OF_TURN
+            //currentGame.gameState= GameState.END_OF_TURN
+            isFinished = true
             return
         }
         var bestPlace=freePlaces[0]
@@ -372,7 +376,8 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
             }
         }
         if (possiblePlaces.isEmpty()){
-            currentGame.gameState= GameState.END_OF_TURN
+            //currentGame.gameState= GameState.END_OF_TURN
+            isFinished = true
             return
         }
         var bestPlace=possiblePlaces[0]
@@ -392,7 +397,8 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
             }
         }
         if (bestScore < 0) {
-            currentGame.gameState= GameState.END_OF_TURN
+            //currentGame.gameState= GameState.END_OF_TURN
+            isFinished = true
             return
         }
 
