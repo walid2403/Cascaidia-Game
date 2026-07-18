@@ -2,7 +2,6 @@ package gui
 
 import entity.PlayerType
 import service.Refreshable
-import service.RootService
 import tools.aqua.bgw.animation.MovementAnimation
 import tools.aqua.bgw.animation.ParallelAnimation
 import tools.aqua.bgw.components.StaticComponentView
@@ -23,9 +22,8 @@ import tools.aqua.bgw.visual.Visual
  * This scene shows the Join Lobby of the game. It shows all players in the Lobby with their name and playerType icon
  * as well as the host's current scoreCard selection.
  * @param app The [SopraApplication] of the game
- * @param [rootService] The [RootService] instance to access the other service methods and entity layer
  */
-class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootService: RootService) :
+class JoinOnlineLobbyScene (private val app: SopraApplication) :
     MenuScene(1920, 1080), Refreshable  {
 
     private val sceneWidth = 1920
@@ -768,15 +766,34 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
     private fun getVisual(name: String): ImageVisual {
         return if (name == playerName) {
             when(playerType) {
+                //TODO("Greedy Heuristic Bot wieder rein kommentieren wenn der implementiert ist")
+
                 PlayerType.HUMAN -> ImageVisual("icons/HumanIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
-                PlayerType.GREEDY_BOT -> ImageVisual("icons/EasyBotIcon3.png").apply {
+                PlayerType.GREEDY_BOT -> ImageVisual("icons/GreedyBotIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
-                PlayerType.HEURISTIC_BOT -> ImageVisual("icons/HardBotIcon3.png").apply {
+                PlayerType.HEURISTIC_BOT -> ImageVisual("icons/HeuristicBotIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
+
+                PlayerType.EASY_BOT -> ImageVisual("icons/EasyBotIcon3.png").apply {
+                    style.borderRadius = BorderRadius(8)
+                }
+                PlayerType.HARD_BOT -> ImageVisual("icons/HardBotIcon3.png").apply {
+                    style.borderRadius = BorderRadius(8)
+                }
+                PlayerType.MONTE_BOT -> ImageVisual("icons/MonteCarloBotIcon3.png").apply {
+                    style.borderRadius = BorderRadius(8)
+                }
+//                PlayerType.GREEDY_HEURISTIC_BOT -> ImageVisual("icons/GreedyHeuristicBotIcon3.png").apply {
+//                    style.borderRadius = BorderRadius(8)
+//                }
+                PlayerType.NEURAL_BOT -> ImageVisual("icons/NeuralNetworkBotIcon3.png").apply {
+                    style.borderRadius = BorderRadius(8)
+                }
+
                 else -> throw IllegalArgumentException("Player type must be PlayerType Object and can't be NETWORK, " +
                         "$playerType not supported")
             }

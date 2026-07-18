@@ -115,6 +115,9 @@ class MainMenuScene(private val app: SopraApplication,private val rootService: R
         isDisabled = true
         onMouseClicked = {
             rootService.gameService.loadGame(saveNameTextField.text)
+            this.isVisible = false
+            saveNameTextField.isVisible = false
+            saveNameTextField.text = ""
         }
     }
 
@@ -201,7 +204,7 @@ class MainMenuScene(private val app: SopraApplication,private val rootService: R
             hardBotIcon2,
             logo,
             menuBackground,
-            exitButton
+            exitButton,
         )
         menuBackground.addAll(
             hostButton,

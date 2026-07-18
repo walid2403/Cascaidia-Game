@@ -49,7 +49,34 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
         }
     )
 
-    val exitButton = Button(
+    private val moreButton = Button(
+        width = 85,
+        height = 21,
+        posX = paneX + 641,
+        posY = paneY + 115,
+        visual = Visual.EMPTY
+    ).apply {
+        onMouseEntered = {
+            playerTypeOverview.isVisible = true
+        }
+        onMouseExited = {
+            playerTypeOverview.isVisible = false
+        }
+    }
+
+    private val playerTypeOverview = Label(
+        width = 460,
+        height = 742,
+        posX = 1367,
+        posY = 169,
+        visual = ImageVisual("assets/PlayerTypeOverview.png").apply {
+            style.borderRadius = BorderRadius(51)
+        }
+    ).apply {
+        isVisible = false
+    }
+
+    private val exitButton = Button(
         width = 78, height = 78,
         posX = paneX + 33, posY = paneY + 23,
         visual = Visual.EMPTY
@@ -213,6 +240,8 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
             switchTypeLeftButton,
             switchTypeRightButton,
             warning,
+            playerTypeOverview,
+            moreButton,
         )
     }
 
@@ -229,17 +258,28 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
      */
     private fun changePlayerType(leftButton: Boolean, playerType: Int): Int {
         val newType = if (leftButton) {
-            (playerType + 2) % 3
+            (playerType + 7) % 8
         } else {
-            (playerType + 1) % 3
+            (playerType + 1) % 8
         }
 
         val newVisual = when (newType) {
+
             0 -> ImageVisual("icons/HumanIcon2.png")
 
             1 -> ImageVisual("icons/EasyBotIcon2.png")
 
             2 -> ImageVisual("icons/HardBotIcon2.png")
+
+            3 -> ImageVisual("icons/MonteCarloBotIcon2.png")
+
+            4 -> ImageVisual("icons/GreedyBotIcon2.png")
+
+            5 -> ImageVisual("icons/HeuristicBotIcon2.png")
+
+            6 -> ImageVisual("icons/GreedyHeuristicBotIcon2.png")
+
+            7 -> ImageVisual("icons/NeuralNetworkBotIcon2.png")
 
             else -> throw IllegalArgumentException("Only possible visuals, $newType is invalid")
         }
@@ -251,9 +291,17 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
 
     private fun getPlayerType(playerTypeInt: Int): PlayerType {
         return when (playerTypeInt) {
+            //TODO("Greedy Heuristic Bot wieder einkommentieren wenn der implementiert ist")
+
             0 -> PlayerType.HUMAN
-            1 -> PlayerType.GREEDY_BOT
-            2 -> PlayerType.HEURISTIC_BOT
+            1 -> PlayerType.EASY_BOT
+            2 -> PlayerType.HARD_BOT
+            3 -> PlayerType.MONTE_BOT
+            4 -> PlayerType.GREEDY_BOT
+            5 -> PlayerType.HEURISTIC_BOT
+//            6 -> PlayerType.GREEDY_HEURISTIC_BOT
+            7 -> PlayerType.NEURAL_BOT
+
             else -> throw IllegalArgumentException("Only numbers between 0 and 3 are valid")
         }
     }

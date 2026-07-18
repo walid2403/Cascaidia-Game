@@ -87,9 +87,14 @@ class PauseMenuScene (private val app: SopraApplication, private val rootService
         }
     ).apply {
         onMouseClicked = {
-            textPane.isVisible = true
-            listOf(exitButton, mainMenuButton, this).forEach { it.isDisabled = true}
-//            rootService.playerActionService.saveGame("")
+            if(!textPane.isVisible) {
+                textPane.isVisible = true
+                listOf(exitButton, mainMenuButton).forEach { it.isDisabled = true}
+            }
+            else{
+                textPane.isVisible = false
+                listOf(exitButton, mainMenuButton, this).forEach { it.isDisabled = false}
+            }
         }
     }
 
@@ -137,6 +142,8 @@ class PauseMenuScene (private val app: SopraApplication, private val rootService
         onMouseClicked = {
             if(textField.text.isNotBlank()) {
                 rootService.playerActionService.saveGame(textField.text.trim())
+                rootService.currentGame = null
+                textPane.isVisible = false
             }
         }
     }

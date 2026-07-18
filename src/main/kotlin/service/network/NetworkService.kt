@@ -296,10 +296,15 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         val game = rootService.currentGame
         checkNotNull(game) { "No running game found" }
 
+        println("Network-Player '"+game.playerQueue.peek().name+"' makes Turn:")
+        println("Selected Tile (ID): "+game.selectedChoice.first.toString())
+        println("Selected Animal (ID): "+game.selectedChoice.second.toString())
+        
         val habCoords: Triple<Int, Int, Int> = Triple(
             (message.habitatCoordinates.first + message.habitatCoordinates.second) * (-1),
             message.habitatCoordinates.second, message.habitatCoordinates.first)
 
+        println("Place Tile at: "+habCoords.third.toString()+", "+habCoords.second.toString())
         rootService.playerActionService.placeTile(habCoords)
         rootService.playerActionService.rotateTile(null, message.habitatRotation, habCoords)
 //        game.playerQueue.peek().board[habCoords]?.rotation = message.habitatRotation
@@ -317,10 +322,16 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
                 (message.wildlifeCoordinates!!.first + message.wildlifeCoordinates!!.second) * (-1),
                 message.wildlifeCoordinates!!.second, message.wildlifeCoordinates!!.first)
 
+            println("Place Wildlife at: "+tokenCoords.third.toString()+", "+tokenCoords.second.toString())
             rootService.playerActionService.placeWildlife(tokenCoords)
 
             rootService.gameService.changeTurn()
+        } else {
+            println("Rejected Wildlife")
         }
+
+        println("End Network-Player '"+game.playerQueue.peek().name+"' Turn")
+        println("-----------------------------")
     }
 
     fun sendExterminate(indices: List<Int>, natureToken: Boolean) {
