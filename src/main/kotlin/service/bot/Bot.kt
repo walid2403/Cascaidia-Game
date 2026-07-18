@@ -9,10 +9,16 @@ import kotlin.random.Random
  */
 class Bot (private val rootService: RootService) : AbstractRefreshingService() {
 
+    /**
+     * Wichtig: Beide müssen in jedem Bot gesetzt werden!
+     */
     var coordinatesTile: Triple<Int?, Int?, Int?> = Triple(null, null, null)
     var coordinatesWildlifeToken: Triple<Int?, Int?, Int?> = Triple(null, null, null)
 
-    private val hardBot = BotLocaleOptimum(rootService, this)
+    /**
+     * Hier eine Kopie von eurem Bot erstellen
+     */
+    private val greedyBot = BotLocaleOptimum(rootService, this)
     private val heuristicBot = HeuristicBot(rootService, this)
 
     private fun resetCoordinates() {
@@ -26,18 +32,34 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
     fun makeTurn(playerType: PlayerType) {
         require(playerType != PlayerType.HUMAN) { "Die Methode sollte nur für Bot Züge aufgerufen werden" }
         require(playerType != PlayerType.NETWORK) { "Die Methode sollte nur für Bot Züge aufgerufen werden" }
+        resetCoordinates()
         when (playerType) {
             PlayerType.EASY_BOT -> {
-                resetCoordinates()
-                while(rootService.currentGame?.gameState != GameState.END_OF_TURN) {
+                isFinished = false
+                randomBotTurn()
+            }
+            PlayerType.HEURISTIC_BOT -> {
+                heuristicBot.isFinished = false
+                while(!heuristicBot.isFinished) {
                     heuristicBot.makeTurn()
                 }
             }
+            PlayerType.GREEDY_BOT -> {
+                greedyBot.isFinished = false
+                while(!greedyBot.isFinished) {
+                    greedyBot.makeTurn()
+                }
+            }
+            PlayerType.MONTE_BOT -> {
+                //Hier euren Zug aufrufen. Wenn ihr den ganzen Zug direkt macht, dann wie bei EASY_BOT, sonst wie bei Rest
+            }
+            PlayerType.NEURAL_BOT -> {
 
+            }
             PlayerType.HARD_BOT -> {
-                resetCoordinates()
-                while(rootService.currentGame?.gameState != GameState.END_OF_TURN) {
-                    hardBot.makeTurn()
+                greedyBot.isFinished = false
+                while(!greedyBot.isFinished) {
+                    greedyBot.makeTurn()
                 }
             }
         }
@@ -46,6 +68,8 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
             requireNotNull(coordinatesTile.second), requireNotNull(coordinatesTile.third))
         onAllRefreshables { refreshAfterBotTurn(coordinatesTileNotNull, coordinatesWildlifeToken) }
     }
+
+    private var isFinished = false
 
     private fun randomBotTurn() {
         val currentGame = rootService.currentGame
@@ -72,7 +96,7 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
                 TurnOptions.MAKE_SELECTION -> randomBotMakeSelection()
                 TurnOptions.PLACE_HABITAT_TILE -> randomBotPlaceHabitatTile(player)
                 TurnOptions.PLACE_WILDLIFE_TOKEN -> randomBotPlaceWildlifeToken(player)
-                TurnOptions.DISCARD_WILDLIFE_TOKEN -> randomBotDiscardWildlifeToken(currentGame)
+                TurnOptions.DISCARD_WILDLIFE_TOKEN -> randomBotDiscardWildlifeToken()
                 TurnOptions.ROTATE -> randomBotRotate()
             }
             newLegalTurns(legalTurns)
@@ -121,6 +145,7 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
 
             }
         }
+        if (isFinished) legalTurns.clear()
     }
 
     private fun randomBotChooseOption(legalTurns: List<TurnOptions>): Int {
@@ -185,7 +210,7 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
             .map { it.key } //freie plätze
         // falls die Liste leer ist, müssen wir das Tier wegwerfen
         if (possiblePositions.isEmpty()) {
-            randomBotDiscardWildlifeToken(currentGame)
+            randomBotDiscardWildlifeToken()
             return
         }
         val position = Random.nextInt(possiblePositions.size)
@@ -193,8 +218,8 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
         rootService.playerActionService.placeWildlife(possiblePositions[position])
     }
 
-    private fun randomBotDiscardWildlifeToken(currentGame: CascadiaGame) {
-        currentGame.gameState = GameState.END_OF_TURN
+    private fun randomBotDiscardWildlifeToken() {
+        isFinished = true
     }
 
     private fun randomBotRotate() {

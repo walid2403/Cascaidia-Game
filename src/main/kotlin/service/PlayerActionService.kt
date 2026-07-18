@@ -75,23 +75,23 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             currentGame.choices[index] = Pair(currentPair.first,newToken)
         }
 
-        if (currentGame.choices.map {it.second}.distinct().size == 1) {
-            rootService.gameService.exterminate(false, natureToken = true)
-        } else {
-            for (wildeLifeToken in alteTierToken) {
-                currentGame.wildlifeTokens.push(wildeLifeToken)
-            }
 
-            currentGame.wildlifeTokens.shuffle()
-
-            currentPlayer.natureTokens--
-
-            if (currentGame.playerQueue.peek().type != PlayerType.NETWORK && !currentGame.isLocal) {
-                rootService.networkService.sendExterminate(indices, true)
-            }
-
-            onAllRefreshables { refreshAfterChangeWildlife(indices) }
+        for (wildeLifeToken in alteTierToken) {
+            currentGame.wildlifeTokens.push(wildeLifeToken)
         }
+
+        currentGame.wildlifeTokens.shuffle()
+
+        currentPlayer.natureTokens--
+
+        if (currentGame.playerQueue.peek().type != PlayerType.NETWORK && !currentGame.isLocal) {
+            rootService.networkService.sendExterminate(indices, true)
+        }
+
+        rootService.gameService.exterminate(false)
+
+        onAllRefreshables { refreshAfterChangeWildlife(indices) }
+
 
     }
 
@@ -198,20 +198,26 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      *
      * @throws IllegalStateException if the [GameState] is not `MADE_CHOICE`.
      */
-    fun rotateTile(right: Boolean?, targetRotation: Int? = null) {
+    fun rotateTile(right: Boolean?, targetRotation: Int? = null, targetTilePos: Triple<Int, Int, Int>? = null) {
         val game = rootService.currentGame ?: error("No current game")
 
-        check(game.gameState == GameState.MADE_CHOICE) {
-            "Tile can only be rotated after a choice was made."
+        if (right != null) {
+            check(game.gameState == GameState.MADE_CHOICE) {
+                "Tile can only be rotated after a choice was made."
+            }
         }
 
-        val tileIndex = game.selectedChoice.first
+        val selectedTile: Tile = if (targetTilePos == null) {
+            val tileIndex = game.selectedChoice.first
 
-        require(tileIndex in game.choices.indices) {
-            "No valid tile was selected."
+            require(tileIndex in game.choices.indices) {
+                "No valid tile was selected."
+            }
+
+            game.choices[tileIndex].first
+        } else {
+            game.playerQueue.peek()?.board[targetTilePos] ?: error("No valid tile position was given")
         }
-
-        val selectedTile = game.choices[tileIndex].first
 
         if (right != null) {
             if (right) {
@@ -245,12 +251,23 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
                 amount = leftTimes * (-1)
             }
 
-            onAllRefreshables { refreshAfterRotate(amount) }
+            if (selectedTile.habs.isNotEmpty()) {
+                for (i in 1..rightTimes) {
+                    val lastHabitat = selectedTile.habs.removeAt(selectedTile.habs.lastIndex)
+                    selectedTile.habs.add(0, lastHabitat)
+                }
+            }
+
+            if (game.playerQueue.peek().type != PlayerType.NETWORK && !game.isLocal) {
+                onAllRefreshables { refreshAfterRotate(amount) }
+            }
         }
 
         game.tileRotation = selectedTile.rotation
 
-        rootService.networkService.sendRotation()
+        if (game.playerQueue.peek().type != PlayerType.NETWORK && !game.isLocal) {
+            rootService.networkService.sendRotation()
+        }
     }
 
     /**
@@ -315,7 +332,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
         game.gameState = GameState.PLAYED_TILE
 
-        onAllRefreshables { refreshAfterPlaceTile(Triple(x, y, z)) }
+        if (currentPlayer.type != PlayerType.NETWORK) onAllRefreshables { refreshAfterPlaceTile(Triple(x, y, z)) }
     }
 
     /**

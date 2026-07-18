@@ -93,7 +93,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
 
         rootService.history.prevMoves.push(CascadiaGame(game))
 
-        onAllRefreshables { refreshAfterStartGame() }
+        if (game.isLocal) onAllRefreshables { refreshAfterStartGame() }
 
     }
 
@@ -395,7 +395,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * or if there are not at least 3 tokens of the same type or
      * if there are 3 and the current gameState is not [GameState.START_OF_TURN]
      */
-    fun exterminate(playerTrigger: Boolean, natureToken : Boolean = false) {
+    fun exterminate(playerTrigger: Boolean, networkOverride: Boolean = false) {
         val game = rootService.currentGame ?: error("No current game")
 //        check(
 //            game.gameState == GameState.START_OF_TURN ||
@@ -404,6 +404,8 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         if (playerTrigger && game.gameState != GameState.START_OF_TURN) {
             throw IllegalStateException("Player can only exterminate at the START_OF_TURN.")
         }
+
+        if (game.playerQueue.peek().type == PlayerType.NETWORK && !networkOverride) return
         //counting the wildlife tokens
         val wildlifeTokens = game.choices.map { it.second }
         var duplicatedToken: WildlifeToken? = null
@@ -451,20 +453,26 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         if (playerTrigger) {
             game.gameState = GameState.HAS_EXTERMINATED
         }
+
         onAllRefreshables { refreshAfterExterminate() }
 
         val remainingTokens = game.choices.map { it.second }
         if (remainingTokens.distinct().size == 1) {
-            exterminate(false)
+            exterminate(false, networkOverride)
             return
         } else {
             for (token in game.removedTokens) {
                 game.wildlifeTokens.push(token)
             }
-            game.wildlifeTokens.shuffle()
             game.removedTokens.clear()
 
-            rootService.networkService.sendExterminate(affectedIndices, natureToken)
+            if (game.playerQueue.peek().type != PlayerType.NETWORK) {
+                game.wildlifeTokens.shuffle()
+
+                if (!game.isLocal) {
+                    rootService.networkService.sendExterminate(affectedIndices, false)
+                }
+            }
 
 //            refreshing only at the final resolved state
 //            onAllRefreshables {
@@ -486,12 +494,13 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @throws IllegalStateException if there is no current game or
      *                               if not every player has 20 habitat tiles
      */
-    fun calculateScores() {
+    fun calculateScores(botCall: Boolean = false) : List<Pair<String,List<Int>>> {
         val scores = mutableListOf<Pair<String, MutableList<Int>>>()
         val currentGame = rootService.currentGame
         checkNotNull(currentGame) { "Es existiert kein Spiel" }
 
         for (player in currentGame.playerQueue) {
+            if (botCall && player != currentGame.playerQueue.peek()) continue
             val playerScore = mutableListOf<Int>()
             val nodes = createGraph(player.board)
             playerScore.addAll(createCorridorScores(nodes))
@@ -516,15 +525,20 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             scores.add(Pair(player.name, playerScore))
         }
 
-        calculateHabitatCorridorMajority(scores, currentGame)
+        if (!botCall) {
+            calculateHabitatCorridorMajority(scores, currentGame)
+        }
 
         scores.forEachIndexed { index, score ->
             score.second.add(currentGame.playerQueue.elementAt(index).natureTokens)
         }
 
-        onAllRefreshables {
-            refreshAfterEndGame(scores)
+        if (!botCall) {
+            onAllRefreshables {
+                refreshAfterEndGame(scores)
+            }
         }
+        return scores
     }
 
     private fun createGraph(board: Map<Triple<Int, Int, Int>, Tile>): List<Node> {
@@ -1165,7 +1179,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         for (node in nodes) {
             if ((node.marked) or (node.tile.occupant != WildlifeToken.FOX)) continue
             node.marked = true
-            val types = node.neighbours.filterNotNull().map { it.tile.occupant }.distinct()
+            val types = node.neighbours.filterNotNull().mapNotNull { it.tile.occupant }.distinct()
             sum += when (types.size) {
                 0 -> 0
                 1 -> 1
@@ -1184,7 +1198,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         for (node in nodes) {
             if ((node.marked) or (node.tile.occupant != WildlifeToken.FOX)) continue
             node.marked = true
-            val types = node.neighbours.filterNotNull().map { it.tile.occupant }.filter { it != WildlifeToken.FOX }
+            val types = node.neighbours.filterNotNull().mapNotNull { it.tile.occupant }.filter { it != WildlifeToken.FOX }
             val doubles = types.filter { type -> types.filter { it == type }.size == 2 }
             sum += when (doubles.size / 2) {
                 0 -> 0
@@ -1218,24 +1232,27 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val checkCondition = game.gameState == GameState.PLAYED_TILE || game.gameState == GameState.END_OF_TURN
         check(checkCondition) { "Current Turn can not be ended" }
 
-        val currentPlayer = game.playerQueue.poll()
-        game.playerQueue.add(currentPlayer)
+        val currentPlayer = game.playerQueue.peek()
 
         if (currentPlayer.type != PlayerType.NETWORK && !game.isLocal) {
             rootService.networkService.sendPlace(game.tileCoordinates, game.tokenCoordinates, game.tileRotation)
         }
 
-        game.tokenCoordinates = null
-        game.tileRotation = 0
+        if (game.gameState == GameState.PLAYED_TILE) {
+            if (currentPlayer.type != PlayerType.NETWORK) {
+                game.wildlifeTokens.push(game.choices[game.selectedChoice.second].second)
+                game.wildlifeTokens.shuffle()
 
-        val nextPlayer = game.playerQueue.peek()
+                if (!game.isLocal) rootService.networkService.sendExterminate(listOf(), false)
+            }
+        }
+
+        val nextPlayer = game.playerQueue.elementAt(1)
 
         if (nextPlayer.board.size == 23) {
             calculateScores()
             return
         }
-
-        game.gameState = GameState.START_OF_TURN
 
         val newTile = game.tileStack.pop()  //hier kann davon ausgegangen werden, dass immer ein Tile da ist
         val newWildlifeToken = game.wildlifeTokens.pop()
@@ -1245,10 +1262,16 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val tokenChoice = game.choices[game.selectedChoice.second]
         game.choices[game.selectedChoice.second] = Pair(tokenChoice.first, newWildlifeToken)
 
-        exterminate(false)
+        game.playerQueue.add(game.playerQueue.poll())
+
+        game.tokenCoordinates = null
+        game.tileRotation = 0
+
+        game.gameState = GameState.START_OF_TURN
 
         game.selectedChoice = Pair(-1, -1)
 
+        exterminate(false)
 
         if (nextPlayer.type == PlayerType.HUMAN && game.isLocal) {
             rootService.history.prevMoves.push(CascadiaGame(game))

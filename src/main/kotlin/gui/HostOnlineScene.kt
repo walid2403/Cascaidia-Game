@@ -36,7 +36,7 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
         posY = 0,
         width = 1920,
         height = 1080,
-        visual = ImageVisual("backgrounds/GameConfigMenuBackground.png")
+        visual = ImageVisual("backgrounds/LoadingScreenBackground.png")
     )
 
     private val menuBackground = Label(
@@ -49,13 +49,41 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
         }
     )
 
-    val exitButton = Button(
+    private val moreButton = Button(
+        width = 85,
+        height = 21,
+        posX = paneX + 641,
+        posY = paneY + 115,
+        visual = Visual.EMPTY
+    ).apply {
+        onMouseEntered = {
+            playerTypeOverview.isVisible = true
+        }
+        onMouseExited = {
+            playerTypeOverview.isVisible = false
+        }
+    }
+
+    private val playerTypeOverview = Label(
+        width = 460,
+        height = 742,
+        posX = 1367,
+        posY = 169,
+        visual = ImageVisual("assets/PlayerTypeOverview.png").apply {
+            style.borderRadius = BorderRadius(51)
+        }
+    ).apply {
+        isVisible = false
+    }
+
+    private val exitButton = Button(
         width = 78, height = 78,
         posX = paneX + 33, posY = paneY + 23,
         visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
-            app.showMenuScene(MainMenuScene(app,rootService))
+            resetScene()
+            app.showMenuScene(app.mainMenuScene)
         }
     }
 
@@ -79,6 +107,7 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
         onMouseClicked = {
             playerType = changePlayerType(true, playerType)
             warning.isVisible = false
+            warning.text = ""
         }
     }
 
@@ -92,6 +121,7 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
         onMouseClicked = {
             playerType = changePlayerType(false, playerType)
             warning.isVisible = false
+            warning.text = ""
         }
     }
 
@@ -103,7 +133,7 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
         visual = ColorVisual(color = Color(0x99acff)).apply { style.borderRadius = BorderRadius(8) }
         isDisabled = false
         onMouseClicked = {
-            var name = nameInput.text
+            val name = nameInput.text
             if(name.isBlank()) {
                 warning.text = "Enter a name before opening the lobby."
                 warning.isVisible = true
@@ -126,6 +156,7 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
         }
         onTextChanged = {
             warning.isVisible = false
+            warning.text = ""
         }
     }
 
@@ -140,6 +171,7 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
         }
         onTextChanged = {
             warning.isVisible = false
+            warning.text = ""
         }
     }
 
@@ -190,6 +222,7 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
         }
     ).apply {
         isVisible = false
+        text = ""
     }
 
     init {
@@ -207,7 +240,17 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
             switchTypeLeftButton,
             switchTypeRightButton,
             warning,
+            playerTypeOverview,
+            moreButton,
         )
+    }
+
+    private fun resetScene() {
+        lobbyInput.text = ""
+        nameInput.text = ""
+        warning.isVisible = false
+        playerType = 0
+        playerTypeIcon.visual = ImageVisual("icons/HumanIcon2.png")
     }
 
     /**
@@ -215,17 +258,28 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
      */
     private fun changePlayerType(leftButton: Boolean, playerType: Int): Int {
         val newType = if (leftButton) {
-            (playerType + 2) % 3
+            (playerType + 7) % 8
         } else {
-            (playerType + 1) % 3
+            (playerType + 1) % 8
         }
 
         val newVisual = when (newType) {
+
             0 -> ImageVisual("icons/HumanIcon2.png")
 
             1 -> ImageVisual("icons/EasyBotIcon2.png")
 
             2 -> ImageVisual("icons/HardBotIcon2.png")
+
+            3 -> ImageVisual("icons/MonteCarloBotIcon2.png")
+
+            4 -> ImageVisual("icons/GreedyBotIcon2.png")
+
+            5 -> ImageVisual("icons/HeuristicBotIcon2.png")
+
+            6 -> ImageVisual("icons/GreedyHeuristicBotIcon2.png")
+
+            7 -> ImageVisual("icons/NeuralNetworkBotIcon2.png")
 
             else -> throw IllegalArgumentException("Only possible visuals, $newType is invalid")
         }
@@ -237,9 +291,17 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
 
     private fun getPlayerType(playerTypeInt: Int): PlayerType {
         return when (playerTypeInt) {
+            //TODO("Greedy Heuristic Bot wieder einkommentieren wenn der implementiert ist")
+
             0 -> PlayerType.HUMAN
             1 -> PlayerType.EASY_BOT
             2 -> PlayerType.HARD_BOT
+            3 -> PlayerType.MONTE_BOT
+            4 -> PlayerType.GREEDY_BOT
+            5 -> PlayerType.HEURISTIC_BOT
+//            6 -> PlayerType.GREEDY_HEURISTIC_BOT
+            7 -> PlayerType.NEURAL_BOT
+
             else -> throw IllegalArgumentException("Only numbers between 0 and 3 are valid")
         }
     }
@@ -250,6 +312,7 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
     }
 
     override fun refreshAfterHostGame(lobbyCode: String, playerName: String, playerType: PlayerType) {
+        resetScene()
         app.showMenuScene(app.hostOnlineLobbyScene)
     }
 }

@@ -23,9 +23,6 @@ import tools.aqua.bgw.visual.Visual
  * This scene shows the Join Lobby of the game. It shows all players in the Lobby with their name and playerType icon
  * as well as the host's current scoreCard selection.
  * @param app The [SopraApplication] of the game
- * @param [rootService] The [RootService] instance to access the other service methods and entity layer
- * @param playerName The [String] that was entered in the [JoinOnlineScene]
- * @param playerType The [Int] corresponding to the [PlayerType] selected in [JoinOnlineScene]
  */
 class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootService: RootService) :
     MenuScene(1920, 1080), Refreshable  {
@@ -60,7 +57,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
         posY = 0,
         width = sceneWidth,
         height = sceneHeight,
-        visual = ImageVisual("backgrounds/GameConfigMenuBackground.png")
+        visual = ImageVisual("backgrounds/LoadingScreenBackground.png")
     )
 
     private val playerViewPane = Pane<StaticComponentView<*>>(
@@ -82,6 +79,33 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
             style.borderRadius = BorderRadius(35)
         }
     )
+
+    private val moreButton = Button(
+        width = 85,
+        height = 21,
+        posX = 641,
+        posY = 115,
+        visual = Visual.EMPTY
+    ).apply {
+        onMouseEntered = {
+            playerTypeOverview.isVisible = true
+        }
+        onMouseExited = {
+            playerTypeOverview.isVisible = false
+        }
+    }
+
+    private val playerTypeOverview = Label(
+        width = 460,
+        height = 742,
+        posX = paneX + paneWidth + 32,
+        posY = 169,
+        visual = ImageVisual("assets/PlayerTypeOverview.png").apply {
+            style.borderRadius = BorderRadius(51)
+        }
+    ).apply {
+        isVisible = false
+    }
 
     private val foldOutTab = Label(
         posX = paneX + paneWidth - tabWidth + 80,
@@ -122,7 +146,9 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
         visual = Visual.EMPTY
     ).apply {
         onMouseClicked = {
-            app.showMenuScene(JoinOnlineScene(app, rootService))
+            rootService.networkService.disconnect()
+            resetScene()
+            app.showMenuScene(app.joinOnlineScene)
         }
     }
 
@@ -485,12 +511,23 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
         isVisible = false
     }
 
+    private val lobbyCodeLabel = Label(
+        posX = 35,
+        posY = paneHeight - 70,
+        width = 500,
+        height = 40,
+        alignment = Alignment.TOP_LEFT,
+        font = Font(24.0, family = "Canva Sans"),
+        text = "Lobby Code: UNKNOWN",
+    )
+
     init {
         addComponents(
             backgroundImage,
             scoreCardSelectionPane,
             foldOutTab,
             playerViewPane,
+            playerTypeOverview
         )
         playerViewPane.addAll(
             backArrow,
@@ -503,6 +540,8 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
             p3Icon,
             p4Icon,
             waitingToStart,
+            lobbyCodeLabel,
+            moreButton
         )
         scoreCardSelectionPane.addAll(
             foxIcon,
@@ -531,7 +570,35 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
             checkBoxSalmonA,
             checkBoxSalmonB
         )
+    }
 
+    private fun resetScene() {
+
+        playerName = ""
+        playerType = PlayerType.HUMAN
+        playerTypeOverview.posX = paneX + paneWidth + 32.0
+
+        listOf(checkBoxSalmonA, checkBoxSalmonB, checkBoxElkA, checkBoxElkB, checkBoxBearA, checkBoxBearB, checkBoxFoxA,
+            checkBoxFoxB, checkBoxHawkA, checkBoxHawkB).forEach { it.isChecked = false }
+
+        //in der join Lobby sind immer mindestens der Host und man selber, player 1 und 2 müssen also nicht unsichtbar
+        //gemacht werden
+        listOf(p1Input, p2Input, p3Input, p4Input).forEach { name ->
+            name.text = ""
+            if(name != p1Input && name != p2Input) {
+                name.isVisible = false
+            }
+        }
+
+        listOf(p1Icon, p2Icon, p3Icon, p4Icon).forEach { icon ->
+            if(icon != p1Icon && icon != p2Icon) {
+                icon.isVisible = false
+            }
+            icon.visual = ImageVisual("icons/NetworkIcon.png")
+        }
+
+        panelsOut = false
+        movePanelsIn()
     }
 
     /**
@@ -553,6 +620,10 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
                 MovementAnimation(
                     foldOutTab,
                     byX = movementDistance,
+                ),
+                MovementAnimation(
+                    playerTypeOverview,
+                    byX = -movementDistance,
                 )
             ).apply {
                 onFinished = {
@@ -583,6 +654,10 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
                 MovementAnimation(
                     foldOutTab,
                     byX = -movementDistance,
+                ),
+                MovementAnimation(
+                    playerTypeOverview,
+                    byX = movementDistance,
                 )
             ).apply {
                 onFinished = {
@@ -614,9 +689,9 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
      */
 
     private fun updatePlayers(players: List<String>) {
-        if(players.size !in 2..4) {
-            throw IllegalArgumentException("Invalid number of players: ${players.size}")
-        }
+//        if(players.size !in 2..4) {
+//            throw IllegalArgumentException("Invalid number of players: ${players.size}")
+//        }
         if (!duplicateFree(players)) {
             throw IllegalArgumentException("Duplicate names are not allowed")
         }
@@ -731,15 +806,34 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
     private fun getVisual(name: String): ImageVisual {
         return if (name == playerName) {
             when(playerType) {
+                //TODO("Greedy Heuristic Bot wieder rein kommentieren wenn der implementiert ist")
+
                 PlayerType.HUMAN -> ImageVisual("icons/HumanIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
+                PlayerType.GREEDY_BOT -> ImageVisual("icons/GreedyBotIcon3.png").apply {
+                    style.borderRadius = BorderRadius(8)
+                }
+                PlayerType.HEURISTIC_BOT -> ImageVisual("icons/HeuristicBotIcon3.png").apply {
+                    style.borderRadius = BorderRadius(8)
+                }
+
                 PlayerType.EASY_BOT -> ImageVisual("icons/EasyBotIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
                 PlayerType.HARD_BOT -> ImageVisual("icons/HardBotIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
+                PlayerType.MONTE_BOT -> ImageVisual("icons/MonteCarloBotIcon3.png").apply {
+                    style.borderRadius = BorderRadius(8)
+                }
+//                PlayerType.GREEDY_HEURISTIC_BOT -> ImageVisual("icons/GreedyHeuristicBotIcon3.png").apply {
+//                    style.borderRadius = BorderRadius(8)
+//                }
+                PlayerType.NEURAL_BOT -> ImageVisual("icons/NeuralNetworkBotIcon3.png").apply {
+                    style.borderRadius = BorderRadius(8)
+                }
+
                 else -> throw IllegalArgumentException("Player type must be PlayerType Object and can't be NETWORK, " +
                         "$playerType not supported")
             }
@@ -774,6 +868,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
     }
 
     override fun refreshAfterStartGame() {
+        resetScene()
         app.hideMenuScene()
     }
 
@@ -794,6 +889,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
     override fun refreshAfterJoinGame(lobbyCode: String, playerName: String, playerType: PlayerType) {
         this.playerName = playerName
         this.playerType = playerType
+        this.lobbyCodeLabel.text = "Lobby Code: $lobbyCode"
     }
 
     private fun addNewPlayer(name: String, nameField: Label, icon: Label) {

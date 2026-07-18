@@ -1,6 +1,7 @@
 package service.network
 
 import edu.udo.cs.sopra.ntf.*
+import entity.GameState
 import entity.Player
 import entity.PlayerType
 import entity.WildlifeToken
@@ -40,10 +41,11 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         }
 
         client?.playerType = playerType
+        client?.isHost = true
 
         updateConnectionState(ConnectionState.CONNECTED)
 
-        if (sessionID.isNullOrBlank()) {
+        if (sessionID.isBlank()) {
             client?.createGame(gameID, "Welcome!")
         } else {
             client?.createGame(gameID, sessionID, "Welcome!")
@@ -85,7 +87,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
                 onAllRefreshables { refreshAfterGameConfigUpdate(playerNames, scoringCards) }
             }
-            "playerJoined" -> {
+            "playerChanged" -> {
                 val playerNames = client?.players?.map {it.first}
                 checkNotNull(playerNames) { "After joining a game the names should not be empty" }
 
@@ -93,6 +95,10 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
                 checkNotNull(scoringCards)
 
                 onAllRefreshables { refreshAfterGameConfigUpdate(playerNames, scoringCards) }
+            }
+            "error" -> {
+                println(client?.errorMessage)
+                onAllRefreshables { refreshAfterConnectionError(client?.errorMessage ?: "") }
             }
         }
     }
@@ -103,6 +109,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
      * even if no connection is currently active.
      */
     fun disconnect() {
+        println("SessionID: ${client?.sessionID}, isOpen: ${client?.isOpen}")
         client?.apply {
             if (sessionID != null) leaveGame("Goodbye!")
             if (isOpen) disconnect()
@@ -194,19 +201,22 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         val tileList = game.tileStack.peekAll().map { it.id }.reversed().toMutableList()
         tileList.addAll(game.choices.map {it.first.id}.reversed())
 
-        val reorderList = listOf(0, 1, 4, 3, 2)
+        game.wildlifeTokens.popAll(11)
+        for (i in 0..10) game.wildlifeTokens.push(WildlifeToken.ELK)
 
         val wildlifeList = game.wildlifeTokens.peekAll().map { NetWildlife.valueOf(it.name) }.reversed().toMutableList()
         wildlifeList.addAll(game.choices.map { NetWildlife.valueOf(it.second.name) }.reversed())
 
         val message = GameInitMessage(
-            tileList, reorderList.map { scoringCards[it] },
+            tileList, scoringCards,
             game.playerQueue.map { NetPlayer(it.name, (it.board[Triple(0,0,0)]?.id ?: 0) / 10) }, wildlifeList
         )
 
         if (game.playerQueue.peek().type == PlayerType.NETWORK) updateConnectionState(ConnectionState.WAITING_FOR_PLAYER_TURN)
         else updateConnectionState(ConnectionState.PLACING)
         client?.sendGameActionMessage(message)
+
+        onAllRefreshables { refreshAfterStartGame() }
     }
 
     /**
@@ -218,7 +228,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
      * @throws IllegalStateException if not currently waiting for an init message
      */
     fun startNewJoinedGame(message: GameInitMessage, playerName: String, playerType: PlayerType) {
-        check(connectionState == ConnectionState.WAITING_FOR_INIT)
+        check(connectionState in listOf(ConnectionState.WAITING_FOR_INIT, ConnectionState.WAITING_FOR_GUESTS))
         { "not waiting for game init message. " }
 
         val reorderList = listOf(0, 1, 4, 3, 2)
@@ -236,6 +246,8 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
         if (game.playerQueue.peek().type == PlayerType.NETWORK) updateConnectionState(ConnectionState.WAITING_FOR_PLAYER_TURN)
         else updateConnectionState(ConnectionState.PLACING)
+
+        onAllRefreshables { refreshAfterStartGame() }
     }
 
     fun sendSelect(unlockedChoices: Boolean) {
@@ -284,20 +296,42 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         val game = rootService.currentGame
         checkNotNull(game) { "No running game found" }
 
+        println("Network-Player '"+game.playerQueue.peek().name+"' makes Turn:")
+        println("Selected Tile (ID): "+game.selectedChoice.first.toString())
+        println("Selected Animal (ID): "+game.selectedChoice.second.toString())
+        
         val habCoords: Triple<Int, Int, Int> = Triple(
             (message.habitatCoordinates.first + message.habitatCoordinates.second) * (-1),
             message.habitatCoordinates.second, message.habitatCoordinates.first)
 
+        println("Place Tile at: "+habCoords.third.toString()+", "+habCoords.second.toString())
         rootService.playerActionService.placeTile(habCoords)
-        game.playerQueue.peek().board[habCoords]?.rotation = message.habitatRotation
+        rootService.playerActionService.rotateTile(null, message.habitatRotation, habCoords)
+//        game.playerQueue.peek().board[habCoords]?.rotation = message.habitatRotation
+//
+//        for (i in 1..message.habitatRotation) {
+//            val hab = game.playerQueue.peek().board[habCoords]?.habs?.removeLast()
+//            checkNotNull(hab)
+//            game.playerQueue.peek().board[habCoords]?.habs?.add(1, hab)
+//        }
+
+        onAllRefreshables { refreshAfterPlaceTile(habCoords) }
 
         if (message.wildlifeCoordinates != null) {
             val tokenCoords: Triple<Int, Int, Int> = Triple(
                 (message.wildlifeCoordinates!!.first + message.wildlifeCoordinates!!.second) * (-1),
                 message.wildlifeCoordinates!!.second, message.wildlifeCoordinates!!.first)
 
+            println("Place Wildlife at: "+tokenCoords.third.toString()+", "+tokenCoords.second.toString())
             rootService.playerActionService.placeWildlife(tokenCoords)
+
+            rootService.gameService.changeTurn()
+        } else {
+            println("Rejected Wildlife")
         }
+
+        println("End Network-Player '"+game.playerQueue.peek().name+"' Turn")
+        println("-----------------------------")
     }
 
     fun sendExterminate(indices: List<Int>, natureToken: Boolean) {
@@ -305,7 +339,6 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         checkNotNull(game) { "No running game found" }
 
         val wildlifeList = game.wildlifeTokens.peekAll().map { NetWildlife.valueOf(it.name) }.reversed().toMutableList()
-        wildlifeList.addAll(game.choices.map { NetWildlife.valueOf(it.second.name) }.reversed())
 
         val message = WipeWildlifeMessage(
             natureToken, game.playerQueue.peek().natureTokens, indices, wildlifeList
@@ -320,22 +353,35 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
         if (message.usedNatureToken) game.playerQueue.peek().natureTokens--
 
-        check(game.playerQueue.peek().natureTokens == message.natureTokenAmount) { "Difference in Nature Tokens detected" }
+//        check(game.playerQueue.peek().natureTokens == message.natureTokenAmount) { "Difference in Nature Tokens detected" }
 
         val wildlifeBag = message.wildlifeBag.toMutableList()
 
-        for (i in game.choices.indices) {
-            game.choices[i] = Pair(game.choices[i].first, WildlifeToken.valueOf(wildlifeBag.removeLast().name))
+        val numChanges = message.wipedWildlifeIndices.size
+        if (numChanges == 4 && !message.usedNatureToken) {
+            rootService.gameService.exterminate(playerTrigger = false, networkOverride = true)
+        } else if (numChanges == 3 && !message.usedNatureToken) {
+            rootService.gameService.exterminate(playerTrigger = true, networkOverride = true)
+        } else {
+            message.wipedWildlifeIndices.sorted().forEach {
+                game.choices[it] = Pair(game.choices[it].first, game.wildlifeTokens.pop())
+            }
         }
+
+
 
         game.wildlifeTokens.clear()
         game.wildlifeTokens.pushAll(wildlifeBag.map {WildlifeToken.valueOf(it.name) })
 
         onAllRefreshables { refreshAfterChangeWildlife(message.wipedWildlifeIndices) }
+
+        if (message.wipedWildlifeIndices.isEmpty() && game.gameState == GameState.PLAYED_TILE) {
+            rootService.gameService.changeTurn()
+        }
     }
 
     fun sendUseNatureToken() {
-        client?.sendGameActionMessage(UseNatureTokenMessage())
+        client?.sendGameActionMessage(UseNatureTokenMessage("Very important message"))
     }
 
     fun receiveUseNatureToken() {
@@ -357,7 +403,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     }
 
     fun receiveSelectWildlife(message: SelectWildlifeMessage) {
-        onAllRefreshables { refreshAfterSelectWildlife(message.wildlifeShopIndex) }
+        onAllRefreshables { refreshAfterSelectWildlife(message.wildlifeIndex) }
     }
 
     fun sendRotation() {
@@ -376,7 +422,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     }
 
     fun receiveSelectHabitatTile(message: SelectHabitatTileMessage) {
-        onAllRefreshables { refreshAfterSelectTile(message.habitatShopIndex) }
+        onAllRefreshables { refreshAfterSelectTile(message.habitatIndex) }
     }
 
     fun sendChatMessage(message: String) {
