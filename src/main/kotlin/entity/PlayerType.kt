@@ -13,5 +13,6 @@ enum class PlayerType {
     HEURISTIC_BOT,
     MONTE_BOT,
     NEURAL_BOT,
+    GREEDY_HEURISTIC_BOT
     ;
 }
