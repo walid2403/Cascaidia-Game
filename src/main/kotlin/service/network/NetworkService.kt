@@ -44,7 +44,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
         updateConnectionState(ConnectionState.CONNECTED)
 
-        if (sessionID.isNullOrBlank()) {
+        if (sessionID.isBlank()) {
             client?.createGame(gameID, "Welcome!")
         } else {
             client?.createGame(gameID, sessionID, "Welcome!")
@@ -346,9 +346,18 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
         val wildlifeBag = message.wildlifeBag.toMutableList()
 
-        message.wipedWildlifeIndices.sorted().forEach {
-            game.choices[it] = Pair(game.choices[it].first, game.wildlifeTokens.pop())
+        val numChanges = message.wipedWildlifeIndices.size
+        if (numChanges == 4 && !message.usedNatureToken) {
+            rootService.gameService.exterminate(playerTrigger = false, networkOverride = true)
+        } else if (numChanges == 3 && !message.usedNatureToken) {
+            rootService.gameService.exterminate(playerTrigger = true, networkOverride = true)
+        } else {
+            message.wipedWildlifeIndices.sorted().forEach {
+                game.choices[it] = Pair(game.choices[it].first, game.wildlifeTokens.pop())
+            }
         }
+
+
 
         game.wildlifeTokens.clear()
         game.wildlifeTokens.pushAll(wildlifeBag.map {WildlifeToken.valueOf(it.name) })
@@ -358,9 +367,6 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         if (message.wipedWildlifeIndices.isEmpty() && game.gameState == GameState.PLAYED_TILE) {
             rootService.gameService.changeTurn()
         }
-
-
-        for (i in 0..3) println(game.choices[i].second.name)
     }
 
     fun sendUseNatureToken() {

@@ -395,7 +395,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * or if there are not at least 3 tokens of the same type or
      * if there are 3 and the current gameState is not [GameState.START_OF_TURN]
      */
-    fun exterminate(playerTrigger: Boolean) {
+    fun exterminate(playerTrigger: Boolean, networkOverride: Boolean = false) {
         val game = rootService.currentGame ?: error("No current game")
 //        check(
 //            game.gameState == GameState.START_OF_TURN ||
@@ -404,6 +404,8 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         if (playerTrigger && game.gameState != GameState.START_OF_TURN) {
             throw IllegalStateException("Player can only exterminate at the START_OF_TURN.")
         }
+
+        if (game.playerQueue.peek().type == PlayerType.NETWORK && !networkOverride) return
         //counting the wildlife tokens
         val wildlifeTokens = game.choices.map { it.second }
         var duplicatedToken: WildlifeToken? = null
@@ -456,7 +458,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
 
         val remainingTokens = game.choices.map { it.second }
         if (remainingTokens.distinct().size == 1) {
-            exterminate(false)
+            exterminate(false, networkOverride)
             return
         } else {
             for (token in game.removedTokens) {
@@ -1260,8 +1262,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val tokenChoice = game.choices[game.selectedChoice.second]
         game.choices[game.selectedChoice.second] = Pair(tokenChoice.first, newWildlifeToken)
 
-        exterminate(false)
-
         game.playerQueue.add(game.playerQueue.poll())
 
         game.tokenCoordinates = null
@@ -1271,7 +1271,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
 
         game.selectedChoice = Pair(-1, -1)
 
-        for (i in 0..3) println(game.choices[i].second.name)
+        exterminate(false)
 
         if (nextPlayer.type == PlayerType.HUMAN && game.isLocal) {
             rootService.history.prevMoves.push(CascadiaGame(game))
