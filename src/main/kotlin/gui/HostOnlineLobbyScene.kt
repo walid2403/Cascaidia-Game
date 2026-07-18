@@ -97,6 +97,33 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
         }
     }
 
+    private val moreButton = Button(
+        width = 85,
+        height = 21,
+        posX = 641,
+        posY = 115,
+        visual = Visual.EMPTY
+    ).apply {
+        onMouseEntered = {
+            playerTypeOverview.isVisible = true
+        }
+        onMouseExited = {
+            playerTypeOverview.isVisible = false
+        }
+    }
+
+    private val playerTypeOverview = Label(
+        width = 460,
+        height = 742,
+        posX = paneX + paneWidth + 32,
+        posY = 169,
+        visual = ImageVisual("assets/PlayerTypeOverview.png").apply {
+            style.borderRadius = BorderRadius(51)
+        }
+    ).apply {
+        isVisible = false
+    }
+
     private val downButtonP1 = Button(
         width = buttonWidth, height = buttonHeight,
         posX = (paneWidth+nameWidth)/2 + downUpButtonDistance ,posY = nameY + (nameHeight - buttonHeight)/2,
@@ -657,7 +684,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
     init {
 
         listOf(p1Input,p2Input,p3Input,p4Input, downButtonP1, downButtonP2, downButtonP3, shuffleButton,
-            exitButton, p1Icon, p2Icon, p3Icon, p4Icon, lobbyCodeLabel).forEach { hostPanel.add(it) }
+            exitButton, p1Icon, p2Icon, p3Icon, p4Icon, lobbyCodeLabel, moreButton).forEach { hostPanel.add(it) }
 
         listOf(bear,elk,hawk,salmon,fox,
             bearCardA,bearCardB,elkCardA,elkCardB,foxCardA,foxCardB,
@@ -675,6 +702,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
             tabLabel,
             hostPanel,
             warning,
+            playerTypeOverview
             )
     }
 
@@ -709,6 +737,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
 
         hostPanel.posX = paneX.toDouble()
         sidePanel.posX = paneX.toDouble()
+        playerTypeOverview.posX = paneX + paneWidth + 32.0
         tabLabel.posX = paneX + paneWidth - tabWidth + 80.0
         tabLabel.apply {
             visual = ImageVisual("assets/FoldOutTab.png").apply {
@@ -752,6 +781,11 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
 //                    toX = sidePanel.actualPosX + (sidePanel.width/2)-90,
                     byX = movementDistance,
                     duration = 1000 // dauer
+                ),
+                MovementAnimation(
+                    playerTypeOverview,
+                    byX = -movementDistance,
+                    duration = 1000
                 )
 
             ).apply {

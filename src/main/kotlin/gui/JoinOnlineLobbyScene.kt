@@ -80,6 +80,33 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
         }
     )
 
+    private val moreButton = Button(
+        width = 85,
+        height = 21,
+        posX = 641,
+        posY = 115,
+        visual = Visual.EMPTY
+    ).apply {
+        onMouseEntered = {
+            playerTypeOverview.isVisible = true
+        }
+        onMouseExited = {
+            playerTypeOverview.isVisible = false
+        }
+    }
+
+    private val playerTypeOverview = Label(
+        width = 460,
+        height = 742,
+        posX = paneX + paneWidth + 32,
+        posY = 169,
+        visual = ImageVisual("assets/PlayerTypeOverview.png").apply {
+            style.borderRadius = BorderRadius(51)
+        }
+    ).apply {
+        isVisible = false
+    }
+
     private val foldOutTab = Label(
         posX = paneX + paneWidth - tabWidth + 80,
         posY = paneY + paneHeight - tabHeight,
@@ -500,6 +527,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
             scoreCardSelectionPane,
             foldOutTab,
             playerViewPane,
+            playerTypeOverview
         )
         playerViewPane.addAll(
             backArrow,
@@ -513,6 +541,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
             p4Icon,
             waitingToStart,
             lobbyCodeLabel,
+            moreButton
         )
         scoreCardSelectionPane.addAll(
             foxIcon,
@@ -547,6 +576,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
 
         playerName = ""
         playerType = PlayerType.HUMAN
+        playerTypeOverview.posX = paneX + paneWidth + 32.0
 
         listOf(checkBoxSalmonA, checkBoxSalmonB, checkBoxElkA, checkBoxElkB, checkBoxBearA, checkBoxBearB, checkBoxFoxA,
             checkBoxFoxB, checkBoxHawkA, checkBoxHawkB).forEach { it.isChecked = false }
@@ -590,6 +620,10 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
                 MovementAnimation(
                     foldOutTab,
                     byX = movementDistance,
+                ),
+                MovementAnimation(
+                    playerTypeOverview,
+                    byX = -movementDistance,
                 )
             ).apply {
                 onFinished = {
@@ -620,6 +654,10 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
                 MovementAnimation(
                     foldOutTab,
                     byX = -movementDistance,
+                ),
+                MovementAnimation(
+                    playerTypeOverview,
+                    byX = movementDistance,
                 )
             ).apply {
                 onFinished = {
