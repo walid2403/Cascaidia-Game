@@ -1179,7 +1179,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         for (node in nodes) {
             if ((node.marked) or (node.tile.occupant != WildlifeToken.FOX)) continue
             node.marked = true
-            val types = node.neighbours.filterNotNull().map { it.tile.occupant }.distinct()
+            val types = node.neighbours.filterNotNull().mapNotNull { it.tile.occupant }.distinct()
             sum += when (types.size) {
                 0 -> 0
                 1 -> 1
@@ -1198,7 +1198,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         for (node in nodes) {
             if ((node.marked) or (node.tile.occupant != WildlifeToken.FOX)) continue
             node.marked = true
-            val types = node.neighbours.filterNotNull().map { it.tile.occupant }.filter { it != WildlifeToken.FOX }
+            val types = node.neighbours.filterNotNull().mapNotNull { it.tile.occupant }.filter { it != WildlifeToken.FOX }
             val doubles = types.filter { type -> types.filter { it == type }.size == 2 }
             sum += when (doubles.size / 2) {
                 0 -> 0
