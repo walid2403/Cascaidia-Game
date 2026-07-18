@@ -149,8 +149,8 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                 val board = startingTiles[startingTilesList[i] / 10 - 1]
 
                 player.board[Triple(0, 0, 0)] = board[0]
-                player.board[Triple(0, 1, -1)] = board[1]
-                player.board[Triple(-1, 1, 0)] = board[2]
+                player.board[Triple(-1, 1, 0)] = board[1]
+                player.board[Triple(0, 1, -1)] = board[2]
             }
         } else {
             startingTiles.shuffle()
@@ -162,8 +162,8 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                  *              tile2  tile3
                  */
                 player.board[Triple(0, 0, 0)] = board[0]
-                player.board[Triple(0, 1, -1)] = board[1]
-                player.board[Triple(-1, 1, 0)] = board[2]
+                player.board[Triple(-1, 1, 0)] = board[1]
+                player.board[Triple(0, 1, -1)] = board[2]
             }
         }
     }
