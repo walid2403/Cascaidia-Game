@@ -62,7 +62,6 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
                 greedyHeuristicBot.makeTurn()
             }
             PlayerType.HARD_BOT -> {
-                //monteCarloBot.turn()
                 greedyHeuristicBot.makeTurn()
             }
         }
