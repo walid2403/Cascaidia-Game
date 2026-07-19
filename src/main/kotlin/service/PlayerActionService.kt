@@ -293,7 +293,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             "Tile can only be placed after a choice was made."
         }
 
-        val currentPlayer = game.playerQueue.peek()
+        val currentPlayer = checkNotNull(game.playerQueue.peek()) { "No current player" }
 
         val tileIndex = game.selectedChoice.first
 
@@ -361,7 +361,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             "Wildlife can only be placed in PLAYED_TILE state"
         }
         val tile = currentPlayer.board[index]
-        checkNotNull(tile) {"There is no tile at the selected position."}
+        requireNotNull(tile) {"There is no tile at the selected position."}
 
         require(tile.occupant == null) {
             "This tile already contains a wildlife token"
@@ -423,8 +423,8 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         val game = rootService.currentGame
         checkNotNull(game) { "No current game" }
 
-        require(name.isEmpty()) { "Der Name darf nicht leer sein." }
-        check(game.isLocal) { "Netzwerkspiele können nicht gespeichert werden." }
+        require(name.isNotEmpty()) { "Der Name darf nicht leer sein." }
+        require(game.isLocal) { "Netzwerkspiele können nicht gespeichert werden." }
 
         val folder = File(RootService.SAVE_DIRECTORY)
         if (!folder.exists()) folder.mkdirs()

@@ -159,4 +159,43 @@ class SelectColumnTest {
         assertEquals(-1, game.selectedChoice.second,
             "Das gewählte Token darf nicht im Game abgespeichert werden")
     }
+
+    /**
+     * Testet, dass [PlayerActionService.selectColumn] fehlschlägt, wenn kein Spiel läuft.
+     */
+    @Test
+    fun `invalider Spielzug ohne laufendes Spiel`() {
+        rootService.currentGame = null
+
+        assertFailsWith<IllegalStateException> {
+            rootService.playerActionService.selectColumn(0)
+        }
+        assertFalse(refreshWasCalled)
+    }
+
+    /**
+     * Testet, dass [PlayerActionService.selectColumn] auch in einem Netzwerkspiel mit einem
+     * menschlichen Spieler funktioniert. Dies führt den Netzwerk-Sende-Zweig aus, der ohne
+     * verbundenen Client eine sichere No-Op ist.
+     */
+    @Test
+    fun `valider Spielzug im Netzwerkspiel`() {
+        val game = CascadiaGame(List(5) { true }, false)
+        val habitats = MutableList(6) { Habitates.MOUNTAINS }
+        for (i in 0 until 4) {
+            game.choices.add(Pair(Tile(10 + i, habitats, emptyList()), WildlifeToken.BEAR))
+        }
+        game.selectedChoice = Pair(-1, -1)
+        game.gameState = GameState.START_OF_TURN
+        game.playerQueue.add(Player("player0", PlayerType.HUMAN))
+        rootService.currentGame = game
+
+        rootService.playerActionService.selectColumn(2)
+
+        assertTrue(refreshWasCalled, "Der Refresh sollte getriggert haben")
+        assertEquals(2, savedIndex, "An den Refresh wurde der falsche Index gesendet")
+        assertEquals(Pair(2, 2), game.selectedChoice)
+        assertEquals(GameState.MADE_CHOICE, game.gameState)
+    }
+
 }
