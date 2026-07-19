@@ -18,9 +18,6 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
 
     var isFinished = false
 
-    /**
-     * A function to determine the next move of the bot
-     */
     //die 6 Richtungen eines Hexagons im Uhrzeigersinn
     private val directions = listOf(
         Triple(1,-1,0), //Richtung 0: Oben-Rechts
@@ -232,7 +229,7 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
                     bestRotation = rot
                 }
                 //currentGame.gameState = GameState.END_OF_TURN
-                isFinished = true
+                //isFinished = true
             }
 
         }
@@ -311,7 +308,7 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
         if(bestPosition != null){
             bot.coordinatesWildlifeToken = bestPosition
             rootService.playerActionService.placeWildlife(bestPosition)
-            currentGame.gameState = GameState.END_OF_TURN
+            isFinished = true
         } else {
             //currentGame.gameState = GameState.END_OF_TURN
             isFinished = true
@@ -563,6 +560,7 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
         }
         return pairs * 20
     }
+
     /**
      * Bewertet alle ausliegenden Markt-Paare (Plättchen + Tier) und wählt die beste aus.
      * Besitzt der Bot einen Natur-Zapfen und ist der normale Markt schlecht bewertet,

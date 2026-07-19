@@ -181,6 +181,8 @@ class PauseMenuScene (private val app: SopraApplication, private val rootService
         }
     ).apply {
         onMouseClicked ={
+            textPane.isVisible = false
+            listOf(exitButton, mainMenuButton, this).forEach { it.isDisabled = false}
             app.hideMenuScene()
         }
     }
