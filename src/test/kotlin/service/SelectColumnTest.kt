@@ -76,7 +76,8 @@ class SelectColumnTest {
         assertTrue(refreshWasCalled, "Der refresh wurde ausgeführt")
         assertEquals(0, savedIndex, "An den Refresh wurde der falsche Index gesendet")
 
-        assertEquals(selection, game.choices, "Die angebotene Selection darf sich zu diesem Zeitpunkt nicht verändert haben")
+        assertEquals(selection, game.choices, "Die angebotene Selection darf sich zu " +
+                "diesem Zeitpunkt nicht verändert haben")
 
         assertEquals(GameState.MADE_CHOICE, game.gameState,
             "Der GameState muss angepasst worden sein")
@@ -102,7 +103,8 @@ class SelectColumnTest {
         assertTrue(refreshWasCalled, "Der refresh wurde ausgeführt")
         assertEquals(3, savedIndex, "An den Refresh wurde der falsche Index gesendet")
 
-        assertEquals(selection, game.choices, "Die angebotene Selection darf sich zu diesem Zeitpunkt nicht verändert haben")
+        assertEquals(selection, game.choices, "Die angebotene Selection darf sich zu " +
+                "diesem Zeitpunkt nicht verändert haben")
 
         assertEquals(GameState.MADE_CHOICE, game.gameState,
             "Der GameState muss angepasst worden sein")

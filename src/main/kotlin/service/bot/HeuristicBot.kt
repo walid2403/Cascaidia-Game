@@ -6,10 +6,21 @@ import entity.Tile
 import entity.WildlifeToken
 import service.RootService
 
+/**
+ * This Bot works with predetermined weights to decide which move is best at the current time
+ * @param rootService Link to the [RootService] class
+ * @param bot Link to the [Bot] class
+ * @property rootService Link to the [RootService] class
+ * @property bot Link to the [Bot] class
+ */
+
 class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
 
     var isFinished = false
 
+    /**
+     * A function to determine the next move of the bot
+     */
     fun makeTurn() {
         val currentGame = rootService.currentGame
         checkNotNull(currentGame) { "Es existiert kein Spiel" }
@@ -101,6 +112,7 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
         }
     }
 
+    @Suppress("NestedBlockDepth")
     private fun evaluateHabitatPosition(position: Triple<Int, Int, Int>, newTile: Tile, player: Player): Int {
         var score = 0
 
@@ -171,6 +183,7 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
         }
     }
 
+    @Suppress("CyclomaticComplexMethod", "LongMethod", "NestedBlockDepth")
     private fun evaluateWildlifePosition(position: Triple<Int, Int, Int>, wildlife: WildlifeToken, player: Player): Int{
         var score = 0
 
@@ -336,6 +349,7 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
         return score
     }
 
+    @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
     private fun heuristicBotChooseMarketPair(player: Player){
         val currentGame = rootService.currentGame
         checkNotNull(currentGame)

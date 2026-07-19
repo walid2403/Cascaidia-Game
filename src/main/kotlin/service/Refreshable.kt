@@ -145,6 +145,9 @@ interface Refreshable {
      */
     fun refreshAfterSelectTile(tileIndex: Int) {}
 
+    /**
+     * Perform refreshes necessary after a bot has taken its turn
+     */
     fun refreshAfterBotTurn(coordinatesTile: Triple<Int, Int, Int>,
                             coordinatesWildlife: Triple<Int?, Int?, Int?>) {}
 }

@@ -15,11 +15,14 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
     var coordinatesTile: Triple<Int?, Int?, Int?> = Triple(null, null, null)
     var coordinatesWildlifeToken: Triple<Int?, Int?, Int?> = Triple(null, null, null)
 
+    private var isFinished = false
+
     /**
      * Hier eine Kopie von eurem Bot erstellen
      */
     private val greedyBot = BotLocaleOptimum(rootService, this)
     private val heuristicBot = HeuristicBot(rootService, this)
+
 
     private fun resetCoordinates() {
         coordinatesTile = Triple(null, null, null)
@@ -54,7 +57,8 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
                 // Hier den Zug aufrufen
             }
             PlayerType.MONTE_BOT -> {
-                //Hier euren Zug aufrufen. Wenn ihr den ganzen Zug direkt macht, dann wie bei EASY_BOT, sonst wie bei Rest
+                // Hier euren Zug aufrufen. Wenn ihr den ganzen Zug direkt macht, dann wie bei EASY_BOT,
+                // sonst wie bei Rest
             }
             PlayerType.NEURAL_BOT -> {
 
@@ -71,9 +75,6 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
             requireNotNull(coordinatesTile.second), requireNotNull(coordinatesTile.third))
         onAllRefreshables { refreshAfterBotTurn(coordinatesTileNotNull, coordinatesWildlifeToken) }
     }
-
-    private var isFinished = false
-
     private fun randomBotTurn() {
         val currentGame = rootService.currentGame
         checkNotNull(currentGame) { "Es existiert kein Spiel" }
