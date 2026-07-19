@@ -247,14 +247,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val habitatList: MutableList<Habitates> = mutableListOf()
 
         for (i in 0..5) {
-            val habitat = when (habitats[i]) {
-                'M' -> Habitates.MOUNTAINS
-                'W' -> Habitates.WETLANDS
-                'F' -> Habitates.FORESTS
-                'R' -> Habitates.RIVERS
-                'P' -> Habitates.PRAIRIES
-                else -> throw IllegalArgumentException("Unexpected habitat")
-            }
+            val habitat = habitatOptions(habitats[i])
             habitatList.add(habitat)
         }
 
@@ -262,19 +255,34 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val possibles: MutableList<WildlifeToken> = mutableListOf()
 
         for (animal in wildlife) {
-            val possible = when (animal) {
-                'E' -> WildlifeToken.ELK
-                'F' -> WildlifeToken.FOX
-                'S' -> WildlifeToken.SALMON
-                'B' -> WildlifeToken.BEAR
-                'H' -> WildlifeToken.HAWK
-                else -> throw IllegalArgumentException("Unexpected wildlife")
-            }
+            val possible = wildlifeOptions(animal)
             possibles.add(possible)
         }
 
         //Tile erstellen und zurückgeben
         return Tile(id, habitatList, possibles)
+    }
+
+    private fun habitatOptions(c: Char): Habitates {
+        return when (c) {
+            'M' -> Habitates.MOUNTAINS
+            'W' -> Habitates.WETLANDS
+            'F' -> Habitates.FORESTS
+            'R' -> Habitates.RIVERS
+            'P' -> Habitates.PRAIRIES
+            else -> throw IllegalArgumentException("Unexpected habitat")
+        }
+    }
+
+    private fun wildlifeOptions(animal: Char): WildlifeToken {
+        return when (animal) {
+            'E' -> WildlifeToken.ELK
+            'F' -> WildlifeToken.FOX
+            'S' -> WildlifeToken.SALMON
+            'B' -> WildlifeToken.BEAR
+            'H' -> WildlifeToken.HAWK
+            else -> throw IllegalArgumentException("Unexpected wildlife")
+        }
     }
 
 
@@ -382,10 +390,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      */
     fun exterminate(playerTrigger: Boolean, networkOverride: Boolean = false) {
         val game = rootService.currentGame ?: error("No current game")
-//        check(
-//            game.gameState == GameState.START_OF_TURN ||
-//                    game.gameState == GameState.HAS_EXTERMINATED
-//        ) { "Extermination is not allowed in the current game state" }
         if (playerTrigger && game.gameState != GameState.START_OF_TURN) {
             throw IllegalStateException("Player can only exterminate at the START_OF_TURN.")
         }
@@ -402,27 +406,9 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                 duplicatedToken = token
             }
         }
-        if (playerTrigger) {
-            check(highestCount == 3) {
-                "Player extermination requires exactly three identical wildlife tokens"
-            }
-        }
-        if (highestCount < 4) {
-            if (!playerTrigger) {
-                return
-            }
-        }
-//        check(highestCount >= 3) {
-//            "There are not at least three identical wildlife tokens"
-//        }
-//        if (playerTrigger) {
-//            if (highestCount != 3) {
-//                throw IllegalStateException("Player extermination requires exactly three identical wildlife tokens")
-//            }
-//        } else {
-//            if (highestCount < 4) throw IllegalStateException("Automatic extermination requires four identical " +
-//                    "wildlife tokens")
-//        }
+
+        if (highestCount < 4 && !playerTrigger) return
+
         val affectedIndices = mutableListOf<Int>()
         for (i in game.choices.indices) {
             if (game.choices[i].second == duplicatedToken) {
@@ -567,43 +553,42 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      */
     private fun createCorridorScores(nodes: List<Node>): List<Int> {
         val scores = mutableListOf<Int>()
-        for (habitat in Habitates.entries) {
+        Habitates.entries.forEach { habitat ->
             var maxSize = 0
-
-            for (node in nodes) {
-                if (node.marked || !node.tile.habs.contains(habitat)) continue
-                val open = ArrayDeque<Node>()
-                open.add(node)
-                node.marked = true
-                var size = 0
-                while (open.isNotEmpty()) {
-                    val cur = open.removeFirst()
-                    size++
-                    for (index in cur.tile.habs.indices) {
-                        if (cur.tile.habs[index] != habitat) continue
-                        val neighbour = cur.neighbours[index] ?: continue
-                        if (neighbour.tile.habs[(index + 3) % 6] == habitat) {
-                            if (!neighbour.marked) {
-                                open.add(neighbour)
-                                neighbour.marked = true
-                            }
-                        }
-                    }
-                }
-                maxSize = max(size, maxSize)
-            }
+            nodes.forEach {node -> maxSize = helpCreateCorridorScores(node, habitat, maxSize) }
             scores.add(maxSize)
             nodes.forEach { node -> node.marked = false }
         }
         return scores
     }
+
+    private fun helpCreateCorridorScores(node: Node, habitat: Habitates, maxSize: Int): Int {
+        if (node.marked || !node.tile.habs.contains(habitat)) return maxSize
+        val open = ArrayDeque<Node>()
+        open.add(node)
+        node.marked = true
+        var size = 0
+        while (open.isNotEmpty()) {
+            val cur = open.removeFirst()
+            size++
+            cur.tile.habs.indices.forEach { index ->
+                if (cur.tile.habs[index] != habitat) return@forEach
+                val neighbour = cur.neighbours[index] ?: return@forEach
+                if (neighbour.tile.habs[(index + 3) % 6] != habitat || neighbour.marked) return@forEach
+                open.add(neighbour)
+                neighbour.marked = true
+            }
+        }
+        return max(size, maxSize)
+    }
+
     private fun calculateHabitatCorridorMajority(
         scores: MutableList<Pair<String, MutableList<Int>>>,
         currentGame: CascadiaGame
     ) {
         if (currentGame.playerQueue.size < 2) return
         if (currentGame.playerQueue.size == 2) {
-            for (habitat in 0..4) {
+            listOf(0, 1, 2, 3, 4).forEach { habitat ->
                 if (scores[0].second[habitat] == scores[1].second[habitat]) {
                     scores[0].second.add(1)
                     scores[1].second.add(1)
@@ -617,55 +602,61 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             }
             return
         }
-        for (habitat in 0..4) {
+        listOf(0, 1, 2, 3, 4).forEach { habitat ->
             val localeScores = mutableListOf<Int>()
             for (playerScore in scores) {
                 localeScores.add(playerScore.second[habitat])
             }
             val largest = localeScores.max()
             val largestCount = localeScores.count { it == largest }
-            when (largestCount) {
-                1 -> {
-                    for (index in scores.indices) {
-                        val secondLargest = localeScores.toList().filter { it != largest }.max()
-                        val secondLargestCount = localeScores.count { it == secondLargest }
-                        if (localeScores[index] == largest) scores[index].second.add(3)
-                        else if (secondLargestCount == 1 && localeScores[index] == secondLargest)
-                            scores[index].second.add(1)
-                        else scores[index].second.add(0)
-                    }
-                }
+            helpCalculateHabitatCorridorMajority(largestCount, largest, scores, localeScores)
+        }
+    }
 
-                2 -> {
-                    for (index in scores.indices) {
-                        if (localeScores[index] == largest) scores[index].second.add(2)
-                        else scores[index].second.add(0)
-                    }
+    private fun helpCalculateHabitatCorridorMajority(largestCount: Int, largest: Int,
+                                                     scores: MutableList<Pair<String, MutableList<Int>>>,
+                                                     localeScores: MutableList<Int>) {
+        when (largestCount) {
+            1 -> {
+                scores.indices.forEach { index ->
+                    val secondLargest = localeScores.toList().filter { it != largest }.max()
+                    val secondLargestCount = localeScores.count { it == secondLargest }
+                    if (localeScores[index] == largest) scores[index].second.add(3)
+                    else if (secondLargestCount == 1 && localeScores[index] == secondLargest)
+                        scores[index].second.add(1)
+                    else scores[index].second.add(0)
                 }
+            }
 
-                else -> {
-                    for (index in scores.indices) {
-                        if (localeScores[index] == largest) scores[index].second.add(1)
-                        else scores[index].second.add(0)
-                    }
+            2 -> {
+                scores.indices.forEach { index ->
+                    if (localeScores[index] == largest) scores[index].second.add(2)
+                    else scores[index].second.add(0)
+                }
+            }
+
+            else -> {
+                scores.indices.forEach { index ->
+                    if (localeScores[index] == largest) scores[index].second.add(1)
+                    else scores[index].second.add(0)
                 }
             }
         }
     }
+
     private fun bearScoringA(nodes: List<Node>): Int {
         var count = 0
-        for (node in nodes) {
-            if (node.marked) continue
+        nodes.forEach { node ->
+            if (node.marked) return@forEach
             node.marked = true
             if (node.tile.occupant == WildlifeToken.BEAR) {
                 node.neighbours.filterNotNull().forEach { it.marked = true }
                 val neighbours = node.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.BEAR }
-                if (neighbours.size != 1) continue
+                if (neighbours.size != 1) return@forEach
                 neighbours.single().neighbours.filterNotNull().forEach { it.marked = true }
                 if (neighbours.single().neighbours.filterNotNull().filter
                     { it.tile.occupant == WildlifeToken.BEAR }.size != 1
-                )
-                    continue
+                ) return@forEach
                 count++
             }
         }
@@ -680,39 +671,42 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
     }
     private fun bearScoringB(nodes: List<Node>): Int {
         var count = 0
-        for (node in nodes) {
-            if (node.marked) continue
+        nodes.forEach { node ->
+            if (node.marked || node.tile.occupant != WildlifeToken.BEAR) return@forEach
             node.marked = true
-            if (node.tile.occupant == WildlifeToken.BEAR) {
-                node.neighbours.filterNotNull().forEach { it.marked = true }
-                val neighbours = node.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.BEAR }
-                if (neighbours.isEmpty() or (neighbours.size > 2)) continue
-                if (neighbours.size == 1) {
-                    neighbours.single().neighbours.filterNotNull().forEach { it.marked = true }
-                    if (neighbours.single().neighbours.filterNotNull().filter
-                        { it.tile.occupant == WildlifeToken.BEAR }.size != 2
-                    ) continue
-                } else {
-                    val firstNeighbour = neighbours.first()
-                    val secondNeighbour = neighbours.last()
-                    val firstNeighbourNeighbours = firstNeighbour.neighbours.filterNotNull()
-                    val secondNeighbourNeighbours = secondNeighbour.neighbours.filterNotNull()
-                    firstNeighbourNeighbours.forEach { it.marked = true }
-                    secondNeighbourNeighbours.forEach { it.marked = true }
-                    if ((firstNeighbourNeighbours.filter { it.tile.occupant == WildlifeToken.BEAR }.size != 1) or
-                        (firstNeighbourNeighbours.filter { it.tile.occupant == WildlifeToken.BEAR }.size == 2 &&
-                                !firstNeighbourNeighbours.contains(secondNeighbour))
-                    ) continue
-                    if ((secondNeighbourNeighbours.filter { it.tile.occupant == WildlifeToken.BEAR }.size != 1) or
-                        (secondNeighbourNeighbours.filter { it.tile.occupant == WildlifeToken.BEAR }.size == 2 &&
-                                !secondNeighbourNeighbours.contains(firstNeighbour))
-                    ) continue
-                }
-                count++
+            node.neighbours.filterNotNull().forEach { it.marked = true }
+            val neighbours = node.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.BEAR }
+            if (neighbours.isEmpty() or (neighbours.size > 2)) return@forEach
+            if (neighbours.size == 1) {
+                neighbours.single().neighbours.filterNotNull().forEach { it.marked = true }
+                if (neighbours.single().neighbours.filterNotNull().filter
+                    { it.tile.occupant == WildlifeToken.BEAR }.size != 2
+                ) return@forEach
+            } else {
+                if (helpBearScoringB(neighbours)) return@forEach
             }
+            count++
         }
         nodes.forEach { node -> node.marked = false }
         return 10 * count
+    }
+
+    private fun helpBearScoringB(neighbours: List<Node>): Boolean {
+        val firstNeighbour = neighbours.first()
+        val secondNeighbour = neighbours.last()
+        val firstNeighbourNeighbours = firstNeighbour.neighbours.filterNotNull()
+        val secondNeighbourNeighbours = secondNeighbour.neighbours.filterNotNull()
+        firstNeighbourNeighbours.forEach { it.marked = true }
+        secondNeighbourNeighbours.forEach { it.marked = true }
+        if ((firstNeighbourNeighbours.filter { it.tile.occupant == WildlifeToken.BEAR }.size != 1) or
+            (firstNeighbourNeighbours.filter { it.tile.occupant == WildlifeToken.BEAR }.size == 2 &&
+                    !firstNeighbourNeighbours.contains(secondNeighbour))
+        ) return true
+        if ((secondNeighbourNeighbours.filter { it.tile.occupant == WildlifeToken.BEAR }.size != 1) or
+            (secondNeighbourNeighbours.filter { it.tile.occupant == WildlifeToken.BEAR }.size == 2 &&
+                    !secondNeighbourNeighbours.contains(firstNeighbour))
+        ) return true
+        return false
     }
 
     private fun sortElks(nodes: List<Node>): List<List<Node>> {
@@ -738,6 +732,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         }
         return elkList
     }
+
     private fun elkScore(elkGroupList: List<List<Node>>, scoringCardA: Boolean): Int {
         val elkScores = mutableListOf<Int>()
 
@@ -745,49 +740,52 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             if (elkGroup.size < 3) {
                 elkScores.add(scoreElk(elkGroup.size))
                 continue
+            }
+            if (scoringCardA) {
+                elkScorePartA(elkGroup, elkScores)
             } else {
-                if (scoringCardA) {
-                    val neighborElks = mutableListOf<Int>()
-                    var straight = true
-                    elkGroup.elementAt(0).neighbours.forEachIndexed { index, node ->
-                        if (node == null) return@forEachIndexed
-                        if (node.tile.occupant == WildlifeToken.ELK) neighborElks.add(index)
-                    }
-                    if (neighborElks.size == 1) {
-                        if (neighborElks.elementAt(0) < 3) neighborElks.elementAt(0) + 3
-                        neighborElks.add(neighborElks.elementAt(0) - 3)
-                    } else if (neighborElks.size == 2) {
-                        neighborElks.sort()
-                        if (neighborElks.elementAt(1) - 3 != neighborElks.elementAt(0)) straight = false
-                    }
-
-                    if (straight) {
-                        for (node in elkGroup) {
-                            val neighborElks2 = mutableListOf<Int>()
-                            node.neighbours.forEachIndexed { index, node ->
-                                if (node == null) return@forEachIndexed
-                                if (node.tile.occupant == WildlifeToken.ELK) neighborElks2.add(index)
-                            }
-
-                            straight = neighborElks2.all { it in neighborElks }
-                        }
-                    }
-
-                    if (straight) {
-                        val longStraigths = elkGroup.size / 4
-                        val shortStraightLength = elkGroup.size % 4
-                        elkScores.add(scoreElk(4) * longStraigths + scoreElk(shortStraightLength))
-                    } else {
-                        elkScores.add(scoreElkGroup(elkGroup, scoringCardA, 0))
-                    }
-                } else {
-                    elkScores.add(scoreElkGroup(elkGroup, scoringCardA, 0))
-                }
+                elkScores.add(scoreElkGroup(elkGroup, false, 0))
             }
         }
 
         return elkScores.sum()
     }
+    private fun elkScorePartA(elkGroup: List<Node>, elkScores: MutableList<Int>) {
+        val neighborElks = mutableListOf<Int>()
+        var straight = true
+        elkGroup.elementAt(0).neighbours.forEachIndexed { index, node ->
+            if (node == null) return@forEachIndexed
+            if (node.tile.occupant == WildlifeToken.ELK) neighborElks.add(index)
+        }
+        if (neighborElks.size == 1) {
+            if (neighborElks.elementAt(0) < 3) neighborElks.elementAt(0) + 3
+            neighborElks.add(neighborElks.elementAt(0) - 3)
+        } else if (neighborElks.size == 2) {
+            neighborElks.sort()
+            if (neighborElks.elementAt(1) - 3 != neighborElks.elementAt(0)) straight = false
+        }
+
+        if (straight) {
+            for (node in elkGroup) {
+                val neighborElks2 = mutableListOf<Int>()
+                node.neighbours.forEachIndexed { index, node ->
+                    if (node == null) return@forEachIndexed
+                    if (node.tile.occupant == WildlifeToken.ELK) neighborElks2.add(index)
+                }
+
+                straight = neighborElks2.all { it in neighborElks }
+            }
+        }
+
+        if (straight) {
+            val longStraigths = elkGroup.size / 4
+            val shortStraightLength = elkGroup.size % 4
+            elkScores.add(scoreElk(4) * longStraigths + scoreElk(shortStraightLength))
+        } else {
+            elkScores.add(scoreElkGroup(elkGroup, true, 0))
+        }
+    }
+
     private fun scoreElkGroup(elkGroup: List<Node>, scoringCardA: Boolean, depth: Int = 0): Int {
         elkGroup.forEach { elk ->
             if (elk.marked) {
@@ -801,9 +799,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val scores = mutableListOf<Int>()
         val combinations = mutableListOf<MutableList<Int>>()
         for (node in elkGroup) {
-            if (node.marked2 != 0) {
-                if (node.marked2 <= depth) continue
-            }
+            if (node.marked2 != 0 && node.marked2 <= depth) continue
             val neighborElks = mutableListOf<Int>()
             node.neighbours.forEachIndexed { index, node ->
                 if (node == null) return@forEachIndexed
@@ -816,44 +812,18 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                 neighborElksA.replaceAll {
                     if (it < 3) it + 3 else it
                 }
+                scoreElkGroupScoringAOuter(neighborElksA, node, elkGroup, combinations, depth, maxScore, scores)
+                return scores.maxOrNull() ?: 0
             } else {
-                val neighborElksT2 = neighborElks.toMutableList()
-                neighborElksT2.sort()
-
-                val neighborElksT = neighborElksT2.filter { node.neighbours[it]?.marked2 == 0 }.toMutableList()
-
-                while (neighborElksT.isNotEmpty()) {
-                    val tempList = mutableListOf<Int>()
-
-                    var currIdx = neighborElksT[0]
-                    val currIdx2 = neighborElksT[0]
-                    while (getNeighbors(currIdx).first in neighborElksT) {
-                        currIdx = getNeighbors(currIdx).first
-                        if (currIdx == currIdx2) break
-                    }
-                    tempList.add(currIdx)
-                    neighborElksT.remove(currIdx)
-                    while (getNeighbors(currIdx).second in neighborElksT) {
-                        currIdx = getNeighbors(currIdx).second
-                        tempList.add(currIdx)
-                        neighborElksT.remove(currIdx)
-                    }
-
-                    if (tempList.size < 3) {
-                        neighborElksB.add(tempList)
-                    } else {
-                        for (i in 0..(tempList.size - 3)) {
-                            neighborElksB.add(tempList.subList(i, i + 3))
-                        }
-                    }
-                }
+                scoreElkGroupScoringB(neighborElks, node, neighborElksB,
+                    elkGroup, depth, maxScore, scores, combinations)
 
                 if (neighborElksB.isEmpty()) {
                     node.marked = true
 
                     val score =
                         if (elkGroup.any { elk -> (elk.marked2 == 0) && !elk.marked }) {
-                            scoreElk(1) + scoreElkGroup(elkGroup, scoringCardA, depth + 1)
+                            scoreElk(1) + scoreElkGroup(elkGroup, false, depth + 1)
                         } else scoreElk(1)
 
                     if (score == maxScore) return score
@@ -865,79 +835,122 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                     }
                 }
             }
+        }
+        return scores.maxOrNull() ?: 0
+    }
 
-            //Sonst kannst du auch 2 Variablen einfach nehmen jeweils mit dem Typ
-            //Oder eine normale for Schleife, damit man den duplicate code nicht hat
-            if (scoringCardA) {
-                neighborElksA.forEach {
-                    markStraightLine(node, it)
-                    markStraightLine(node, it - 3)
+    private fun scoreElkGroupScoringA(elkGroup: List<Node>, combinations: MutableList<MutableList<Int>>,
+                                      depth: Int, maxScore: Int, scores: MutableList<Int>): Boolean {
+        val combination = elkGroup.filter { elk -> elk.marked }.map { elk -> elk.tile.id }.toMutableList()
+        combination.sort()
 
-                    val combination = elkGroup.filter { elk -> elk.marked }.map { elk -> elk.tile.id }.toMutableList()
-                    combination.sort()
-
-                    if (combination in combinations) {
-                        elkGroup.forEach { elk -> elk.marked = false }
-                        elkGroup.forEach { elk ->
-                            if (elk.marked2 > depth) elk.marked2 = 0
-                        }
-
-                        return@forEach
-                    } else combinations.add(combination)
-
-                    val tmpScore = elkGroup.count { elk -> elk.marked }
-//                    println("tmpScore: $tmpScore, depth: $depth, size: ${elkGroup.size}, " +
-//                            "scores: $scores, it: $it, combination: $combination")
-
-                    val score =
-                        if (elkGroup.any { elk -> (elk.marked2 == 0) && !elk.marked }) {
-                            scoreElk(tmpScore) + scoreElkGroup(elkGroup, scoringCardA, depth + 1)
-                        } else scoreElk(tmpScore)
-
-                    if (score == maxScore) return score
-                    else scores.add(score)
-
-                    elkGroup.forEach { elk -> elk.marked = false }
-                    elkGroup.forEach { elk ->
-                        if (elk.marked2 > depth) elk.marked2 = 0
-                    }
-                }
-            } else {
-                neighborElksB.forEach {
-                    markElkGroup(node, it)
-
-                    val combination = elkGroup.filter { elk -> elk.marked }.map { elk -> elk.tile.id }.toMutableList()
-                    combination.sort()
-
-                    if (combination in combinations) {
-                        elkGroup.forEach { elk -> elk.marked = false }
-                        elkGroup.forEach { elk ->
-                            if (elk.marked2 > depth) elk.marked2 = 0
-                        }
-
-                        return@forEach
-                    } else combinations.add(combination)
-
-                    val tmpScore = elkGroup.count { elk -> elk.marked }
-//                    println("tmpScore: $tmpScore, depth: $depth, size: ${elkGroup.size}, scores: $scores, it: $it")
-//                    elkGroup.forEach {elk ->
-//                        println("ID: ${elk.tile.id}, Marked: ${elk.marked}, Marked2: ${elk.marked2}")
-//                    }
-
-                    val score =
-                        if (elkGroup.any { elk -> (elk.marked2 == 0) && !elk.marked }) {
-                            scoreElk(tmpScore) + scoreElkGroup(elkGroup, scoringCardA, depth + 1)
-                        } else scoreElk(tmpScore)
-
-                    if (score == maxScore) return score
-                    else scores.add(score)
-
-                    elkGroup.forEach { elk -> elk.marked = false }
-                    elkGroup.forEach { elk ->
-                        if (elk.marked2 > depth) elk.marked2 = 0
-                    }
-                }
+        if (combination in combinations) {
+            elkGroup.forEach { elk -> elk.marked = false }
+            elkGroup.forEach { elk ->
+                if (elk.marked2 > depth) elk.marked2 = 0
             }
+            return false
+        } else combinations.add(combination)
+
+        val tmpScore = elkGroup.count { elk -> elk.marked }
+        val score =
+            if (elkGroup.any { elk -> (elk.marked2 == 0) && !elk.marked }) {
+                scoreElk(tmpScore) + scoreElkGroup(elkGroup, true, depth + 1)
+            } else scoreElk(tmpScore)
+
+        if (score == maxScore) return true
+        else scores.add(score)
+
+        elkGroup.forEach { elk -> elk.marked = false }
+        elkGroup.forEach { elk ->
+            if (elk.marked2 > depth) elk.marked2 = 0
+        }
+        return false
+    }
+
+    private fun scoreElkGroupScoringAOuter(neighborElksA: MutableList<Int>,
+                                           node: Node, elkGroup: List<Node>,
+                                           combinations: MutableList<MutableList<Int>>,
+                                           depth: Int, maxScore: Int, scores: MutableList<Int>) {
+        neighborElksA.forEach {
+            markStraightLine(node, it)
+            markStraightLine(node, it - 3)
+
+            scoreElkGroupScoringA(elkGroup, combinations, depth, maxScore, scores) //TODO Ergebnis auslesen
+        }
+    }
+
+    private fun scoreElkGroupScoringBInnerLoop(neighborElksT: MutableList<Int>,
+                                               neighborElksB: MutableList<MutableList<Int>>, node: Node,
+                                               elkGroup: List<Node>, combinations: MutableList<MutableList<Int>>,
+                                               depth: Int, maxScore: Int, scores: MutableList<Int>) {
+        val tempList = mutableListOf<Int>()
+
+        var currIdx = neighborElksT[0]
+        val currIdx2 = neighborElksT[0]
+        while (getNeighbors(currIdx).first in neighborElksT) {
+            currIdx = getNeighbors(currIdx).first
+            if (currIdx == currIdx2) break
+        }
+        tempList.add(currIdx)
+        neighborElksT.remove(currIdx)
+        while (getNeighbors(currIdx).second in neighborElksT) {
+            currIdx = getNeighbors(currIdx).second
+            tempList.add(currIdx)
+            neighborElksT.remove(currIdx)
+        }
+
+        if (tempList.size < 3) {
+            neighborElksB.add(tempList)
+        } else {
+            for (i in 0..(tempList.size - 3)) {
+                neighborElksB.add(tempList.subList(i, i + 3))
+            }
+        }
+
+        neighborElksB.forEach {
+            markElkGroup(node, it)
+
+            val combination = elkGroup.filter { elk -> elk.marked }.map { elk -> elk.tile.id }.toMutableList()
+            combination.sort()
+
+            if (combination in combinations) {
+                elkGroup.forEach { elk -> elk.marked = false }
+                elkGroup.forEach { elk ->
+                    if (elk.marked2 > depth) elk.marked2 = 0
+                }
+
+                return@forEach
+            } else combinations.add(combination)
+
+            val tmpScore = elkGroup.count { elk -> elk.marked }
+            val score =
+                if (elkGroup.any { elk -> (elk.marked2 == 0) && !elk.marked }) {
+                    scoreElk(tmpScore) + scoreElkGroup(elkGroup, false, depth + 1)
+                } else scoreElk(tmpScore)
+
+            if (score == maxScore) //return
+            else scores.add(score)
+
+            elkGroup.forEach { elk -> elk.marked = false }
+            elkGroup.forEach { elk ->
+                if (elk.marked2 > depth) elk.marked2 = 0
+            }
+        }
+    }
+
+    private fun scoreElkGroupScoringB(neighborElks: MutableList<Int>, node: Node,
+                                      neighborElksB: MutableList<MutableList<Int>>, elkGroup: List<Node>, depth: Int,
+                                      maxScore: Int, scores: MutableList<Int>,
+                                      combinations: MutableList<MutableList<Int>>): Int {
+        val neighborElksT2 = neighborElks.toMutableList()
+        neighborElksT2.sort()
+
+        val neighborElksT = neighborElksT2.filter { node.neighbours[it]?.marked2 == 0 }.toMutableList()
+
+        while (neighborElksT.isNotEmpty()) {
+            scoreElkGroupScoringBInnerLoop(neighborElksT, neighborElksB, node, elkGroup, combinations, depth,
+                maxScore, scores)
         }
         return scores.maxOrNull() ?: 0
     }
@@ -985,8 +998,8 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         }
         breakPointList.forEach { it.marked = true }
 
-        for (node in nodes) {
-            if ((node.marked) or (node.tile.occupant != WildlifeToken.SALMON)) continue
+        nodes.forEach { node ->
+            if ((node.marked) or (node.tile.occupant != WildlifeToken.SALMON)) return@forEach
             node.marked = true
             val neighbours = node.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.SALMON }
                 .filter { it !in breakPointList }
@@ -994,41 +1007,51 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                 sum += 2
             }
             if (neighbours.size == 1) {
-                var curNeighbour = neighbours.single()
-                var last = node
-                var count = 1
-                while (true) {
-                    curNeighbour.marked = true
-                    count++
-                    val curNeighbours =
-                        curNeighbour.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.SALMON }
-                            .filter { it != last }.filter { it !in breakPointList }
-                    if (curNeighbours.size != 1) break
-                    last = curNeighbour
-                    curNeighbour = curNeighbours.single()
-                }
-                sum += scoreSalmon(isA, count)
+                sum += helpSalmonScoringCase1(neighbours, node, breakPointList, isA)
             }
             if (neighbours.size == 2) {
-                val testCircleScore = testCircle(node, breakPointList)
-                if (testCircleScore != -1) {
-                    sum += scoreSalmon(isA, testCircleScore)
-                }
-                val firstNeighbourNeighbours =
-                    neighbours.first().neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.SALMON }
-                val secondNeighbourNeighbours =
-                    neighbours.last().neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.SALMON }
-                if ((firstNeighbourNeighbours.size != 2) or (!firstNeighbourNeighbours.contains(neighbours.last())))
-                    continue
-                if ((secondNeighbourNeighbours.size != 2) or (!secondNeighbourNeighbours.contains(neighbours.first())))
-                    continue
-                neighbours.forEach { it.marked = true }
-                sum += if (isA) 8 else 9
+                sum += helpSalmonScoringCase2(node, breakPointList, isA, neighbours)
             }
 
         }
         nodes.forEach { node -> node.marked = false }
         return sum
+    }
+
+    private fun helpSalmonScoringCase1(neighbours: List<Node>, node: Node,
+                                       breakPointList: List<Node>, isA: Boolean): Int {
+        var curNeighbour = neighbours.single()
+        var last = node
+        var count = 1
+        while (true) {
+            curNeighbour.marked = true
+            count++
+            val curNeighbours =
+                curNeighbour.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.SALMON }
+                    .filter { it != last }.filter { it !in breakPointList }
+            if (curNeighbours.size != 1) break
+            last = curNeighbour
+            curNeighbour = curNeighbours.single()
+        }
+        return scoreSalmon(isA, count)
+    }
+
+    private fun helpSalmonScoringCase2(node: Node, breakPointList: List<Node>, isA: Boolean,
+                                       neighbours: List<Node>): Int {
+        val testCircleScore = testCircle(node, breakPointList)
+        if (testCircleScore != -1) {
+            return scoreSalmon(isA, testCircleScore)
+        }
+        val firstNeighbourNeighbours =
+            neighbours.first().neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.SALMON }
+        val secondNeighbourNeighbours =
+            neighbours.last().neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.SALMON }
+        if ((firstNeighbourNeighbours.size != 2) or (!firstNeighbourNeighbours.contains(neighbours.last())))
+            return 0
+        if ((secondNeighbourNeighbours.size != 2) or (!secondNeighbourNeighbours.contains(neighbours.first())))
+            return 0
+        neighbours.forEach { it.marked = true }
+        return if (isA) 8 else 9
     }
 
     private fun testCircle(start: Node, breakPointList: List<Node>): Int {
@@ -1081,17 +1104,21 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
     }
     private fun hawkScoringA(nodes: List<Node>): Int {
         var count = 0
-        for (node in nodes) {
-            if (node.marked) continue
+        nodes.forEach { node ->
+            if (node.marked) return@forEach
             node.marked = true
             if (node.tile.occupant == WildlifeToken.HAWK) {
                 node.neighbours.filterNotNull().forEach { it.marked = true }
                 val neighbours = node.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.HAWK }
-                if (neighbours.isNotEmpty()) continue
+                if (neighbours.isNotEmpty()) return@forEach
                 count++
             }
         }
         nodes.forEach { node -> node.marked = false }
+        return hawkScoreA(count)
+    }
+
+    private fun hawkScoreA(count: Int): Int {
         return when (count) {
             0 -> 0
             1 -> 2
@@ -1104,16 +1131,16 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             else -> 26
         }
     }
+
     private fun hawkScoringB(nodes: List<Node>): Int {
         var count = 0
-        for (node in nodes) {
-            if (node.marked) continue
+        nodes.forEach { node ->
+            if (node.marked) return@forEach
             node.marked = true
-            if (node.tile.occupant != WildlifeToken.HAWK) continue
+            if (node.tile.occupant != WildlifeToken.HAWK) return@forEach
             node.neighbours.filterNotNull().forEach { it.marked = true }
             val neighbours = node.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.HAWK }
-            if (neighbours.isNotEmpty()) continue
-            var found = false
+            if (neighbours.isNotEmpty()) return@forEach
             val directions = listOf(
                 Triple(0, -1, 1),
                 Triple(-1, 0, 1),
@@ -1124,21 +1151,14 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             )
             val start = node.coords
             val coordList = nodes.filter { it.tile.occupant == WildlifeToken.HAWK }.map { it.coords }
-            for (distance in 1..15) {
-                for (direction in directions) {
-                    val first = start.first + direction.first * distance
-                    val second = start.second + direction.second * distance
-                    val third = start.third + direction.third * distance
-                    if (coordList.contains(Triple(first, second, third))) {
-                        found = true
-                        break
-                    }
-                }
-                if (found) break
-            }
-            if (found) count++
+
+            if (helpHawkScoringB(coordList, directions, start)) count++
         }
         nodes.forEach { node -> node.marked = false }
+        return hawkScoreB(count)
+    }
+
+    private fun hawkScoreB(count: Int): Int {
         return when (count) {
             0 -> 0
             1 -> 0
@@ -1150,6 +1170,24 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             7 -> 24
             else -> 28
         }
+    }
+
+    private fun helpHawkScoringB(coordList: List<Triple<Int, Int, Int>>,
+                                 directions: List<Triple<Int, Int, Int>>, start: Triple<Int, Int, Int>): Boolean {
+        var found = false
+        for (distance in 1..21) {
+            for (direction in directions) {
+                val first = start.first + direction.first * distance
+                val second = start.second + direction.second * distance
+                val third = start.third + direction.third * distance
+                if (coordList.contains(Triple(first, second, third))) {
+                    found = true
+                    break
+                }
+            }
+            if (found) break
+        }
+        return found
     }
 
     private fun foxScoringA(nodes: List<Node>): Int {

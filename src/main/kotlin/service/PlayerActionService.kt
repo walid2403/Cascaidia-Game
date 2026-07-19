@@ -220,53 +220,61 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         }
 
         if (right != null) {
-            if (right) {
-                selectedTile.rotation = (selectedTile.rotation + 1) % 6
-
-                if (selectedTile.habs.isNotEmpty()) {
-                    val lastHabitat = selectedTile.habs.removeAt(selectedTile.habs.lastIndex)
-                    selectedTile.habs.add(0, lastHabitat)
-                }
-
-                onAllRefreshables { refreshAfterRotate(1) }
-            } else {
-                selectedTile.rotation = (selectedTile.rotation + 5) % 6
-
-                if (selectedTile.habs.isNotEmpty()) {
-                    val firstHabitat = selectedTile.habs.removeAt(0)
-                    selectedTile.habs.add(firstHabitat)
-                }
-
-                onAllRefreshables { refreshAfterRotate(-1) }
-            }
+            rotateLocal(right, selectedTile)
         } else if (targetRotation != null) {
-            val rightTimes = targetRotation - selectedTile.rotation
-            val leftTimes = selectedTile.rotation - targetRotation
-
-            selectedTile.rotation = targetRotation
-
-            var amount = rightTimes
-
-            if (leftTimes < rightTimes) {
-                amount = leftTimes * (-1)
-            }
-
-            if (selectedTile.habs.isNotEmpty()) {
-                repeat(rightTimes) {
-                    val lastHabitat = selectedTile.habs.removeAt(selectedTile.habs.lastIndex)
-                    selectedTile.habs.add(0, lastHabitat)
-                }
-            }
-
-            if (game.playerQueue.peek().type != PlayerType.NETWORK && !game.isLocal) {
-                onAllRefreshables { refreshAfterRotate(amount) }
-            }
+            rotateOnline(targetRotation, selectedTile, game)
         }
 
         game.tileRotation = selectedTile.rotation
 
         if (game.playerQueue.peek().type != PlayerType.NETWORK && !game.isLocal) {
             rootService.networkService.sendRotation()
+        }
+    }
+
+    private fun rotateLocal(right: Boolean, selectedTile: Tile) {
+        if (right) {
+            selectedTile.rotation = (selectedTile.rotation + 1) % 6
+
+            if (selectedTile.habs.isNotEmpty()) {
+                val lastHabitat = selectedTile.habs.removeAt(selectedTile.habs.lastIndex)
+                selectedTile.habs.add(0, lastHabitat)
+            }
+
+            onAllRefreshables { refreshAfterRotate(1) }
+        } else {
+            selectedTile.rotation = (selectedTile.rotation + 5) % 6
+
+            if (selectedTile.habs.isNotEmpty()) {
+                val firstHabitat = selectedTile.habs.removeAt(0)
+                selectedTile.habs.add(firstHabitat)
+            }
+
+            onAllRefreshables { refreshAfterRotate(-1) }
+        }
+    }
+
+    private fun rotateOnline(targetRotation: Int, selectedTile: Tile, game: CascadiaGame) {
+        val rightTimes = targetRotation - selectedTile.rotation
+        val leftTimes = selectedTile.rotation - targetRotation
+
+        selectedTile.rotation = targetRotation
+
+        var amount = rightTimes
+
+        if (leftTimes < rightTimes) {
+            amount = leftTimes * (-1)
+        }
+
+        if (selectedTile.habs.isNotEmpty()) {
+            repeat(rightTimes) {
+                val lastHabitat = selectedTile.habs.removeAt(selectedTile.habs.lastIndex)
+                selectedTile.habs.add(0, lastHabitat)
+            }
+        }
+
+        if (game.playerQueue.peek().type != PlayerType.NETWORK && !game.isLocal) {
+            onAllRefreshables { refreshAfterRotate(amount) }
         }
     }
 

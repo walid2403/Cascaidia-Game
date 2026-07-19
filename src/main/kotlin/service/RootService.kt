@@ -54,4 +54,3 @@ class RootService {
         const val SAVE_EXTENSION = ".cascadia"
     }
 }
-

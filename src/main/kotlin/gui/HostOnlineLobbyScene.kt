@@ -1316,32 +1316,16 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
      * the NetworkIcon otherwise
      */
     private fun getVisual(name: String): ImageVisual {
+        val list1 = listOf(PlayerType.HUMAN, PlayerType.EASY_BOT, PlayerType.HARD_BOT, PlayerType.HEURISTIC_BOT)
+        val list2 = listOf(PlayerType.GREEDY_BOT, PlayerType.MONTE_BOT, PlayerType.NEURAL_BOT, PlayerType.GREEDY_HEURISTIC_BOT)
+
         return if (name == playerName) {
             when(playerType) {
-                PlayerType.HUMAN -> ImageVisual("icons/HumanIcon3.png").apply {
-                    style.borderRadius = BorderRadius(8)
-                }
-                PlayerType.GREEDY_BOT -> ImageVisual("icons/GreedyBotIcon3.png").apply {
-                    style.borderRadius = BorderRadius(8)
-                }
-                PlayerType.HEURISTIC_BOT -> ImageVisual("icons/HeuristicBotIcon3.png").apply {
-                    style.borderRadius = BorderRadius(8)
-                }
-                PlayerType.EASY_BOT -> ImageVisual("icons/EasyBotIcon3.png").apply {
-                    style.borderRadius = BorderRadius(8)
-                }
-                PlayerType.HARD_BOT -> ImageVisual("icons/HardBotIcon3.png").apply {
-                    style.borderRadius = BorderRadius(8)
-                }
-                PlayerType.MONTE_BOT -> ImageVisual("icons/MonteCarloBotIcon3.png").apply {
-                    style.borderRadius = BorderRadius(8)
-                }
-                PlayerType.GREEDY_HEURISTIC_BOT -> ImageVisual("icons/GreedyHeuristicBotIcon3.png").apply {
-                    style.borderRadius = BorderRadius(8)
-                }
-                PlayerType.NEURAL_BOT -> ImageVisual("icons/NeuralNetworkBotIcon3.png").apply {
-                    style.borderRadius = BorderRadius(8)
-                }
+
+                in list1 -> firstHalfOfImages(playerType)
+
+                in list2 -> secondHalfOfImages(playerType)
+
                 else -> throw IllegalArgumentException("Player type must be PlayerType Object and can't be NETWORK, " +
                         "$playerType not supported")
             }
@@ -1349,6 +1333,52 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
             ImageVisual("icons/NetworkIcon.png").apply {
                 style.borderRadius = BorderRadius(8)
             }
+        }
+    }
+
+    private fun firstHalfOfImages(playerType: PlayerType): ImageVisual {
+        return when(playerType) {
+            PlayerType.HUMAN -> ImageVisual("icons/HumanIcon3.png").apply {
+                style.borderRadius = BorderRadius(8)
+            }
+
+            PlayerType.EASY_BOT -> ImageVisual("icons/EasyBotIcon3.png").apply {
+                style.borderRadius = BorderRadius(8)
+            }
+
+            PlayerType.HARD_BOT -> ImageVisual("icons/HardBotIcon3.png").apply {
+                style.borderRadius = BorderRadius(8)
+            }
+
+            PlayerType.HEURISTIC_BOT -> ImageVisual("icons/HeuristicBotIcon3.png").apply {
+                style.borderRadius = BorderRadius(8)
+            }
+
+            else -> throw IllegalArgumentException("This function doesn't provide an ImageVisual for this player" +
+                    "type: $playerType")
+        }
+    }
+
+    private fun secondHalfOfImages(playerType: PlayerType): ImageVisual {
+        return when(playerType) {
+            PlayerType.GREEDY_BOT -> ImageVisual("icons/GreedyBotIcon3.png").apply {
+                style.borderRadius = BorderRadius(8)
+            }
+
+            PlayerType.MONTE_BOT -> ImageVisual("icons/MonteCarloBotIcon3.png").apply {
+                style.borderRadius = BorderRadius(8)
+            }
+
+            PlayerType.NEURAL_BOT -> ImageVisual("icons/NeuralNetworkBotIcon3.png").apply {
+                style.borderRadius = BorderRadius(8)
+            }
+
+            PlayerType.GREEDY_HEURISTIC_BOT -> ImageVisual("icons/GreedyHeuristicBotIcon3.png").apply {
+                style.borderRadius = BorderRadius(8)
+            }
+
+            else -> throw IllegalArgumentException("This function doesn't provide an ImageVisual for this player" +
+                    "type: $playerType")
         }
     }
 }

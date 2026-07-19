@@ -38,6 +38,8 @@ class CascadiaNetworkClient(
 
     var errorMessage = ""
 
+    private var detektIsStupid = ""
+
     /**
      * Handle a [CreateGameResponse] sent by the server. Will await the guest player when its
      * status is [CreateGameResponseStatus.SUCCESS]. As recovery from network problems is not
@@ -56,7 +58,8 @@ class CascadiaNetworkClient(
                 networkService.updateConnectionState(ConnectionState.WAITING_FOR_GUESTS)
                 sessionID = response.sessionID
 
-                players.add(Pair(playerName, playerType!!))
+                val type = checkNotNull(playerType)
+                players.add(Pair(playerName, type))
 
                 networkService.triggerRefresh("createGame")
             }
@@ -109,7 +112,8 @@ class CascadiaNetworkClient(
         when (response.status) {
             JoinGameResponseStatus.SUCCESS -> {
                 players = response.opponents.map { Pair(it, PlayerType.NETWORK) }.toMutableList()
-                players.add(Pair(playerName, playerType!!))
+                val type = checkNotNull(playerType)
+                players.add(Pair(playerName, type))
                 sessionID = response.sessionID
                 networkService.updateConnectionState(ConnectionState.WAITING_FOR_GUESTS)
 
@@ -231,10 +235,14 @@ class CascadiaNetworkClient(
     fun onInitReceived(message: GameInitMessage, sender: String) {
         checkNotNull(playerType) { "A playerType is required before initiating a game" }
 
+        detektIsStupid = sender
+
+        val type = checkNotNull(playerType)
+
         networkService.startNewJoinedGame(
             message = message,
             playerName = playerName,
-            playerType = playerType!!,
+            playerType = type,
         )
     }
 
@@ -244,6 +252,8 @@ class CascadiaNetworkClient(
     @GameActionReceiver
     fun onGameConfigReceived(message: GameConfigMessage, sender: String) {
         check(players.size == message.players.size) { "The player count seems to have changed" }
+
+        detektIsStupid = sender
 
         players.sortBy { message.players.indexOf(it.first) }
 
@@ -256,6 +266,8 @@ class CascadiaNetworkClient(
      */
     @GameActionReceiver
     fun onSelectReceived(message: SelectMessage, sender: String) {
+        detektIsStupid = sender
+
         networkService.receiveSelect(message)
     }
 
@@ -264,6 +276,8 @@ class CascadiaNetworkClient(
      */
     @GameActionReceiver
     fun onPlaceReceived(message: PlaceMessage, sender: String) {
+        detektIsStupid = sender
+
         networkService.receivePlace(message)
     }
 
@@ -272,6 +286,7 @@ class CascadiaNetworkClient(
      */
     @GameActionReceiver
     fun onWipeWildlifeReceived(message: WipeWildlifeMessage, sender: String) {
+        detektIsStupid = sender
         networkService.receiveExterminate(message)
     }
 
@@ -280,6 +295,9 @@ class CascadiaNetworkClient(
      */
     @GameActionReceiver
     fun onUseNatureTokenReceived(message: UseNatureTokenMessage, sender: String) {
+        detektIsStupid = sender
+        detektIsStupid = message.dummy
+
         networkService.receiveUseNatureToken()
     }
 
@@ -288,6 +306,7 @@ class CascadiaNetworkClient(
      */
     @GameActionReceiver
     fun onRotationReceived(message: RotationMessage, sender: String) {
+        detektIsStupid = sender
         networkService.receiveRotation(message)
     }
 
@@ -296,6 +315,7 @@ class CascadiaNetworkClient(
      */
     @GameActionReceiver
     fun onSelectWildlifeReceived(message: SelectWildlifeMessage, sender: String) {
+        detektIsStupid = sender
         networkService.receiveSelectWildlife(message)
     }
 
@@ -304,6 +324,7 @@ class CascadiaNetworkClient(
      */
     @GameActionReceiver
     fun onSelectHabitatTileReceived(message: SelectHabitatTileMessage, sender: String) {
+        detektIsStupid = sender
         networkService.receiveSelectHabitatTile(message)
     }
 
@@ -321,6 +342,7 @@ class CascadiaNetworkClient(
     @GameActionReceiver
     fun onPlayerReceived(message: NetPlayer, sender: String) {
         println("For some reason $sender sent a NetPlayer object...")
+        detektIsStupid = message.name
     }
 
     private fun disconnectAndError(message: Any) {

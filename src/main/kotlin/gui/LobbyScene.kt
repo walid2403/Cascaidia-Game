@@ -834,10 +834,10 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
         it.isVisible = false
         it.isDisabled = true}
 
-        p1Type = 0
-        p2Type = 0
-        p3Type = 3
-        p4Type = 3
+        p1Type = 1
+        p2Type = 1
+        p3Type = 0
+        p4Type = 0
 
         hostPanel.posX = paneX.toDouble()
         sidePanel.posX = paneX.toDouble()
