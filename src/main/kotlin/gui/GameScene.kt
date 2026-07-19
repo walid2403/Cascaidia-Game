@@ -771,7 +771,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         listOf(chatBoxBackground, chatView, messageInput, sendButton).forEach { it.isVisible = false }
     }
 
-    private fun chooseTile(index: Int) {
+    private fun chooseTile(index: Int, fromChooseAnimal: Boolean = false) {
         if(index !in 0..3) throw IllegalArgumentException("Invalid index given: $index")
 
         if(selectTile == index) {
@@ -787,7 +787,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         val player = rootService.currentGame?.playerQueue?.peek()
         checkNotNull(player)
 
-        if (player.type != PlayerType.NETWORK && (rootService.currentGame?.isLocal == false)) {
+        if (player.type != PlayerType.NETWORK && (rootService.currentGame?.isLocal == false) && fromChooseAnimal) {
             rootService.networkService.sendSelectHabitatTile(index)
         }
     }
@@ -813,7 +813,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     private fun chooseAnimal(index: Int, animal: Label) {
         if(!customChoiceActive && !changeWildlifeActive) {
-            chooseTile(index)
+            chooseTile(index, true)
         } else {
             if(!changeWildlifeActive) {
                 if (selectAnimal == index) selectAnimal = -1
