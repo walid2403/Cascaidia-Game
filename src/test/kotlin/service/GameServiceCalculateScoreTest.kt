@@ -1176,4 +1176,198 @@ class GameServiceCalculateScoreTest {
         //all should be b
         assertEquals(16, scoreOf(player, listOf(false, false, false, false, false)).size)
     }
+
+    /**
+     * Tests bear card B with a straight group of exactly three bears where the middle
+     * bear is evaluated first, covering the two-neighbour branch of the group check.
+     */
+    @Test
+    fun bearBGroupOfThreeFromMiddle() {
+        val player = Player("P", PlayerType.HUMAN)
+        player.board[Triple(1, -1, 0)] = connectedTile(1, Habitates.FORESTS, WildlifeToken.BEAR)
+        player.board[Triple(0, 0, 0)]  = connectedTile(2, Habitates.FORESTS, WildlifeToken.BEAR)
+        player.board[Triple(2, -2, 0)] = connectedTile(3, Habitates.FORESTS, WildlifeToken.BEAR)
+        assertEquals(10, scoreOf(player, listOf(false, true, true, true, true))[5],
+            "A group of exactly three bears scores 10 points on card B")
+    }
+
+    /**
+     * Tests bear card B with the same group of three bears where an end bear is evaluated
+     * first, covering the single-neighbour branch of the group check.
+     */
+    @Test
+    fun bearBGroupOfThreeFromEnd() {
+        val player = Player("P", PlayerType.HUMAN)
+        player.board[Triple(0, 0, 0)]  = connectedTile(1, Habitates.FORESTS, WildlifeToken.BEAR)
+        player.board[Triple(1, -1, 0)] = connectedTile(2, Habitates.FORESTS, WildlifeToken.BEAR)
+        player.board[Triple(2, -2, 0)] = connectedTile(3, Habitates.FORESTS, WildlifeToken.BEAR)
+        assertEquals(10, scoreOf(player, listOf(false, true, true, true, true))[5],
+            "A group of exactly three bears scores 10 points on card B")
+    }
+    /**
+     * Tests bear card B with a straight line of four bears evaluated from the second
+     * bear, covering the pair-rejection branches where a neighbour touches a third bear.
+     * Four bears in a line form no group of exactly three, so card B scores zero.
+     */
+    @Test
+    fun bearBLineOfFourFromSecond() {
+        val player = Player("P", PlayerType.HUMAN)
+        player.board[Triple(1, -1, 0)] = connectedTile(1, Habitates.FORESTS, WildlifeToken.BEAR)
+        player.board[Triple(0, 0, 0)]  = connectedTile(2, Habitates.FORESTS, WildlifeToken.BEAR)
+        player.board[Triple(2, -2, 0)] = connectedTile(3, Habitates.FORESTS, WildlifeToken.BEAR)
+        player.board[Triple(3, -3, 0)] = connectedTile(4, Habitates.FORESTS, WildlifeToken.BEAR)
+        assertEquals(0, scoreOf(player, listOf(false, true, true, true, true))[5],
+            "Four bears in a line contain no group of exactly three and score zero on card B")
+    }
+
+    /**
+     * Tests bear card B with the same line of four bears evaluated from the third
+     * bear, covering the mirrored pair-rejection branch for the other neighbour.
+     */
+    @Test
+    fun bearBLineOfFourFromThird() {
+        val player = Player("P", PlayerType.HUMAN)
+        player.board[Triple(2, -2, 0)] = connectedTile(1, Habitates.FORESTS, WildlifeToken.BEAR)
+        player.board[Triple(0, 0, 0)]  = connectedTile(2, Habitates.FORESTS, WildlifeToken.BEAR)
+        player.board[Triple(1, -1, 0)] = connectedTile(3, Habitates.FORESTS, WildlifeToken.BEAR)
+        player.board[Triple(3, -3, 0)] = connectedTile(4, Habitates.FORESTS, WildlifeToken.BEAR)
+        assertEquals(0, scoreOf(player, listOf(false, true, true, true, true))[5],
+            "Four bears in a line contain no group of exactly three and score zero on card B")
+    }
+
+    /**
+     * Tests the salmon scoring for a triangle of three salmon, which exercises the circle
+     * detection and the special triangle handling.
+     */
+    @Test
+    fun salmonTriangleScoredAsRunOfThree() {
+        val player = Player("P", PlayerType.HUMAN)
+        player.board[Triple(0, 0, 0)]  = connectedTile(1, Habitates.RIVERS, WildlifeToken.SALMON)
+        player.board[Triple(1, -1, 0)] = connectedTile(2, Habitates.RIVERS, WildlifeToken.SALMON)
+        player.board[Triple(0, -1, 1)] = connectedTile(3, Habitates.RIVERS, WildlifeToken.SALMON)
+        assertEquals(8, scoreOf(player)[7],
+            "A salmon triangle scores like a run of three on card A")
+    }
+
+    /**
+     * Tests the salmon scoring for a straight line of three salmon whose middle salmon is
+     * evaluated first, covering the non-circle outcome of the two-neighbour case.
+     */
+    @Test
+    fun salmonLineEvaluatedFromMiddle() {
+        val player = Player("P", PlayerType.HUMAN)
+        player.board[Triple(1, -1, 0)] = connectedTile(1, Habitates.RIVERS, WildlifeToken.SALMON)
+        player.board[Triple(0, 0, 0)]  = connectedTile(2, Habitates.RIVERS, WildlifeToken.SALMON)
+        player.board[Triple(2, -2, 0)] = connectedTile(3, Habitates.RIVERS, WildlifeToken.SALMON)
+        assertEquals(8, scoreOf(player)[7], "A run of three salmon scores 8 points on card A")
+    }
+
+    /**
+     * Creates a player with the given number of pairwise non-adjacent hawks that all lie on
+     * one straight sight line with a spacing of two tiles.
+     */
+    private fun hawkLinePlayer(count: Int): Player {
+        val player = Player("P", PlayerType.HUMAN)
+        for (i in 0 until count) {
+            player.board[Triple(2 * i, -2 * i, 0)] =
+                connectedTile(i, Habitates.MOUNTAINS, WildlifeToken.HAWK)
+        }
+        return player
+    }
+
+    /**
+     * Tests hawk card A for five to eight isolated hawks, covering the upper branches of
+     * the score table.
+     */
+    @Test
+    fun hawkAFiveToEightIsolatedHawks() {
+        assertEquals(14, scoreOf(hawkLinePlayer(5))[8])
+        assertEquals(18, scoreOf(hawkLinePlayer(6))[8])
+        assertEquals(22, scoreOf(hawkLinePlayer(7))[8])
+        assertEquals(26, scoreOf(hawkLinePlayer(8))[8])
+    }
+
+    /**
+     * Tests hawk card B for four to eight isolated hawks with a shared sight line,
+     * covering the upper branches of the score table.
+     */
+    @Test
+    fun hawkBFourToEightHawksWithSightLines() {
+        val cards = listOf(true, true, true, false, true)
+        assertEquals(12, scoreOf(hawkLinePlayer(4), cards)[8])
+        assertEquals(16, scoreOf(hawkLinePlayer(5), cards)[8])
+        assertEquals(20, scoreOf(hawkLinePlayer(6), cards)[8])
+        assertEquals(24, scoreOf(hawkLinePlayer(7), cards)[8])
+        assertEquals(28, scoreOf(hawkLinePlayer(8), cards)[8])
+    }
+
+    /**
+     * Tests hawk card B with an adjacent hawk pair and a single distant watcher: only the
+     * watcher counts, and a single scoring hawk is worth zero points.
+     */
+    @Test
+    fun hawkBSingleSightingHawkIsZero() {
+        val player = Player("P", PlayerType.HUMAN)
+        player.board[Triple(0, 0, 0)]  = connectedTile(1, Habitates.MOUNTAINS, WildlifeToken.HAWK)
+        player.board[Triple(1, -1, 0)] = connectedTile(2, Habitates.MOUNTAINS, WildlifeToken.HAWK)
+        player.board[Triple(0, -2, 2)] = connectedTile(3, Habitates.MOUNTAINS, WildlifeToken.HAWK)
+        assertEquals(0, scoreOf(player, listOf(true, true, true, false, true))[8],
+            "One counting hawk scores zero points on card B")
+    }
+
+    /**
+     * Tests fox card A with four unique neighbouring animal types, covering the four-type
+     * branch of the score table.
+     */
+    @Test
+    fun foxAFourUniqueNeighbourTypes() {
+        val player = Player("P", PlayerType.HUMAN)
+        player.board[Triple(0, 0, 0)]  = connectedTile(1, Habitates.PRAIRIES, WildlifeToken.FOX)
+        player.board[Triple(0, 1, -1)] = connectedTile(2, Habitates.PRAIRIES, WildlifeToken.BEAR)
+        player.board[Triple(0, -1, 1)] = connectedTile(3, Habitates.PRAIRIES, WildlifeToken.ELK)
+        player.board[Triple(1, 0, -1)] = connectedTile(4, Habitates.PRAIRIES, WildlifeToken.SALMON)
+        player.board[Triple(-1, 0, 1)] = connectedTile(5, Habitates.PRAIRIES, WildlifeToken.HAWK)
+        assertEquals(4, scoreOf(player)[9],
+            "A fox with four unique neighbour types scores 4 points")
+    }
+
+    /**
+     * Tests fox card A with five unique neighbouring animal types including a second fox,
+     * covering the else branch of the score table. The neighbouring fox scores its own
+     * three unique neighbour types on top.
+     */
+    @Test
+    fun foxAFiveUniqueNeighbourTypes() {
+        val player = Player("P", PlayerType.HUMAN)
+        player.board[Triple(0, 0, 0)]  = connectedTile(1, Habitates.PRAIRIES, WildlifeToken.FOX)
+        player.board[Triple(0, 1, -1)] = connectedTile(2, Habitates.PRAIRIES, WildlifeToken.BEAR)
+        player.board[Triple(0, -1, 1)] = connectedTile(3, Habitates.PRAIRIES, WildlifeToken.ELK)
+        player.board[Triple(1, 0, -1)] = connectedTile(4, Habitates.PRAIRIES, WildlifeToken.SALMON)
+        player.board[Triple(-1, 0, 1)] = connectedTile(5, Habitates.PRAIRIES, WildlifeToken.HAWK)
+        player.board[Triple(1, -1, 0)] = connectedTile(6, Habitates.PRAIRIES, WildlifeToken.FOX)
+        assertEquals(8, scoreOf(player)[9],
+            "Center fox scores 5 for five unique types, the neighbour fox 3 for its own three")
+    }
+
+    /**
+     * Tests the corridor majority for four players where three players tie for the largest
+     * mountain corridor and one player has none, covering the zero-points branch of the
+     * three-way tie.
+     */
+    @Test
+    fun majorityThreeWayTieGivesLoserZero() {
+        val p1 = Player("P1", PlayerType.HUMAN)
+        val p2 = Player("P2", PlayerType.HUMAN)
+        val p3 = Player("P3", PlayerType.HUMAN)
+        val p4 = Player("P4", PlayerType.HUMAN)
+        p1.board[Triple(0, 0, 0)] = connectedTile(1, Habitates.MOUNTAINS)
+        p2.board[Triple(0, 0, 0)] = connectedTile(2, Habitates.MOUNTAINS)
+        p3.board[Triple(0, 0, 0)] = connectedTile(3, Habitates.MOUNTAINS)
+        p4.board[Triple(0, 0, 0)] = connectedTile(4, Habitates.FORESTS)
+        val scores = runGame(listOf(p1, p2, p3, p4))
+        assertEquals(1, scores[0].second[10], "Tied players receive one bonus point")
+        assertEquals(1, scores[1].second[10], "Tied players receive one bonus point")
+        assertEquals(1, scores[2].second[10], "Tied players receive one bonus point")
+        assertEquals(0, scores[3].second[10], "The player without the habitat receives zero")
+    }
 }
