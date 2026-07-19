@@ -2,6 +2,7 @@ package service.bot
 
 import entity.*
 import service.*
+import kotlin.collections.set
 
 /**
  * this Bot for making the decision with the highest immediate
@@ -13,6 +14,11 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
     private val directionX = intArrayOf(0, -1, -1, 0, 1, 1)
     private val directionY = intArrayOf(-1, 0, 1, 1, 0, -1)
     private val directionZ = intArrayOf(1, 1, 0, -1, -1, 0)
+
+    var bestFreeSelectionPoints: Int = 0
+    var bestTileIdx = 0
+    var bestWildlifeIdx = 0
+    private var bestCombinedScore: Int = 0
 
     var isFinished = false
     /** this plays one bot turn: handles overpopulation, then picks the best scoring
@@ -51,6 +57,7 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
             isFinished = true
         }
     }
+
     private fun findNeighbor(position: Triple<Int,Int,Int>): List<Triple<Int,Int,Int>>{
         val neighbours= mutableListOf<Triple<Int,Int,Int>>()
         for(i in 0..5){
@@ -61,6 +68,7 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
         }
         return neighbours
     }
+
     private fun findFreePlace(board: Map<Triple<Int, Int, Int>, Tile>):
             List<Triple<Int,Int,Int>>{
         val freePlaces = mutableListOf<Triple<Int,Int,Int>>()
@@ -76,6 +84,7 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
         }
         return freePlaces
     }
+
     private fun rotatedTile(tile: Tile, steps: Int): Tile{
         val copy= Tile(tile)
         var numOfSteps = steps%6
@@ -91,178 +100,49 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
         copy.rotation=(copy.rotation+numOfSteps)%6
         return copy
     }
-    private fun calculateCorridorPoints(board: Map<Triple<Int, Int, Int>, Tile>):
-            Int{
-        var totalPoints= 0
-        for (habitat in Habitates.entries){
-            var biggestCorridor=0
-            val visited= mutableListOf<Triple<Int, Int, Int>>()
-            for (p in board.keys){
-                if (visited.contains(p)) continue
-                val tile=board[p]!!
-                if(!tile.habs.contains(habitat))continue
 
-                val queue= ArrayDeque<Triple<Int,Int,Int>>()
-                queue.add(p)
-                visited.add(p)
-                var corridorsSize=0
-                while (queue.isNotEmpty()){
-                    val currentPosition= queue.removeFirst()
-                    corridorsSize++
-                    val currentTile=board[currentPosition]!!
-                    val neighbour= findNeighbor(currentPosition)
-
-                    for(i in 0..5){
-                        if (currentTile.habs[i]!= habitat)continue
-                        val neighbourPosition= neighbour[i]
-                        if ( visited.contains(neighbourPosition))continue
-                        val neighbourTile= board[neighbourPosition]?:continue
-
-                        val neighboursSide=(i+3)%6
-                        if(neighbourTile.habs[neighboursSide]==habitat){
-                            visited.add(neighbourPosition)
-                            queue.add(neighbourPosition)
-                        }
-                    }
-                }
-                if(corridorsSize> biggestCorridor){
-                    biggestCorridor=corridorsSize
-                }
-            }
-            totalPoints += biggestCorridor
-        }
-        return totalPoints
-
-    }
-    private fun calculateAnimalPoints(board: Map<Triple<Int, Int, Int>, Tile>, animal: WildlifeToken,
-                                      isTypeA: Boolean): Int {
-        var points=0
-        for(pos in board.keys){
-            val tile = board[pos]!!
-            if(tile.occupant != animal) continue
-            val neighbour= findNeighbor(pos)
-            var sameNeighbours = 0
-            var haveSameNeighbours = false
-            for(neighbourPosition in neighbour){
-                val neighbourTile = board[neighbourPosition]
-                if(neighbourTile != null && neighbourTile.occupant == animal){
-                    sameNeighbours++
-                    haveSameNeighbours = true
-                }
-            }
-            when(animal){
-                WildlifeToken.BEAR->{
-                    if(isTypeA){
-                        if(sameNeighbours==1) points +=4
-                        else points +=0
-                    }else{
-                        if(sameNeighbours==2) points +=10
-                        else points +=0
-                    }
-                }
-
-                WildlifeToken.ELK->{
-                    if(isTypeA){
-                        if (sameNeighbours==0) points +=0
-                        else if (sameNeighbours==1) points +=2
-                        else points +=5
-                    }else{
-                        if (sameNeighbours==0) points +=2
-                        else if (sameNeighbours==1) points +=5
-                        else if (sameNeighbours==2) points +=9
-                        else points+= 19
-                    }
-                }
-
-                WildlifeToken.SALMON->{
-                    if (isTypeA){
-                        if(sameNeighbours==1) points+=5
-                        else if (sameNeighbours==2) points +=8
-                        else if (sameNeighbours==0) points +=2
-                        else points+=0
-                    }else{
-                        if(sameNeighbours==1)points +=4
-                        else if(sameNeighbours==2)points+=9
-                        else if(sameNeighbours==0) points +=2
-                        else points+=0
-                    }
-                }
-
-                WildlifeToken.HAWK->{
-                    if(!haveSameNeighbours)points+=2
-                    else points+=0
-                }
-
-                WildlifeToken.FOX->{
-                    val neighbourAnimals=mutableListOf<WildlifeToken>()
-                    for(neighbourPosition in neighbour){
-                        val neighbouringTile= board[neighbourPosition]
-                        if(neighbouringTile!=null && neighbouringTile.occupant!=null){
-                            neighbourAnimals.add(neighbouringTile.occupant!!)
-                        }
-                    }
-                    if(isTypeA){
-                        val differentAnimals=neighbourAnimals.distinct()
-                        points+= differentAnimals.size
-                    }else{
-                        var numCouple=0
-                        val alreadyCount=mutableListOf<WildlifeToken>()
-                        for(oneAnimal in neighbourAnimals){
-                            if(alreadyCount.contains(oneAnimal))continue
-                            val present= neighbourAnimals.count { it == oneAnimal }
-                            if(present>=2){
-                                numCouple+=1
-                            }
-                            alreadyCount.add(oneAnimal)
-                        }
-                        points+=numCouple*3
-                    }
-                }
-            }
-        }
-        return points
-    }
     //calculating total points corridor+animals
-    private fun allPoints(board: Map<Triple<Int, Int, Int>, Tile>,scoringCards: List<Boolean>): Int{
-        /*var points= calculateCorridorPoints(board)
-        for( tier in WildlifeToken.entries){
-            points += calculateAnimalPoints(board, tier, scoringCards[tier.ordinal])
+    private fun allPoints() = rootService.gameService.calculateScores(true).single().second.sum()
+
+    private fun chooseBestPairInnerFirst(player: Player, tile: Tile, p: Triple<Int, Int, Int>,
+                                         animal: WildlifeToken) {
+        for(s in 0..5){
+            val rotated = rotatedTile(tile, s)
+            player.board[p] = rotated
+            var bestForThisTilePlacement = allPoints()
+            val animalPositions = player.board.entries
+                .filter { it.value.occupant == null && animal in it.value.possibles }
+                .map { it.key }
+
+            for (pos in animalPositions) {
+                val tile = player.board[pos]
+                checkNotNull(tile)
+                tile.occupant = animal
+                val combinedScore = allPoints()
+                tile.occupant = null
+                if (combinedScore > bestForThisTilePlacement) {
+                    bestForThisTilePlacement = combinedScore
+                }
+            }
+            player.board.remove(p)
+            if (bestForThisTilePlacement > bestCombinedScore) {
+                bestCombinedScore = bestForThisTilePlacement
+            }
         }
-        return points*/
-        return rootService.gameService.calculateScores(true).single().second.sum()
     }
+
     //chooses one of the given pairs
     private fun chooseBestPair(currentGame: CascadiaGame, player: Player){
         val freePlaces= findFreePlace(player.board)
-        val startPoints= allPoints(player.board,currentGame.scoringCards)
+        val startPoints= allPoints()
         var bestIndex = 0
         var bestWinner= Int.MIN_VALUE
         for(i in currentGame.choices.indices){
             val tile= currentGame.choices[i].first
             val animal=currentGame.choices[i].second
-            var bestCombinedScore=startPoints
+            bestCombinedScore = startPoints
             for(p in freePlaces){
-                for(s in 0..5){
-                    val rotated = rotatedTile(tile, s)
-                    player.board[p] = rotated
-                    var bestForThisTilePlacement = allPoints(player.board, currentGame.scoringCards)
-                    val animalPositions = player.board.entries
-                        .filter { it.value.occupant == null && animal in it.value.possibles }
-                        .map { it.key }
-
-                    for (pos in animalPositions) {
-                        player.board[pos]!!.occupant = animal
-                        val combinedScore = allPoints(player.board, currentGame.scoringCards)
-                        player.board[pos]!!.occupant = null
-                        if (combinedScore > bestForThisTilePlacement) {
-                            bestForThisTilePlacement = combinedScore
-                        }
-                    }
-                    player.board.remove(p)
-                    if (bestForThisTilePlacement > bestCombinedScore) {
-                        bestCombinedScore = bestForThisTilePlacement
-                    }
-                }
+                chooseBestPairInnerFirst(player, tile, p, animal)
             }
             val winner=bestCombinedScore-startPoints
             if(winner>bestWinner){
@@ -271,57 +151,12 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
             }
         }
         if(player.natureTokens>0) {
-            var bestFreeSelectionPoints = 0
-            var bestTileIdx = 0
-            var bestWildlifeIdx = 0
+            bestFreeSelectionPoints = 0
+            bestTileIdx = 0
+            bestWildlifeIdx = 0
 
             for (i in currentGame.choices.indices) {
-                val tile = currentGame.choices[i].first
-                var bestScoreForThisTile = startPoints
-                for (p in freePlaces) {
-                    for (s in 0..5) {
-                        val possibleRotatedTile = rotatedTile(tile, s)
-                        val simulateBoard = player.board.toMutableMap()
-                        simulateBoard[p] = possibleRotatedTile
-                        player.board[p] = possibleRotatedTile
-                        val score = allPoints(simulateBoard, currentGame.scoringCards)
-                        player.board.remove(p)
-                        if (score > bestScoreForThisTile) {
-                            bestScoreForThisTile = score
-                        }
-                    }
-                }
-                for (wildlifeIdx in currentGame.choices.indices) {
-                    if (i == wildlifeIdx) continue
-                    val wildlife = currentGame.choices[wildlifeIdx].second
-                    val wildlifePosition = mutableListOf<Triple<Int, Int, Int>>()
-                    for (e in player.board.entries) {
-                        val unoccupied = e.value.occupant == null
-                        val allowedHere = e.value.possibles.contains(wildlife)
-                        if (unoccupied && allowedHere) {
-                            wildlifePosition.add(e.key)
-                        }
-                    }
-                    var bestScoreWL = startPoints
-                    for (p in wildlifePosition) {
-                        val simulateBoard = player.board.toMutableMap()
-                        val simulatedTile = Tile(simulateBoard[p]!!)
-                        simulatedTile.occupant = wildlife
-                        simulateBoard[p] = simulatedTile
-                        player.board[p]!!.occupant = wildlife
-                        val score = allPoints(simulateBoard, currentGame.scoringCards)
-                        player.board[p]!!.occupant = null
-                        if (score > bestScoreWL) {
-                            bestScoreWL = score
-                        }
-                    }
-                    val totalGain = (bestScoreForThisTile - startPoints) + (bestScoreWL - startPoints)
-                    if (totalGain > bestFreeSelectionPoints) {
-                        bestFreeSelectionPoints = totalGain
-                        bestTileIdx = i
-                        bestWildlifeIdx = wildlifeIdx
-                    }
-                }
+                chooseBestPairInnerSecond(currentGame, startPoints, freePlaces, i, player)
             }
             if (bestFreeSelectionPoints > bestWinner + 5) {
                 rootService.playerActionService.freeSelection(bestTileIdx, bestWildlifeIdx)
@@ -330,11 +165,59 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
         }
         rootService.playerActionService.selectColumn(bestIndex)
     }
+
+    private fun chooseBestPairInnerSecond(currentGame: CascadiaGame, startPoints: Int,
+                                          freePlaces: List<Triple<Int, Int, Int>>, i: Int, player: Player) {
+        val tile = currentGame.choices[i].first
+        var bestScoreForThisTile = startPoints
+        for (p in freePlaces) {
+            for (s in 0..5) {
+                val possibleRotatedTile = rotatedTile(tile, s)
+                val simulateBoard = player.board.toMutableMap()
+                simulateBoard[p] = possibleRotatedTile
+                player.board[p] = possibleRotatedTile
+                val score = allPoints()
+                player.board.remove(p)
+                if (score > bestScoreForThisTile) {
+                    bestScoreForThisTile = score
+                }
+            }
+        }
+        for (wildlifeIdx in currentGame.choices.indices) {
+            if (i == wildlifeIdx) continue
+            val wildlife = currentGame.choices[wildlifeIdx].second
+            val wildlifePosition = mutableListOf<Triple<Int, Int, Int>>()
+            for (e in player.board.entries) {
+                val unoccupied = e.value.occupant == null
+                val allowedHere = e.value.possibles.contains(wildlife)
+                if (unoccupied && allowedHere) {
+                    wildlifePosition.add(e.key)
+                }
+            }
+            var bestScoreWL = startPoints
+            for (p in wildlifePosition) {
+                val tile = player.board[p]
+                requireNotNull(tile)
+                tile.occupant = wildlife
+                val score = allPoints()
+                tile.occupant = null
+                if (score > bestScoreWL) {
+                    bestScoreWL = score
+                }
+            }
+            val totalGain = (bestScoreForThisTile - startPoints) + (bestScoreWL - startPoints)
+            if (totalGain > bestFreeSelectionPoints) {
+                bestFreeSelectionPoints = totalGain
+                bestTileIdx = i
+                bestWildlifeIdx = wildlifeIdx
+            }
+        }
+    }
+
     private fun placeBestPlace(currentGame: CascadiaGame, player: Player){
         val chosenTile= currentGame.choices[currentGame.selectedChoice.first].first
         val freePlaces=findFreePlace(player.board)
         if(freePlaces.isEmpty()){
-            //currentGame.gameState= GameState.END_OF_TURN
             isFinished = true
             return
         }
@@ -347,7 +230,7 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
                 val simulateBoard= player.board.toMutableMap()
                 simulateBoard[p]=rotatedTile
                 player.board[p] = rotatedTile
-                val points= allPoints(simulateBoard,currentGame.scoringCards)
+                val points= allPoints()
                 player.board.remove(p)
                 if(points>bestScore){
                     bestScore=points
@@ -376,28 +259,24 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
             }
         }
         if (possiblePlaces.isEmpty()){
-            //currentGame.gameState= GameState.END_OF_TURN
             isFinished = true
             return
         }
         var bestPlace=possiblePlaces[0]
         var bestScore= Int.MIN_VALUE
         for(p in possiblePlaces){
-            val simulateBoard= player.board.toMutableMap()
-            val simulateTile= Tile(simulateBoard[p]!!)
-            simulateTile.occupant=chosenToken
-            simulateBoard[p]=simulateTile
+            val tile = player.board[p]
+            checkNotNull(tile)
 
-            player.board[p]!!.occupant = chosenToken
-            val points=allPoints(simulateBoard,currentGame.scoringCards)
-            player.board[p]!!.occupant = null
+            tile.occupant = chosenToken
+            val points=allPoints()
+            tile.occupant = null
             if(points>bestScore){
                 bestScore=points
                 bestPlace=p
             }
         }
         if (bestScore < 0) {
-            //currentGame.gameState= GameState.END_OF_TURN
             isFinished = true
             return
         }

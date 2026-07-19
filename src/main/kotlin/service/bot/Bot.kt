@@ -22,7 +22,7 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
     private val heuristicBot = HeuristicBot(rootService, this)
     private val monteCarloBot= FlatMonteCarlo(rootService,this)
     private val greedyHeuristicBot = GreedyHeuristicBot(rootService, this)
-    private val greedyHeuristicTest = GreedyHeuristicBot(rootService, this, dummy = true)
+    var greedyHeuristicTest = GreedyHeuristicBot(rootService, this)
 
     private fun resetCoordinates() {
         coordinatesTile = Triple(null, null, null)
@@ -57,12 +57,14 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
                 monteCarloBot.turn()
             }
             PlayerType.NEURAL_BOT -> {
-
+                isFinished = false
+                randomBotTurn()
             }
             PlayerType.GREEDY_HEURISTIC_BOT -> {
                 greedyHeuristicBot.makeTurn()
             }
             PlayerType.HARD_BOT -> {
+                //greedyHeuristicBot.makeTurn()
                 greedyHeuristicTest.makeTurn()
             }
         }
