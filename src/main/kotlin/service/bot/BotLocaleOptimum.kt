@@ -28,12 +28,12 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
         for( wildLife in WildlifeToken.entries){
             var count=0
             for( paar in currentGame.choices){
-               if ( paar.second==wildLife){
-                count++
-               }
+                if ( paar.second==wildLife){
+                    count++
+                }
             }
             if (count > maxNum){
-            maxNum = count
+                maxNum = count
             }
         }
         if(maxNum==4){
@@ -109,21 +109,32 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
         var bestWinner= Int.MIN_VALUE
         for(i in currentGame.choices.indices){
             val tile= currentGame.choices[i].first
-            var bestPointsForThisTile= startPoints
+            val animal=currentGame.choices[i].second
+            var bestCombinedScore=startPoints
             for(p in freePlaces){
                 for(s in 0..5){
-                    val rotatedTile= rotatedTile(tile,s)
-                    val simulateBoard= player.board.toMutableMap()
-                    simulateBoard[p]=rotatedTile
-                    player.board[p] = rotatedTile
-                    val points=allPoints()
+                    val rotated = rotatedTile(tile, s)
+                    player.board[p] = rotated
+                    var bestForThisTilePlacement = allPoints()
+                    val animalPositions = player.board.entries
+                        .filter { it.value.occupant == null && animal in it.value.possibles }
+                        .map { it.key }
+
+                    for (pos in animalPositions) {
+                        player.board[pos]!!.occupant = animal
+                        val combinedScore = allPoints()
+                        player.board[pos]!!.occupant = null
+                        if (combinedScore > bestForThisTilePlacement) {
+                            bestForThisTilePlacement = combinedScore
+                        }
+                    }
                     player.board.remove(p)
-                    if(points> bestPointsForThisTile){
-                        bestPointsForThisTile=points
+                    if (bestForThisTilePlacement > bestCombinedScore) {
+                        bestCombinedScore = bestForThisTilePlacement
                     }
                 }
             }
-            val winner=bestPointsForThisTile-startPoints
+            val winner=bestCombinedScore-startPoints
             if(winner>bestWinner){
                 bestWinner = winner
                 bestIndex=i
@@ -264,7 +275,6 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
         }
 
         bot.coordinatesWildlifeToken = bestPlace
-        println(bestPlace)
         rootService.playerActionService.placeWildlife(bestPlace)
     }
 
