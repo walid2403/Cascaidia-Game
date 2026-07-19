@@ -344,11 +344,12 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @throws IllegalStateException If there is currently a game running
      */
     fun loadGame(name: String) {
+        check(rootService.currentGame == null) { "Es läuft bereits ein Spiel." }
 
-        require(name.isBlank()) {"Der Name darf nicht leer sein."}
+        require(name.isNotBlank()) {"Der Name darf nicht leer sein."}
 
         val file = File(RootService.SAVE_DIRECTORY, "$name${RootService.SAVE_EXTENSION}")
-        check(file.exists()) { "Spielstand '$name' existiert nicht." }
+        require(file.exists()) { "Spielstand '$name' existiert nicht." }
 
         val loadedState: SaveState = mapper.readValue(file)
 
@@ -585,7 +586,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         scores: MutableList<Pair<String, MutableList<Int>>>,
         currentGame: CascadiaGame
     ) {
-        if (currentGame.playerQueue.isEmpty()) return
+        if (currentGame.playerQueue.size < 2) return
         if (currentGame.playerQueue.size == 2) {
             listOf(0, 1, 2, 3, 4).forEach { habitat ->
                 if (scores[0].second[habitat] == scores[1].second[habitat]) {

@@ -121,4 +121,94 @@ class UndoAndRedoTest {
         assertEquals(PlayerType.HUMAN,currentGame.playerQueue.last().type)
     }
 
+
+    /**
+     * Creates a minimal running game for the failure branch tests and stores it in the
+     * [RootService].
+     *
+     * @param playerType the type of the single player in the queue
+     * @param isLocal whether the game is local
+     */
+    private fun createHistoryGame(playerType: PlayerType, isLocal: Boolean): CascadiaGame {
+        val game = CascadiaGame(getValidScoringCards(), isLocal)
+        game.playerQueue.add(Player("P1", playerType))
+        rootService.currentGame = game
+        rootService.history.prevMoves.push(game)
+        return game
+    }
+
+    /**
+     * Tests that [PlayerActionService.redo] fails if no game is running.
+     */
+    @Test
+    fun `redo throws IllegalStateException when no game is running`() {
+        rootService.currentGame = null
+
+        assertFailsWith<IllegalStateException> {
+            playerActionService.redo()
+        }
+    }
+
+    /**
+     * Tests that [PlayerActionService.redo] fails if the current player is not human.
+     */
+    @Test
+    fun `redo throws IllegalStateException for non human player`() {
+        val game = createHistoryGame(PlayerType.EASY_BOT, isLocal = true)
+        rootService.history.undoneMoves.push(CascadiaGame(game))
+
+        assertFailsWith<IllegalStateException> {
+            playerActionService.redo()
+        }
+    }
+
+    /**
+     * Tests that [PlayerActionService.redo] fails in a network game.
+     */
+    @Test
+    fun `redo throws IllegalStateException in network game`() {
+        val game = createHistoryGame(PlayerType.HUMAN, isLocal = false)
+        rootService.history.undoneMoves.push(CascadiaGame(game))
+
+        assertFailsWith<IllegalStateException> {
+            playerActionService.redo()
+        }
+    }
+
+    /**
+     * Tests that [PlayerActionService.undo] fails if no game is running.
+     */
+    @Test
+    fun `undo throws IllegalStateException when no game is running`() {
+        rootService.currentGame = null
+
+        assertFailsWith<IllegalStateException> {
+            playerActionService.undo()
+        }
+    }
+
+    /**
+     * Tests that [PlayerActionService.undo] fails if the current player is not human.
+     */
+    @Test
+    fun `undo throws IllegalStateException for non human player`() {
+        createHistoryGame(PlayerType.EASY_BOT, isLocal = true)
+
+        assertFailsWith<IllegalStateException> {
+            playerActionService.undo()
+        }
+    }
+
+    /**
+     * Tests that [PlayerActionService.undo] fails in a network game.
+     */
+    @Test
+    fun `undo throws IllegalStateException in network game`() {
+        createHistoryGame(PlayerType.HUMAN, isLocal = false)
+
+        assertFailsWith<IllegalStateException> {
+            playerActionService.undo()
+        }
+    }
+
 }

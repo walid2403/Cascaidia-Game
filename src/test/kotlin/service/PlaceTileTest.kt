@@ -11,14 +11,24 @@ class PlaceTileTest {
 
     private lateinit var rootService: RootService
     private lateinit var playerActionService: PlayerActionService
+    private var refreshWasCalled = false
 
     /**
-     * Initializes the services before every test.
+     * Initializes the services and a refreshable that records whether the place-tile refresh
+     * was triggered. This function is executed before every test.
      */
     @BeforeTest
     fun setUp() {
         rootService = RootService()
         playerActionService = rootService.playerActionService
+        refreshWasCalled = false
+
+        val refreshable = object : Refreshable {
+            override fun refreshAfterPlaceTile(index: Triple<Int, Int, Int>) {
+                refreshWasCalled = true
+            }
+        }
+        rootService.addRefreshable(refreshable)
     }
 
     /**
@@ -177,4 +187,32 @@ class PlaceTileTest {
             playerActionService.placeTile(Triple(1, 0, -1))
         }
     }
+
+    /**
+     * Tests that [PlayerActionService.placeTile] does not trigger a refresh for a NETWORK
+     * player, covering the false branch of the final refresh condition. The tile itself must
+     * still be placed correctly.
+     */
+    @Test
+    fun `placing Tile does not refresh for network player`() {
+        val game = CascadiaGame(List(5) { true }, false)
+
+        val networkPlayer = Player("Net", PlayerType.NETWORK)
+        networkPlayer.board[Triple(0, 0, 0)] = createTile(0)
+
+        game.playerQueue.add(networkPlayer)
+        game.choices.add(Pair(createTile(1), WildlifeToken.BEAR))
+        game.selectedChoice = Pair(0, 0)
+        game.gameState = GameState.MADE_CHOICE
+
+        rootService.currentGame = game
+
+        playerActionService.placeTile(Triple(1, -1, 0))
+
+        assertTrue(networkPlayer.board.containsKey(Triple(1, -1, 0)),
+            "The tile should be placed on the board.")
+        assertEquals(GameState.PLAYED_TILE, game.gameState)
+        assertFalse(refreshWasCalled, "No refresh may fire for a NETWORK player.")
+    }
+
 }

@@ -88,6 +88,10 @@ class SaveLoadGameTest {
         oldMove.playerQueue.add(Player("Alice", PlayerType.HUMAN))
         rootService.history.prevMoves.push(oldMove)
 
+        val undoneMove = CascadiaGame(listOf(true, false, true, false, true), true)
+        undoneMove.playerQueue.add(Player("Bob", PlayerType.HUMAN))
+        rootService.history.undoneMoves.push(undoneMove)
+
         assertFalse(rootService.history.prevMoves.isEmpty(),
             "Die Historie sollte vor dem Speichern Züge enthalten.")
 
@@ -99,6 +103,7 @@ class SaveLoadGameTest {
 
         rootService.currentGame = null
         rootService.history.prevMoves.clear()
+        rootService.history.undoneMoves.clear()
 
         gameService.loadGame(testSaveName)
 
@@ -108,6 +113,8 @@ class SaveLoadGameTest {
             "Es sollten wieder genau 2 Spieler in der Queue sein!")
         assertFalse(rootService.history.prevMoves.isEmpty(),
             "Die Undo-Historie wurde beim Laden nicht rekonstruiert!")
+        assertFalse(rootService.history.undoneMoves.isEmpty(),
+            "Die Redo-Historie wurde beim Laden nicht rekonstruiert!")
     }
 
     /**

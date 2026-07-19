@@ -28,11 +28,11 @@ class StartNewGameTest {
 
         val refreshable = object : Refreshable {
             override fun refreshAfterStartGame(){
-                    refreshWasCalled = true
-                }
+                refreshWasCalled = true
             }
-        rootService.addRefreshable(refreshable)
         }
+        rootService.addRefreshable(refreshable)
+    }
 
 
     private fun getValidPlayers() = listOf(Pair("Mert", PlayerType.HUMAN), Pair("Noman", PlayerType.EASY_BOT))
@@ -45,7 +45,7 @@ class StartNewGameTest {
     fun `start new game`() {
         gameService.startNewGame(
             getValidPlayers(),
-           getValidScoringCards()
+            getValidScoringCards()
         )
 
         val game = rootService.currentGame
@@ -84,7 +84,7 @@ class StartNewGameTest {
     /**
      * Tests if there are more than 4 players
      */
-    @Test 
+    @Test
     fun `test throws exception if to many players`(){
         assertFailsWith<IllegalArgumentException> {
             gameService.startNewGame(
@@ -236,4 +236,28 @@ class StartNewGameTest {
         assertEquals(6, game.tileStack.size,
             "Die übergebenen TileIDs wurden nicht korrekt verwendet")
     }
+
+    /**
+     * Tests that the market creation resolves an overpopulated wildlife bag: if the top
+     * four tokens of the provided bag are identical, the bag is rebuilt before the four
+     * market pairs are drawn.
+     */
+    @Test
+    fun `startNewGame resolves overpopulated wildlife bag`() {
+        val bag = List(20) { WildlifeToken.SALMON } + List(4) { WildlifeToken.BEAR }
+
+        gameService.startNewGame(
+            getValidPlayers(),
+            getValidScoringCards(),
+            wildlifeBag = bag
+        )
+
+        val game = rootService.currentGame
+        assertNotNull(game)
+        assertEquals(4, game.choices.size, "The market must contain four pairs")
+        assertTrue(game.choices.map { it.second }.distinct().size > 1) {
+            "The market must not start with four identical tokens"
+        }
+    }
+
 }

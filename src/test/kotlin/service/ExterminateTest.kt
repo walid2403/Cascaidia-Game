@@ -33,6 +33,7 @@ class ExterminateTest {
 
         val currentGame = CascadiaGame(List(5) { true }, true)
         currentGame.gameState = GameState.START_OF_TURN
+        currentGame.playerQueue.add(Player("P1", PlayerType.HUMAN))
 
         setChoices(
             currentGame,
@@ -267,9 +268,8 @@ class ExterminateTest {
                 WildlifeToken.ELK,
             )
         )
-        assertFailsWith<IllegalStateException> {
-            rootService.gameService.exterminate(false)
-        }
+        rootService.gameService.exterminate(false)
+
         assertEquals(GameState.START_OF_TURN, currentGame.gameState,)
         assertTrue(currentGame.removedTokens.isEmpty())
         assertFalse(refreshWasCalled,)
@@ -341,8 +341,10 @@ class ExterminateTest {
             )
         )
         rootService.gameService.exterminate(false)
-        assertTrue(refreshWasCalled)
-        assertTrue(refreshWasCalled)
+        assertTrue(refreshWasCalled,
+            "Der erste Wipe muss den Exterminate-Refresh feuern")
+        assertTrue(refreshWasCalled2,
+            "Bei zu kleinem Beutel muss die Endwertung ausgeloest werden")
     }
     /**
      * here we are testing that the removed tokens is empty after the end
@@ -413,5 +415,34 @@ class ExterminateTest {
         assertTrue(currentGame.removedTokens.isEmpty())
     }
 
+
+
+    /**
+     * Tests a player-triggered extermination in a non-local game with a human player.
+     * This executes the network-send branch inside the extermination resolution, which is a
+     * safe no-op because no network client is connected.
+     */
+    @Test
+    fun `player extermination sends wipe in network game`() {
+        val game = CascadiaGame(List(5) { true }, false)
+        game.gameState = GameState.START_OF_TURN
+        game.playerQueue.add(Player("P1", PlayerType.HUMAN))
+
+        setChoices(
+            game,
+            listOf(WildlifeToken.SALMON, WildlifeToken.SALMON, WildlifeToken.SALMON, WildlifeToken.FOX)
+        )
+        fillWildlifeTokens(game, listOf(WildlifeToken.BEAR, WildlifeToken.ELK, WildlifeToken.HAWK))
+
+        rootService.currentGame = game
+
+        rootService.gameService.exterminate(true)
+
+        assertEquals(GameState.HAS_EXTERMINATED, game.gameState,
+            "A player-triggered extermination must set HAS_EXTERMINATED")
+        assertTrue(game.removedTokens.isEmpty(),
+            "Removed tokens must be pushed back into the bag after resolution")
+        assertTrue(refreshWasCalled)
+    }
 
 }
