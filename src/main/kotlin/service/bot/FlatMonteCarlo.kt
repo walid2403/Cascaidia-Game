@@ -45,7 +45,7 @@ class FlatMonteCarlo(private val rootService: RootService, private val bot: Bot)
  * Methode, die den Botzug nach FlatMonteCarlo durchführt
  */
 
-public fun turn(){
+fun turn(){
     val game=rootService.currentGame
     checkNotNull(game){"Das Spiel läuft nicht"}
 
@@ -78,7 +78,7 @@ public fun turn(){
         // Initialwert ist - undendlich (ein ungültiger Wert)
         var bestScore: Double= Double.NEGATIVE_INFINITY
         // index in der Liste des besten Moves
-        var indexBestMove: Int = 0
+        var indexBestMove = 0
 
         //iterieren über die Listenelemente: Vergleich des iten scores mit dem aktuell besten
         for (i in allMoves.indices){
@@ -183,7 +183,8 @@ public fun turn(){
         //calculatescores aufrufen
         simRootService.gameService.calculateScores()
         //scores bekommt nun die scores als Paar(Name, Summe aller Teilscores)
-        val scores=(refreshable.receiveScores!!).map { pair->
+
+        val scores=(refreshable.receiveScores ?: error("")).map { pair->
             val playerName= pair.first
             val partialScore = pair.second
             Pair(playerName, partialScore.sum())
