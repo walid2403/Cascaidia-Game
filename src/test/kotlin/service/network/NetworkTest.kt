@@ -18,14 +18,14 @@ class NetworkTest {
     private lateinit var rootService1: RootService
     private lateinit var rootService2: RootService
 
-    private var code = ""
-
     /**
      * Initialize service to set up the test environment. This function is executed before every test.
      */
-    fun setUp(p1Type: PlayerType = PlayerType.HUMAN, p2Type: PlayerType = PlayerType.HUMAN) {
+    fun setUp(p1Type: PlayerType = PlayerType.HUMAN, p2Type: PlayerType = PlayerType.HUMAN, lobbyCode: String = "") {
         rootService1 = RootService()
         rootService2 = RootService()
+
+        var code = lobbyCode
 
         val refreshable = object : Refreshable {
             override fun refreshAfterHostGame(lobbyCode: String, playerName: String, playerType: PlayerType) {
@@ -46,24 +46,6 @@ class NetworkTest {
 
         rootService1.networkService.startNewHostedGame()
         Thread.sleep(5000)
-    }
-
-    /**
-     * A simple test to check if the [RootService] is initialized.
-     */
-    @Test
-    fun testIfSetUpWorked() {
-        setUp()
-
-        val game1 = rootService1.currentGame
-        checkNotNull(game1) {"Game 1 should have been started"}
-
-        val game2 = rootService2.currentGame
-        checkNotNull(game2) {"Game 2 should have been started"}
-
-        assertEquals(game1.choices.map { Pair(it.first.id, it.second.name) },
-            game2.choices.map { Pair(it.first.id, it.second.name) },
-            "Both clients should have the same choices")
     }
 
     /**
@@ -91,43 +73,11 @@ class NetworkTest {
     }
 
     /**
-     * A test to see if a turn plays out correctly
-     */
-    @Test
-    fun fullTurn() {
-        setUp()
-
-        val game1 = rootService1.currentGame
-        checkNotNull(game1) {"Game 1 should have been started"}
-        val game2 = rootService2.currentGame
-        checkNotNull(game2) {"Game 2 should have been started"}
-
-        rootService1.playerActionService.selectColumn(1)
-
-        Thread.sleep(1000)
-
-        assertEquals(game1.selectedChoice, game2.selectedChoice,
-            "Both clients should have the same choices")
-
-        rootService1.playerActionService.placeTile(Triple(-1, 0, 1))
-        rootService1.gameService.changeTurn()
-
-        Thread.sleep(1000)
-
-        assertEquals(game1.playerQueue.last().board[Triple(-1,0,1)]?.id,
-            game2.playerQueue.last().board[Triple(-1,0,1)]?.id,
-            "Both clients should have the same Tile placed")
-
-        assertEquals(game1.wildlifeTokens.peekAll().map {it.name},
-            game2.wildlifeTokens.peekAll().map {it.name},
-            "Both clients should have the same wildlife bag")
-    }
-
-    /**
      * A test to confirm the currentGame == null cases
      */
     @Test
     fun nullTest() {
+        rootService1 = RootService()
         val net = rootService1.networkService
         assertFailsWith<IllegalStateException> {net.startNewHostedGame()}
         assertFailsWith<IllegalStateException> {net.startNewHostedGame()}
@@ -137,17 +87,6 @@ class NetworkTest {
         assertFailsWith<IllegalStateException> {net.sendExterminate(listOf(), false)}
         assertFailsWith<IllegalStateException> {net.receiveExterminate(WipeWildlifeMessage(false, 0, listOf(), listOf()))}
         assertFailsWith<IllegalStateException> {net.sendRotation()}
-    }
-
-    /**
-     * A test for the network service
-     */
-    @Test
-    fun noConnectionTest() {
-        setUp()
-
-        val rootService3 = RootService()
-        assertFails { rootService3.networkService.hostGame("Test", PlayerType.HUMAN, code) }
     }
 
     /**

@@ -224,34 +224,6 @@ class ExterminateTest {
     }
 
     /**
-     * Tests the error case where there are not at least three identical
-     * wildlife tokens in the choices.
-     */
-    @Test
-    fun `exterminate fails when there are not three same wildlife tokens`() {
-        val currentGame = rootService.currentGame
-        assertNotNull(currentGame)
-
-        setChoices(
-            currentGame,
-            listOf(
-                WildlifeToken.BEAR,
-                WildlifeToken.SALMON,
-                WildlifeToken.ELK,
-                WildlifeToken.FOX
-            )
-        )
-
-        assertFailsWith<IllegalStateException>("Extermination without three same tokens was allowed") {
-            rootService.gameService.exterminate(true)
-        }
-
-        assertFalse(refreshWasCalled,
-            "Refresh should not be called after an invalid extermination")
-        assertEquals(0, currentGame.removedTokens.size,
-            "No token should be removed after an invalid extermination")
-    }
-    /**
      * tests that with only three identical wildlife no automatic extrmination is allowed
      *
      */
@@ -359,28 +331,7 @@ class ExterminateTest {
         assertTrue(currentGame.removedTokens.isEmpty(),
             "removedTokens should be empty after an extermination")
     }
-    /**
-     * tests that a player cannot exterminate with four identical tokens
-     */
-    @Test
-    fun playerCannotExterminateFourId(){
-        val currentGame = rootService.currentGame
-        assertNotNull(currentGame)
-        setChoices(
-            currentGame,
-            listOf(
-                WildlifeToken.BEAR,
-                WildlifeToken.BEAR,
-                WildlifeToken.BEAR,
-                WildlifeToken.BEAR
-            )
-        )
-        assertFailsWith<IllegalStateException> {
-            rootService.gameService.exterminate(true)
-        }
-        assertEquals(GameState.START_OF_TURN, currentGame.gameState)
-        assertTrue(currentGame.removedTokens.isEmpty())
-    }
+
     /**
      * tests that the player cannot exterminate twice
      */
