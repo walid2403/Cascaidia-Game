@@ -182,15 +182,12 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     }
 
     /**
-     * set up the game using [GameService.startNewGame] and send the game init message
-     * to the guest player. [connectionState] needs to be [ConnectionState.WAITING_FOR_GUEST].
-     * This method should be called from the [WarNetworkClient] when the guest joined notification
-     * arrived. See [WarNetworkClient.onPlayerJoined].
+     * set up the game using [service.GameService.startNewGame] and send the game init message
+     * to the guest player. [connectionState] needs to be [ConnectionState.WAITING_FOR_GUESTS].
+     * This method should be called from the [CascadiaNetworkClient] when the guest joined notification
+     * arrived. See [CascadiaNetworkClient.onPlayerJoined].
      *
-     * @param hostPlayerName player name of the host player
-     * @param guestPlayerName player name of the guest player
-     *
-     * @throws IllegalStateException if [connectionState] != [ConnectionState.WAITING_FOR_GUEST]
+     * @throws IllegalStateException if [connectionState] != [ConnectionState.WAITING_FOR_GUESTS]
      */
     fun startNewHostedGame() {
         val playerNames = client?.players?.toList()
