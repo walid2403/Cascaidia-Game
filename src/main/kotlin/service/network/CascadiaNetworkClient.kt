@@ -58,7 +58,8 @@ class CascadiaNetworkClient(
                 networkService.updateConnectionState(ConnectionState.WAITING_FOR_GUESTS)
                 sessionID = response.sessionID
 
-                players.add(Pair(playerName, playerType!!))
+                val type = checkNotNull(playerType)
+                players.add(Pair(playerName, type))
 
                 networkService.triggerRefresh("createGame")
             }
@@ -111,7 +112,8 @@ class CascadiaNetworkClient(
         when (response.status) {
             JoinGameResponseStatus.SUCCESS -> {
                 players = response.opponents.map { Pair(it, PlayerType.NETWORK) }.toMutableList()
-                players.add(Pair(playerName, playerType!!))
+                val type = checkNotNull(playerType)
+                players.add(Pair(playerName, type))
                 sessionID = response.sessionID
                 networkService.updateConnectionState(ConnectionState.WAITING_FOR_GUESTS)
 
@@ -235,10 +237,12 @@ class CascadiaNetworkClient(
 
         detektIsStupid = sender
 
+        val type = checkNotNull(playerType)
+
         networkService.startNewJoinedGame(
             message = message,
             playerName = playerName,
-            playerType = playerType!!,
+            playerType = type,
         )
     }
 

@@ -357,9 +357,10 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         onAllRefreshables { refreshAfterPlaceTile(habCoords) }
 
         if (message.wildlifeCoordinates != null) {
+            val cords = checkNotNull(message.wildlifeCoordinates)
             val tokenCoords: Triple<Int, Int, Int> = Triple(
-                (message.wildlifeCoordinates!!.first + message.wildlifeCoordinates!!.second) * (-1),
-                message.wildlifeCoordinates!!.second, message.wildlifeCoordinates!!.first)
+                (cords.first + cords.second) * (-1),
+                cords.second, cords.first)
 
             println("Place Wildlife at: "+tokenCoords.third.toString()+", "+tokenCoords.second.toString())
             rootService.playerActionService.placeWildlife(tokenCoords)
