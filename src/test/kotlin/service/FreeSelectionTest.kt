@@ -195,4 +195,46 @@ class FreeSelectionTest {
         assertEquals(3, game.playerQueue.peek().natureTokens,
             "Die Anzahl der Nature Tokens des Spielers sollte nicht verändert worden sein worden sein")
     }
+
+    /**
+     * Testet, dass [PlayerActionService.freeSelection] fehlschlägt, wenn kein Spiel läuft.
+     */
+    @Test
+    fun `invalider Spielzug ohne laufendes Spiel`() {
+        rootService.currentGame = null
+
+        assertFailsWith<IllegalStateException> {
+            rootService.playerActionService.freeSelection(0, 1)
+        }
+        assertFalse(refreshWasCalled)
+    }
+
+    /**
+     * Testet, dass [PlayerActionService.freeSelection] auch in einem Netzwerkspiel mit einem
+     * menschlichen Spieler funktioniert. Dies führt den Netzwerk-Sende-Zweig aus, der ohne
+     * verbundenen Client eine sichere No-Op ist.
+     */
+    @Test
+    fun `valider Spielzug im Netzwerkspiel`() {
+        val game = CascadiaGame(List(5) { true }, false)
+        val habitats = MutableList(6) { Habitates.MOUNTAINS }
+        for (i in 0 until 4) {
+            game.choices.add(Pair(Tile(10 + i, habitats, emptyList()), WildlifeToken.BEAR))
+        }
+        game.selectedChoice = Pair(-1, -1)
+        game.gameState = GameState.START_OF_TURN
+        val player = Player("player0", PlayerType.HUMAN)
+        player.natureTokens = 3
+        game.playerQueue.add(player)
+        rootService.currentGame = game
+
+        rootService.playerActionService.freeSelection(0, 2)
+
+        assertTrue(refreshWasCalled, "Der Refresh sollte getriggert haben")
+        assertEquals(Pair(0, 2), game.selectedChoice)
+        assertEquals(GameState.MADE_CHOICE, game.gameState)
+        assertEquals(2, player.natureTokens,
+            "Die Anzahl der Nature Tokens des Spielers sollte um eins reduziert worden sein")
+    }
+
 }

@@ -115,14 +115,19 @@ class ChangeWildlifeTest {
 
         game.gameState = GameState.HAS_EXTERMINATED
 
+        // Markt diversifizieren, damit exterminate() keine automatische
+        // Ueberbevoelkerungs-Bereinigung (4 identische Token) ausloest
+        game.choices[1] = Pair(game.choices[1].first, WildlifeToken.ELK)
+        game.choices[2] = Pair(game.choices[2].first, WildlifeToken.HAWK)
+
         rootService.playerActionService.changeWildlife(emptyList())
 
         assertTrue(refreshWasCalled, "Der Refresh sollte getriggert haben")
         assertEquals(listOf(), refreshIndices)
 
         assertEquals(WildlifeToken.BEAR, selection.elementAt(0).second)
-        assertEquals(WildlifeToken.BEAR, selection.elementAt(1).second)
-        assertEquals(WildlifeToken.BEAR, selection.elementAt(2).second)
+        assertEquals(WildlifeToken.ELK, selection.elementAt(1).second)
+        assertEquals(WildlifeToken.HAWK, selection.elementAt(2).second)
         assertEquals(WildlifeToken.BEAR, selection.elementAt(3).second)
 
         assertEquals(2, game.playerQueue.peek().natureTokens,
@@ -193,7 +198,7 @@ class ChangeWildlifeTest {
         assertEquals(WildlifeToken.BEAR, selection.elementAt(2).second)
         assertEquals(WildlifeToken.BEAR, selection.elementAt(3).second)
 
-    assertEquals(GameState.MADE_CHOICE, game.gameState,
+        assertEquals(GameState.MADE_CHOICE, game.gameState,
             "Der GameState darf nicht angepasst worden sein")
 
         assertEquals(3, game.playerQueue.peek().natureTokens,
@@ -226,4 +231,109 @@ class ChangeWildlifeTest {
         assertEquals(3, game.playerQueue.peek().natureTokens,
             "Die Anzahl der Nature Tokens des Spielers sollte nicht verändert worden sein worden sein")
     }
+
+    /**
+     * Testet, dass [PlayerActionService.changeWildlife] fehlschlägt, wenn kein Spiel läuft.
+     */
+    @Test
+    fun `invalider Spielzug ohne laufendes Spiel`() {
+        rootService.currentGame = null
+
+        assertFailsWith<IllegalStateException> {
+            rootService.playerActionService.changeWildlife(listOf(0))
+        }
+        assertFalse(refreshWasCalled)
+    }
+
+    /**
+     * Testet, dass [PlayerActionService.changeWildlife] mehr als vier Indizes ablehnt.
+     */
+    @Test
+    fun `invalider Spielzug durch mehr als vier Indizes`() {
+        val game = rootService.currentGame
+        assertNotNull(game)
+
+        assertFailsWith<IllegalArgumentException> {
+            rootService.playerActionService.changeWildlife(listOf(0, 1, 2, 3, 0))
+        }
+
+        assertFalse(refreshWasCalled)
+        assertEquals(3, game.playerQueue.peek().natureTokens,
+            "Die Anzahl der Nature Tokens des Spielers sollte nicht verändert worden sein")
+    }
+
+    /**
+     * Testet, dass [PlayerActionService.changeWildlife] doppelte Indizes ablehnt.
+     */
+    @Test
+    fun `invalider Spielzug durch doppelte Indizes`() {
+        val game = rootService.currentGame
+        assertNotNull(game)
+
+        assertFailsWith<IllegalArgumentException> {
+            rootService.playerActionService.changeWildlife(listOf(0, 0))
+        }
+
+        assertFalse(refreshWasCalled)
+        assertEquals(3, game.playerQueue.peek().natureTokens,
+            "Die Anzahl der Nature Tokens des Spielers sollte nicht verändert worden sein")
+    }
+
+    /**
+     * Testet, dass [PlayerActionService.changeWildlife] die Endwertung auslöst und früh
+     * zurückkehrt, wenn der Beutel weniger Token enthält als getauscht werden sollen.
+     * Der Markt und die Nature Tokens des Spielers dürfen sich dabei nicht verändern.
+     */
+    @Test
+    fun `Wertung wird ausgeloest wenn der Beutel zu klein ist`() {
+        val game = rootService.currentGame
+        assertNotNull(game)
+
+        while (game.wildlifeTokens.size > 2) {
+            game.wildlifeTokens.pop()
+        }
+
+        rootService.playerActionService.changeWildlife(listOf(0, 1, 2))
+
+        assertFalse(refreshWasCalled, "Der Tausch-Refresh darf bei leerem Beutel nicht feuern")
+        assertEquals(WildlifeToken.BEAR, game.choices[0].second, "Der Markt darf sich nicht verändern")
+        assertEquals(3, game.playerQueue.peek().natureTokens,
+            "Es darf kein Nature Token ausgegeben werden")
+    }
+
+    /**
+     * Testet, dass [PlayerActionService.changeWildlife] auch in einem Netzwerkspiel mit einem
+     * menschlichen Spieler funktioniert. Dies führt den Netzwerk-Sende-Zweig aus, der ohne
+     * verbundenen Client eine sichere No-Op ist.
+     */
+    @Test
+    fun `valider Spielzug im Netzwerkspiel`() {
+        val game = CascadiaGame(List(5) { true }, false)
+        val habitats = MutableList(6) { Habitates.MOUNTAINS }
+        for (i in 0 until 5) {
+            game.tileStack.push(Tile(i, habitats, emptyList()))
+        }
+        game.natureTokens = 10
+        for (i in 0 until 4) {
+            game.choices.add(Pair(Tile(10 + i, habitats, emptyList()), WildlifeToken.BEAR))
+        }
+        game.selectedChoice = Pair(-1, -1)
+        game.gameState = GameState.START_OF_TURN
+        for (i in 0 until 3) {
+            val player = Player("player$i", PlayerType.HUMAN)
+            player.natureTokens = 3
+            game.playerQueue.add(player)
+        }
+        game.wildlifeTokens.pushAll(List(30) { WildlifeToken.SALMON })
+        rootService.currentGame = game
+
+        rootService.playerActionService.changeWildlife(listOf(0, 1))
+
+        assertTrue(refreshWasCalled, "Der Refresh sollte getriggert haben")
+        assertEquals(WildlifeToken.SALMON, game.choices[0].second)
+        assertEquals(WildlifeToken.SALMON, game.choices[1].second)
+        assertEquals(2, game.playerQueue.peek().natureTokens,
+            "Die Anzahl der Nature Tokens des Spielers sollte um eins reduziert worden sein")
+    }
+
 }
