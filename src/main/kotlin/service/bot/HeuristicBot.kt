@@ -563,12 +563,6 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
         }
         return pairs * 20
     }
-
-            }
-        }
-
-        return score
-    }
     /**
      * Bewertet alle ausliegenden Markt-Paare (Plättchen + Tier) und wählt die beste aus.
      * Besitzt der Bot einen Natur-Zapfen und ist der normale Markt schlecht bewertet,
