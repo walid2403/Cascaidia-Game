@@ -50,6 +50,9 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
                     greedyBot.makeTurn()
                 }
             }
+            PlayerType.GREEDY_HEURISTIC_BOT -> {
+                // Hier den Zug aufrufen
+            }
             PlayerType.MONTE_BOT -> {
                 //Hier euren Zug aufrufen. Wenn ihr den ganzen Zug direkt macht, dann wie bei EASY_BOT, sonst wie bei Rest
             }
