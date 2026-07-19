@@ -877,7 +877,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private fun disableOnlineGameFeatures() {
         redo.isDisabled = true
         undo.isDisabled = true
-        app.pauseMenu.saveAndExitButton.isDisabled = true
+        disableSaveAndExit()
     }
 
     private fun disableAllTilesOnclick() {
@@ -1115,6 +1115,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         selectedGridX = null
         selectedGridY = null
 
+        changeWildlifeButton.text = "Change Wildlife"
+
         if(requireNotNull(rootService.currentGame).isLocal) {
             chatButton.isVisible = false
             closeChat()
@@ -1136,6 +1138,24 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         if(rootService.currentGame?.isLocal == false) { disableOnlineGameFeatures() }
     }
 
+    private fun enableSaveAndExit() {
+        app.pauseMenu.saveAndExitButton.visual = ColorVisual(236, 142, 14, 256).apply {
+            style.borderRadius = BorderRadius(31)
+        }
+        app.pauseMenu.saveAndExitButton.font = Font(30.0,
+            Color(256,256,256,256),fontWeight = Font.FontWeight.BOLD,family = "Poppins")
+        app.pauseMenu.saveAndExitButton.isDisabled = false
+    }
+
+    private fun disableSaveAndExit() {
+        app.pauseMenu.saveAndExitButton.visual = ColorVisual(236, 142, 14, 127).apply {
+            style.borderRadius = BorderRadius(31)
+        }
+        app.pauseMenu.saveAndExitButton.font = Font(30.0,
+            Color(256,256,256,127),fontWeight = Font.FontWeight.BOLD,family = "Poppins")
+        app.pauseMenu.saveAndExitButton.isDisabled = true
+    }
+
     private fun createGame() {
         val game = rootService.currentGame
         checkNotNull(game)
@@ -1143,7 +1163,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         redo.isDisabled = false
         undo.isDisabled = false
         endTurn.isDisabled = false
-        app.pauseMenu.saveAndExitButton.isDisabled = false
+
+        enableSaveAndExit()
 
         resetGame()
 
@@ -1515,7 +1536,14 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         redo.isDisabled = false
         undo.isDisabled = false
         endTurn.isDisabled = false
-        app.pauseMenu.saveAndExitButton.isDisabled = false
+
+        clearOverpopulationButton.visual = ColorVisual(0, 0, 0, 127).apply {
+            style.borderRadius = BorderRadius(10)
+        }
+        clearOverpopulationButton.font = Font(size = 16, color = Color(255, 255, 255, 127))
+
+        enableSaveAndExit()
+
         makeButtonsBlack()
 
         botRotation = 0
