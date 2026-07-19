@@ -291,7 +291,6 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
 
     private fun getPlayerType(playerTypeInt: Int): PlayerType {
         return when (playerTypeInt) {
-            //TODO("Greedy Heuristic Bot wieder einkommentieren wenn der implementiert ist")
 
             0 -> PlayerType.HUMAN
             1 -> PlayerType.EASY_BOT
@@ -302,7 +301,7 @@ class HostOnlineScene(private val app: SopraApplication, private val rootService
             6 -> PlayerType.GREEDY_HEURISTIC_BOT
             7 -> PlayerType.NEURAL_BOT
 
-            else -> throw IllegalArgumentException("Only numbers between 0 and 3 are valid")
+            else -> throw IllegalArgumentException("Only numbers between 0 and 7 are valid")
         }
     }
 
