@@ -731,6 +731,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         }
         return elkList
     }
+
     private fun elkScore(elkGroupList: List<List<Node>>, scoringCardA: Boolean): Int {
         val elkScores = mutableListOf<Int>()
 
@@ -738,49 +739,52 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             if (elkGroup.size < 3) {
                 elkScores.add(scoreElk(elkGroup.size))
                 continue
+            }
+            if (scoringCardA) {
+                elkScorePartA(elkGroup, elkScores)
             } else {
-                if (scoringCardA) {
-                    val neighborElks = mutableListOf<Int>()
-                    var straight = true
-                    elkGroup.elementAt(0).neighbours.forEachIndexed { index, node ->
-                        if (node == null) return@forEachIndexed
-                        if (node.tile.occupant == WildlifeToken.ELK) neighborElks.add(index)
-                    }
-                    if (neighborElks.size == 1) {
-                        if (neighborElks.elementAt(0) < 3) neighborElks.elementAt(0) + 3
-                        neighborElks.add(neighborElks.elementAt(0) - 3)
-                    } else if (neighborElks.size == 2) {
-                        neighborElks.sort()
-                        if (neighborElks.elementAt(1) - 3 != neighborElks.elementAt(0)) straight = false
-                    }
-
-                    if (straight) {
-                        for (node in elkGroup) {
-                            val neighborElks2 = mutableListOf<Int>()
-                            node.neighbours.forEachIndexed { index, node ->
-                                if (node == null) return@forEachIndexed
-                                if (node.tile.occupant == WildlifeToken.ELK) neighborElks2.add(index)
-                            }
-
-                            straight = neighborElks2.all { it in neighborElks }
-                        }
-                    }
-
-                    if (straight) {
-                        val longStraigths = elkGroup.size / 4
-                        val shortStraightLength = elkGroup.size % 4
-                        elkScores.add(scoreElk(4) * longStraigths + scoreElk(shortStraightLength))
-                    } else {
-                        elkScores.add(scoreElkGroup(elkGroup, scoringCardA, 0))
-                    }
-                } else {
-                    elkScores.add(scoreElkGroup(elkGroup, scoringCardA, 0))
-                }
+                elkScores.add(scoreElkGroup(elkGroup, false, 0))
             }
         }
 
         return elkScores.sum()
     }
+    private fun elkScorePartA(elkGroup: List<Node>, elkScores: MutableList<Int>) {
+        val neighborElks = mutableListOf<Int>()
+        var straight = true
+        elkGroup.elementAt(0).neighbours.forEachIndexed { index, node ->
+            if (node == null) return@forEachIndexed
+            if (node.tile.occupant == WildlifeToken.ELK) neighborElks.add(index)
+        }
+        if (neighborElks.size == 1) {
+            if (neighborElks.elementAt(0) < 3) neighborElks.elementAt(0) + 3
+            neighborElks.add(neighborElks.elementAt(0) - 3)
+        } else if (neighborElks.size == 2) {
+            neighborElks.sort()
+            if (neighborElks.elementAt(1) - 3 != neighborElks.elementAt(0)) straight = false
+        }
+
+        if (straight) {
+            for (node in elkGroup) {
+                val neighborElks2 = mutableListOf<Int>()
+                node.neighbours.forEachIndexed { index, node ->
+                    if (node == null) return@forEachIndexed
+                    if (node.tile.occupant == WildlifeToken.ELK) neighborElks2.add(index)
+                }
+
+                straight = neighborElks2.all { it in neighborElks }
+            }
+        }
+
+        if (straight) {
+            val longStraigths = elkGroup.size / 4
+            val shortStraightLength = elkGroup.size % 4
+            elkScores.add(scoreElk(4) * longStraigths + scoreElk(shortStraightLength))
+        } else {
+            elkScores.add(scoreElkGroup(elkGroup, true, 0))
+        }
+    }
+
     private fun scoreElkGroup(elkGroup: List<Node>, scoringCardA: Boolean, depth: Int = 0): Int {
         elkGroup.forEach { elk ->
             if (elk.marked) {
@@ -794,9 +798,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val scores = mutableListOf<Int>()
         val combinations = mutableListOf<MutableList<Int>>()
         for (node in elkGroup) {
-            if (node.marked2 != 0) {
-                if (node.marked2 <= depth) continue
-            }
+            if (node.marked2 != 0 && node.marked2 <= depth) continue
             val neighborElks = mutableListOf<Int>()
             node.neighbours.forEachIndexed { index, node ->
                 if (node == null) return@forEachIndexed
@@ -809,44 +811,24 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                 neighborElksA.replaceAll {
                     if (it < 3) it + 3 else it
                 }
-            } else {
-                val neighborElksT2 = neighborElks.toMutableList()
-                neighborElksT2.sort()
 
-                val neighborElksT = neighborElksT2.filter { node.neighbours[it]?.marked2 == 0 }.toMutableList()
+                neighborElksA.forEach {
+                    markStraightLine(node, it)
+                    markStraightLine(node, it - 3)
 
-                while (neighborElksT.isNotEmpty()) {
-                    val tempList = mutableListOf<Int>()
-
-                    var currIdx = neighborElksT[0]
-                    val currIdx2 = neighborElksT[0]
-                    while (getNeighbors(currIdx).first in neighborElksT) {
-                        currIdx = getNeighbors(currIdx).first
-                        if (currIdx == currIdx2) break
-                    }
-                    tempList.add(currIdx)
-                    neighborElksT.remove(currIdx)
-                    while (getNeighbors(currIdx).second in neighborElksT) {
-                        currIdx = getNeighbors(currIdx).second
-                        tempList.add(currIdx)
-                        neighborElksT.remove(currIdx)
-                    }
-
-                    if (tempList.size < 3) {
-                        neighborElksB.add(tempList)
-                    } else {
-                        for (i in 0..(tempList.size - 3)) {
-                            neighborElksB.add(tempList.subList(i, i + 3))
-                        }
-                    }
+                    scoreElkGroupScoringA(elkGroup, combinations, depth, maxScore, scores) //TODO Ergebnis auslesen
                 }
+                return scores.maxOrNull() ?: 0
+            } else {
+                scoreElkGroupScoringB(neighborElks, node, neighborElksB,
+                    elkGroup, depth, maxScore, scores, combinations)
 
                 if (neighborElksB.isEmpty()) {
                     node.marked = true
 
                     val score =
                         if (elkGroup.any { elk -> (elk.marked2 == 0) && !elk.marked }) {
-                            scoreElk(1) + scoreElkGroup(elkGroup, scoringCardA, depth + 1)
+                            scoreElk(1) + scoreElkGroup(elkGroup, false, depth + 1)
                         } else scoreElk(1)
 
                     if (score == maxScore) return score
@@ -858,79 +840,110 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                     }
                 }
             }
+        }
+        return scores.maxOrNull() ?: 0
+    }
 
-            //Sonst kannst du auch 2 Variablen einfach nehmen jeweils mit dem Typ
-            //Oder eine normale for Schleife, damit man den duplicate code nicht hat
-            if (scoringCardA) {
-                neighborElksA.forEach {
-                    markStraightLine(node, it)
-                    markStraightLine(node, it - 3)
+    private fun scoreElkGroupScoringA(elkGroup: List<Node>, combinations: MutableList<MutableList<Int>>,
+                                      depth: Int, maxScore: Int, scores: MutableList<Int>): Boolean {
+        val combination = elkGroup.filter { elk -> elk.marked }.map { elk -> elk.tile.id }.toMutableList()
+        combination.sort()
 
-                    val combination = elkGroup.filter { elk -> elk.marked }.map { elk -> elk.tile.id }.toMutableList()
-                    combination.sort()
-
-                    if (combination in combinations) {
-                        elkGroup.forEach { elk -> elk.marked = false }
-                        elkGroup.forEach { elk ->
-                            if (elk.marked2 > depth) elk.marked2 = 0
-                        }
-
-                        return@forEach
-                    } else combinations.add(combination)
-
-                    val tmpScore = elkGroup.count { elk -> elk.marked }
-//                    println("tmpScore: $tmpScore, depth: $depth, size: ${elkGroup.size}, " +
-//                            "scores: $scores, it: $it, combination: $combination")
-
-                    val score =
-                        if (elkGroup.any { elk -> (elk.marked2 == 0) && !elk.marked }) {
-                            scoreElk(tmpScore) + scoreElkGroup(elkGroup, scoringCardA, depth + 1)
-                        } else scoreElk(tmpScore)
-
-                    if (score == maxScore) return score
-                    else scores.add(score)
-
-                    elkGroup.forEach { elk -> elk.marked = false }
-                    elkGroup.forEach { elk ->
-                        if (elk.marked2 > depth) elk.marked2 = 0
-                    }
-                }
-            } else {
-                neighborElksB.forEach {
-                    markElkGroup(node, it)
-
-                    val combination = elkGroup.filter { elk -> elk.marked }.map { elk -> elk.tile.id }.toMutableList()
-                    combination.sort()
-
-                    if (combination in combinations) {
-                        elkGroup.forEach { elk -> elk.marked = false }
-                        elkGroup.forEach { elk ->
-                            if (elk.marked2 > depth) elk.marked2 = 0
-                        }
-
-                        return@forEach
-                    } else combinations.add(combination)
-
-                    val tmpScore = elkGroup.count { elk -> elk.marked }
-//                    println("tmpScore: $tmpScore, depth: $depth, size: ${elkGroup.size}, scores: $scores, it: $it")
-//                    elkGroup.forEach {elk ->
-//                        println("ID: ${elk.tile.id}, Marked: ${elk.marked}, Marked2: ${elk.marked2}")
-//                    }
-
-                    val score =
-                        if (elkGroup.any { elk -> (elk.marked2 == 0) && !elk.marked }) {
-                            scoreElk(tmpScore) + scoreElkGroup(elkGroup, scoringCardA, depth + 1)
-                        } else scoreElk(tmpScore)
-
-                    if (score == maxScore) return score
-                    else scores.add(score)
-
-                    elkGroup.forEach { elk -> elk.marked = false }
-                    elkGroup.forEach { elk ->
-                        if (elk.marked2 > depth) elk.marked2 = 0
-                    }
-                }
+        if (combination in combinations) {
+            elkGroup.forEach { elk -> elk.marked = false }
+            elkGroup.forEach { elk ->
+                if (elk.marked2 > depth) elk.marked2 = 0
             }
+            return false
+        } else combinations.add(combination)
+
+        val tmpScore = elkGroup.count { elk -> elk.marked }
+        val score =
+            if (elkGroup.any { elk -> (elk.marked2 == 0) && !elk.marked }) {
+                scoreElk(tmpScore) + scoreElkGroup(elkGroup, true, depth + 1)
+            } else scoreElk(tmpScore)
+
+        if (score == maxScore) return true
+        else scores.add(score)
+
+        elkGroup.forEach { elk -> elk.marked = false }
+        elkGroup.forEach { elk ->
+            if (elk.marked2 > depth) elk.marked2 = 0
+        }
+        return false
+    }
+
+    private fun scoreElkGroupScoringBInnerLoop(neighborElksT: MutableList<Int>,
+                                               neighborElksB: MutableList<MutableList<Int>>, node: Node,
+                                               elkGroup: List<Node>, combinations: MutableList<MutableList<Int>>,
+                                               depth: Int, maxScore: Int, scores: MutableList<Int>) {
+        val tempList = mutableListOf<Int>()
+
+        var currIdx = neighborElksT[0]
+        val currIdx2 = neighborElksT[0]
+        while (getNeighbors(currIdx).first in neighborElksT) {
+            currIdx = getNeighbors(currIdx).first
+            if (currIdx == currIdx2) break
+        }
+        tempList.add(currIdx)
+        neighborElksT.remove(currIdx)
+        while (getNeighbors(currIdx).second in neighborElksT) {
+            currIdx = getNeighbors(currIdx).second
+            tempList.add(currIdx)
+            neighborElksT.remove(currIdx)
+        }
+
+        if (tempList.size < 3) {
+            neighborElksB.add(tempList)
+        } else {
+            for (i in 0..(tempList.size - 3)) {
+                neighborElksB.add(tempList.subList(i, i + 3))
+            }
+        }
+
+        neighborElksB.forEach {
+            markElkGroup(node, it)
+
+            val combination = elkGroup.filter { elk -> elk.marked }.map { elk -> elk.tile.id }.toMutableList()
+            combination.sort()
+
+            if (combination in combinations) {
+                elkGroup.forEach { elk -> elk.marked = false }
+                elkGroup.forEach { elk ->
+                    if (elk.marked2 > depth) elk.marked2 = 0
+                }
+
+                return@forEach
+            } else combinations.add(combination)
+
+            val tmpScore = elkGroup.count { elk -> elk.marked }
+            val score =
+                if (elkGroup.any { elk -> (elk.marked2 == 0) && !elk.marked }) {
+                    scoreElk(tmpScore) + scoreElkGroup(elkGroup, false, depth + 1)
+                } else scoreElk(tmpScore)
+
+            if (score == maxScore) //return
+            else scores.add(score)
+
+            elkGroup.forEach { elk -> elk.marked = false }
+            elkGroup.forEach { elk ->
+                if (elk.marked2 > depth) elk.marked2 = 0
+            }
+        }
+    }
+
+    private fun scoreElkGroupScoringB(neighborElks: MutableList<Int>, node: Node,
+                                      neighborElksB: MutableList<MutableList<Int>>, elkGroup: List<Node>, depth: Int,
+                                      maxScore: Int, scores: MutableList<Int>,
+                                      combinations: MutableList<MutableList<Int>>): Int {
+        val neighborElksT2 = neighborElks.toMutableList()
+        neighborElksT2.sort()
+
+        val neighborElksT = neighborElksT2.filter { node.neighbours[it]?.marked2 == 0 }.toMutableList()
+
+        while (neighborElksT.isNotEmpty()) {
+            scoreElkGroupScoringBInnerLoop(neighborElksT, neighborElksB, node, elkGroup, combinations, depth,
+                maxScore, scores)
         }
         return scores.maxOrNull() ?: 0
     }
