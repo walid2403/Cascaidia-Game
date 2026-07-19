@@ -873,8 +873,7 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
      */
     private fun getVisual(name: String): ImageVisual {
         val list1 = listOf(PlayerType.HUMAN, PlayerType.EASY_BOT, PlayerType.HARD_BOT, PlayerType.HEURISTIC_BOT)
-        val list2 = listOf(PlayerType.GREEDY_BOT, PlayerType.MONTE_BOT, PlayerType.NEURAL_BOT)
-        //TODO("PlayerType.GREEDY_HEURISTIC_BOT in list2 ergänzen")
+        val list2 = listOf(PlayerType.GREEDY_BOT, PlayerType.MONTE_BOT, PlayerType.NEURAL_BOT, PlayerType.GREEDY_HEURISTIC_BOT)
 
         return if (name == playerName) {
             when(playerType) {
@@ -930,11 +929,9 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
                 style.borderRadius = BorderRadius(8)
             }
 
-            //TODO("Greedy Heuristic Bot wieder rein kommentieren wenn der implementiert ist")
-
-//            PlayerType.GREEDY_HEURISTIC_BOT -> ImageVisual("icons/GreedyHeuristicBotIcon3.png").apply {
-//                style.borderRadius = BorderRadius(8)
-//            }
+            PlayerType.GREEDY_HEURISTIC_BOT -> ImageVisual("icons/GreedyHeuristicBotIcon3.png").apply {
+                style.borderRadius = BorderRadius(8)
+            }
 
             else -> throw IllegalArgumentException("This function doesn't provide an ImageVisual for this player" +
                     "type: $playerType")
