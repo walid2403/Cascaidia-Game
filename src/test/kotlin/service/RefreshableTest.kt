@@ -12,6 +12,9 @@ import kotlin.test.Test
 class RefreshableTest {
     private val refreshable = object: Refreshable{}
 
+    /**
+     * Test
+     */
     @Test
     fun `refreshable test`() {
         refreshable.refreshAfterChangeTurn(lastTurn = false)

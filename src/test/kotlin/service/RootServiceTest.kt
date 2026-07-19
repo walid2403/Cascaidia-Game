@@ -8,6 +8,9 @@ import kotlin.test.assertTrue
  *
  */
 class RootServiceTest {
+    /**
+     * Test
+     */
     @Test
     fun addRefreshableTest() {
         val rootService = RootService()
