@@ -11,8 +11,6 @@ import service.RootService
  * @param rootService Link to the [RootService] class
  * @property rootService Link to the [RootService] class
  */
-
-@Suppress("TooManyFunctions")
 class NetworkService(private val rootService: RootService) : AbstractRefreshingService() {
 
     /** URL of the BGW net server hosted for SoPra participants */

@@ -10,6 +10,8 @@ import tools.aqua.bgw.components.layoutviews.Pane
 import tools.aqua.bgw.components.uicomponents.Button
 import tools.aqua.bgw.components.uicomponents.CheckBox
 import tools.aqua.bgw.components.uicomponents.Label
+import tools.aqua.bgw.components.uicomponents.ListView
+import tools.aqua.bgw.components.uicomponents.TextField
 import tools.aqua.bgw.core.Alignment
 import tools.aqua.bgw.core.Color
 import tools.aqua.bgw.core.MenuScene
@@ -521,13 +523,46 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
         text = "Lobby Code: UNKNOWN",
     )
 
+    //Chat
+    private var chatOpened = false
+    private var newMessage = false
+
+    private val chatButton = Button(width = 70, height = 60, posX = 1815, posY = 35).apply {
+        onMouseClicked = {
+            if(!chatOpened) {
+                openChat()
+            } else {
+                closeChat()
+            }
+        }
+    }
+    private val chatView = ListView<String>(posX = 1560, posY = 80, width = 240, height = 125,
+        visual = ColorVisual(200,200,200).apply { style.borderRadius = BorderRadius(10) },
+        font = Font(size = 20))
+    private val chatBoxBackground = Label(posX = 1555, posY = 35, width = 250, height = 175,
+        visual = ColorVisual(120,120,120).apply { style.borderRadius = BorderRadius(10) })
+    private val messageInput = TextField(posX = 1560, posY = 40, width = 195, height = 35,
+        visual = ColorVisual(200,200,200).apply { style.borderRadius = BorderRadius(17.5) },
+        prompt = "Message:", font = Font(size = 20))
+    private val sendButton = Button(posX = 1765, posY = 40, width = 35, height = 35,
+        visual = ColorVisual(200,200,200).apply { style.borderRadius = BorderRadius(17.5) },
+        text = ">", font = Font(size = 30)).apply {
+        onMouseClicked = {
+            rootService.networkService.sendChatMessage(messageInput.text)
+            refreshAfterChatMessage("Me",
+                messageInput.text)
+            messageInput.text = ""
+        }
+    }
+
     init {
         addComponents(
             backgroundImage,
             scoreCardSelectionPane,
             foldOutTab,
             playerViewPane,
-            playerTypeOverview
+            playerTypeOverview,
+            chatButton, chatBoxBackground, chatView, messageInput, sendButton
         )
         playerViewPane.addAll(
             backArrow,
@@ -570,6 +605,8 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
             checkBoxSalmonA,
             checkBoxSalmonB
         )
+
+        resetChat()
     }
 
     private fun resetScene() {
@@ -599,6 +636,38 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
 
         panelsOut = false
         movePanelsIn()
+
+        resetChat()
+    }
+
+    private fun resetChat() {
+        chatOpened = false
+        newMessage = false
+        chatView.items.clear()
+        listOf(chatBoxBackground, chatView, messageInput, sendButton).forEach { it.isVisible = false }
+        messageInput.text = ""
+        chatButton.visual = ImageVisual("chat_icon.png")
+    }
+
+    private fun openChat() {
+        chatOpened = true
+        listOf(chatBoxBackground, chatView, messageInput, sendButton).forEach { it.isVisible = true }
+        chatButton.visual = ImageVisual("chat_icon.png")
+    }
+
+    private fun closeChat() {
+        chatOpened = false
+        listOf(chatBoxBackground, chatView, messageInput, sendButton).forEach { it.isVisible = false }
+    }
+
+    /**
+     * This Method showed received Messages from other Players in the Chat
+     */
+    override fun refreshAfterChatMessage(messageSender: String, message: String) {
+        if(!chatOpened) chatButton.visual = ImageVisual("chat_icon_redDot.png")
+        if(message.isNotBlank() && messageSender.isNotBlank()) {
+            chatView.items.add(0, "$messageSender: $message")
+        }
     }
 
     /**
@@ -802,8 +871,6 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
      * This function returns the [ImageVisual] corresponding to the [playerType], if the parameter [name] is identical
      * to the [playerName] of the local player and the NetworkIcon otherwise
      */
-
-    @Suppress("CyclomaticComplexMethod")
     private fun getVisual(name: String): ImageVisual {
         return if (name == playerName) {
             when(playerType) {

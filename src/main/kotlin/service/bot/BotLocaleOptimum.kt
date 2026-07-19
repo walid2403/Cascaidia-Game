@@ -101,7 +101,6 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
     }
 
     //chooses one of the given pairs
-    @Suppress("CyclomaticComplexMethod", "LongMethod", "NestedBlockDepth")
     private fun chooseBestPair(currentGame: CascadiaGame, player: Player){
         val freePlaces= findFreePlace(player.board)
         val startPoints= allPoints()

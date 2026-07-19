@@ -198,7 +198,6 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      *
      * @throws IllegalStateException if the [GameState] is not `MADE_CHOICE`.
      */
-    @Suppress("CyclomaticComplexMethod")
     fun rotateTile(right: Boolean?, targetRotation: Int? = null, targetTilePos: Triple<Int, Int, Int>? = null) {
         val game = rootService.currentGame ?: error("No current game")
 
