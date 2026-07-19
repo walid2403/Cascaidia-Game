@@ -11,6 +11,7 @@ enum class PlayerType {
     NETWORK,
     GREEDY_BOT,
     HEURISTIC_BOT,
+    GREEDY_HEURISTIC_BOT,
     MONTE_BOT,
     NEURAL_BOT,
     ;

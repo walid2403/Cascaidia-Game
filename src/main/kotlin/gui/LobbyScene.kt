@@ -1239,14 +1239,13 @@ class LobbyScene(private val app: SopraApplication, private val rootService: Roo
      */
     private fun getPlayerType(type: Int): PlayerType {
         return when (type) {
-//          TODO("Greedy Heuristic Bot wieder einkommentieren wenn der implementiert ist")
             1 -> PlayerType.HUMAN
             2 -> PlayerType.EASY_BOT
             3 -> PlayerType.HARD_BOT
             4 -> PlayerType.MONTE_BOT
             5 -> PlayerType.GREEDY_BOT
             6 -> PlayerType.HEURISTIC_BOT
-//            7 -> PlayerType.GREEDY_HEURISTIC_BOT
+            7 -> PlayerType.GREEDY_HEURISTIC_BOT
             8 -> PlayerType.NEURAL_BOT
 
             else -> throw IllegalArgumentException("Player $type is not valid")

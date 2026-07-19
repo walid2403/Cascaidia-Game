@@ -827,9 +827,9 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
                 PlayerType.MONTE_BOT -> ImageVisual("icons/MonteCarloBotIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
-//                PlayerType.GREEDY_HEURISTIC_BOT -> ImageVisual("icons/GreedyHeuristicBotIcon3.png").apply {
-//                    style.borderRadius = BorderRadius(8)
-//                }
+                PlayerType.GREEDY_HEURISTIC_BOT -> ImageVisual("icons/GreedyHeuristicBotIcon3.png").apply {
+                    style.borderRadius = BorderRadius(8)
+                }
                 PlayerType.NEURAL_BOT -> ImageVisual("icons/NeuralNetworkBotIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }

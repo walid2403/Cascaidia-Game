@@ -1269,9 +1269,9 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
                 PlayerType.MONTE_BOT -> ImageVisual("icons/MonteCarloBotIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
-//                PlayerType.GREEDY_HEURISTIC_BOT -> ImageVisual("icons/GreedyHeuristicBotIcon3.png").apply {
-//                    style.borderRadius = BorderRadius(8)
-//                }
+                PlayerType.GREEDY_HEURISTIC_BOT -> ImageVisual("icons/GreedyHeuristicBotIcon3.png").apply {
+                    style.borderRadius = BorderRadius(8)
+                }
                 PlayerType.NEURAL_BOT -> ImageVisual("icons/NeuralNetworkBotIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
