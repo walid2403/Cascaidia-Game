@@ -34,6 +34,8 @@ class CascadiaNetworkClient(
 
     var players = mutableListOf<Pair<String, PlayerType>>()
 
+    var isHost = false
+
     var errorMessage = ""
 
     /**
@@ -45,7 +47,9 @@ class CascadiaNetworkClient(
      * @throws IllegalStateException if status != success or currently not waiting for a game creation response.
      */
     override fun onCreateGameResponse(response: CreateGameResponse) {
-        check(networkService.connectionState == ConnectionState.WAITING_FOR_HOST_CONFIRMATION) { "unexpected CreateGameResponse" }
+        check(networkService.connectionState == ConnectionState.WAITING_FOR_HOST_CONFIRMATION) {
+            "unexpected CreateGameResponse"
+        }
 
         when (response.status) {
             CreateGameResponseStatus.SUCCESS -> {
@@ -73,7 +77,8 @@ class CascadiaNetworkClient(
 
                     CreateGameResponseStatus.SESSION_WITH_ID_ALREADY_EXISTS -> {
                         errorMessage =
-                            "This game ID is already in use, please use a different one or simply " + "leave the field blank"
+                            "This game ID is already in use, please use a different one or simply " +
+                                    "leave the field blank"
                     }
 
                     else -> {
@@ -95,7 +100,9 @@ class CascadiaNetworkClient(
      * @throws IllegalStateException if status != success or currently not waiting for a join game response.
      */
     override fun onJoinGameResponse(response: JoinGameResponse) {
-        check(networkService.connectionState == ConnectionState.WAITING_FOR_JOIN_CONFIRMATION) { "unexpected JoinGameResponse" }
+        check(networkService.connectionState == ConnectionState.WAITING_FOR_JOIN_CONFIRMATION) {
+            "unexpected JoinGameResponse"
+        }
 
         checkNotNull(playerType) { "A playerType is required before joining a game" }
 
@@ -104,7 +111,7 @@ class CascadiaNetworkClient(
                 players = response.opponents.map { Pair(it, PlayerType.NETWORK) }.toMutableList()
                 players.add(Pair(playerName, playerType!!))
                 sessionID = response.sessionID
-                networkService.updateConnectionState(ConnectionState.WAITING_FOR_INIT)
+                networkService.updateConnectionState(ConnectionState.WAITING_FOR_GUESTS)
 
                 networkService.triggerRefresh("joinGame")
             }
@@ -113,7 +120,8 @@ class CascadiaNetworkClient(
                 when (response.status) {
                     JoinGameResponseStatus.PLAYER_NAME_ALREADY_TAKEN -> {
                         errorMessage =
-                            "A player with your name already exists in the lobby, please change it in " + "order to join this game"
+                            "A player with your name already exists in the lobby, please change it in " +
+                                    "order to join this game"
                     }
 
                     JoinGameResponseStatus.ALREADY_ASSOCIATED_WITH_GAME -> {
@@ -126,7 +134,8 @@ class CascadiaNetworkClient(
 
                     JoinGameResponseStatus.INVALID_SESSION_ID -> {
                         errorMessage =
-                            "This session ID is invalid, if the host has already started the lobby ask " + "him for the correct ID"
+                            "This session ID is invalid, if the host has already started the lobby ask " +
+                                    "him for the correct ID"
                     }
 
                     else -> {
@@ -145,11 +154,16 @@ class CascadiaNetworkClient(
      * @throws IllegalStateException if not currently expecting any guests to join.
      */
     override fun onPlayerJoined(notification: PlayerJoinedNotification) {
-        check(networkService.connectionState == ConnectionState.WAITING_FOR_GUESTS) { "not awaiting any guests." }
+        check(networkService.connectionState == ConnectionState.WAITING_FOR_GUESTS) {
+            "not awaiting any guests."
+        }
 
         players.add(Pair(notification.sender, PlayerType.NETWORK))
 
         networkService.triggerRefresh("playerChanged")
+        if (isHost) networkService.sendGameConfig(players.map {it.first}, scoringCards)
+
+        if (players.size == 4) networkService.updateConnectionState(ConnectionState.WAITING_FOR_INIT)
     }
 
     /**
@@ -213,7 +227,6 @@ class CascadiaNetworkClient(
     /**
      * handle a [GameInitMessage] sent by the server
      */
-    @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onInitReceived(message: GameInitMessage, sender: String) {
         checkNotNull(playerType) { "A playerType is required before initiating a game" }
@@ -228,7 +241,6 @@ class CascadiaNetworkClient(
     /**
      * Handle a [GameConfigMessage] sent by the server
      */
-    @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onGameConfigReceived(message: GameConfigMessage, sender: String) {
         check(players.size == message.players.size) { "The player count seems to have changed" }
@@ -242,7 +254,6 @@ class CascadiaNetworkClient(
     /**
      * Handle a [SelectMessage] sent by the server
      */
-    @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onSelectReceived(message: SelectMessage, sender: String) {
         networkService.receiveSelect(message)
@@ -251,7 +262,6 @@ class CascadiaNetworkClient(
     /**
      * Handle a [PlaceMessage] sent by the server
      */
-    @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onPlaceReceived(message: PlaceMessage, sender: String) {
         networkService.receivePlace(message)
@@ -260,7 +270,6 @@ class CascadiaNetworkClient(
     /**
      * Handle a [WipeWildlifeMessage] sent by the server
      */
-    @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onWipeWildlifeReceived(message: WipeWildlifeMessage, sender: String) {
         networkService.receiveExterminate(message)
@@ -269,7 +278,6 @@ class CascadiaNetworkClient(
     /**
      * Handle a [UseNatureTokenMessage] sent by the server
      */
-    @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onUseNatureTokenReceived(message: UseNatureTokenMessage, sender: String) {
         networkService.receiveUseNatureToken()
@@ -278,7 +286,6 @@ class CascadiaNetworkClient(
     /**
      * Handle a [RotationMessage] sent by the server
      */
-    @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onRotationReceived(message: RotationMessage, sender: String) {
         networkService.receiveRotation(message)
@@ -287,7 +294,6 @@ class CascadiaNetworkClient(
     /**
      * Handle a [SelectWildlifeMessage] sent by the server
      */
-    @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onSelectWildlifeReceived(message: SelectWildlifeMessage, sender: String) {
         networkService.receiveSelectWildlife(message)
@@ -296,7 +302,6 @@ class CascadiaNetworkClient(
     /**
      * Handle a [SelectHabitatTileMessage] sent by the server
      */
-    @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onSelectHabitatTileReceived(message: SelectHabitatTileMessage, sender: String) {
         networkService.receiveSelectHabitatTile(message)
@@ -305,7 +310,6 @@ class CascadiaNetworkClient(
     /**
      * Handle a [ChatMessage] sent by the server
      */
-    @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onChatReceived(message: ChatMessage, sender: String) {
         networkService.receiveChatMessage(message, sender)
@@ -314,7 +318,6 @@ class CascadiaNetworkClient(
     /**
      * Handle a [NetPlayer] sent by the server (Dummy function for warning)
      */
-    @Suppress("UNUSED_PARAMETER", "unused")
     @GameActionReceiver
     fun onPlayerReceived(message: NetPlayer, sender: String) {
         println("For some reason $sender sent a NetPlayer object...")

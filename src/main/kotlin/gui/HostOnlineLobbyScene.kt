@@ -20,6 +20,8 @@ import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 import tools.aqua.bgw.visual.Visual
+import tools.aqua.bgw.components.uicomponents.ListView
+import tools.aqua.bgw.components.uicomponents.TextField
 
 
 /**
@@ -77,7 +79,7 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
         posY = 0,
         width = 1920,
         height = 1080,
-        visual = ImageVisual("backgrounds/GameConfigMenuBackground.png")
+        visual = ImageVisual("backgrounds/LoadingScreenBackground.png")
     )
     private val hostPanel = Pane<UIComponent>(
         posX = paneX, posY = paneY,
@@ -681,6 +683,39 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
         isVisible = false
     }
 
+    //Chat
+    private var chatOpened = false
+    private var newMessage = false
+
+    private val chatButton = Button(width = 70, height = 60, posX = 1815, posY = 35).apply {
+        onMouseClicked = {
+            if(!chatOpened) {
+                openChat()
+            } else {
+                closeChat()
+            }
+        }
+    }
+    private val chatView = ListView<String>(posX = 1560, posY = 80, width = 240, height = 125,
+        visual = ColorVisual(200,200,200).apply { style.borderRadius = BorderRadius(10) },
+        font = Font(size = 20))
+    private val chatBoxBackground = Label(posX = 1555, posY = 35, width = 250, height = 175,
+        visual = ColorVisual(120,120,120).apply { style.borderRadius = BorderRadius(10) })
+    private val messageInput = TextField(posX = 1560, posY = 40, width = 195, height = 35,
+        visual = ColorVisual(200,200,200).apply { style.borderRadius = BorderRadius(17.5) },
+        prompt = "Message:", font = Font(size = 20))
+    private val sendButton = Button(posX = 1765, posY = 40, width = 35, height = 35,
+        visual = ColorVisual(200,200,200).apply { style.borderRadius = BorderRadius(17.5) },
+        text = ">", font = Font(size = 30)).apply {
+        onMouseClicked = {
+            rootService.networkService.sendChatMessage(messageInput.text)
+            refreshAfterChatMessage("Me",
+                messageInput.text)
+            messageInput.text = ""
+        }
+    }
+
+
     init {
 
         listOf(p1Input,p2Input,p3Input,p4Input, downButtonP1, downButtonP2, downButtonP3, shuffleButton,
@@ -702,8 +737,11 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
             tabLabel,
             hostPanel,
             warning,
-            playerTypeOverview
+            playerTypeOverview,
+            chatButton, chatBoxBackground, chatView, messageInput, sendButton
             )
+
+        resetChat()
     }
 
     private fun resetScene() {
@@ -749,6 +787,38 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
                 hawkCardA.isVisible = true
                 hawkCardB.isVisible = true
             }
+        }
+
+        resetChat()
+    }
+
+    private fun resetChat() {
+        chatOpened = false
+        newMessage = false
+        chatView.items.clear()
+        listOf(chatBoxBackground, chatView, messageInput, sendButton).forEach { it.isVisible = false }
+        messageInput.text = ""
+        chatButton.visual = ImageVisual("chat_icon.png")
+    }
+
+    private fun openChat() {
+        chatOpened = true
+        listOf(chatBoxBackground, chatView, messageInput, sendButton).forEach { it.isVisible = true }
+        chatButton.visual = ImageVisual("chat_icon.png")
+    }
+
+    private fun closeChat() {
+        chatOpened = false
+        listOf(chatBoxBackground, chatView, messageInput, sendButton).forEach { it.isVisible = false }
+    }
+
+    /**
+     * This Method showed received Messages from other Players in the Chat
+     */
+    override fun refreshAfterChatMessage(messageSender: String, message: String) {
+        if(!chatOpened) chatButton.visual = ImageVisual("chat_icon_redDot.png")
+        if(message.isNotBlank() && messageSender.isNotBlank()) {
+            chatView.items.add(0, "$messageSender: $message")
         }
     }
 
@@ -1245,7 +1315,6 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
      * This function returns the [ImageVisual] for [playerType] if [name] is the [playerName] and
      * the NetworkIcon otherwise
      */
-
     private fun getVisual(name: String): ImageVisual {
         val list1 = listOf(PlayerType.HUMAN, PlayerType.EASY_BOT, PlayerType.HARD_BOT, PlayerType.HEURISTIC_BOT)
         val list2 = listOf(PlayerType.GREEDY_BOT, PlayerType.MONTE_BOT, PlayerType.NEURAL_BOT)

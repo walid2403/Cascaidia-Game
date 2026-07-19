@@ -37,7 +37,7 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
         posY = 0,
         width = sceneWidth,
         height = sceneHeight,
-        visual = ImageVisual("backgrounds/GameConfigMenuBackground.png")
+        visual = ImageVisual("backgrounds/LoadingScreenBackground.png")
     )
 
     private val menuBackground = Label(
@@ -282,7 +282,7 @@ class JoinOnlineScene(private val app: SopraApplication,private val rootService:
             3 -> PlayerType.MONTE_BOT
             4 -> PlayerType.GREEDY_BOT
             5 -> PlayerType.HEURISTIC_BOT
-//            6 -> PlayerType.GREEDY_HEURISTIC_BOT
+            6 -> PlayerType.GREEDY_HEURISTIC_BOT
             7 -> PlayerType.NEURAL_BOT
             else -> throw IllegalArgumentException("Only numbers between 0 and 3 are valid")
         }

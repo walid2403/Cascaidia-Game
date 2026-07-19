@@ -6,8 +6,21 @@ import entity.Tile
 import entity.WildlifeToken
 import service.RootService
 
+/**
+ * This Bot works with predetermined weights to decide which move is best at the current time
+ * @param rootService Link to the [RootService] class
+ * @param bot Link to the [Bot] class
+ * @property rootService Link to the [RootService] class
+ * @property bot Link to the [Bot] class
+ */
+
 class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
 
+    var isFinished = false
+
+    /**
+     * A function to determine the next move of the bot
+     */
     fun makeTurn() {
         val currentGame = rootService.currentGame
         checkNotNull(currentGame) { "Es existiert kein Spiel" }
@@ -50,7 +63,8 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
 
             else -> {
                 // Falls das Spiel auf etwas anderes wartet (z.B. Zug-Ende), leiten wir das Ende ein
-                currentGame.gameState = GameState.END_OF_TURN
+                //currentGame.gameState = GameState.END_OF_TURN
+                isFinished = true
             }
         }
     }
@@ -93,10 +107,10 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
             bot.coordinatesTile = bestPosition
             rootService.playerActionService.placeTile(bestPosition)
         } else { //falls keine freien Plätze mehr gibt
-            currentGame.gameState = GameState.END_OF_TURN
+            //currentGame.gameState = GameState.END_OF_TURN
+            isFinished = true   //sollte nie erreicht werden können
         }
     }
-
     private fun evaluateHabitatPosition(position: Triple<Int, Int, Int>, newTile: Tile, player: Player): Int {
         var score = 0
 
@@ -147,7 +161,8 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
 
         //Falls die Liste leer ist beenden wir den Zug (das Tier wird verworfen)
         if(possiblePositions.isEmpty()){ //muss updated !!!!!!!!!!!!!!!!!!!!!!!!
-            currentGame.gameState = GameState.END_OF_TURN
+            //currentGame.gameState = GameState.END_OF_TURN
+            isFinished = true
             return
         }
 
@@ -161,10 +176,10 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
             bot.coordinatesWildlifeToken = bestPosition
             rootService.playerActionService.placeWildlife(bestPosition)
         } else {
-            currentGame.gameState = GameState.END_OF_TURN
+            //currentGame.gameState = GameState.END_OF_TURN
+            isFinished = true
         }
     }
-
     private fun evaluateWildlifePosition(position: Triple<Int, Int, Int>, wildlife: WildlifeToken, player: Player): Int{
         var score = 0
 
@@ -329,7 +344,6 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
 
         return score
     }
-
     private fun heuristicBotChooseMarketPair(player: Player){
         val currentGame = rootService.currentGame
         checkNotNull(currentGame)

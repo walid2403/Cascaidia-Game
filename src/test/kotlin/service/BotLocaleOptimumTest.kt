@@ -1,15 +1,21 @@
-package service.bot
+package service
 
 import entity.*
-import service.RootService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
+import service.bot.BotLocaleOptimum
 
+/**
+ * A class to test the [service.bot.BotLocaleOptimum]
+ */
 class BotLocaleOptimumTest {
 
     private lateinit var rootService: RootService
 
+    /**
+     * Initialize service to set up the test environment. This function is executed before every test.
+     */
     @BeforeEach
     fun setUp() {
         println("setUp is running")
@@ -25,8 +31,12 @@ class BotLocaleOptimumTest {
             List(5) { true }
         )
     }
+
     private fun currentGame() = rootService.currentGame!!
-    private fun currentPlayer() = currentGame().playerQueue.peek()
+
+    /**
+     * A test for the [BotLocaleOptimum]
+     */
     @Test
     fun `bot makes a market selection without crashing`() {
         val bot = BotLocaleOptimum(rootService, rootService.bot)

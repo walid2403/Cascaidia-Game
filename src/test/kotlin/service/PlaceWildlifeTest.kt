@@ -194,7 +194,8 @@ class PlaceWildlifeTest {
 
         assertEquals(GameState.PLAYED_TILE, game.gameState,
             "GameState should not change after an invalid placement")
-        assertEquals(natTokenBefore, currentPlayer.natureTokens,"Player should not recieve natureToken after an invalid placement")
+        assertEquals(natTokenBefore, currentPlayer.natureTokens,"Player should not receive " +
+                "natureToken after an invalid placement")
         assertEquals(WildlifeToken.FOX, game.choices[0].second)
     }
     /**

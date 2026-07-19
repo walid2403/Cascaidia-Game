@@ -207,7 +207,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             }
         }
 
-        val selectedTile: Tile = if (right != null) {
+        val selectedTile: Tile = if (targetTilePos == null) {
             val tileIndex = game.selectedChoice.first
 
             require(tileIndex in game.choices.indices) {
@@ -216,8 +216,6 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
             game.choices[tileIndex].first
         } else {
-            checkNotNull(targetTilePos)
-
             game.playerQueue.peek()?.board[targetTilePos] ?: error("No valid tile position was given")
         }
 
@@ -254,7 +252,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             }
 
             if (selectedTile.habs.isNotEmpty()) {
-                for (i in 1..rightTimes) {
+                repeat(rightTimes) {
                     val lastHabitat = selectedTile.habs.removeAt(selectedTile.habs.lastIndex)
                     selectedTile.habs.add(0, lastHabitat)
                 }
@@ -296,7 +294,6 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         }
 
         val currentPlayer = game.playerQueue.peek()
-            ?: throw IllegalStateException("No current player found.")
 
         val tileIndex = game.selectedChoice.first
 
@@ -364,9 +361,8 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             "Wildlife can only be placed in PLAYED_TILE state"
         }
         val tile = currentPlayer.board[index]
-            ?: throw IllegalArgumentException(
-                "There is no tile at the selected position"
-            )
+        checkNotNull(tile) {"There is no tile at the selected position."}
+
         require(tile.occupant == null) {
             "This tile already contains a wildlife token"
         }
@@ -424,11 +420,11 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * @throws IllegalArgumentException if the name is empty, or if the game is not in a state where it can be saved.
      */
     fun saveGame(name: String) {
-        val game = rootService.currentGame ?: throw IllegalStateException("Kein aktives Spiel zum Speichern vorhanden.")
-        if (name.isEmpty()) throw IllegalArgumentException("Der Name darf nicht leer sein.")
-        if (!game.isLocal) {
-            throw IllegalArgumentException("Netzwerkspiele können nicht gespeichert werden.")
-        }
+        val game = rootService.currentGame
+        checkNotNull(game) { "No current game" }
+
+        require(name.isEmpty()) { "Der Name darf nicht leer sein." }
+        check(game.isLocal) { "Netzwerkspiele können nicht gespeichert werden." }
 
         val folder = File(RootService.SAVE_DIRECTORY)
         if (!folder.exists()) folder.mkdirs()

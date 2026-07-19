@@ -42,7 +42,7 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
         posY = 0,
         width = sceneWidth,
         height = sceneHeight,
-        visual = ImageVisual("backgrounds/ScoreSceneBackground.png")
+        visual = ImageVisual("backgrounds/LoadingScreenBackground.png")
     )
 
     private val mainScorePane = Pane<StaticComponentView<*>>(
@@ -231,7 +231,7 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
         }
     ).apply {
         onMouseClicked = {
-            if (rootService.currentGame?.isLocal ?: false) rootService.networkService.disconnect()
+            if (!(rootService.currentGame?.isLocal ?: true)) rootService.networkService.disconnect()
             app.exit()
         }
     }
@@ -265,7 +265,7 @@ class ScoreScene(private val app: SopraApplication, private val rootService: Roo
         }
     ).apply {
         onMouseClicked = {
-            if (rootService.currentGame?.isLocal ?: false) rootService.networkService.disconnect()
+            if (!(rootService.currentGame?.isLocal ?: true)) rootService.networkService.disconnect()
             app.showMenuScene(app.mainMenuScene)
         }
     }

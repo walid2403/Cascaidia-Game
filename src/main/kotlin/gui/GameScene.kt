@@ -783,7 +783,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
 
         adjustShopBasedOnCustomChoiceActive(customChoiceActive, tileShop[index], index)
-        rootService.networkService.sendSelectHabitatTile(index)
+
+        val player = rootService.currentGame?.playerQueue?.peek()
+        checkNotNull(player)
+
+        if (player.type != PlayerType.NETWORK && (rootService.currentGame?.isLocal == false)) {
+            rootService.networkService.sendSelectHabitatTile(index)
+        }
     }
 
     private fun adjustShopBasedOnCustomChoiceActive(customChoiceActive: Boolean, tile: Label, index: Int) {
@@ -795,6 +801,13 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             scaleAnimal(selectAnimal != -1, animal)
         } else {
             scaleTile(selectTile != -1, tile)
+        }
+
+        val player = rootService.currentGame?.playerQueue?.peek()
+        checkNotNull(player)
+
+        if (player.type != PlayerType.NETWORK && (rootService.currentGame?.isLocal == false)) {
+            rootService.networkService.sendSelectHabitatTile(index)
         }
     }
 
@@ -820,7 +833,12 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             }
         }
 
-        rootService.networkService.sendSelectWildlife(index)
+        val player = rootService.currentGame?.playerQueue?.peek()
+        checkNotNull(player)
+
+        if (player.type != PlayerType.NETWORK && (rootService.currentGame?.isLocal == false)) {
+            rootService.networkService.sendSelectWildlife(index)
+        }
     }
 
     private fun disableAllOnClicks() {

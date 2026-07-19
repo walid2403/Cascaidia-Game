@@ -36,7 +36,7 @@ class MainMenuScene(private val app: SopraApplication,private val rootService: R
         posY = 0,
         width = sceneWidth,
         height = sceneHeight,
-        visual = ImageVisual("backgrounds/ScoreSceneBackground.png")
+        visual = ImageVisual("backgrounds/LoadingScreenBackground.png")
     )
     private val menuBackground = Pane<StaticComponentView<*>>(
         posX = paneX,
