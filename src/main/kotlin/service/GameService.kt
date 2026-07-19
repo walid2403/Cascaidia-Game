@@ -234,7 +234,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @return Habitatstile
      * @param line eine Zeile aus der csv datei die bereits ein String ist
      */
-    @Suppress("CyclomaticComplexMethod")
     private fun createHabitatTile(line: String, startingTile: Boolean = false): Tile {
 
         // Aus line eine Liste machen, welche die 4 Attribute der Bezeichner besitzt
@@ -380,7 +379,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * or if there are not at least 3 tokens of the same type or
      * if there are 3 and the current gameState is not [GameState.START_OF_TURN]
      */
-    @Suppress("CyclomaticComplexMethod")
     fun exterminate(playerTrigger: Boolean, networkOverride: Boolean = false) {
         val game = rootService.currentGame ?: error("No current game")
 //        check(
@@ -562,8 +560,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
     /*
      * Alle Methoden stellen sicher, dass am Ende alle Marked flags false sind und ändern daher nichts an den Knoten
      */
-
-    @Suppress("LoopWithTooManyJumpStatements", "CyclomaticComplexMethod", "NestedBlockDepth")
     private fun createCorridorScores(nodes: List<Node>): List<Int> {
         val scores = mutableListOf<Int>()
         for (habitat in Habitates.entries) {
@@ -596,8 +592,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         }
         return scores
     }
-
-    @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
     private fun calculateHabitatCorridorMajority(
         scores: MutableList<Pair<String, MutableList<Int>>>,
         currentGame: CascadiaGame
@@ -653,8 +647,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             }
         }
     }
-
-    @Suppress("LoopWithTooManyJumpStatements", "CyclomaticComplexMethod")
     private fun bearScoringA(nodes: List<Node>): Int {
         var count = 0
         for (node in nodes) {
@@ -681,8 +673,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             else -> 27
         }
     }
-
-    @Suppress("LoopWithTooManyJumpStatements", "CyclomaticComplexMethod", "NestedBlockDepth")
     private fun bearScoringB(nodes: List<Node>): Int {
         var count = 0
         for (node in nodes) {
@@ -743,8 +733,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         }
         return elkList
     }
-
-    @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
     private fun elkScore(elkGroupList: List<List<Node>>, scoringCardA: Boolean): Int {
         val elkScores = mutableListOf<Int>()
 
@@ -795,8 +783,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
 
         return elkScores.sum()
     }
-
-    @Suppress("CyclomaticComplexMethod", "LongMethod", "NestedBlockDepth")
     private fun scoreElkGroup(elkGroup: List<Node>, scoringCardA: Boolean, depth: Int = 0): Int {
         elkGroup.forEach { elk ->
             if (elk.marked) {
@@ -985,8 +971,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             else -> scoreElk(4) * (length / 4) + scoreElk(length % 4)
         }
     }
-
-    @Suppress("LoopWithTooManyJumpStatements", "CyclomaticComplexMethod", "NestedBlockDepth")
     private fun salmonScoring(nodes: List<Node>, isA: Boolean): Int {
         var sum = 0
         val breakPointList = mutableListOf<Node>()  //Diese Knoten werden ignoriert für Wege
@@ -1090,8 +1074,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             }
         }
     }
-
-    @Suppress("LoopWithTooManyJumpStatements", "CyclomaticComplexMethod")
     private fun hawkScoringA(nodes: List<Node>): Int {
         var count = 0
         for (node in nodes) {
@@ -1117,8 +1099,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             else -> 26
         }
     }
-
-    @Suppress("LoopWithTooManyJumpStatements", "CyclomaticComplexMethod", "NestedBlockDepth")
     private fun hawkScoringB(nodes: List<Node>): Int {
         var count = 0
         for (node in nodes) {

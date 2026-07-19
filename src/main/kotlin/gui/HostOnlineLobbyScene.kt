@@ -1245,8 +1245,6 @@ class HostOnlineLobbyScene(private val app: SopraApplication,
      * This function returns the [ImageVisual] for [playerType] if [name] is the [playerName] and
      * the NetworkIcon otherwise
      */
-
-    @Suppress("CyclomaticComplexMethod")
     private fun getVisual(name: String): ImageVisual {
         return if (name == playerName) {
             when(playerType) {

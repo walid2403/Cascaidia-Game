@@ -111,8 +111,6 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
             isFinished = true   //sollte nie erreicht werden können
         }
     }
-
-    @Suppress("NestedBlockDepth")
     private fun evaluateHabitatPosition(position: Triple<Int, Int, Int>, newTile: Tile, player: Player): Int {
         var score = 0
 
@@ -182,8 +180,6 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
             isFinished = true
         }
     }
-
-    @Suppress("CyclomaticComplexMethod", "LongMethod", "NestedBlockDepth")
     private fun evaluateWildlifePosition(position: Triple<Int, Int, Int>, wildlife: WildlifeToken, player: Player): Int{
         var score = 0
 
@@ -348,8 +344,6 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
 
         return score
     }
-
-    @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
     private fun heuristicBotChooseMarketPair(player: Player){
         val currentGame = rootService.currentGame
         checkNotNull(currentGame)

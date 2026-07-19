@@ -802,8 +802,6 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
      * This function returns the [ImageVisual] corresponding to the [playerType], if the parameter [name] is identical
      * to the [playerName] of the local player and the NetworkIcon otherwise
      */
-
-    @Suppress("CyclomaticComplexMethod")
     private fun getVisual(name: String): ImageVisual {
         return if (name == playerName) {
             when(playerType) {

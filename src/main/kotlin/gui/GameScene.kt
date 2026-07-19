@@ -51,8 +51,6 @@ import kotlin.math.min
  *  anschaut, um die Boards noch einmal zu sehen
  *  @property animationsEnabled ein Objekt des Typs [Boolean], speichert, ob Animationen eingeschaltet sind
  */
-
-@Suppress("TooManyFunctions")
 class GameScene(private val app: SopraApplication,private val rootService: RootService) :
     BoardGameScene(1920, 1080), Refreshable {
 
