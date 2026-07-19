@@ -106,7 +106,7 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
 
     private fun chooseBestPairInnerFirst(player: Player, tile: Tile, p: Triple<Int, Int, Int>,
                                          animal: WildlifeToken) {
-        for(s in 0..5){
+        for (s in 0..5) {
             val rotated = rotatedTile(tile, s)
             player.board[p] = rotated
             var bestForThisTilePlacement = allPoints()
@@ -129,6 +129,7 @@ class BotLocaleOptimum(private val rootService: RootService, private val bot: Bo
                 bestCombinedScore = bestForThisTilePlacement
             }
         }
+    }
 
     //chooses one of the given pairs
     private fun chooseBestPair(currentGame: CascadiaGame, player: Player){
