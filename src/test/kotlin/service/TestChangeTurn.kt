@@ -259,6 +259,7 @@ class TestChangeTurn {
         rootService.currentGame = currentGame
         currentGame.playerQueue.clear()
         currentGame.playerQueue.add(Player("test", PlayerType.EASY_BOT))
+        currentGame.playerQueue.add(Player("test2", PlayerType.EASY_BOT))
         rootService.gameService.changeTurn()
         assertEquals(1,rootService.history.prevMoves.size,
             "Bot Zug auf Stack gespeichert")
@@ -296,4 +297,68 @@ class TestChangeTurn {
         assertEquals(1,rootService.history.prevMoves.size,
             "Bot Zug auf Stack gespeichert")
     }
+
+    /**
+     * Testet den Spielende-Zweig von [GameService.changeTurn]: Hat der naechste Spieler
+     * bereits 23 Tiles auf dem Board, wird die Endwertung ausgeloest und der Zug nicht
+     * gewechselt.
+     */
+    @Test
+    fun `changeTurn beendet das Spiel bei vollem Board`() {
+        val currentGame = rootService.currentGame
+        assertNotNull(currentGame)
+
+        var endGameCalled = false
+        rootService.addRefreshable(object : Refreshable {
+            override fun refreshAfterEndGame(scores: List<Pair<String, List<Int>>>) {
+                endGameCalled = true
+            }
+        })
+
+        val nextPlayer = currentGame.playerQueue.elementAt(1)
+        val habitats = MutableList(6) { Habitates.MOUNTAINS }
+        nextPlayer.board[Triple(0, 0, 21)] = Tile(900, habitats, emptyList())
+        nextPlayer.board[Triple(0, 0, 22)] = Tile(901, habitats, emptyList())
+        assertEquals(23, nextPlayer.board.size)
+
+        rootService.gameService.changeTurn()
+
+        assertTrue(endGameCalled, "Die Endwertung sollte ausgeloest worden sein")
+        assertFalse(refreshWasCalled, "Der normale Zugwechsel-Refresh darf nicht feuern")
+    }
+
+    /**
+     * Testet [GameService.changeTurn] im Netzwerkspiel mit einem menschlichen Spieler im
+     * Zustand PLAYED_TILE. Dies fuehrt die Netzwerk-Sende-Zweige (sendPlace und
+     * sendExterminate) aus, die ohne verbundenen Client sichere No-Ops sind.
+     */
+    @Test
+    fun `changeTurn im Netzwerkspiel mit PLAYED_TILE`() {
+        val newGame = CascadiaGame(List(5) { true }, false)
+        val habitats = MutableList(6) { Habitates.MOUNTAINS }
+        for (i in 0 until 5) {
+            newGame.tileStack.push(Tile(i, habitats, emptyList()))
+        }
+        // Gemischter Markt, damit nach dem Nachfuellen keine Ueberbevoelkerung entsteht
+        newGame.choices.add(Pair(Tile(10, habitats, emptyList()), WildlifeToken.BEAR))
+        newGame.choices.add(Pair(Tile(11, habitats, emptyList()), WildlifeToken.ELK))
+        newGame.choices.add(Pair(Tile(12, habitats, emptyList()), WildlifeToken.SALMON))
+        newGame.choices.add(Pair(Tile(13, habitats, emptyList()), WildlifeToken.HAWK))
+        newGame.selectedChoice = Pair(0, 1)
+        newGame.gameState = GameState.PLAYED_TILE
+        newGame.playerQueue.add(Player("netHost", PlayerType.HUMAN))
+        newGame.playerQueue.add(Player("netGuest", PlayerType.HUMAN))
+        newGame.wildlifeTokens.pushAll(List(10) { WildlifeToken.SALMON })
+
+        rootService.currentGame = newGame
+        rootService.history.prevMoves.clear()
+
+        rootService.gameService.changeTurn()
+
+        assertEquals(GameState.START_OF_TURN, newGame.gameState)
+        assertTrue(refreshWasCalled, "Der Zugwechsel-Refresh sollte gefeuert haben")
+        assertEquals(0, rootService.history.prevMoves.size,
+            "Im Netzwerkspiel darf kein Zug auf den Undo-Stack gelegt werden")
+    }
+
 }
