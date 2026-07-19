@@ -811,13 +811,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                 neighborElksA.replaceAll {
                     if (it < 3) it + 3 else it
                 }
-
-                neighborElksA.forEach {
-                    markStraightLine(node, it)
-                    markStraightLine(node, it - 3)
-
-                    scoreElkGroupScoringA(elkGroup, combinations, depth, maxScore, scores) //TODO Ergebnis auslesen
-                }
+                scoreElkGroupScoringAOuter(neighborElksA, node, elkGroup, combinations, depth, maxScore, scores)
                 return scores.maxOrNull() ?: 0
             } else {
                 scoreElkGroupScoringB(neighborElks, node, neighborElksB,
@@ -871,6 +865,18 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             if (elk.marked2 > depth) elk.marked2 = 0
         }
         return false
+    }
+
+    private fun scoreElkGroupScoringAOuter(neighborElksA: MutableList<Int>,
+                                           node: Node, elkGroup: List<Node>,
+                                           combinations: MutableList<MutableList<Int>>,
+                                           depth: Int, maxScore: Int, scores: MutableList<Int>) {
+        neighborElksA.forEach {
+            markStraightLine(node, it)
+            markStraightLine(node, it - 3)
+
+            scoreElkGroupScoringA(elkGroup, combinations, depth, maxScore, scores) //TODO Ergebnis auslesen
+        }
     }
 
     private fun scoreElkGroupScoringBInnerLoop(neighborElksT: MutableList<Int>,
