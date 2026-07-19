@@ -247,14 +247,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val habitatList: MutableList<Habitates> = mutableListOf()
 
         for (i in 0..5) {
-            val habitat = when (habitats[i]) {
-                'M' -> Habitates.MOUNTAINS
-                'W' -> Habitates.WETLANDS
-                'F' -> Habitates.FORESTS
-                'R' -> Habitates.RIVERS
-                'P' -> Habitates.PRAIRIES
-                else -> throw IllegalArgumentException("Unexpected habitat")
-            }
+            val habitat = habitatOptions(habitats[i])
             habitatList.add(habitat)
         }
 
@@ -262,19 +255,34 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val possibles: MutableList<WildlifeToken> = mutableListOf()
 
         for (animal in wildlife) {
-            val possible = when (animal) {
-                'E' -> WildlifeToken.ELK
-                'F' -> WildlifeToken.FOX
-                'S' -> WildlifeToken.SALMON
-                'B' -> WildlifeToken.BEAR
-                'H' -> WildlifeToken.HAWK
-                else -> throw IllegalArgumentException("Unexpected wildlife")
-            }
+            val possible = wildlifeOptions(animal)
             possibles.add(possible)
         }
 
         //Tile erstellen und zurückgeben
         return Tile(id, habitatList, possibles)
+    }
+
+    private fun habitatOptions(c: Char): Habitates {
+        return when (c) {
+            'M' -> Habitates.MOUNTAINS
+            'W' -> Habitates.WETLANDS
+            'F' -> Habitates.FORESTS
+            'R' -> Habitates.RIVERS
+            'P' -> Habitates.PRAIRIES
+            else -> throw IllegalArgumentException("Unexpected habitat")
+        }
+    }
+
+    private fun wildlifeOptions(animal: Char): WildlifeToken {
+        return when (animal) {
+            'E' -> WildlifeToken.ELK
+            'F' -> WildlifeToken.FOX
+            'S' -> WildlifeToken.SALMON
+            'B' -> WildlifeToken.BEAR
+            'H' -> WildlifeToken.HAWK
+            else -> throw IllegalArgumentException("Unexpected wildlife")
+        }
     }
 
 
@@ -381,10 +389,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      */
     fun exterminate(playerTrigger: Boolean, networkOverride: Boolean = false) {
         val game = rootService.currentGame ?: error("No current game")
-//        check(
-//            game.gameState == GameState.START_OF_TURN ||
-//                    game.gameState == GameState.HAS_EXTERMINATED
-//        ) { "Extermination is not allowed in the current game state" }
         if (playerTrigger && game.gameState != GameState.START_OF_TURN) {
             throw IllegalStateException("Player can only exterminate at the START_OF_TURN.")
         }
@@ -402,22 +406,8 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             }
         }
 
-        if (highestCount < 4) {
-            if (!playerTrigger) {
-                return
-            }
-        }
-//        check(highestCount >= 3) {
-//            "There are not at least three identical wildlife tokens"
-//        }
-//        if (playerTrigger) {
-//            if (highestCount != 3) {
-//                throw IllegalStateException("Player extermination requires exactly three identical wildlife tokens")
-//            }
-//        } else {
-//            if (highestCount < 4) throw IllegalStateException("Automatic extermination requires four identical " +
-//                    "wildlife tokens")
-//        }
+        if (highestCount < 4 && !playerTrigger) return
+
         val affectedIndices = mutableListOf<Int>()
         for (i in game.choices.indices) {
             if (game.choices[i].second == duplicatedToken) {
