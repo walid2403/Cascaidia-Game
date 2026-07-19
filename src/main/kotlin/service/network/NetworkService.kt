@@ -1,13 +1,18 @@
 package service.network
 
 import edu.udo.cs.sopra.ntf.*
-import entity.GameState
-import entity.Player
-import entity.PlayerType
-import entity.WildlifeToken
+import entity.*
 import service.AbstractRefreshingService
 import service.RootService
 
+/**
+ * The NetworkService Class, it implements all necessary functions to play online, in combination with the
+ * [CascadiaNetworkClient]
+ * @param rootService Link to the [RootService] class
+ * @property rootService Link to the [RootService] class
+ */
+
+@Suppress("TooManyFunctions")
 class NetworkService(private val rootService: RootService) : AbstractRefreshingService() {
 
     /** URL of the BGW net server hosted for SoPra participants */
@@ -53,6 +58,11 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         updateConnectionState(ConnectionState.WAITING_FOR_HOST_CONFIRMATION)
     }
 
+    /**
+     * Helper function to trigger refreshes from the [CascadiaNetworkClient]
+     *
+     * @param refresh A [String] to manage which refresh should be triggered
+     */
     fun triggerRefresh(refresh: String) {
         when (refresh) {
             "createGame" -> {
@@ -201,10 +211,12 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         val tileList = game.tileStack.peekAll().map { it.id }.reversed().toMutableList()
         tileList.addAll(game.choices.map {it.first.id}.reversed())
 
-        game.wildlifeTokens.popAll(11)
-        for (i in 0..10) game.wildlifeTokens.push(WildlifeToken.ELK)
+//        game.wildlifeTokens.popAll(11)
+//        for (i in 0..10) game.wildlifeTokens.push(WildlifeToken.ELK)
 
-        val wildlifeList = game.wildlifeTokens.peekAll().map { NetWildlife.valueOf(it.name) }.reversed().toMutableList()
+        val wildlifeList = game.wildlifeTokens.peekAll().map {
+            NetWildlife.valueOf(it.name)
+        }.reversed().toMutableList()
         wildlifeList.addAll(game.choices.map { NetWildlife.valueOf(it.second.name) }.reversed())
 
         val message = GameInitMessage(
@@ -212,7 +224,8 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
             game.playerQueue.map { NetPlayer(it.name, (it.board[Triple(0,0,0)]?.id ?: 0) / 10) }, wildlifeList
         )
 
-        if (game.playerQueue.peek().type == PlayerType.NETWORK) updateConnectionState(ConnectionState.WAITING_FOR_PLAYER_TURN)
+        if (game.playerQueue.peek().type == PlayerType.NETWORK)
+            updateConnectionState(ConnectionState.WAITING_FOR_PLAYER_TURN)
         else updateConnectionState(ConnectionState.PLACING)
         client?.sendGameActionMessage(message)
 
@@ -244,12 +257,20 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         val game = rootService.currentGame
         checkNotNull(game) { "Game should not be null right after starting it." }
 
-        if (game.playerQueue.peek().type == PlayerType.NETWORK) updateConnectionState(ConnectionState.WAITING_FOR_PLAYER_TURN)
+        if (game.playerQueue.peek().type == PlayerType.NETWORK)
+            updateConnectionState(ConnectionState.WAITING_FOR_PLAYER_TURN)
         else updateConnectionState(ConnectionState.PLACING)
 
         onAllRefreshables { refreshAfterStartGame() }
     }
 
+    /**
+     * A function to send the selected choices to the network via a [SelectMessage]
+     *
+     * @param unlockedChoices A [Boolean] to note if the player spend a nature token to unlock the choices
+     *
+     * @throws IllegalStateException If no game is running at the moment
+     */
     fun sendSelect(unlockedChoices: Boolean) {
         val game = rootService.currentGame
         checkNotNull(game) { "No running game found" }
@@ -263,6 +284,13 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         client?.sendGameActionMessage(message)
     }
 
+    /**
+     * A function to handle a received [SelectMessage]
+     *
+     * @param message The received [SelectMessage]
+     *
+     * @throws IllegalStateException If no game is running at the moment
+     */
     fun receiveSelect(message: SelectMessage) {
         val game = rootService.currentGame
         checkNotNull(game) { "No running game found" }
@@ -278,6 +306,15 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         }
     }
 
+    /**
+     * A function to send the positions of the placed [Tile] and [WildlifeToken] as well as the rotation of the [Tile]
+     * via a [PlaceMessage]
+     *
+     * @param habCoords The coordinates at which the [Tile] has been placed, as a [Triple] of [Int]s
+     * @param tokenCoords The coordinates at which the [WildlifeToken] has been placed, as a [Triple] of [Int]s,
+     * nullable, to enable the discarding of the [WildlifeToken]
+     * @param habRotation The rotation of the [Tile] as [Int] clockwise in 60° Intervalls
+     */
     fun sendPlace(habCoords: Triple<Int, Int, Int>, tokenCoords: Triple<Int, Int, Int>?, habRotation: Int) {
         val wildlifeCoords = if (tokenCoords != null) {
             Pair(tokenCoords.third, tokenCoords.second)
@@ -292,6 +329,13 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         client?.sendGameActionMessage(message)
     }
 
+    /**
+     * A function to handle a received [PlaceMessage]
+     *
+     * @param message The received [PlaceMessage]
+     *
+     * @throws IllegalStateException If no game is running at the moment
+     */
     fun receivePlace(message: PlaceMessage) {
         val game = rootService.currentGame
         checkNotNull(game) { "No running game found" }
@@ -334,6 +378,14 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         println("-----------------------------")
     }
 
+    /**
+     * A function to send a [WipeWildlifeMessage]
+     *
+     * @param indices A list of [Int], denoting the shop positions which have been changed
+     * @param natureToken A [Boolean], saying if a nature token has been spent for the action
+     *
+     * @throws IllegalStateException If no game is running at the moment
+     */
     fun sendExterminate(indices: List<Int>, natureToken: Boolean) {
         val game = rootService.currentGame
         checkNotNull(game) { "No running game found" }
@@ -347,13 +399,22 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         client?.sendGameActionMessage(message)
     }
 
+    /**
+     * A function to handle a received [WipeWildlifeMessage]
+     *
+     * @param message The received [WipeWildlifeMessage]
+     *
+     * @throws IllegalStateException If no game is running at the moment
+     */
     fun receiveExterminate(message: WipeWildlifeMessage) {
         val game = rootService.currentGame
         checkNotNull(game) { "No running game found" }
 
         if (message.usedNatureToken) game.playerQueue.peek().natureTokens--
 
-//        check(game.playerQueue.peek().natureTokens == message.natureTokenAmount) { "Difference in Nature Tokens detected" }
+//        check(game.playerQueue.peek().natureTokens == message.natureTokenAmount) {
+//            "Difference in Nature Tokens detected"
+//        }
 
         val wildlifeBag = message.wildlifeBag.toMutableList()
 
@@ -380,56 +441,113 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         }
     }
 
+    /**
+     * A function to send a [UseNatureTokenMessage]
+     */
     fun sendUseNatureToken() {
         client?.sendGameActionMessage(UseNatureTokenMessage("Very important message"))
     }
 
+    /**
+     * A function to receive a [UseNatureTokenMessage]
+     */
     fun receiveUseNatureToken() {
         onAllRefreshables { refreshAfterUnlockSelection() }
     }
 
+    /**
+     * A function to send a [GameConfigMessage]
+     *
+     * @param playerList A [List] containing the player names as [String]s
+     * @param scoringCards A [List] containing a nullable [Boolean] for every scoring card to denote if variant A or B
+     * has been selected
+     */
     fun sendGameConfig(playerList: List<String>, scoringCards: List<Boolean?>) {
         client?.players?.sortBy { playerList.indexOf(it.first) }
         client?.scoringCards = scoringCards.toMutableList()
         client?.sendGameActionMessage(GameConfigMessage(playerList, scoringCards))
     }
 
+    /**
+     * A function to handle a received [GameConfigMessage]
+     *
+     * @param message The received [GameConfigMessage]
+     */
     fun receiveGameConfig(message: GameConfigMessage) {
         onAllRefreshables { refreshAfterGameConfigUpdate(message.players, message.scoringCards) }
     }
 
+    /**
+     * A function to send a [SelectWildlifeMessage]
+     *
+     * @param wildlifeIndex The index of the selected [WildlifeToken] as [Int]
+     */
     fun sendSelectWildlife(wildlifeIndex: Int) {
         client?.sendGameActionMessage(SelectWildlifeMessage(wildlifeIndex))
     }
 
+    /**
+     * A function to handle a received [SelectWildlifeMessage]
+     *
+     * @param message The received [SelectWildlifeMessage]
+     */
     fun receiveSelectWildlife(message: SelectWildlifeMessage) {
         onAllRefreshables { refreshAfterSelectWildlife(message.wildlifeIndex) }
     }
 
+    /**
+     * A function to send a [RotationMessage]
+     */
     fun sendRotation() {
         val game = rootService.currentGame
         checkNotNull(game) { "No running game found" }
 
-        client?.sendGameActionMessage(RotationMessage(game.choices[game.selectedChoice.first].first.rotation))
+        client?.sendGameActionMessage(
+            RotationMessage(game.choices[game.selectedChoice.first].first.rotation))
     }
 
+    /**
+     * A function to handle a received [RotationMessage]
+     *
+     * @param message The received [RotationMessage]
+     */
     fun receiveRotation(message: RotationMessage) {
         rootService.playerActionService.rotateTile(null, message.habitatRotation)
     }
 
+    /**
+     * A function to send a [SelectHabitatTileMessage]
+     *
+     * @param tileIndex The index of the selected [Tile] as [Int]
+     */
     fun sendSelectHabitatTile(tileIndex: Int) {
         client?.sendGameActionMessage(SelectHabitatTileMessage(tileIndex))
     }
 
+    /**
+     * A function to handle a received [SelectHabitatTileMessage]
+     *
+     * @param message The received [SelectHabitatTileMessage]
+     */
     fun receiveSelectHabitatTile(message: SelectHabitatTileMessage) {
         onAllRefreshables { refreshAfterSelectTile(message.habitatIndex) }
     }
 
+    /**
+     * A function to send a [ChatMessage]
+     *
+     * @param message The chat message to be sent (as [String])
+     */
     fun sendChatMessage(message: String) {
         val message = ChatMessage(message)
         client?.sendGameActionMessage(message)
     }
 
+    /**
+     * A function to handle a received [ChatMessage]
+     *
+     * @param message The received [ChatMessage]
+     */
     fun receiveChatMessage(message: ChatMessage, messageSender: String) {
         onAllRefreshables { refreshAfterChatMessage(messageSender, message.message) }
     }

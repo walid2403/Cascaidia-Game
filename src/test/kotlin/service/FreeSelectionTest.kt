@@ -73,7 +73,8 @@ class FreeSelectionTest {
 
         assertTrue(refreshWasCalled, "Der Refresh sollte getriggert haben")
 
-        assertEquals(selection, game.choices, "Die angebotene Selection darf sich zu diesem Zeitpunkt nicht verändert haben")
+        assertEquals(selection, game.choices, "Die angebotene Selection darf sich zu " +
+                "diesem Zeitpunkt nicht verändert haben")
 
         assertEquals(GameState.MADE_CHOICE, game.gameState,
             "Der GameState muss angepasst worden sein")
@@ -101,7 +102,8 @@ class FreeSelectionTest {
 
         assertTrue(refreshWasCalled, "Der Refresh sollte getriggert haben")
 
-        assertEquals(selection, game.choices, "Die angebotene Selection darf sich zu diesem Zeitpunkt nicht verändert haben")
+        assertEquals(selection, game.choices, "Die angebotene Selection darf sich zu " +
+                "diesem Zeitpunkt nicht verändert haben")
 
         assertEquals(GameState.MADE_CHOICE, game.gameState,
             "Der GameState muss angepasst worden sein")

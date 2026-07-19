@@ -115,13 +115,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         //für jede Zeile in der csv:
         for (line in input.bufferedReader().readLines()) {
             //ignoriere Leerzeilen, die startzeile, die kommentarzeilen
-            if (line.isBlank()) {
-                continue
-            }
-            if (line.startsWith("id")) {
-                continue
-            }
-            if (line.startsWith("-")) {
+            if (line.isBlank() || line.startsWith("id") || line.startsWith("-")) {
                 continue
             }
             // füge rest in lines hinzu
@@ -185,16 +179,9 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         //jede zeile der csv durchgehen
         for (line in input.bufferedReader().readLines()) {
             //ignoriere Leerzeilen, startzeile und Kommentarzeile
-            if (line.isBlank()) {
+            if (line.isBlank() || line.startsWith("id") || line.startsWith("-")) {
                 continue
             }
-            if (line.startsWith("id")) {
-                continue
-            }
-            if (line.startsWith("-")) {
-                continue
-            }
-
             //Rest(Tiles) in die liste
             lines.add(line)
         }
@@ -247,11 +234,11 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @return Habitatstile
      * @param line eine Zeile aus der csv datei die bereits ein String ist
      */
+    @Suppress("CyclomaticComplexMethod")
     private fun createHabitatTile(line: String, startingTile: Boolean = false): Tile {
 
         // Aus line eine Liste machen, welche die 4 Attribute der Bezeichner besitzt
         val parts = line.split(";")
-
 
         val id = parts[0].toInt() * if (startingTile) 10 else 1
         val habitats = parts[1]
@@ -284,7 +271,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                 'H' -> WildlifeToken.HAWK
                 else -> throw IllegalArgumentException("Unexpected wildlife")
             }
-
             possibles.add(possible)
         }
 
@@ -352,11 +338,10 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      */
     fun loadGame(name: String) {
 
-        if (rootService.currentGame != null) throw IllegalStateException("Es läuft bereits ein Spiel.")
-        if (name.isBlank()) throw IllegalArgumentException("Der Name darf nicht leer sein.")
+        require(name.isBlank()) {"Der Name darf nicht leer sein."}
 
         val file = File(RootService.SAVE_DIRECTORY, "$name${RootService.SAVE_EXTENSION}")
-        if (!file.exists()) throw IllegalArgumentException("Spielstand '$name' existiert nicht.")
+        check(file.exists()) { "Spielstand '$name' existiert nicht." }
 
         val loadedState: SaveState = mapper.readValue(file)
 
@@ -395,6 +380,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * or if there are not at least 3 tokens of the same type or
      * if there are 3 and the current gameState is not [GameState.START_OF_TURN]
      */
+    @Suppress("CyclomaticComplexMethod")
     fun exterminate(playerTrigger: Boolean, networkOverride: Boolean = false) {
         val game = rootService.currentGame ?: error("No current game")
 //        check(
@@ -431,7 +417,8 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
 //                throw IllegalStateException("Player extermination requires exactly three identical wildlife tokens")
 //            }
 //        } else {
-//            if (highestCount < 4) throw IllegalStateException("Automatic extermination requires four identical wildlife tokens")
+//            if (highestCount < 4) throw IllegalStateException("Automatic extermination requires four identical " +
+//                    "wildlife tokens")
 //        }
         val affectedIndices = mutableListOf<Int>()
         for (i in game.choices.indices) {
@@ -576,6 +563,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * Alle Methoden stellen sicher, dass am Ende alle Marked flags false sind und ändern daher nichts an den Knoten
      */
 
+    @Suppress("LoopWithTooManyJumpStatements", "CyclomaticComplexMethod", "NestedBlockDepth")
     private fun createCorridorScores(nodes: List<Node>): List<Int> {
         val scores = mutableListOf<Int>()
         for (habitat in Habitates.entries) {
@@ -609,6 +597,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         return scores
     }
 
+    @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
     private fun calculateHabitatCorridorMajority(
         scores: MutableList<Pair<String, MutableList<Int>>>,
         currentGame: CascadiaGame
@@ -665,6 +654,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         }
     }
 
+    @Suppress("LoopWithTooManyJumpStatements", "CyclomaticComplexMethod")
     private fun bearScoringA(nodes: List<Node>): Int {
         var count = 0
         for (node in nodes) {
@@ -692,6 +682,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         }
     }
 
+    @Suppress("LoopWithTooManyJumpStatements", "CyclomaticComplexMethod", "NestedBlockDepth")
     private fun bearScoringB(nodes: List<Node>): Int {
         var count = 0
         for (node in nodes) {
@@ -732,8 +723,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
     private fun sortElks(nodes: List<Node>): List<List<Node>> {
         val elkGroupList = mutableListOf<MutableList<Node>>()
         for (node in nodes) {
-            if (node.tile.occupant != WildlifeToken.ELK) continue
-            if (node.marked) continue
+            if (node.tile.occupant != WildlifeToken.ELK || node.marked) continue
 
             node.marked = true
             elkGroupList.add(markElks(node, mutableListOf(node)))
@@ -754,6 +744,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         return elkList
     }
 
+    @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
     private fun elkScore(elkGroupList: List<List<Node>>, scoringCardA: Boolean): Int {
         val elkScores = mutableListOf<Int>()
 
@@ -805,6 +796,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         return elkScores.sum()
     }
 
+    @Suppress("CyclomaticComplexMethod", "LongMethod", "NestedBlockDepth")
     private fun scoreElkGroup(elkGroup: List<Node>, scoringCardA: Boolean, depth: Int = 0): Int {
         elkGroup.forEach { elk ->
             if (elk.marked) {
@@ -903,7 +895,8 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                     } else combinations.add(combination)
 
                     val tmpScore = elkGroup.count { elk -> elk.marked }
-//                    println("tmpScore: $tmpScore, depth: $depth, size: ${elkGroup.size}, scores: $scores, it: $it, combination: $combination")
+//                    println("tmpScore: $tmpScore, depth: $depth, size: ${elkGroup.size}, " +
+//                            "scores: $scores, it: $it, combination: $combination")
 
                     val score =
                         if (elkGroup.any { elk -> (elk.marked2 == 0) && !elk.marked }) {
@@ -993,6 +986,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         }
     }
 
+    @Suppress("LoopWithTooManyJumpStatements", "CyclomaticComplexMethod", "NestedBlockDepth")
     private fun salmonScoring(nodes: List<Node>, isA: Boolean): Int {
         var sum = 0
         val breakPointList = mutableListOf<Node>()  //Diese Knoten werden ignoriert für Wege
@@ -1061,10 +1055,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             cur.marked = true
             val newNeighbour = cur.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.SALMON }
                 .filter { it !in breakPointList }.filter { it != last }
-            if (newNeighbour.size != 1) {
-                break
-            }
-            if (newNeighbour.single().marked) {
+            if (newNeighbour.size != 1 || newNeighbour.single().marked) {
                 break
             }
             last = cur
@@ -1100,6 +1091,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         }
     }
 
+    @Suppress("LoopWithTooManyJumpStatements", "CyclomaticComplexMethod")
     private fun hawkScoringA(nodes: List<Node>): Int {
         var count = 0
         for (node in nodes) {
@@ -1126,6 +1118,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         }
     }
 
+    @Suppress("LoopWithTooManyJumpStatements", "CyclomaticComplexMethod", "NestedBlockDepth")
     private fun hawkScoringB(nodes: List<Node>): Int {
         var count = 0
         for (node in nodes) {
@@ -1198,7 +1191,9 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         for (node in nodes) {
             if ((node.marked) or (node.tile.occupant != WildlifeToken.FOX)) continue
             node.marked = true
-            val types = node.neighbours.filterNotNull().mapNotNull { it.tile.occupant }.filter { it != WildlifeToken.FOX }
+            val types = node.neighbours.filterNotNull().mapNotNull { it.tile.occupant }.filter {
+                it != WildlifeToken.FOX
+            }
             val doubles = types.filter { type -> types.filter { it == type }.size == 2 }
             sum += when (doubles.size / 2) {
                 0 -> 0

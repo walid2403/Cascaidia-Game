@@ -803,11 +803,10 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
      * to the [playerName] of the local player and the NetworkIcon otherwise
      */
 
+    @Suppress("CyclomaticComplexMethod")
     private fun getVisual(name: String): ImageVisual {
         return if (name == playerName) {
             when(playerType) {
-                //TODO("Greedy Heuristic Bot wieder rein kommentieren wenn der implementiert ist")
-
                 PlayerType.HUMAN -> ImageVisual("icons/HumanIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
@@ -817,7 +816,6 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
                 PlayerType.HEURISTIC_BOT -> ImageVisual("icons/HeuristicBotIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
-
                 PlayerType.EASY_BOT -> ImageVisual("icons/EasyBotIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
@@ -827,13 +825,12 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
                 PlayerType.MONTE_BOT -> ImageVisual("icons/MonteCarloBotIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
-//                PlayerType.GREEDY_HEURISTIC_BOT -> ImageVisual("icons/GreedyHeuristicBotIcon3.png").apply {
-//                    style.borderRadius = BorderRadius(8)
-//                }
+                PlayerType.GREEDY_HEURISTIC_BOT -> ImageVisual("icons/GreedyHeuristicBotIcon3.png").apply {
+                    style.borderRadius = BorderRadius(8)
+                }
                 PlayerType.NEURAL_BOT -> ImageVisual("icons/NeuralNetworkBotIcon3.png").apply {
                     style.borderRadius = BorderRadius(8)
                 }
-
                 else -> throw IllegalArgumentException("Player type must be PlayerType Object and can't be NETWORK, " +
                         "$playerType not supported")
             }

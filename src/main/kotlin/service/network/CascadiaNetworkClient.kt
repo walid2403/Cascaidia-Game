@@ -19,6 +19,8 @@ import tools.aqua.bgw.net.common.response.*
  * @param secret the secret to use for the connection.
  * @property networkService the [NetworkService] to potentially forward received messages to.
  */
+
+@Suppress("TooManyFunctions")
 class CascadiaNetworkClient(
     playerName: String,
     host: String,
@@ -47,7 +49,9 @@ class CascadiaNetworkClient(
      * @throws IllegalStateException if status != success or currently not waiting for a game creation response.
      */
     override fun onCreateGameResponse(response: CreateGameResponse) {
-        check(networkService.connectionState == ConnectionState.WAITING_FOR_HOST_CONFIRMATION) { "unexpected CreateGameResponse" }
+        check(networkService.connectionState == ConnectionState.WAITING_FOR_HOST_CONFIRMATION) {
+            "unexpected CreateGameResponse"
+        }
 
         when (response.status) {
             CreateGameResponseStatus.SUCCESS -> {
@@ -75,7 +79,8 @@ class CascadiaNetworkClient(
 
                     CreateGameResponseStatus.SESSION_WITH_ID_ALREADY_EXISTS -> {
                         errorMessage =
-                            "This game ID is already in use, please use a different one or simply " + "leave the field blank"
+                            "This game ID is already in use, please use a different one or simply " +
+                                    "leave the field blank"
                     }
 
                     else -> {
@@ -97,7 +102,9 @@ class CascadiaNetworkClient(
      * @throws IllegalStateException if status != success or currently not waiting for a join game response.
      */
     override fun onJoinGameResponse(response: JoinGameResponse) {
-        check(networkService.connectionState == ConnectionState.WAITING_FOR_JOIN_CONFIRMATION) { "unexpected JoinGameResponse" }
+        check(networkService.connectionState == ConnectionState.WAITING_FOR_JOIN_CONFIRMATION) {
+            "unexpected JoinGameResponse"
+        }
 
         checkNotNull(playerType) { "A playerType is required before joining a game" }
 
@@ -115,7 +122,8 @@ class CascadiaNetworkClient(
                 when (response.status) {
                     JoinGameResponseStatus.PLAYER_NAME_ALREADY_TAKEN -> {
                         errorMessage =
-                            "A player with your name already exists in the lobby, please change it in " + "order to join this game"
+                            "A player with your name already exists in the lobby, please change it in " +
+                                    "order to join this game"
                     }
 
                     JoinGameResponseStatus.ALREADY_ASSOCIATED_WITH_GAME -> {
@@ -128,7 +136,8 @@ class CascadiaNetworkClient(
 
                     JoinGameResponseStatus.INVALID_SESSION_ID -> {
                         errorMessage =
-                            "This session ID is invalid, if the host has already started the lobby ask " + "him for the correct ID"
+                            "This session ID is invalid, if the host has already started the lobby ask " +
+                                    "him for the correct ID"
                     }
 
                     else -> {
@@ -147,7 +156,9 @@ class CascadiaNetworkClient(
      * @throws IllegalStateException if not currently expecting any guests to join.
      */
     override fun onPlayerJoined(notification: PlayerJoinedNotification) {
-        check(networkService.connectionState == ConnectionState.WAITING_FOR_GUESTS) { "not awaiting any guests." }
+        check(networkService.connectionState == ConnectionState.WAITING_FOR_GUESTS) {
+            "not awaiting any guests."
+        }
 
         players.add(Pair(notification.sender, PlayerType.NETWORK))
 
