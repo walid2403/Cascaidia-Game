@@ -1542,22 +1542,16 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         val game = rootService.currentGame
         checkNotNull(game)
         println("ChangeTurn GUI Start")
-
         redo.isDisabled = false
         undo.isDisabled = false
         endTurn.isDisabled = false
-
         updateAllNatureToken()
-
         clearOverpopulationButton.visual = ColorVisual(0, 0, 0, 127).apply {
             style.borderRadius = BorderRadius(10)
         }
         clearOverpopulationButton.font = Font(size = 16, color = Color(255, 255, 255, 127))
-
         enableSaveAndExit()
-
         makeButtonsBlack()
-
         botRotation = 0
         disableAllTilesOnclick()
         scaleArea()

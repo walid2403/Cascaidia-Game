@@ -222,7 +222,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         if (right != null) {
             rotateLocal(right, selectedTile)
         } else if (targetRotation != null) {
-            rotateOnline(targetRotation, selectedTile, game)
+            rotateOnline(targetRotation, selectedTile)
         }
 
         game.tileRotation = selectedTile.rotation
@@ -254,7 +254,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         }
     }
 
-    private fun rotateOnline(targetRotation: Int, selectedTile: Tile, game: CascadiaGame) {
+    private fun rotateOnline(targetRotation: Int, selectedTile: Tile) {
         val rightTimes = targetRotation - selectedTile.rotation
         val leftTimes = selectedTile.rotation - targetRotation
 
@@ -273,9 +273,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             }
         }
 
-//        if (game.playerQueue.peek().type != PlayerType.NETWORK && !game.isLocal) {
-            onAllRefreshables { refreshAfterRotate(amount) }
-//        }
+        onAllRefreshables { refreshAfterRotate(amount) }
     }
 
     /**
