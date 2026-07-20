@@ -873,7 +873,8 @@ class JoinOnlineLobbyScene (private val app: SopraApplication, private val rootS
      */
     private fun getVisual(name: String): ImageVisual {
         val list1 = listOf(PlayerType.HUMAN, PlayerType.EASY_BOT, PlayerType.HARD_BOT, PlayerType.HEURISTIC_BOT)
-        val list2 = listOf(PlayerType.GREEDY_BOT, PlayerType.MONTE_BOT, PlayerType.NEURAL_BOT, PlayerType.GREEDY_HEURISTIC_BOT)
+        val list2 = listOf(PlayerType.GREEDY_BOT, PlayerType.MONTE_BOT, PlayerType.NEURAL_BOT,
+            PlayerType.GREEDY_HEURISTIC_BOT)
 
         return if (name == playerName) {
             when(playerType) {
