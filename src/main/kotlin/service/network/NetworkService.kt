@@ -199,7 +199,9 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         check(connectionState == ConnectionState.WAITING_FOR_GUESTS && playerNames.size in 2..4)
         { "currently not prepared to start a new hosted game." }
 
-        rootService.gameService.startNewGame(playerNames, scoringCards)
+        val reorderList = listOf(0, 1, 4, 3, 2)
+
+        rootService.gameService.startNewGame(playerNames, reorderList.map { scoringCards[it] })
         val game = rootService.currentGame
         checkNotNull(game) { "game should not be null right after starting it." }
 

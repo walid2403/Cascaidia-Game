@@ -412,7 +412,7 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
 
             return 50 // PERFEKT: Beide Bären sind noch Single, wir bilden ein sauberes Paar.
 
-        } else {
+        }/* else {
             // === BÄR TYP B (Genau 3er Gruppen) ===
             if (bearNeighbors == 0) return 10
             if (bearNeighbors > 2) return -100 // 4er Gruppe vermeiden
@@ -450,7 +450,7 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
                 }
                 return 50 // PERFEKT: Wir schließen die Lücke und bilden genau eine 3er-Gruppe.
             }
-        }
+        }*/
         return 0
     }
 
