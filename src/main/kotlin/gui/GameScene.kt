@@ -1056,7 +1056,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 val x = coordinates.first
                 val y = coordinates.second
                 val s = (x + y) * (-1)
-                rootService.playerActionService.placeWildlife(Triple(s, y, x))
+                if(requireNotNull(game.playerQueue.peek().board[Triple(s, y, x)]).occupant == null) {
+                    rootService.playerActionService.placeWildlife(Triple(s, y, x))
+                }
             }
         }
     }
