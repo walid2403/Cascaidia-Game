@@ -709,6 +709,30 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         return false
     }
 
+    private fun countBears(nodes: List<Node>): Int {
+        var bearGroupCount = 0
+        for (node in nodes) {
+            if (node.tile.occupant != WildlifeToken.BEAR || node.marked) continue
+
+            node.marked = true
+            if (markBears(node, mutableListOf(node)).size == 3) bearGroupCount += 1
+        }
+        nodes.forEach { node -> node.marked = false }
+        return bearGroupCount * 10
+    }
+
+    private fun markBears(node: Node, bearList: MutableList<Node>): MutableList<Node> {
+        var bearList = bearList
+        node.neighbours.filterNotNull().forEach {
+            if (!it.marked && it.tile.occupant == WildlifeToken.BEAR) {
+                bearList.add(it)
+                it.marked = true
+                bearList = markBears(it, bearList)
+            }
+        }
+        return bearList
+    }
+
     private fun sortElks(nodes: List<Node>): List<List<Node>> {
         val elkGroupList = mutableListOf<MutableList<Node>>()
         for (node in nodes) {
@@ -732,6 +756,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         }
         return elkList
     }
+
     private fun elkScore(elkGroupList: List<List<Node>>, scoringCardA: Boolean): Int {
         val elkScores = mutableListOf<Int>()
 
