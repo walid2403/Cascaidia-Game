@@ -1083,6 +1083,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
             it.scale(1.0)
         }
 
+        resetScoreCards()
         showScoreScene.isVisible = false
         zoomIn.isVisible = true
         zoomOut.isVisible = true
@@ -1518,6 +1519,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         val game = rootService.currentGame
         checkNotNull(game)
 
+        println("RefreshAfterChangeTurn")
+
         if(game.playerQueue.elementAt(game.playerQueue.size-1).type == PlayerType.NETWORK) {
             playAnimation(
                 DelayAnimation(duration = (1000 / animationSpeed).toInt()).apply {
@@ -1532,6 +1535,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private fun changeTurn() {
         val game = rootService.currentGame
         checkNotNull(game)
+
+        println("ChangeTurn GUI Start")
 
         redo.isDisabled = false
         undo.isDisabled = false
@@ -1595,6 +1600,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         animalShop.forEach { scaleAnimal(false, it) }
 
         if(!isHuman()) {
+
+            println("ChangeTurn GUI NotHuman Block")
+
             disableAllForNetworkBotTurn()
             if(game.playerQueue.peek().type != PlayerType.NETWORK) {
                 rootService.bot.makeTurn(game.playerQueue.peek().type)
@@ -1603,6 +1611,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         updateRoundCounter()
         if(rootService.currentGame?.isLocal == false) { disableOnlineGameFeatures() }
+
+        println("ChangeTurn GUI End")
     }
 
     private fun checkRedoButton() {
@@ -2046,6 +2056,14 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 }
             }
         }
+    }
+
+    private fun resetScoreCards() {
+        bearScoringCard.visual = ImageVisual("scoringCards/Scoring_Bear_A.png")
+        elkScoringCard.visual = ImageVisual("scoringCards/Scoring_Elk_A.png")
+        salmonScoringCard.visual = ImageVisual("scoringCards/Scoring_Salmon_A.png")
+        hawkScoringCard.visual = ImageVisual("scoringCards/Scoring_Hawk_A.png")
+        foxScoringCard.visual = ImageVisual("scoringCards/Scoring_Fox_A.png")
     }
 
 
