@@ -69,6 +69,10 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
                 greedyHeuristicBot.makeTurn()
             }
         }
+
+        val coordinatesTilesNotNull = Triple(requireNotNull(coordinatesTile.first),
+            requireNotNull(coordinatesTile.second), requireNotNull(coordinatesTile.third))
+        onAllRefreshables { refreshAfterBotTurn(coordinatesTilesNotNull, coordinatesWildlifeToken) }
     }
     private fun randomBotTurn() {
         val currentGame = rootService.currentGame
