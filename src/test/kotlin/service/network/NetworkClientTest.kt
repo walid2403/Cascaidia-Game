@@ -44,7 +44,8 @@ class NetworkClientTest {
     fun testOnCreateGameResponse() {
         networkService.updateConnectionState(ConnectionState.CONNECTED)
 
-        assertFails { networkClient.onCreateGameResponse(CreateGameResponse(Pair(CreateGameResponseStatus.GAME_ID_DOES_NOT_EXIST, null))) }
+        assertFails { networkClient.onCreateGameResponse(CreateGameResponse(
+            Pair(CreateGameResponseStatus.GAME_ID_DOES_NOT_EXIST, null))) }
     }
 
     /**
@@ -114,9 +115,11 @@ class NetworkClientTest {
     fun testOnJoinGameResponseFails() {
         networkService.updateConnectionState(ConnectionState.CONNECTED)
 
-        assertFails { networkClient.onJoinGameResponse(JoinGameResponse(JoinGameResponseStatus.PLAYER_NAME_ALREADY_TAKEN,
+        assertFails { networkClient.onJoinGameResponse(JoinGameResponse(
+            JoinGameResponseStatus.PLAYER_NAME_ALREADY_TAKEN,
             "null", listOf("Peter"), "Peter")) }
-        assertFails { networkClient.onJoinGameResponse(JoinGameResponse(JoinGameResponseStatus.ALREADY_ASSOCIATED_WITH_GAME,
+        assertFails { networkClient.onJoinGameResponse(JoinGameResponse(
+            JoinGameResponseStatus.ALREADY_ASSOCIATED_WITH_GAME,
             "null", listOf("Peter"), "Peter")) }
         assertFails { networkClient.onJoinGameResponse(JoinGameResponse(JoinGameResponseStatus.SERVER_ERROR,
             "null", listOf("Peter"), "Peter")) }
@@ -131,7 +134,8 @@ class NetworkClientTest {
     fun testOnJoinGameResponseFails2() {
         networkService.updateConnectionState(ConnectionState.CONNECTED)
 
-        assertFails { networkClient.onJoinGameResponse(JoinGameResponse(JoinGameResponseStatus.ALREADY_ASSOCIATED_WITH_GAME,
+        assertFails { networkClient.onJoinGameResponse(JoinGameResponse(
+            JoinGameResponseStatus.ALREADY_ASSOCIATED_WITH_GAME,
             "null", listOf("Peter"), "Peter")) }
     }
 

@@ -9,8 +9,8 @@ import service.RootService
 /**
  * Eine Klasse für einen Bot, der eine Greedy Entscheidung trifft und diese durch eine Heuristic unterstützt
  */
-class GreedyHeuristicBot(private val rootService: RootService, private val bot : Bot, private val marginForNT: Int = 0,
-                         private val thresholdForExterminate: Int = 4, private val thresholdForChangeWildlife: Int = 2,
+class GreedyHeuristicBot(private val rootService: RootService, private val bot : Bot, private val marginForNT: Int = 4,
+                         private val thresholdForExterminate: Int = 6, private val thresholdForChangeWildlife: Int = 6,
                          private val dummy : Boolean = false) {
 
     private var chosenTileCoordinateNormal: Triple<Int, Int, Int>? = null
@@ -75,7 +75,7 @@ class GreedyHeuristicBot(private val rootService: RootService, private val bot :
         }
         //println("Normal: $normalGain\n NT: $ntGain")
 
-        if (currentGame.choices.groupBy { it.second }.entries.maxOf {it.value.size} >= 3 &&
+        if (currentGame.choices.groupBy { it.second }.entries.maxOf {it.value.size} == 3 &&
             maxOf(ntGain, normalGain) < thresholdForExterminate &&
             currentGame.gameState == GameState.START_OF_TURN) {
             rootService.gameService.exterminate(true)
@@ -100,7 +100,6 @@ class GreedyHeuristicBot(private val rootService: RootService, private val bot :
         }
     }
 
-    //TODO evtl. andere ausprobieren
     private fun removeTokens() {
         rootService.playerActionService.changeWildlife(listOf(0,1,2,3))
     }
@@ -233,23 +232,20 @@ class GreedyHeuristicBot(private val rootService: RootService, private val bot :
         return Triple(normalAnswer, ntScore, ntAnswer)
     }
 
-    private fun heuristicEvaluate(board: Map<Triple<Int, Int, Int>, Tile>,
-                                  tPosition: Triple<Int, Int, Int>, wPosition: Triple<Int, Int, Int>? = null,
-                                  wildlife: WildlifeToken? = null, dummy: Boolean = false) : Int {
-        if (dummy) return 0
-        val tile = board[tPosition]
-        requireNotNull(tile)
-        var neighbours = getNeighbours(tPosition)
-
+    private fun neighbourHeuristic(tile: Tile, board: Map<Triple<Int, Int, Int>, Tile>,
+                                   neighbours: List<Triple<Int, Int, Int>>): Int {
         var score = 0
 
         for (i in tile.habs.indices) {
             val neighbour = board[neighbours[i]] ?: continue
             score += if (tile.habs[i] == neighbour.habs[(i+3)%6]) 1 else 0
         }
-        if ((wPosition == null) || (wildlife == null)) return score
-        neighbours = getNeighbours(wPosition)
+        return score
+    }
 
+    private fun foxHeuristic(neighbours: List<Triple<Int, Int, Int>>, board: Map<Triple<Int, Int, Int>, Tile>,
+                             wildlife: WildlifeToken): Int {
+        var score = 0
         for (pos in neighbours) {
             val tile = board[pos] ?: continue
             if (tile.occupant == WildlifeToken.FOX) {
@@ -257,7 +253,12 @@ class GreedyHeuristicBot(private val rootService: RootService, private val bot :
                 score -= if (foxNeighbours.mapNotNull { board[it] }.any { it.occupant == wildlife}) 1 else 0
             }
         }
+        return score
+    }
 
+    private fun restHeuristic(wildlife: WildlifeToken, neighbours: List<Triple<Int, Int, Int>>,
+                              board: Map<Triple<Int, Int, Int>, Tile>): Int {
+        var score = 0
         when(wildlife) {
             WildlifeToken.HAWK -> {
                 for (pos in neighbours) {
@@ -273,6 +274,26 @@ class GreedyHeuristicBot(private val rootService: RootService, private val bot :
             }
             else -> {}
         }
+        return score
+    }
+
+    private fun heuristicEvaluate(board: Map<Triple<Int, Int, Int>, Tile>,
+                                  tPosition: Triple<Int, Int, Int>, wPosition: Triple<Int, Int, Int>? = null,
+                                  wildlife: WildlifeToken? = null, dummy: Boolean = false) : Int {
+        if (dummy) return 0
+        val tile = board[tPosition]
+        requireNotNull(tile)
+        var neighbours = getNeighbours(tPosition)
+
+        var score = 0
+
+        score += neighbourHeuristic(tile, board, neighbours)
+        if ((wPosition == null) || (wildlife == null)) return score
+        neighbours = getNeighbours(wPosition)
+
+        score -= foxHeuristic(neighbours, board, wildlife)
+
+        score -= restHeuristic(wildlife, neighbours, board)
 
         return score
     }

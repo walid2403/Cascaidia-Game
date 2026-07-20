@@ -459,6 +459,21 @@ class GameServiceCalculateScoreTest {
     }
 
     /**
+     * Complex shape for Bear Test
+     */
+    @Test
+    fun bearBFourConnected() {
+        val shape = listOf(
+            Triple(0,0,0),
+            Triple(0,1,-1),
+            Triple(-1,1,0),
+            Triple(-1,2,-1),
+        )
+        extremeTest(shape, WildlifeToken.BEAR, false)
+        println(refreshable.receivedScores!!.first().second[5])
+    }
+
+    /**
      * Ein Test für einen Extremfall bei elkAScore
      */
     @Test

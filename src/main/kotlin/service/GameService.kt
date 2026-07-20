@@ -482,7 +482,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             playerScore.addAll(createCorridorScores(nodes))
 
             if (currentGame.scoringCards[0]) playerScore.add(bearScoringA(nodes))
-            else playerScore.add(bearScoringB(nodes))
+            else playerScore.add(countBears(nodes))
 
             /*if (currentGame.scoringCards[1]) playerScore.add(elkScoringA(nodes))
             else playerScore.add(elkScoringB(nodes))*/
@@ -669,44 +669,29 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             else -> 27
         }
     }
-    private fun bearScoringB(nodes: List<Node>): Int {
-        var count = 0
-        nodes.forEach { node ->
-            if (node.marked || node.tile.occupant != WildlifeToken.BEAR) return@forEach
+
+    private fun countBears(nodes: List<Node>): Int {
+        var bearGroupCount = 0
+        for (node in nodes) {
+            if (node.tile.occupant != WildlifeToken.BEAR || node.marked) continue
+
             node.marked = true
-            node.neighbours.filterNotNull().forEach { it.marked = true }
-            val neighbours = node.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.BEAR }
-            if (neighbours.isEmpty() or (neighbours.size > 2)) return@forEach
-            if (neighbours.size == 1) {
-                neighbours.single().neighbours.filterNotNull().forEach { it.marked = true }
-                if (neighbours.single().neighbours.filterNotNull().filter
-                    { it.tile.occupant == WildlifeToken.BEAR }.size != 2
-                ) return@forEach
-            } else {
-                if (helpBearScoringB(neighbours)) return@forEach
-            }
-            count++
+            if (markBears(node, mutableListOf(node)).size == 3) bearGroupCount += 1
         }
         nodes.forEach { node -> node.marked = false }
-        return 10 * count
+        return bearGroupCount * 10
     }
 
-    private fun helpBearScoringB(neighbours: List<Node>): Boolean {
-        val firstNeighbour = neighbours.first()
-        val secondNeighbour = neighbours.last()
-        val firstNeighbourNeighbours = firstNeighbour.neighbours.filterNotNull()
-        val secondNeighbourNeighbours = secondNeighbour.neighbours.filterNotNull()
-        firstNeighbourNeighbours.forEach { it.marked = true }
-        secondNeighbourNeighbours.forEach { it.marked = true }
-        if ((firstNeighbourNeighbours.filter { it.tile.occupant == WildlifeToken.BEAR }.size != 1) or
-            (firstNeighbourNeighbours.filter { it.tile.occupant == WildlifeToken.BEAR }.size == 2 &&
-                    !firstNeighbourNeighbours.contains(secondNeighbour))
-        ) return true
-        if ((secondNeighbourNeighbours.filter { it.tile.occupant == WildlifeToken.BEAR }.size != 1) or
-            (secondNeighbourNeighbours.filter { it.tile.occupant == WildlifeToken.BEAR }.size == 2 &&
-                    !secondNeighbourNeighbours.contains(firstNeighbour))
-        ) return true
-        return false
+    private fun markBears(node: Node, bearList: MutableList<Node>): MutableList<Node> {
+        var bearList = bearList
+        node.neighbours.filterNotNull().forEach {
+            if (!it.marked && it.tile.occupant == WildlifeToken.BEAR) {
+                bearList.add(it)
+                it.marked = true
+                bearList = markBears(it, bearList)
+            }
+        }
+        return bearList
     }
 
     private fun sortElks(nodes: List<Node>): List<List<Node>> {
@@ -732,6 +717,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         }
         return elkList
     }
+
     private fun elkScore(elkGroupList: List<List<Node>>, scoringCardA: Boolean): Int {
         val elkScores = mutableListOf<Int>()
 
@@ -1229,7 +1215,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val game = rootService.currentGame
         checkNotNull(game) { "No current game" }
 
-        println("Change Turn GameService")
+        //println("Change Turn GameService")
 
         val checkCondition = game.gameState == GameState.PLAYED_TILE || game.gameState == GameState.END_OF_TURN
         check(checkCondition) { "Current Turn can not be ended" }
