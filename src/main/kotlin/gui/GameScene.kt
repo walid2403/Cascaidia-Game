@@ -1206,6 +1206,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         if(!isHuman()) {
             disableAllForNetworkBotTurn()
             if(game.playerQueue.peek().type != PlayerType.NETWORK) {
+                println("MakeTurn Aufruf in GUI")
                 rootService.bot.makeTurn(game.playerQueue.peek().type)
             }
         } else {
@@ -1495,6 +1496,9 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
     private fun placeWildLifeBot(index: Triple<Int, Int, Int>) {
         println("Place Wildlife at: "+index.third.toString()+", "+index.second.toString())
+        val game = rootService.currentGame
+        checkNotNull(game)
+        println("Animal: "+game.choices[game.selectedChoice.second].second.name)
         placeTile(index)
     }
 
