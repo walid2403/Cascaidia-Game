@@ -2036,7 +2036,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 natureTokenCountTwoSide,
                 natureTokenCountThreeSide,
                 natureTokenCountFourSide
-            ).elementAt(i).text = game.playerQueue.elementAt(i).natureTokens.toString()
+            ).elementAt((getPlayerId()+i)%game.playerQueue.size).text =
+                game.playerQueue.elementAt(i).natureTokens.toString()
         }
     }
 
