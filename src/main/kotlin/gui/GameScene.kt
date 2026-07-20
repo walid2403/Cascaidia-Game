@@ -193,44 +193,44 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
 
     //Auswahl Tiles
-    private val tileChoice1 = Label(
-        width = 100,
-        height = 116,
+    private val tileChoice1 = HexagonView(
         posX = 822,
         posY = 25,
+        size = 60,
+        visual = ColorVisual(170,170,170, 127)
     ).apply {
         onMouseClicked = {
             chooseTile(0)
         }
     }
 
-    private val tileChoice2 = Label(
-        width = 100,
-        height = 116,
+    private val tileChoice2 = HexagonView(
         posX = 976,
         posY = 25,
+        size = 60,
+        visual = ColorVisual(170,170,170, 127)
     ).apply {
         onMouseClicked = {
             chooseTile(1)
         }
     }
 
-    private val tileChoice3 = Label(
-        width = 100,
-        height = 116,
+    private val tileChoice3 = HexagonView(
         posX = 1130,
         posY = 25,
+        size = 60,
+        visual = ColorVisual(170,170,170, 127)
     ).apply {
         onMouseClicked = {
             chooseTile(2)
         }
     }
 
-    private val tileChoice4 = Label(
-        width = 100,
-        height = 116,
+    private val tileChoice4 = HexagonView(
         posX = 1284,
         posY = 25,
+        size = 60,
+        visual = ColorVisual(170,170,170, 127)
     ).apply {
         onMouseClicked = {
             chooseTile(3)
@@ -792,7 +792,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
-    private fun adjustShopBasedOnCustomChoiceActive(customChoiceActive: Boolean, tile: Label, index: Int) {
+    private fun adjustShopBasedOnCustomChoiceActive(customChoiceActive: Boolean, tile: HexagonView, index: Int) {
         if(!customChoiceActive) {
             scaleDownOtherAnimals(selectTile)
             scaleTile(selectTile != -1, tile)
@@ -947,15 +947,15 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
-    private fun scaleTile(sizeUp: Boolean, tileLabel: Label) {
+    private fun scaleTile(sizeUp: Boolean, tileHex: HexagonView) {
         val targetScale = if(sizeUp) {100.0 / 80.0 } else { 1.0 }
 
         if(animationsEnabled) {
             playAnimation(
                 ScaleAnimation(
-                    componentView = tileLabel,
-                    fromScaleX = tileLabel.scaleX,
-                    fromScaleY = tileLabel.scaleY,
+                    componentView = tileHex,
+                    fromScaleX = tileHex.scaleX,
+                    fromScaleY = tileHex.scaleY,
                     toScaleX = targetScale,
                     toScaleY = targetScale,
                     duration = (300 / animationSpeed).toInt(),
@@ -963,7 +963,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
                 )
             )
         } else {
-            tileLabel.scale(targetScale)
+            tileHex.scale(targetScale)
         }
     }
 
@@ -1473,7 +1473,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         )
     }
 
-    private fun placeTileBot(index: Triple<Int, Int, Int>, chosenTile: Label) {
+    private fun placeTileBot(index: Triple<Int, Int, Int>, chosenTile: HexagonView) {
         println("Place Tile at: "+index.third.toString()+", "+index.second.toString())
 
         val game = rootService.currentGame
@@ -1545,6 +1545,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         redo.isDisabled = false
         undo.isDisabled = false
         endTurn.isDisabled = false
+
+        updateAllNatureToken()
 
         clearOverpopulationButton.visual = ColorVisual(0, 0, 0, 127).apply {
             style.borderRadius = BorderRadius(10)
@@ -1636,49 +1638,49 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
      * it visible again
      */
     private fun moveLabelToShop(shopIndex: Int) {
-        var label: Label
+        var hex: HexagonView
         var posX: Double
         val posY = 25.0
 
         when(shopIndex) {
             0 -> {
-                label = tileChoice1
+                hex = tileChoice1
                 posX = 822.0
             }
             1 -> {
-                label = tileChoice2
+                hex = tileChoice2
                 posX = 976.0
             }
             2 -> {
-                label = tileChoice3
+                hex = tileChoice3
                 posX = 1130.0
             }
             3 -> {
-                label = tileChoice4
+                hex = tileChoice4
                 posX = 1284.0
             }
             else -> throw IllegalArgumentException("Invalid shop index $shopIndex")
         }
 
-        label.posX = posX
-        label.posY = posY
+        hex.posX = posX
+        hex.posY = posY
 
         if(animationsEnabled) {
             playAnimation(
                 FadeAnimation(
-                    label,
+                    hex,
                     toOpacity = 1.0,
                     //duration = (1000/animationSpeed).toInt(),
                     duration = 1000
                 ).apply {
                     onFinished = {
-                        label.isVisible = true
+                        hex.isVisible = true
                         //println("label was moved")
                     }
                 }
             )
         } else {
-            label.isVisible = true
+            hex.isVisible = true
         }
     }
 
@@ -1965,8 +1967,17 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     override fun refreshAfterRotate(amount: Int) {
+        println("RefreshAfterRotate")
         if(!isHuman()) {
+            println("notHuman Block")
             botRotation += amount
+            val game = rootService.currentGame
+            checkNotNull(game)
+            if(game.playerQueue.peek().type == PlayerType.NETWORK) {
+                println("Rotate Network Block")
+                tileShop.elementAt(game.selectedChoice.first).rotation += amount * 60.0
+                println(amount)
+            }
         } else {
             val game = rootService.currentGame
             checkNotNull(game)
@@ -2015,11 +2026,24 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         }
     }
 
+    private fun updateAllNatureToken() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        for(i in 0 until game.playerQueue.size) {
+            listOf(
+                natureTokenCountOneSide,
+                natureTokenCountTwoSide,
+                natureTokenCountThreeSide,
+                natureTokenCountFourSide
+            ).elementAt(i).text = game.playerQueue.elementAt(i).natureTokens.toString()
+        }
+    }
+
     private fun updateNatureTokenCount(removeManually: Int = 0) {
         val game = rootService.currentGame
         checkNotNull(game)
         val tokenCount = listOf(natureTokenCountOneSide, natureTokenCountTwoSide,
-            natureTokenCountThreeSide, natureTokenCountFourSide).elementAt(player)
+            natureTokenCountThreeSide, natureTokenCountFourSide).elementAt(getPlayerId())
 
         val newCount = game.playerQueue.peek().natureTokens - removeManually
         tokenCount.text = "$newCount"
