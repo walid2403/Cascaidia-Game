@@ -24,7 +24,6 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
     private val heuristicBot = HeuristicBot(rootService, this)
     private val monteCarloBot = FlatMonteCarlo(rootService, this)
     private val greedyHeuristicBot = GreedyHeuristicBot(rootService, this)
-    var greedyHeuristicTest = GreedyHeuristicBot(rootService, this)
 
     private fun resetCoordinates() {
         coordinatesTile = Triple(null, null, null)
