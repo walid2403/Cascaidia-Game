@@ -1215,7 +1215,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val game = rootService.currentGame
         checkNotNull(game) { "No current game" }
 
-        println("Change Turn GameService")
+        //println("Change Turn GameService")
 
         val checkCondition = game.gameState == GameState.PLAYED_TILE || game.gameState == GameState.END_OF_TURN
         check(checkCondition) { "Current Turn can not be ended" }
