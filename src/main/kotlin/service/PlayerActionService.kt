@@ -273,9 +273,9 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
             }
         }
 
-        if (game.playerQueue.peek().type != PlayerType.NETWORK && !game.isLocal) {
+//        if (game.playerQueue.peek().type != PlayerType.NETWORK && !game.isLocal) {
             onAllRefreshables { refreshAfterRotate(amount) }
-        }
+//        }
     }
 
     /**
