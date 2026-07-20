@@ -1614,6 +1614,8 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         updateRoundCounter()
         if(rootService.currentGame?.isLocal == false) { disableOnlineGameFeatures() }
 
+        tileShop.forEach { it.rotation = 0.0 }
+
         //println("ChangeTurn GUI End")
     }
 
@@ -1914,7 +1916,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     override fun refreshAfterUndo() {
-        createGame()
+        refreshAfterStartGame()
         checkRedoButton()
     }
 
