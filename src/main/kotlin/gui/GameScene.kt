@@ -1208,7 +1208,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         if(!isHuman()) {
             disableAllForNetworkBotTurn()
             if(game.playerQueue.peek().type != PlayerType.NETWORK) {
-                println("MakeTurn Aufruf in GUI")
+                //println("MakeTurn Aufruf in GUI")
                 rootService.bot.makeTurn(game.playerQueue.peek().type)
             }
         } else {
@@ -1525,7 +1525,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         val game = rootService.currentGame
         checkNotNull(game)
 
-        println("RefreshAfterChangeTurn")
+        //println("RefreshAfterChangeTurn")
 
         if(game.playerQueue.elementAt(game.playerQueue.size-1).type == PlayerType.NETWORK) {
             playAnimation(
@@ -1541,7 +1541,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private fun changeTurn() {
         val game = rootService.currentGame
         checkNotNull(game)
-        println("ChangeTurn GUI Start")
+        //println("ChangeTurn GUI Start")
 
         redo.isDisabled = false
         undo.isDisabled = false
@@ -1608,7 +1608,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
 
         if(!isHuman()) {
 
-            println("ChangeTurn GUI NotHuman Block")
+            //("ChangeTurn GUI NotHuman Block")
 
             disableAllForNetworkBotTurn()
             if(game.playerQueue.peek().type != PlayerType.NETWORK) {
@@ -1619,7 +1619,7 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
         updateRoundCounter()
         if(rootService.currentGame?.isLocal == false) { disableOnlineGameFeatures() }
 
-        println("ChangeTurn GUI End")
+        //println("ChangeTurn GUI End")
     }
 
     private fun checkRedoButton() {
@@ -1968,14 +1968,14 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     }
 
     override fun refreshAfterRotate(amount: Int) {
-        println("RefreshAfterRotate")
+        //println("RefreshAfterRotate")
         if(!isHuman()) {
-            println("notHuman Block")
+            //println("notHuman Block")
             botRotation += amount
             val game = rootService.currentGame
             checkNotNull(game)
             if(game.playerQueue.peek().type == PlayerType.NETWORK) {
-                println("Rotate Network Block")
+                //println("Rotate Network Block")
                 tileShop.elementAt(game.selectedChoice.first).rotation += amount * 60.0
                 println(amount)
             }
