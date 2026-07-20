@@ -75,7 +75,7 @@ class GreedyHeuristicBot(private val rootService: RootService, private val bot :
         }
         //println("Normal: $normalGain\n NT: $ntGain")
 
-        if (currentGame.choices.groupBy { it.second }.entries.maxOf {it.value.size} >= 3 &&
+        if (currentGame.choices.groupBy { it.second }.entries.maxOf {it.value.size} == 3 &&
             maxOf(ntGain, normalGain) < thresholdForExterminate &&
             currentGame.gameState == GameState.START_OF_TURN) {
             rootService.gameService.exterminate(true)

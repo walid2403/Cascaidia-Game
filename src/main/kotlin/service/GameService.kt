@@ -482,7 +482,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             playerScore.addAll(createCorridorScores(nodes))
 
             if (currentGame.scoringCards[0]) playerScore.add(bearScoringA(nodes))
-            else playerScore.add(bearScoringB(nodes))
+            else playerScore.add(countBears(nodes))
 
             /*if (currentGame.scoringCards[1]) playerScore.add(elkScoringA(nodes))
             else playerScore.add(elkScoringB(nodes))*/
@@ -668,45 +668,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             3 -> 19
             else -> 27
         }
-    }
-    private fun bearScoringB(nodes: List<Node>): Int {
-        var count = 0
-        nodes.forEach { node ->
-            if (node.marked || node.tile.occupant != WildlifeToken.BEAR) return@forEach
-            node.marked = true
-            node.neighbours.filterNotNull().forEach { it.marked = true }
-            val neighbours = node.neighbours.filterNotNull().filter { it.tile.occupant == WildlifeToken.BEAR }
-            if (neighbours.isEmpty() or (neighbours.size > 2)) return@forEach
-            if (neighbours.size == 1) {
-                neighbours.single().neighbours.filterNotNull().forEach { it.marked = true }
-                if (neighbours.single().neighbours.filterNotNull().filter
-                    { it.tile.occupant == WildlifeToken.BEAR }.size != 2
-                ) return@forEach
-            } else {
-                if (helpBearScoringB(neighbours)) return@forEach
-            }
-            count++
-        }
-        nodes.forEach { node -> node.marked = false }
-        return 10 * count
-    }
-
-    private fun helpBearScoringB(neighbours: List<Node>): Boolean {
-        val firstNeighbour = neighbours.first()
-        val secondNeighbour = neighbours.last()
-        val firstNeighbourNeighbours = firstNeighbour.neighbours.filterNotNull()
-        val secondNeighbourNeighbours = secondNeighbour.neighbours.filterNotNull()
-        firstNeighbourNeighbours.forEach { it.marked = true }
-        secondNeighbourNeighbours.forEach { it.marked = true }
-        if ((firstNeighbourNeighbours.filter { it.tile.occupant == WildlifeToken.BEAR }.size != 1) or
-            (firstNeighbourNeighbours.filter { it.tile.occupant == WildlifeToken.BEAR }.size == 2 &&
-                    !firstNeighbourNeighbours.contains(secondNeighbour))
-        ) return true
-        if ((secondNeighbourNeighbours.filter { it.tile.occupant == WildlifeToken.BEAR }.size != 1) or
-            (secondNeighbourNeighbours.filter { it.tile.occupant == WildlifeToken.BEAR }.size == 2 &&
-                    !secondNeighbourNeighbours.contains(firstNeighbour))
-        ) return true
-        return false
     }
 
     private fun countBears(nodes: List<Node>): Int {
