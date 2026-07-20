@@ -35,7 +35,6 @@ class Bot (private val rootService: RootService) : AbstractRefreshingService() {
      * Die Schnittstelle für die GUI
      */
     fun makeTurn(playerType: PlayerType) {
-        println("makeTurn")
         require(playerType != PlayerType.HUMAN) { "Die Methode sollte nur für Bot Züge aufgerufen werden" }
         require(playerType != PlayerType.NETWORK) { "Die Methode sollte nur für Bot Züge aufgerufen werden" }
         resetCoordinates()
