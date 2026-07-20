@@ -208,8 +208,8 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         val tileList = game.tileStack.peekAll().map { it.id }.reversed().toMutableList()
         tileList.addAll(game.choices.map {it.first.id}.reversed())
 
-//        game.wildlifeTokens.popAll(11)
-//        for (i in 0..10) game.wildlifeTokens.push(WildlifeToken.ELK)
+//        game.wildlifeTokens.popAll(21)
+//        for (i in 0..20) game.wildlifeTokens.push(WildlifeToken.ELK)
 
         val wildlifeList = game.wildlifeTokens.peekAll().map {
             NetWildlife.valueOf(it.name)

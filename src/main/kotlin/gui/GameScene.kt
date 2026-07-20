@@ -1541,7 +1541,6 @@ class GameScene(private val app: SopraApplication,private val rootService: RootS
     private fun changeTurn() {
         val game = rootService.currentGame
         checkNotNull(game)
-
         println("ChangeTurn GUI Start")
 
         redo.isDisabled = false

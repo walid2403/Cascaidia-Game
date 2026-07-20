@@ -85,7 +85,8 @@ class NetworkTest {
         assertFailsWith<IllegalStateException> {net.receiveSelect(SelectMessage(0, 0, false))}
         assertFailsWith<IllegalStateException> {net.receivePlace(PlaceMessage(Pair(0, 0), null, 0))}
         assertFailsWith<IllegalStateException> {net.sendExterminate(listOf(), false)}
-        assertFailsWith<IllegalStateException> {net.receiveExterminate(WipeWildlifeMessage(false, 0, listOf(), listOf()))}
+        assertFailsWith<IllegalStateException> {
+            net.receiveExterminate(WipeWildlifeMessage(false, 0, listOf(), listOf()))}
         assertFailsWith<IllegalStateException> {net.sendRotation()}
     }
 
