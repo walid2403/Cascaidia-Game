@@ -680,3 +680,9 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
         } ?: 0
     }
 }
+
+/**
+ * sopra-gitlab.package-registry.token=glpat-QR-8dwWiy3pN9p_FBMz7eW86MQp1OjE3Mwk.01.0z0oiawrb
+ *
+ * token access
+ */
