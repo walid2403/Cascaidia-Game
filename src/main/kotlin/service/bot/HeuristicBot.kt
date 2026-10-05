@@ -19,15 +19,22 @@ class HeuristicBot(private val rootService: RootService, private val bot: Bot) {
     var isFinished = false
 
     //die 6 Richtungen eines Hexagons im Uhrzeigersinn
-    private val directions = listOf(
+   /** private val directions = listOf(
         Triple(1,-1,0), //Richtung 0: Oben-Rechts
         Triple(1,0,-1), //Richtung 1: Rechts
         Triple(0,1,-1), //Richtung 2: Unten-Rechts
         Triple(-1,1,0), //Richtung 3: Unten-Links
         Triple(-1,0,1), //Richtung 4: Links
         Triple(0,-1,1)  //Richtung 5: Oben-Links
-    )
-
+    )*/
+   private val directions = listOf(
+       Triple(0,-1,1), //Richtung 0: Oben-Rechts
+       Triple(-1,0,1), //Richtung 1: Rechts
+       Triple(-1,1,0), //Richtung 2: Unten-Rechts
+       Triple(0,1,-1), //Richtung 3: Unten-Links
+       Triple(1,0,-1), //Richtung 4: Links
+       Triple(1,-1,0)  //Richtung 5: Oben-Links
+   )
     /**
      * Hauptmethode für den Zug des Bots.
      * Prüft zunächst auf Überpopulation (3 oder 4 gleiche Tiere im Markt).
